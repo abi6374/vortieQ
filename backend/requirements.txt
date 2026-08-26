@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+supabase
+groq
+pyjwt[crypto]
+pydantic-settings
+sentence-transformers
+python-dotenv
+httpx
+numpy
