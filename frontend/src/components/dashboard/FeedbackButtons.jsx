@@ -1,26 +1,143 @@
-import React from 'react'
+import React, { useEffect, useRef, useState } from 'react'
+import apiClient from '../../lib/apiClient'
 
-export default function FeedbackButtons({ stepId, onFeedback }) {
+/**
+ * FeedbackButtons
+ * Self-contained action row for a single learning-path step. Posts the learner's
+ * feedback straight to the backend and hands the response back to the parent so
+ * it can re-fetch / adapt the path.
+ *
+ * Props:
+ *   stepId          - string, the path_step id to attach feedback to
+ *   onFeedbackGiven - function(responseData), called after a successful post
+ */
+const ACTIONS = [
+  {
+    type: 'completed',
+    label: 'Mark Done',
+    icon: '✅',
+    idle: 'bg-green-100 text-green-700 hover:bg-green-200 focus-visible:ring-green-400',
+    spinner: 'text-green-700',
+  },
+  {
+    type: 'too_easy',
+    label: 'Too Easy',
+    icon: '⚡',
+    idle: 'bg-amber-100 text-amber-700 hover:bg-amber-200 focus-visible:ring-amber-400',
+    spinner: 'text-amber-700',
+  },
+  {
+    type: 'not_interested',
+    label: 'Not for Me',
+    icon: '🙅',
+    idle: 'bg-red-100 text-red-700 hover:bg-red-200 focus-visible:ring-red-400',
+    spinner: 'text-red-700',
+  },
+]
+
+function Spinner({ className = '' }) {
   return (
-    <div className="flex flex-wrap gap-2">
-      <button
-        onClick={() => onFeedback(stepId, 'completed')}
-        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-lg transition shadow-md shadow-emerald-950"
-      >
-        Mark Completed ✓
-      </button>
-      <button
-        onClick={() => onFeedback(stepId, 'too_easy')}
-        className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs rounded-lg transition border border-slate-700"
-      >
-        Too Easy ⚡
-      </button>
-      <button
-        onClick={() => onFeedback(stepId, 'not_interested')}
-        className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 text-xs rounded-lg transition border border-slate-700"
-      >
-        Skip / Not Interested
-      </button>
+    <svg
+      className={`animate-spin h-4 w-4 ${className}`}
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+    >
+      <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+      <path
+        className="opacity-90"
+        fill="currentColor"
+        d="M4 12a8 8 0 0 1 8-8V0C5.4 0 0 5.4 0 12h4z"
+      />
+    </svg>
+  )
+}
+
+export default function FeedbackButtons({ stepId, onFeedbackGiven }) {
+  const [loadingType, setLoadingType] = useState(null)
+  const [error, setError] = useState(null)
+  const errorTimer = useRef(null)
+  const mounted = useRef(true)
+
+  useEffect(() => {
+    mounted.current = true
+    return () => {
+      mounted.current = false
+      if (errorTimer.current) clearTimeout(errorTimer.current)
+    }
+  }, [])
+
+  // Auto-hide the error after 3s whenever it changes.
+  useEffect(() => {
+    if (!error) return
+    if (errorTimer.current) clearTimeout(errorTimer.current)
+    errorTimer.current = setTimeout(() => {
+      if (mounted.current) setError(null)
+    }, 3000)
+    return () => {
+      if (errorTimer.current) clearTimeout(errorTimer.current)
+    }
+  }, [error])
+
+  const submit = async (buttonType) => {
+    if (loadingType) return
+    setError(null)
+    setLoadingType(buttonType)
+    try {
+      const response = await apiClient.post(`/api/steps/${stepId}/feedback`, {
+        event_type: buttonType,
+        note: '',
+      })
+      if (typeof onFeedbackGiven === 'function') {
+        onFeedbackGiven(response.data)
+      }
+    } catch (err) {
+      if (mounted.current) setError('Failed to update. Try again.')
+    } finally {
+      if (mounted.current) setLoadingType(null)
+    }
+  }
+
+  const busy = loadingType !== null
+
+  return (
+    <div className="w-full">
+      <div className="flex flex-wrap gap-2">
+        {ACTIONS.map((action) => {
+          const isLoading = loadingType === action.type
+          return (
+            <button
+              key={action.type}
+              type="button"
+              onClick={() => submit(action.type)}
+              disabled={busy}
+              aria-busy={isLoading}
+              aria-label={action.label}
+              className={[
+                'inline-flex items-center justify-center gap-1.5 rounded-lg px-3 py-1.5',
+                'text-sm font-semibold transition-colors duration-150 select-none',
+                'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1',
+                action.idle,
+                busy && !isLoading ? 'opacity-40 cursor-not-allowed' : '',
+                isLoading ? 'cursor-progress' : '',
+              ].join(' ')}
+            >
+              {isLoading ? (
+                <Spinner className={action.spinner} />
+              ) : (
+                <span aria-hidden="true">{action.icon}</span>
+              )}
+              <span>{action.label}</span>
+            </button>
+          )
+        })}
+      </div>
+
+      {error && (
+        <p role="alert" className="mt-2 text-xs font-medium text-red-600">
+          {error}
+        </p>
+      )}
     </div>
   )
 }

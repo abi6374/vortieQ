@@ -1,7 +1,6 @@
 # PROGRESS TRACKER
-Last updated by: kavindra-e-m (Member 1 — Backend) at 2026-08-26 (M1-S2 → M1-S4 complete, MODULE 3 + 5 gates passed)
-Previously: Login-39t at 2026-08-26 (M3-S3 landing page + AuthCard complete)
-Previously: Abinivas (Member 2 — ML) at 2026-08-26 (M2-S2 → M2-S5 complete, MODULE 2 gate passed)
+Last updated by: Kubojah-Dan (Member 4 — Dashboard) at 2026-08-26 (M4-S3 + M4-S4 complete, feedback loop wired)
+Previously: kavindra-e-m (Member 1 — Backend) at 2026-08-26 (M1-S2 → M1-S4 complete, MODULE 3 + 5 gates passed)
 
 ## Infrastructure (Member 5)
 - [ ] GitHub repo: https://github.com/YOUR_ORG/career-path-recommender
@@ -32,9 +31,9 @@ Previously: Abinivas (Member 2 — ML) at 2026-08-26 (M2-S2 → M2-S5 complete, 
 - [ ] M3-S5: Roadmap view with real data
 
 ## Frontend Dashboard — Member 4
-- [x] M4-S2: Dashboard + ProgressHeader
-- [ ] M4-S3: SkillMap + NextActions + FeedbackButtons
-- [ ] M4-S4: Feedback loop wired + dashboard refresh
+- [x] M4-S2: Dashboard + ProgressHeader — light-theme dashboard fetches newest active path from Supabase (nested `path_steps`→`courses`), computes progress %, skills gained, next 3 steps; `ProgressHeader` SVG ring (r40, circumference 251.2, indigo-600 on gray-200) with "View full roadmap →"; empty state → `/onboarding`
+- [x] M4-S3: SkillMap + NextActions + FeedbackButtons — `SkillMap` green pill badges ("Skills Gained" 🧠) + empty-state copy; `NextActions` ("Up Next") renders up to 3 white step cards (title/provider/difficulty badge/duration + rule + feedback) with all-caught-up empty state; `FeedbackButtons` posts to `/api/steps/{id}/feedback` (completed/too_easy/not_interested) with per-button spinner, all-disabled-while-loading, and auto-hiding (3s) error text
+- [x] M4-S4: Feedback loop wired + dashboard refresh — `DashboardPage.handleFeedback` re-fetches after every feedback and shows an animated indigo toast when `path_updated`; roadmap wired end-to-end: `ResourceItem` embeds `FeedbackButtons`, `onRefresh` threaded `RoadmapTimeline → MilestoneCard → ResourceItem`, and `RoadmapPage.refetchPath` re-calls `GET /api/paths/{pathId}` (normalized, with sample fallback). `npm run build` passes.
 - [ ] M4-S5: AI Assistant chat panel
 - [ ] M4-S6: Polish pass (loading/error/empty states)
 

@@ -1,19 +1,45 @@
 import React from 'react'
 
-export default function SkillMap({ skills = ["Python", "PyTorch", "FastAPI", "Data Structures", "pgvector"] }) {
+/**
+ * SkillMap
+ * Shows the distinct skills a learner has earned by completing steps.
+ *
+ * Props:
+ *   skills - string[] of skill tags gained
+ */
+export default function SkillMap({ skills = [] }) {
+  const hasSkills = Array.isArray(skills) && skills.length > 0
+
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
-      <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">Skills in Progress & Mastered</h4>
-      <div className="flex flex-wrap gap-2">
-        {skills.map((skill, idx) => (
-          <span
-            key={idx}
-            className="px-3 py-1 bg-slate-800 border border-slate-700 text-xs font-medium text-blue-300 rounded-lg hover:border-blue-500 transition"
-          >
-            ✓ {skill}
+    <section className="bg-white rounded-2xl shadow p-6 h-full">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="flex items-center gap-2 text-base font-bold text-gray-800">
+          <span aria-hidden="true" className="text-lg">🧠</span>
+          Skills Gained
+        </h3>
+        {hasSkills && (
+          <span className="text-xs font-semibold text-gray-400">
+            {skills.length} earned
           </span>
-        ))}
+        )}
       </div>
-    </div>
+
+      {hasSkills ? (
+        <div className="flex flex-wrap gap-2">
+          {skills.map((skill, idx) => (
+            <span
+              key={`${skill}-${idx}`}
+              className="bg-green-100 text-green-800 rounded-full px-3 py-1 text-sm font-medium"
+            >
+              {skill}
+            </span>
+          ))}
+        </div>
+      ) : (
+        <p className="text-sm italic text-gray-400">
+          Complete steps in your roadmap to see skills you've earned
+        </p>
+      )}
+    </section>
   )
 }
