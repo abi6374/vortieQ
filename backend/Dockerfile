@@ -1,3 +1,5 @@
+# Deploys automatically to the career-path-backend EC2 instance (13.206.51.130)
+# via .github/workflows/deploy-backend.yml on every push to main under backend/**.
 FROM python:3.11-slim
 
 WORKDIR /app

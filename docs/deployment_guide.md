@@ -6,6 +6,13 @@ This doc is the one-time manual setup. After you finish it once, every
 default behavior once connected). Nobody needs to SSH in or click "deploy"
 manually again after this.
 
+> **Status for this project:** Part A is done. Backend EC2 instance
+> `career-path-backend` (Ubuntu 24.04, t3.micro, ap-south-1) is live at
+> Elastic IP **13.206.51.130** — `http://13.206.51.130/health`. Docker,
+> 2 GiB swap, and `~/app/.env` are all set up on the box. The 3 GitHub
+> secrets (`EC2_HOST`/`EC2_USER`/`EC2_SSH_KEY`) are added. Part B (Vercel)
+> is still pending.
+
 ---
 
 ## Part A — Backend on EC2 (one-time setup)
