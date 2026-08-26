@@ -7,7 +7,7 @@ Previously: Kubojah-Dan (Member 4 — Dashboard) at 2026-08-26 (M4-S3 + M4-S4 co
 Previously: kavindra-e-m (Member 1 — Backend) at 2026-08-26 (M1-S2 → M1-S4 complete, MODULE 3 + 5 gates passed)
 
 ## Infrastructure (Member 5)
-- [ ] GitHub repo: https://github.com/YOUR_ORG/career-path-recommender
+- [x] GitHub repo: https://github.com/abi6374/vortieQ
 - [x] Supabase tables live (all 5 tables) — `omnhtvxuvjnimokwqtje.supabase.co`, RLS enabled on all incl. read-only public policy on `courses`
 - [ ] Vercel URL: TBD
 - [ ] Render URL: TBD
