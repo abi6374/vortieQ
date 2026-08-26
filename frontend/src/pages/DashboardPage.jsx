@@ -1,13 +1,29 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
-import { useAuth } from '../hooks/useAuth'
 import ProgressHeader from '../components/dashboard/ProgressHeader'
 import SkillMap from '../components/dashboard/SkillMap'
 import NextActions from '../components/dashboard/NextActions'
+import AssistantChat from '../components/assistant/AssistantChat'
+import NavBar from '../components/ui/NavBar'
+import ErrorCard from '../components/ui/ErrorCard'
+import SkeletonBlock from '../components/ui/SkeletonBlock'
+
+function DashboardSkeleton() {
+  return (
+    <div className="space-y-6" aria-hidden="true">
+      <div className="grid gap-6 md:grid-cols-3">
+        <SkeletonBlock className="h-56 md:col-span-1" />
+        <SkeletonBlock className="h-56 md:col-span-2" />
+      </div>
+      <SkeletonBlock className="h-8 w-40" />
+      <SkeletonBlock className="h-28 w-full" />
+      <SkeletonBlock className="h-28 w-3/4" />
+    </div>
+  )
+}
 
 export default function DashboardPage() {
-  const { signOut } = useAuth()
   const navigate = useNavigate()
 
   const [loading, setLoading] = useState(true)
@@ -71,28 +87,6 @@ export default function DashboardPage() {
     .sort((a, b) => a.sequence_order - b.sequence_order)
     .slice(0, 3)
 
-  const TopNav = () => (
-    <header className="flex items-center justify-between mb-8">
-      <span className="text-xl font-bold text-indigo-600">PathAI</span>
-      <div className="flex items-center gap-4">
-        {path && (
-          <Link
-            to={`/roadmap/${path.id}`}
-            className="text-sm font-medium text-gray-600 hover:text-indigo-600"
-          >
-            My Roadmap
-          </Link>
-        )}
-        <button
-          onClick={signOut}
-          className="text-sm font-medium text-gray-500 hover:text-gray-800"
-        >
-          Sign Out
-        </button>
-      </div>
-    </header>
-  )
-
   return (
     <div className="min-h-screen bg-gray-50">
       {toastMessage && (
@@ -105,36 +99,39 @@ export default function DashboardPage() {
         </div>
       )}
 
-      <div className="max-w-5xl mx-auto px-6 py-8">
-        <TopNav />
-
-        {loading && (
-          <div className="text-center text-gray-500 py-20">Loading your dashboard…</div>
+      <NavBar>
+        {path && (
+          <Link
+            to={`/roadmap/${path.id}`}
+            className="text-sm font-medium text-gray-600 hover:text-indigo-600 transition-colors"
+          >
+            My Roadmap
+          </Link>
         )}
+      </NavBar>
 
-        {!loading && error && (
-          <div className="bg-white rounded-2xl shadow p-8 text-center">
-            <p className="text-red-600 mb-4">{error}</p>
-            <button
-              onClick={fetchDashboardData}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700"
-            >
-              Retry
-            </button>
-          </div>
-        )}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">Your Dashboard</h1>
+          <p className="mt-1 text-sm text-gray-500">Track your progress and take the next step.</p>
+        </div>
+
+        {loading && <DashboardSkeleton />}
+
+        {!loading && error && <ErrorCard message={error} onRetry={fetchDashboardData} />}
 
         {!loading && !error && !path && (
           <div className="bg-white rounded-2xl shadow p-10 text-center max-w-lg mx-auto">
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">No active learning path yet</h2>
-            <p className="text-gray-500 mb-6">
+            <div className="text-6xl" aria-hidden="true">🗺️</div>
+            <h2 className="mt-4 text-2xl font-bold text-gray-800">No learning path yet</h2>
+            <p className="mt-2 text-gray-500">
               Tell us your goal and we'll build a personalized roadmap just for you.
             </p>
             <button
               onClick={() => navigate('/onboarding')}
-              className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700"
+              className="mt-6 inline-flex items-center justify-center px-6 py-3 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-1"
             >
-              Create your path
+              Generate my first path →
             </button>
           </div>
         )}
@@ -155,14 +152,12 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <NextActions
-              steps={nextSteps}
-              pathId={path.id}
-              onRefresh={handleFeedback}
-            />
+            <NextActions steps={nextSteps} pathId={path.id} onRefresh={handleFeedback} />
           </div>
         )}
       </div>
+
+      {path && <AssistantChat pathId={path.id} />}
     </div>
   )
 }

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import ChatInput from '../components/onboarding/ChatInput'
 import GoalConfirm from '../components/onboarding/GoalConfirm'
 import GeneratingLoader from '../components/onboarding/GeneratingLoader'
+import NavBar from '../components/ui/NavBar'
 import api from '../lib/apiClient'
 
 export default function OnboardingPage() {
@@ -48,7 +49,9 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-indigo-900 to-blue-900 px-4 py-12">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-indigo-900 to-blue-900">
+      <NavBar />
+      <div className="flex-1 flex flex-col items-center justify-center px-4 py-12">
       <div className="w-full max-w-2xl">
         {phase === 'chat' && (
           <div className="bg-white rounded-2xl shadow-xl p-8">
@@ -78,6 +81,7 @@ export default function OnboardingPage() {
             {error}
           </p>
         )}
+      </div>
       </div>
     </div>
   )
