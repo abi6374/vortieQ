@@ -1,31 +1,48 @@
 import React, { useState, useEffect } from 'react'
 
 const STAGES = [
-  "Analyzing learner experience & career goal...",
-  "Running vector similarity search across course library...",
-  "Sequencing prerequisite milestones with LLM...",
-  "Finalizing personalized roadmap with grounded explanations..."
+  '🔍 Understanding your goals',
+  '📚 Finding relevant courses',
+  '🧠 Sequencing your learning path',
+  '✨ Preparing your roadmap',
 ]
 
 export default function GeneratingLoader() {
-  const [stageIdx, setStageIdx] = useState(0)
+  const [activeStage, setActiveStage] = useState(0)
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setStageIdx((prev) => (prev < STAGES.length - 1 ? prev + 1 : prev))
-    }, 1200)
+      setActiveStage((prev) => (prev < STAGES.length - 1 ? prev + 1 : prev))
+    }, 1500)
     return () => clearInterval(interval)
   }, [])
 
   return (
-    <div className="flex flex-col items-center justify-center p-12 text-center max-w-md mx-auto">
-      <div className="relative mb-6">
-        <div className="w-16 h-16 rounded-full border-4 border-blue-500/20 border-t-blue-500 animate-spin"></div>
+    <div className="bg-white rounded-2xl shadow-xl p-10">
+      <h2 className="text-xl font-bold text-gray-900 text-center">
+        Building your roadmap…
+      </h2>
+
+      <ul className="mt-8 space-y-4">
+        {STAGES.map((stage, i) => (
+          <li
+            key={i}
+            className={`text-center text-base transition-colors duration-300 ${
+              i === activeStage
+                ? 'text-indigo-600 font-bold'
+                : i < activeStage
+                ? 'text-gray-400'
+                : 'text-gray-300'
+            }`}
+          >
+            {stage}
+          </li>
+        ))}
+      </ul>
+
+      <div className="mt-8 h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+        <div className="h-full w-1/3 bg-indigo-500 rounded-full animate-pulse" />
       </div>
-      <h3 className="text-lg font-semibold text-slate-100 mb-2">Building Your Career Path</h3>
-      <p className="text-xs text-blue-400 font-medium transition-all duration-300 h-6">
-        {STAGES[stageIdx]}
-      </p>
     </div>
   )
 }

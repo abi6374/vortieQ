@@ -1,50 +1,82 @@
 import React from 'react'
 
+const LEVEL_BADGE = {
+  beginner: 'bg-green-100 text-green-800',
+  intermediate: 'bg-yellow-100 text-yellow-800',
+  advanced: 'bg-red-100 text-red-800',
+}
+
 export default function GoalConfirm({ profile, onConfirm, onEdit }) {
+  if (!profile) return null
+
+  const {
+    target_role,
+    current_level,
+    interests = [],
+    weekly_hours,
+  } = profile
+
+  const levelClass = LEVEL_BADGE[current_level] || 'bg-gray-100 text-gray-800'
+
   return (
-    <div className="w-full max-w-xl bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl">
-      <h3 className="text-lg font-semibold text-slate-100 mb-4">Learner Profile Extracted</h3>
-      <div className="space-y-3 text-sm text-slate-300">
-        <div className="flex justify-between py-1 border-b border-slate-800">
-          <span className="text-slate-500">Target Role:</span>
-          <span className="font-medium text-blue-400">{profile.target_role}</span>
-        </div>
-        <div className="flex justify-between py-1 border-b border-slate-800">
-          <span className="text-slate-500">Current Level:</span>
-          <span className="capitalize">{profile.current_skill_level}</span>
-        </div>
-        <div className="flex justify-between py-1 border-b border-slate-800">
-          <span className="text-slate-500">Time Commitment:</span>
-          <span>{profile.time_commitment_hrs_per_week} hrs/week</span>
-        </div>
-        <div className="flex justify-between py-1 border-b border-slate-800">
-          <span className="text-slate-500">Learning Style:</span>
-          <span className="capitalize">{profile.learning_style}</span>
-        </div>
+    <div className="bg-white rounded-2xl shadow-xl p-8">
+      <h2 className="text-xl font-bold text-gray-900">Here's what I understood:</h2>
+
+      <div className="mt-6 space-y-5">
         <div>
-          <span className="text-slate-500 block mb-1">Interests & Tags:</span>
-          <div className="flex flex-wrap gap-1.5">
-            {profile.interests?.map((tag, i) => (
-              <span key={i} className="px-2 py-0.5 bg-slate-800 border border-slate-700 text-xs rounded text-blue-300">
-                {tag}
-              </span>
-            ))}
+          <p className="text-xs uppercase tracking-wide text-gray-500">Target Role</p>
+          <p className="mt-1 text-lg font-bold text-gray-900">
+            {target_role || '—'}
+          </p>
+        </div>
+
+        <div>
+          <p className="text-xs uppercase tracking-wide text-gray-500">Current Level</p>
+          <span
+            className={`mt-1 inline-block px-3 py-1 rounded-full text-sm font-medium capitalize ${levelClass}`}
+          >
+            {current_level || 'unknown'}
+          </span>
+        </div>
+
+        <div>
+          <p className="text-xs uppercase tracking-wide text-gray-500">Skills & Interests</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {interests.length > 0 ? (
+              interests.map((tag, i) => (
+                <span
+                  key={i}
+                  className="px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800"
+                >
+                  {tag}
+                </span>
+              ))
+            ) : (
+              <span className="text-sm text-gray-400 italic">None detected</span>
+            )}
           </div>
+        </div>
+
+        <div>
+          <p className="text-xs uppercase tracking-wide text-gray-500">Weekly Hours</p>
+          <p className="mt-1 text-lg font-semibold text-gray-900">
+            {weekly_hours ?? '—'} hrs / week
+          </p>
         </div>
       </div>
 
-      <div className="flex gap-3 mt-6">
-        <button
-          onClick={onEdit}
-          className="flex-1 py-2 px-4 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-lg transition"
-        >
-          Edit Goal
-        </button>
+      <div className="mt-8 flex flex-col sm:flex-row gap-3">
         <button
           onClick={onConfirm}
-          className="flex-1 py-2 px-4 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-lg transition"
+          className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-lg transition-colors"
         >
-          Confirm & Build Path →
+          ✨ Generate My Learning Path
+        </button>
+        <button
+          onClick={onEdit}
+          className="flex-1 border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium py-2.5 rounded-lg transition-colors"
+        >
+          Let me rephrase
         </button>
       </div>
     </div>
