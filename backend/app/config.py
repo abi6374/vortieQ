@@ -12,6 +12,11 @@ class Settings(BaseSettings):
     SUPABASE_JWT_SECRET: str
     GROQ_API_KEY: str
 
+    # Chat model used for profile extraction, path sequencing, explanations and
+    # the assistant. Override via GROQ_MODEL in .env if Groq retires this one
+    # (check available models with `groq_client.models.list()`).
+    GROQ_MODEL: str = "openai/gpt-oss-120b"
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 

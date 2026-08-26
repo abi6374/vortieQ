@@ -1,14 +1,14 @@
 import jwt
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.config import settings
 
-bearer_scheme = HTTPBearer(auto_error=True)
+security = HTTPBearer()
 
 
 def verify_jwt(
-    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
+    credentials: HTTPAuthorizationCredentials = Depends(security),
 ) -> str:
     """Decode the Supabase JWT and return the user's id (`sub` claim)."""
     token = credentials.credentials
@@ -19,12 +19,11 @@ def verify_jwt(
             algorithms=["HS256"],
             audience="authenticated",
         )
-        user_id = payload.get("sub")
+        user_id: str = payload.get("sub")
         if not user_id:
-            raise ValueError("Missing sub claim")
-        return str(user_id)
-    except Exception:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token",
-        )
+            raise HTTPException(status_code=401, detail="Invalid token: no sub claim")
+        return user_id
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except jwt.InvalidTokenError as e:
+        raise HTTPException(status_code=401, detail=f"Invalid token: {str(e)}")
