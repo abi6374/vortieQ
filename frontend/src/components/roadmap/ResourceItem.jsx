@@ -2,61 +2,79 @@ import React, { useState } from 'react'
 import WhyThisDrawer from './WhyThisDrawer'
 import FeedbackButtons from '../dashboard/FeedbackButtons'
 
+const DIFFICULTY_BADGE = {
+  beginner: 'bg-green-100 text-green-800',
+  intermediate: 'bg-yellow-100 text-yellow-800',
+  advanced: 'bg-red-100 text-red-800',
+}
+
 export default function ResourceItem({ step, onRefresh }) {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const course = step.course || step.courses || {}
   const status = step.status || 'not_started'
   const isCompleted = status === 'completed'
+  const difficulty = course.difficulty
+  const difficultyClass = DIFFICULTY_BADGE[difficulty] || 'bg-gray-100 text-gray-700'
 
   return (
-    <div className="p-4 bg-slate-800/60 border border-slate-700/60 rounded-xl hover:border-slate-600 transition">
-      <div className="flex justify-between items-start">
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <span className={`text-[10px] px-2 py-0.5 rounded font-semibold uppercase ${
-              isCompleted ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' :
-              status === 'skipped' ? 'bg-slate-700 text-slate-400 border border-slate-600' :
-              'bg-slate-700 text-slate-300'
-            }`}>
-              {status}
-            </span>
-            <span className="text-xs text-slate-400">{course.provider || 'Online Provider'}</span>
+    <div
+      className={`p-4 border rounded-xl transition-colors ${
+        isCompleted ? 'bg-gray-50 border-gray-200 opacity-70' : 'bg-white border-gray-200 hover:border-indigo-300'
+      }`}
+    >
+      <div className="flex justify-between items-start gap-3">
+        <div className="flex-1 min-w-0">
+          <h4
+            className={`text-sm font-semibold ${
+              isCompleted ? 'text-gray-500 line-through' : 'text-gray-900'
+            }`}
+          >
+            {course.title || 'Recommended Course'}
+          </h4>
+          <p className="text-xs text-gray-500 mt-0.5">{course.provider || 'Online Provider'}</p>
+
+          <div className="flex flex-wrap items-center gap-2 mt-2">
+            {difficulty && (
+              <span className={`px-2 py-0.5 rounded-full text-[11px] font-medium capitalize ${difficultyClass}`}>
+                {difficulty}
+              </span>
+            )}
+            {course.duration_hrs != null && (
+              <span className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-gray-100 text-gray-600">
+                {course.duration_hrs} hrs
+              </span>
+            )}
+            {status === 'skipped' && (
+              <span className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-gray-200 text-gray-500">
+                skipped
+              </span>
+            )}
           </div>
-          <h5 className="text-sm font-semibold text-slate-100 mt-1">{course.title || 'Recommended Course Module'}</h5>
-          <p className="text-xs text-slate-400 mt-1 line-clamp-2">{course.description}</p>
         </div>
 
         <button
           onClick={() => setDrawerOpen(true)}
-          className="text-xs text-blue-400 hover:text-blue-300 ml-4 font-medium"
+          className="text-xs font-medium text-indigo-600 hover:text-indigo-800 shrink-0"
         >
           Why this? →
         </button>
       </div>
 
-      <div className="flex justify-between items-center mt-3 text-xs">
-        <div className="flex gap-1.5 flex-wrap">
-          {course.skill_tags?.map((tag, idx) => (
-            <span key={idx} className="bg-slate-700/40 text-slate-400 px-1.5 py-0.5 rounded text-[10px]">
-              {tag}
-            </span>
-          ))}
-        </div>
-        {course.resource_url && (
-          <a
-            href={course.resource_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-400 hover:underline shrink-0 ml-2"
-          >
-            Visit Course ↗
-          </a>
-        )}
-      </div>
+      {course.resource_url && (
+        <a
+          href={course.resource_url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-block mt-2 text-xs text-indigo-600 hover:underline"
+        >
+          Visit course ↗
+        </a>
+      )}
 
-      <div className="mt-3 pt-3 border-t border-slate-700/40">
+      {/* Member 4's feedback wiring — preserved. Completed steps show a static badge. */}
+      <div className="mt-3 pt-3 border-t border-gray-100">
         {isCompleted ? (
-          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-400">
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-green-600">
             ✓ Completed
           </span>
         ) : (

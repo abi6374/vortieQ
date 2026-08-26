@@ -1,5 +1,6 @@
 # PROGRESS TRACKER
-Last updated by: Login-39t (Member 3 — Frontend) at 2026-08-26 (M3-S4 onboarding chat intake complete)
+Last updated by: Login-39t (Member 3 — Frontend) at 2026-08-26 (M3-S5 roadmap view complete — all M3 steps done)
+Previously: Login-39t (Member 3 — Frontend) at 2026-08-26 (M3-S4 onboarding chat intake complete)
 Previously: kavindra-e-m (Member 1 — Backend) at 2026-08-26 (M1-S5 + M1-S6 complete, MODULE 7 + 8 backend halves passed)
 Previously: Kubojah-Dan (Member 4 — Dashboard) at 2026-08-26 (M4-S3 + M4-S4 complete, feedback loop wired)
 Previously: kavindra-e-m (Member 1 — Backend) at 2026-08-26 (M1-S2 → M1-S4 complete, MODULE 3 + 5 gates passed)
@@ -30,7 +31,7 @@ Previously: kavindra-e-m (Member 1 — Backend) at 2026-08-26 (M1-S2 → M1-S4 c
 - [x] M3-S2: AuthContext, routing, supabaseClient — `supabaseClient.js` (createClient), `apiClient.js` (axios + JWT interceptor via `supabase.auth.getSession`), `AuthContext.jsx` (session/loading + signIn/signUp/signOut + onAuthStateChange), `useAuth` hook, `ProtectedRoute`, and full React Router setup (`/`, `/onboarding`, `/roadmap/:pathId`, `/roadmap`, `/dashboard`, `*`→`/`)
 - [x] M3-S3: Landing page + AuthCard — indigo gradient landing ("PathAI" + brain logo + tagline), redirects to `/dashboard` when a session exists; AuthCard white card with Sign In / Sign Up tabs, loading spinner, error text, error clears on typing; sign-in → `/dashboard`, sign-up → `/onboarding`. Verified in browser (both tabs render, build passes)
 - [x] M3-S4: Onboarding chat intake — `OnboardingPage` 3-phase state machine (chat → confirm → generating): `ChatInput` (textarea + "Generate My Path →" w/ spinner, disabled when empty/loading) → `POST /api/profile/` → `GoalConfirm` (target role, level badge, interest tags, weekly hours; confirm / rephrase) → `POST /api/paths/generate` → navigate `/roadmap/:pathId`; `GeneratingLoader` 4 stages advancing every 1.5s + pulsing bar; indigo gradient bg matching Landing. `npm run build` passes
-- [ ] M3-S5: Roadmap view with real data
+- [x] M3-S5: Roadmap view with real data — `RoadmapPage` reads `:pathId`, `GET /api/paths/{pathId}` (normalized), loading spinner + error card w/ retry, top nav (← PathAI / My Dashboard), light theme (`bg-gray-50`). `RoadmapTimeline` vertical connector; `MilestoneCard` collapsible (first open) w/ numbered marker + "~X weeks" badge; `ResourceItem` difficulty badge (green/yellow/red) + duration badge + completed line-through/grayed; `WhyThisDrawer` right-side slide-in + backdrop. Member 4's `FeedbackButtons`/`onRefresh` wiring preserved. `npm run build` passes
 
 ## Frontend Dashboard — Member 4
 - [x] M4-S2: Dashboard + ProgressHeader — light-theme dashboard fetches newest active path from Supabase (nested `path_steps`→`courses`), computes progress %, skills gained, next 3 steps; `ProgressHeader` SVG ring (r40, circumference 251.2, indigo-600 on gray-200) with "View full roadmap →"; empty state → `/onboarding`
