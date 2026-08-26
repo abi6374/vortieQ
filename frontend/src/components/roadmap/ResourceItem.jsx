@@ -78,7 +78,7 @@ export default function ResourceItem({ step, onRefresh }) {
             ✓ Completed
           </span>
         ) : (
-          <FeedbackButtons stepId={step.id || step.step_id} onFeedbackGiven={onRefresh} />
+          <FeedbackButtons stepId={step.id || step.step_id} stepStatus={step.status} onFeedbackGiven={onRefresh} />
         )}
       </div>
 

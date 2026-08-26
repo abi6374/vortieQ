@@ -53,10 +53,12 @@ function Spinner({ className = '' }) {
   )
 }
 
-export default function FeedbackButtons({ stepId, onFeedbackGiven }) {
+export default function FeedbackButtons({ stepId, stepStatus, onFeedbackGiven }) {
   const [loadingType, setLoadingType] = useState(null)
   const [error, setError] = useState(null)
+  const [info, setInfo] = useState(null)
   const errorTimer = useRef(null)
+  const infoTimer = useRef(null)
   const mounted = useRef(true)
 
   useEffect(() => {
@@ -64,8 +66,17 @@ export default function FeedbackButtons({ stepId, onFeedbackGiven }) {
     return () => {
       mounted.current = false
       if (errorTimer.current) clearTimeout(errorTimer.current)
+      if (infoTimer.current) clearTimeout(infoTimer.current)
     }
   }, [])
+
+  // Auto-hide the info toast after 3s.
+  useEffect(() => {
+    if (!info) return
+    if (infoTimer.current) clearTimeout(infoTimer.current)
+    infoTimer.current = setTimeout(() => { if (mounted.current) setInfo(null) }, 3000)
+    return () => { if (infoTimer.current) clearTimeout(infoTimer.current) }
+  }, [info])
 
   // Auto-hide the error after 3s whenever it changes.
   useEffect(() => {
@@ -82,12 +93,19 @@ export default function FeedbackButtons({ stepId, onFeedbackGiven }) {
   const submit = async (buttonType) => {
     if (loadingType) return
     setError(null)
+    setInfo(null)
     setLoadingType(buttonType)
     try {
       const response = await apiClient.post(`/api/steps/${stepId}/feedback`, {
         event_type: buttonType,
         note: '',
       })
+      // Backend idempotency guard sends back {path_updated:false, note:"..."}
+      // when the step was already terminal. Surface that instead of silently
+      // doing nothing.
+      if (response.data && response.data.note && response.data.path_updated === false) {
+        if (mounted.current) setInfo(response.data.note)
+      }
       if (typeof onFeedbackGiven === 'function') {
         onFeedbackGiven(response.data)
       }
@@ -99,6 +117,23 @@ export default function FeedbackButtons({ stepId, onFeedbackGiven }) {
   }
 
   const busy = loadingType !== null
+  const terminal = stepStatus === 'completed' || stepStatus === 'skipped'
+
+  // Once a step is terminal, replace the button row with a compact status pill.
+  if (terminal) {
+    return (
+      <div className="w-full">
+        <span
+          className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold
+            ${stepStatus === 'completed'
+              ? 'bg-green-100 text-green-700'
+              : 'bg-gray-100 text-gray-600'}`}
+        >
+          {stepStatus === 'completed' ? '✅ Completed' : '⏭ Skipped'}
+        </span>
+      </div>
+    )
+  }
 
   return (
     <div className="w-full">
@@ -136,6 +171,11 @@ export default function FeedbackButtons({ stepId, onFeedbackGiven }) {
       {error && (
         <p role="alert" className="mt-2 text-xs font-medium text-red-600">
           {error}
+        </p>
+      )}
+      {info && !error && (
+        <p role="status" className="mt-2 text-xs font-medium text-gray-500">
+          {info}
         </p>
       )}
     </div>
