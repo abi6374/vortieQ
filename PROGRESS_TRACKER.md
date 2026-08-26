@@ -1,5 +1,6 @@
 # PROGRESS TRACKER
-Last updated by: Login-39t (Member 3 — Frontend) at 2026-08-26 (M3-S5 roadmap view complete — all M3 steps done)
+Last updated by: Kubojah-Dan (Member 4 — Dashboard) at 2026-08-26 (M4-S5 + M4-S6 complete — all M4 steps done, frontend polish pass)
+Previously: Login-39t (Member 3 — Frontend) at 2026-08-26 (M3-S5 roadmap view complete — all M3 steps done)
 Previously: Login-39t (Member 3 — Frontend) at 2026-08-26 (M3-S4 onboarding chat intake complete)
 Previously: kavindra-e-m (Member 1 — Backend) at 2026-08-26 (M1-S5 + M1-S6 complete, MODULE 7 + 8 backend halves passed)
 Previously: Kubojah-Dan (Member 4 — Dashboard) at 2026-08-26 (M4-S3 + M4-S4 complete, feedback loop wired)
@@ -37,8 +38,8 @@ Previously: kavindra-e-m (Member 1 — Backend) at 2026-08-26 (M1-S2 → M1-S4 c
 - [x] M4-S2: Dashboard + ProgressHeader — light-theme dashboard fetches newest active path from Supabase (nested `path_steps`→`courses`), computes progress %, skills gained, next 3 steps; `ProgressHeader` SVG ring (r40, circumference 251.2, indigo-600 on gray-200) with "View full roadmap →"; empty state → `/onboarding`
 - [x] M4-S3: SkillMap + NextActions + FeedbackButtons — `SkillMap` green pill badges ("Skills Gained" 🧠) + empty-state copy; `NextActions` ("Up Next") renders up to 3 white step cards (title/provider/difficulty badge/duration + rule + feedback) with all-caught-up empty state; `FeedbackButtons` posts to `/api/steps/{id}/feedback` (completed/too_easy/not_interested) with per-button spinner, all-disabled-while-loading, and auto-hiding (3s) error text
 - [x] M4-S4: Feedback loop wired + dashboard refresh — `DashboardPage.handleFeedback` re-fetches after every feedback and shows an animated indigo toast when `path_updated`; roadmap wired end-to-end: `ResourceItem` embeds `FeedbackButtons`, `onRefresh` threaded `RoadmapTimeline → MilestoneCard → ResourceItem`, and `RoadmapPage.refetchPath` re-calls `GET /api/paths/{pathId}` (normalized, with sample fallback). `npm run build` passes.
-- [ ] M4-S5: AI Assistant chat panel
-- [ ] M4-S6: Polish pass (loading/error/empty states)
+- [x] M4-S5: AI Assistant chat panel — `AssistantChat` floating 56px indigo bubble (💬) → white panel (`w-80`, full-width on mobile) with "🤖 AI Learning Assistant" header + close; seeds a welcome message on first open, posts `{question, path_id: pathId}` to `/api/assistant/ask`, animated three-dot typing bubble, auto-scroll to newest, Enter-to-send / Shift+Enter newline; `MessageBubble` role-based (user → indigo right, assistant → gray left). Mounted on Dashboard + Roadmap with the active `pathId`.
+- [x] M4-S6: Polish pass — shared `ui/NavBar` (🧠 PathAI + Sign Out) on all three protected pages (Dashboard/Roadmap/Onboarding); `ui/SkeletonBlock` loaders replace spinners on Dashboard + Roadmap; `ui/ErrorCard` (⚠️ + retry) on both; Dashboard empty state (🗺️ "No learning path yet" → "Generate my first path →"); mobile-responsive (assistant full-width < sm, cards stack, `sm:` padding); `index.html` title → "PathAI — Your Career Learning Path" and body theme aligned to light. Landing verified in-browser with a clean console; `npm run build` passes.
 
 ## Module Gates — Member 5 verifies each
 - [x] MODULE 0: 5 Supabase tables visible ✅ (+ RLS enabled, `match_courses` RPC + `profiles_updated_at` trigger live)
@@ -49,7 +50,7 @@ Previously: kavindra-e-m (Member 1 — Backend) at 2026-08-26 (M1-S2 → M1-S4 c
 - [x] MODULE 5: Path generation API works ✅ (`POST /api/paths/generate` → 3 milestones / 8 real courses in ~11s, rows in `learning_paths` + `path_steps`, 8/8 steps carry explanations; `GET /api/paths/{id}` round-trips and enforces ownership)
 - [ ] MODULE 6: Roadmap shows real courses
 - [x] MODULE 7: Dashboard + feedback loop ✅ (M4-S2..S4 frontend + M1-S5 backend now both live; `POST /api/steps/{id}/feedback` returns real `{feedback_id, path_updated, updated_steps}` and mutates DB — Member 4's UI can stop treating the response as a no-op)
-- [x] MODULE 8: AI assistant grounded answers ✅ (`POST /api/assistant/ask` returns answers grounded on the real path — Q about "Python removed" correctly referenced completed/skipped statuses and course names from the DB. Frontend M4-S5 chat panel still pending.)
+- [x] MODULE 8: AI assistant grounded answers ✅ (`POST /api/assistant/ask` returns answers grounded on the real path — Q about "Python removed" correctly referenced completed/skipped statuses and course names from the DB. Frontend M4-S5 chat panel now live on Dashboard + Roadmap.)
 - [ ] MODULE 9: Full flow on deployed URL
 
 ## Notes
