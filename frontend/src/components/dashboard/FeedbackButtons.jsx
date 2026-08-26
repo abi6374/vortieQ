@@ -11,6 +11,8 @@ import apiClient from '../../lib/apiClient'
  *   stepId          - string, the path_step id to attach feedback to
  *   onFeedbackGiven - function(responseData), called after a successful post
  */
+// The two right-hand buttons now hit /api/steps/{id}/swap on the backend
+// instead of triggering a full-tail regen. Only THIS one step is replaced.
 const ACTIONS = [
   {
     type: 'completed',
@@ -28,10 +30,10 @@ const ACTIONS = [
   },
   {
     type: 'not_interested',
-    label: 'Not for Me',
-    icon: '🙅',
-    idle: 'bg-red-100 text-red-700 hover:bg-red-200 focus-visible:ring-red-400',
-    spinner: 'text-red-700',
+    label: 'Swap',
+    icon: '🔀',
+    idle: 'bg-blue-100 text-blue-700 hover:bg-blue-200 focus-visible:ring-blue-400',
+    spinner: 'text-blue-700',
   },
 ]
 
@@ -96,13 +98,21 @@ export default function FeedbackButtons({ stepId, stepStatus, onFeedbackGiven })
     setInfo(null)
     setLoadingType(buttonType)
     try {
-      const response = await apiClient.post(`/api/steps/${stepId}/feedback`, {
-        event_type: buttonType,
-        note: '',
-      })
-      // Backend idempotency guard sends back {path_updated:false, note:"..."}
-      // when the step was already terminal. Surface that instead of silently
-      // doing nothing.
+      let response
+      if (buttonType === 'completed') {
+        response = await apiClient.post(`/api/steps/${stepId}/feedback`, {
+          event_type: 'completed', note: '',
+        })
+      } else {
+        // too_easy => level_hint=1 (harder replacement); Swap => level_hint=0.
+        const level_hint = buttonType === 'too_easy' ? 1 : 0
+        response = await apiClient.post(`/api/steps/${stepId}/swap`, { level_hint })
+        // Surface "no alternative available" as an info line.
+        if (response.data && response.data.swapped === false && response.data.reason) {
+          if (mounted.current) setInfo(response.data.reason)
+        }
+      }
+      // Idempotency guard on /feedback also returns a note.
       if (response.data && response.data.note && response.data.path_updated === false) {
         if (mounted.current) setInfo(response.data.note)
       }

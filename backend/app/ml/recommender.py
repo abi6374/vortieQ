@@ -23,10 +23,16 @@ class Recommender:
         target_role = profile.get("target_role", "")
         interests = profile.get("interests", [])
         current_level = profile.get("current_level", "beginner")
+        completed = set(profile.get("completed_courses") or [])
 
         query = f"{goal_text} {target_role} {' '.join(interests)}"
         embedding = embed_text(query)
-        candidates = retrieve_candidates(embedding, n=20)
+        candidates = retrieve_candidates(embedding, n=25)
+
+        # Filter out courses the learner has already completed so we don't
+        # recommend the same thing twice across paths.
+        if completed:
+            candidates = [c for c in candidates if c.get("id") not in completed]
 
         ranked = self._rerank(candidates, current_level, interests)
         return ranked[:15]

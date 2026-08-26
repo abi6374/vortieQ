@@ -6,6 +6,7 @@ import NavBar from '../components/ui/NavBar'
 import ErrorCard from '../components/ui/ErrorCard'
 import SkeletonBlock from '../components/ui/SkeletonBlock'
 import apiClient from '../lib/apiClient'
+import RebuildTailButton from '../components/roadmap/RebuildTailButton'
 
 // Normalize the backend GET /api/paths/{id} shape into the shape the roadmap
 // components expect (milestone.title / step.course / step.why_recommended).
@@ -98,7 +99,10 @@ export default function RoadmapPage() {
           ) : error ? (
             <ErrorCard message={error} onRetry={handleRetry} />
           ) : (
-            <RoadmapTimeline milestones={milestones} onRefresh={refetchPath} />
+            <>
+              <RoadmapTimeline milestones={milestones} onRefresh={refetchPath} />
+              <RebuildTailButton pathId={pathId} onDone={refetchPath} />
+            </>
           )}
         </div>
       </div>
