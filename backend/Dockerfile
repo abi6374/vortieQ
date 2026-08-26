@@ -1,5 +1,7 @@
 # Deploys automatically to the career-path-backend EC2 instance (13.206.51.130)
 # via .github/workflows/deploy-backend.yml on every push to main under backend/**.
+# EBS root volume resized 8GB -> 16GB (image tarball is ~1.5GB and the 8GB
+# default didn't leave enough headroom for `docker load` to unpack it).
 FROM python:3.11-slim
 
 WORKDIR /app
