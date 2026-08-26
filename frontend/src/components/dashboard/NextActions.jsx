@@ -83,7 +83,7 @@ export default function NextActions({ steps = [], pathId, onRefresh }) {
 
                 <hr className="my-4 border-gray-100" />
 
-                <FeedbackButtons stepId={step.id} onFeedbackGiven={onRefresh} />
+                <FeedbackButtons stepId={step.id} stepStatus={step.status} onFeedbackGiven={onRefresh} />
               </article>
             )
           })}
