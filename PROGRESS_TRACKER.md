@@ -1,5 +1,5 @@
 # PROGRESS TRACKER
-Last updated by: kavindra-e-m at 2026-08-26 08:08 IST
+Last updated by: Login-39t at 2026-08-26 (M3-S1 scaffold complete)
 
 ## Infrastructure (Member 5)
 - [ ] GitHub repo: https://github.com/YOUR_ORG/career-path-recommender
@@ -22,7 +22,7 @@ Last updated by: kavindra-e-m at 2026-08-26 08:08 IST
 - [ ] M2-S5: Recommender.recommend() re-ranking done
 
 ## Frontend Auth + Onboarding — Member 3
-- [ ] M3-S1: React scaffold, folder structure — folder tree scaffolded, files empty
+- [x] M3-S1: React scaffold, folder structure — Vite+React+Tailwind scaffolded, all 24 component/page/lib/hook files created, `npm run dev` + `npm run build` pass, `.env.example` + `vercel.json` in place
 - [ ] M3-S2: AuthContext, routing, supabaseClient
 - [ ] M3-S3: Landing page + AuthCard
 - [ ] M3-S4: Onboarding chat intake
