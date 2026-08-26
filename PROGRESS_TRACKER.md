@@ -31,7 +31,7 @@ Previously: Abinivas (Member 2 — ML) at 2026-08-26 (M2-S2 → M2-S5 complete, 
 - [ ] M3-S5: Roadmap view with real data
 
 ## Frontend Dashboard — Member 4
-- [ ] M4-S2: Dashboard + ProgressHeader
+- [x] M4-S2: Dashboard + ProgressHeader
 - [ ] M4-S3: SkillMap + NextActions + FeedbackButtons
 - [ ] M4-S4: Feedback loop wired + dashboard refresh
 - [ ] M4-S5: AI Assistant chat panel

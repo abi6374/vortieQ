@@ -1,41 +1,56 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 
-export default function ProgressHeader({ totalSteps = 10, completedSteps = 3, targetRole = "AI Engineer" }) {
-  const percentage = Math.round((completedSteps / (totalSteps || 1)) * 100)
+const RADIUS = 40
+const STROKE_WIDTH = 8
+const CIRCUMFERENCE = 2 * Math.PI * RADIUS // 251.2
+
+export default function ProgressHeader({ percent = 0, totalSteps = 0, completedSteps = 0, pathId }) {
+  const navigate = useNavigate()
+  const safePercent = Math.max(0, Math.min(100, percent))
+  const dashOffset = CIRCUMFERENCE * (1 - safePercent / 100)
 
   return (
-    <div className="bg-gradient-to-r from-slate-900 via-slate-900 to-blue-950/40 border border-slate-800 rounded-2xl p-6 shadow-xl flex items-center justify-between">
-      <div>
-        <span className="text-xs font-semibold text-blue-400 uppercase tracking-wider">Active Target Role</span>
-        <h2 className="text-2xl font-black text-slate-100 mt-1">{targetRole}</h2>
-        <p className="text-xs text-slate-400 mt-1">
-          {completedSteps} of {totalSteps} modules finished ({percentage}%)
-        </p>
-      </div>
-
-      <div className="flex items-center gap-4">
-        <div className="relative w-16 h-16 flex items-center justify-center">
-          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-            <path
-              className="text-slate-800"
-              strokeWidth="3.5"
-              stroke="currentColor"
-              fill="none"
-              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-            />
-            <path
-              className="text-blue-500 transition-all duration-1000 ease-out"
-              strokeDasharray={`${percentage}, 100`}
-              strokeWidth="3.5"
-              strokeLinecap="round"
-              stroke="currentColor"
-              fill="none"
-              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-            />
-          </svg>
-          <span className="absolute text-xs font-bold text-slate-200">{percentage}%</span>
+    <div className="bg-white rounded-2xl shadow p-6 flex flex-col items-center text-center">
+      <div className="relative w-28 h-28">
+        <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+          <circle
+            cx="50"
+            cy="50"
+            r={RADIUS}
+            fill="none"
+            strokeWidth={STROKE_WIDTH}
+            className="stroke-gray-200"
+          />
+          <circle
+            cx="50"
+            cy="50"
+            r={RADIUS}
+            fill="none"
+            strokeWidth={STROKE_WIDTH}
+            strokeLinecap="round"
+            strokeDasharray={CIRCUMFERENCE}
+            strokeDashoffset={dashOffset}
+            className="stroke-indigo-600 transition-[stroke-dashoffset] duration-700 ease-out"
+          />
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="text-2xl font-bold text-gray-800">{safePercent}%</span>
         </div>
       </div>
+
+      <p className="mt-4 text-sm text-gray-600">
+        {completedSteps} of {totalSteps} steps completed
+      </p>
+
+      {pathId && (
+        <button
+          onClick={() => navigate(`/roadmap/${pathId}`)}
+          className="mt-3 text-sm font-medium text-indigo-600 hover:text-indigo-700 hover:underline"
+        >
+          View full roadmap →
+        </button>
+      )}
     </div>
   )
 }
