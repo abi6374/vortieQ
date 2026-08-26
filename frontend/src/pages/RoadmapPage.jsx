@@ -1,8 +1,8 @@
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import React, { useCallback, useEffect, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import RoadmapTimeline from '../components/roadmap/RoadmapTimeline'
 import AssistantChat from '../components/assistant/AssistantChat'
-import { useFeedback } from '../hooks/useFeedback'
+import apiClient from '../lib/apiClient'
 
 const MOCK_MILESTONES = [
   {
@@ -26,7 +26,7 @@ const MOCK_MILESTONES = [
       {
         id: "s2",
         why_recommended: "Mandatory prerequisite for data wrangling and numerical computing.",
-        status: "in_progress",
+        status: "not_started",
         course: {
           title: "Applied Data Science with Python",
           provider: "Coursera",
@@ -59,27 +59,69 @@ const MOCK_MILESTONES = [
   }
 ]
 
-export default function RoadmapPage() {
-  const [milestones, setMilestones] = useState(MOCK_MILESTONES)
-  const { sendFeedback } = useFeedback()
-  const navigate = useNavigate()
+// Normalize the backend GET /api/paths/{id} shape into the shape the roadmap
+// components expect (milestone.title / step.course / step.why_recommended).
+function normalizePath(data) {
+  const milestones = data?.milestones || []
+  return milestones.map((m, idx) => ({
+    id: `${data.path_id || 'path'}-m${idx}`,
+    title: m.label || `Milestone ${idx + 1}`,
+    description: m.rationale || '',
+    estimated_weeks: m.estimated_weeks,
+    steps: (m.steps || []).map((s) => ({
+      id: s.step_id || s.id,
+      status: s.status || 'not_started',
+      why_recommended: s.explanation || s.why_recommended || '',
+      course: {
+        title: s.title,
+        provider: s.provider,
+        description: s.description || '',
+        difficulty: s.difficulty,
+        duration_hrs: s.duration_hrs,
+        skill_tags: s.skill_tags || [],
+        resource_url: s.resource_url,
+      },
+    })),
+  }))
+}
 
-  const handleFeedback = async (stepId, action) => {
-    await sendFeedback(stepId, action)
-    setMilestones((prev) =>
-      prev.map((m) => ({
-        ...m,
-        steps: m.steps.map((s) => (s.id === stepId ? { ...s, status: action === 'completed' ? 'completed' : 'skipped' } : s))
-      }))
-    )
-  }
+export default function RoadmapPage() {
+  const { pathId } = useParams()
+  const navigate = useNavigate()
+  const [milestones, setMilestones] = useState(MOCK_MILESTONES)
+  const [loading, setLoading] = useState(Boolean(pathId))
+  const [usingMock, setUsingMock] = useState(!pathId)
+
+  const refetchPath = useCallback(async () => {
+    if (!pathId) return
+    try {
+      const { data } = await apiClient.get(`/api/paths/${pathId}`)
+      const normalized = normalizePath(data)
+      if (normalized.length > 0) {
+        setMilestones(normalized)
+        setUsingMock(false)
+      }
+    } catch (err) {
+      // Backend not reachable (e.g. demo mode) — keep whatever is on screen.
+      console.warn('Could not load path, showing sample roadmap:', err?.message)
+    } finally {
+      setLoading(false)
+    }
+  }, [pathId])
+
+  useEffect(() => {
+    refetchPath()
+  }, [refetchPath])
 
   return (
     <div className="min-h-screen bg-slate-950 p-6 max-w-4xl mx-auto">
       <header className="flex justify-between items-center mb-8 pb-4 border-b border-slate-800">
         <div>
           <h1 className="text-2xl font-black text-slate-100">Your AI Career Roadmap</h1>
-          <p className="text-xs text-slate-400 mt-1">Structured milestones with prerequisite validation</p>
+          <p className="text-xs text-slate-400 mt-1">
+            Structured milestones with prerequisite validation
+            {usingMock && ' · sample preview'}
+          </p>
         </div>
         <button
           onClick={() => navigate('/dashboard')}
@@ -89,7 +131,12 @@ export default function RoadmapPage() {
         </button>
       </header>
 
-      <RoadmapTimeline milestones={milestones} onStepFeedback={handleFeedback} />
+      {loading ? (
+        <div className="text-slate-500 text-sm py-16 text-center">Loading your roadmap…</div>
+      ) : (
+        <RoadmapTimeline milestones={milestones} onRefresh={refetchPath} />
+      )}
+
       <AssistantChat />
     </div>
   )

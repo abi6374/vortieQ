@@ -1,7 +1,7 @@
 import React from 'react'
 import MilestoneCard from './MilestoneCard'
 
-export default function RoadmapTimeline({ milestones, onStepFeedback }) {
+export default function RoadmapTimeline({ milestones, onRefresh }) {
   if (!milestones || milestones.length === 0) {
     return <div className="text-slate-500 text-sm">No milestones generated yet.</div>
   }
@@ -13,7 +13,7 @@ export default function RoadmapTimeline({ milestones, onStepFeedback }) {
           key={m.id || idx}
           milestone={m}
           index={idx + 1}
-          onStepFeedback={onStepFeedback}
+          onRefresh={onRefresh}
         />
       ))}
     </div>

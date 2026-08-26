@@ -13,6 +13,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [path, setPath] = useState(null)
+  const [toastMessage, setToastMessage] = useState(null)
 
   async function fetchDashboardData() {
     setLoading(true)
@@ -42,6 +43,16 @@ export default function DashboardPage() {
   useEffect(() => {
     fetchDashboardData()
   }, [])
+
+  // Called by FeedbackButtons (via NextActions) after a successful feedback post.
+  // If the backend adapted the path, surface a toast, then always re-fetch.
+  const handleFeedback = async (response) => {
+    if (response?.path_updated) {
+      setToastMessage('✨ Path updated based on your feedback!')
+      setTimeout(() => setToastMessage(null), 3000)
+    }
+    await fetchDashboardData()
+  }
 
   // Derived data
   const allSteps = path?.path_steps || []
@@ -84,6 +95,16 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {toastMessage && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-indigo-600 text-white px-6 py-3 rounded-xl shadow-lg animate-bounce"
+        >
+          {toastMessage}
+        </div>
+      )}
+
       <div className="max-w-5xl mx-auto px-6 py-8">
         <TopNav />
 
@@ -137,7 +158,7 @@ export default function DashboardPage() {
             <NextActions
               steps={nextSteps}
               pathId={path.id}
-              onRefresh={fetchDashboardData}
+              onRefresh={handleFeedback}
             />
           </div>
         )}

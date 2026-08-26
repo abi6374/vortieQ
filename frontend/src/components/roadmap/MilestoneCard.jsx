@@ -1,7 +1,7 @@
 import React from 'react'
 import ResourceItem from './ResourceItem'
 
-export default function MilestoneCard({ milestone, index, onStepFeedback }) {
+export default function MilestoneCard({ milestone, index, onRefresh }) {
   const steps = milestone.steps || milestone.path_steps || []
 
   return (
@@ -21,7 +21,7 @@ export default function MilestoneCard({ milestone, index, onStepFeedback }) {
           <ResourceItem
             key={s.id || sIdx}
             step={s}
-            onFeedback={onStepFeedback}
+            onRefresh={onRefresh}
           />
         ))}
       </div>

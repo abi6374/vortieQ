@@ -1,9 +1,12 @@
 import React, { useState } from 'react'
 import WhyThisDrawer from './WhyThisDrawer'
+import FeedbackButtons from '../dashboard/FeedbackButtons'
 
-export default function ResourceItem({ step, onFeedback }) {
+export default function ResourceItem({ step, onRefresh }) {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const course = step.course || step.courses || {}
+  const status = step.status || 'not_started'
+  const isCompleted = status === 'completed'
 
   return (
     <div className="p-4 bg-slate-800/60 border border-slate-700/60 rounded-xl hover:border-slate-600 transition">
@@ -11,10 +14,11 @@ export default function ResourceItem({ step, onFeedback }) {
         <div className="flex-1">
           <div className="flex items-center gap-2">
             <span className={`text-[10px] px-2 py-0.5 rounded font-semibold uppercase ${
-              step.status === 'completed' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' :
+              isCompleted ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' :
+              status === 'skipped' ? 'bg-slate-700 text-slate-400 border border-slate-600' :
               'bg-slate-700 text-slate-300'
             }`}>
-              {step.status || 'not_started'}
+              {status}
             </span>
             <span className="text-xs text-slate-400">{course.provider || 'Online Provider'}</span>
           </div>
@@ -30,8 +34,8 @@ export default function ResourceItem({ step, onFeedback }) {
         </button>
       </div>
 
-      <div className="flex justify-between items-center mt-3 pt-3 border-t border-slate-700/40 text-xs">
-        <div className="flex gap-1.5">
+      <div className="flex justify-between items-center mt-3 text-xs">
+        <div className="flex gap-1.5 flex-wrap">
           {course.skill_tags?.map((tag, idx) => (
             <span key={idx} className="bg-slate-700/40 text-slate-400 px-1.5 py-0.5 rounded text-[10px]">
               {tag}
@@ -43,10 +47,20 @@ export default function ResourceItem({ step, onFeedback }) {
             href={course.resource_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-400 hover:underline"
+            className="text-blue-400 hover:underline shrink-0 ml-2"
           >
             Visit Course ↗
           </a>
+        )}
+      </div>
+
+      <div className="mt-3 pt-3 border-t border-slate-700/40">
+        {isCompleted ? (
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-400">
+            ✓ Completed
+          </span>
+        ) : (
+          <FeedbackButtons stepId={step.id || step.step_id} onFeedbackGiven={onRefresh} />
         )}
       </div>
 
@@ -54,7 +68,7 @@ export default function ResourceItem({ step, onFeedback }) {
         isOpen={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         courseTitle={course.title}
-        explanation={step.why_recommended}
+        explanation={step.why_recommended || step.explanation}
       />
     </div>
   )
