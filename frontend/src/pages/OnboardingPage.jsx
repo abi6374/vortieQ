@@ -4,7 +4,7 @@ import ChatInput from '../components/onboarding/ChatInput'
 import GoalConfirm from '../components/onboarding/GoalConfirm'
 import GeneratingLoader from '../components/onboarding/GeneratingLoader'
 import ResumeUpload from '../components/onboarding/ResumeUpload'
-import TopicRatingList from '../components/onboarding/TopicRatingList'
+import AssessSkills from '../components/onboarding/AssessSkills'
 import NavBar from '../components/ui/NavBar'
 import api from '../lib/apiClient'
 
@@ -90,7 +90,7 @@ export default function OnboardingPage() {
           )}
 
           {phase === 'topics' && (
-            <TopicRatingList
+            <AssessSkills
               topics={resumeTopics}
               detectedYears={detectedYears}
               onContinue={handleTopicsContinue}
