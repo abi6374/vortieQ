@@ -85,13 +85,13 @@ CREATE OR REPLACE FUNCTION match_courses(
   match_count INT DEFAULT 15
 )
 RETURNS TABLE (
-  id UUID, title TEXT, description TEXT,
+  id UUID, title TEXT, description TEXT, provider TEXT,
   skill_tags TEXT[], difficulty TEXT,
   duration_hrs INT, prerequisites TEXT[],
   resource_url TEXT, similarity FLOAT
 )
 LANGUAGE SQL STABLE AS $$
-  SELECT id, title, description, skill_tags, difficulty,
+  SELECT id, title, description, provider, skill_tags, difficulty,
          duration_hrs, prerequisites, resource_url,
          1 - (embedding <=> query_embedding) AS similarity
   FROM courses

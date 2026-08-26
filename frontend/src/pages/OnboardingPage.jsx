@@ -3,63 +3,86 @@ import { useNavigate } from 'react-router-dom'
 import ChatInput from '../components/onboarding/ChatInput'
 import GoalConfirm from '../components/onboarding/GoalConfirm'
 import GeneratingLoader from '../components/onboarding/GeneratingLoader'
+import NavBar from '../components/ui/NavBar'
 import api from '../lib/apiClient'
 
 export default function OnboardingPage() {
-  const [stage, setStage] = useState('input') // 'input' | 'confirm' | 'generating'
-  const [profile, setProfile] = useState(null)
+  const [phase, setPhase] = useState('chat') // 'chat' | 'confirm' | 'generating'
+  const [goalText, setGoalText] = useState('')
+  const [extractedProfile, setExtractedProfile] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState(null)
+
   const navigate = useNavigate()
 
-  const handleGoalSubmit = async (goalText) => {
+  const handleGoalSubmit = async (text) => {
+    setGoalText(text)
+    setError(null)
+    setIsLoading(true)
     try {
-      const res = await api.post('/api/profile', { goal_text: goalText })
-      setProfile(res.data)
-      setStage('confirm')
+      // Trailing slash matches the FastAPI route (POST /api/profile/) and avoids a 307 redirect
+      const result = await api.post('/api/profile/', { goal_text: text })
+      setExtractedProfile(result.data)
+      setPhase('confirm')
     } catch (err) {
-      console.error(err)
-      // Dev fallback
-      setProfile({
-        target_role: "Machine Learning Engineer",
-        current_skill_level: "beginner",
-        time_commitment_hrs_per_week: 10,
-        learning_style: "hands-on",
-        interests: ["Python", "PyTorch", "NLP", "FastAPI"]
-      })
-      setStage('confirm')
+      setError('Could not process your goal. Please try again.')
+    } finally {
+      setIsLoading(false)
     }
   }
 
   const handleConfirm = async () => {
-    setStage('generating')
+    setError(null)
+    setPhase('generating')
     try {
-      const res = await api.post('/api/paths/generate')
-      setTimeout(() => {
-        navigate('/roadmap')
-      }, 3000)
+      const result = await api.post('/api/paths/generate', {})
+      navigate(`/roadmap/${result.data.path_id}`)
     } catch (err) {
-      console.error(err)
-      setTimeout(() => {
-        navigate('/roadmap')
-      }, 3000)
+      setError('Path generation failed. Please try again.')
+      setPhase('confirm')
     }
   }
 
-  return (
-    <div className="min-h-screen bg-slate-950 p-6 flex flex-col items-center justify-center">
-      <div className="text-center mb-8">
-        <h2 className="text-2xl font-black text-slate-100">Tell Us Your Career Ambition</h2>
-        <p className="text-xs text-slate-400 mt-1">Our AI extracts your skill baseline and builds a tailored path</p>
-      </div>
+  const handleEdit = () => {
+    setPhase('chat')
+    setExtractedProfile(null)
+  }
 
-      {stage === 'input' && <ChatInput onSubmit={handleGoalSubmit} />}
-      {stage === 'confirm' && (
-        <GoalConfirm
-          profile={profile}
-          onConfirm={handleConfirm}
-          onEdit={() => setStage('input')}
-        />
-      )}
-      {stage === 'generating' && <GeneratingLoader />}
+  return (
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-indigo-900 to-blue-900">
+      <NavBar />
+      <div className="flex-1 flex flex-col items-center justify-center px-4 py-12">
+      <div className="w-full max-w-2xl">
+        {phase === 'chat' && (
+          <div className="bg-white rounded-2xl shadow-xl p-8">
+            <h1 className="text-2xl font-bold text-gray-900">Let's map your path</h1>
+            <p className="mt-2 text-sm text-gray-600">
+              Describe your learning goal in your own words. Our AI will turn it into a
+              personalized roadmap.
+            </p>
+            <div className="mt-6">
+              <ChatInput onSubmit={handleGoalSubmit} isLoading={isLoading} />
+            </div>
+          </div>
+        )}
+
+        {phase === 'confirm' && (
+          <GoalConfirm
+            profile={extractedProfile}
+            onConfirm={handleConfirm}
+            onEdit={handleEdit}
+          />
+        )}
+
+        {phase === 'generating' && <GeneratingLoader />}
+
+        {error && (
+          <p className="mt-4 text-center text-sm text-red-200 bg-red-900/40 rounded-lg py-2 px-4">
+            {error}
+          </p>
+        )}
+      </div>
+      </div>
     </div>
   )
 }
