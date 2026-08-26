@@ -82,3 +82,53 @@ def upsert_profile(user_id: str, data: dict) -> dict:
     }
     result = supabase_client.table("profiles").upsert(payload).execute()
     return result.data[0] if result.data else payload
+
+
+# ---------------------------------------------------------------- topic ratings
+# 4-tier resume/assessment scale -> 3-tier recommender scale.
+_LEVEL_TO_RECOMMENDER = {
+    "basic": "beginner",
+    "intermediate": "intermediate",
+    "advanced": "advanced",
+    "expert": "advanced",
+}
+
+# When choosing an overall current_level from a bag of per-topic levels we take
+# the median-ish highest reliable level: at least 2 topics rated at that level.
+_LEVEL_ORDER = ["beginner", "intermediate", "advanced"]
+
+
+def merge_topic_ratings(profile: dict, topic_ratings: list[dict]) -> dict:
+    """Fold per-topic self-ratings back into a profile dict before upsert.
+
+    - Adds each topic name to `interests` (lowercased, deduped).
+    - Recomputes `current_level` as the highest level supported by >=2 topics
+      (falls back to the LLM's extracted level if we don't have that many).
+    - Stashes the full ratings under `topic_ratings` for downstream use.
+    """
+    if not topic_ratings:
+        return profile
+
+    interests = [i.lower() for i in profile.get("interests") or []]
+    for rating in topic_ratings:
+        name = (rating.get("name") or "").strip().lower()
+        if name and name not in interests:
+            interests.append(name)
+
+    # Overall level: highest level that at least two topics claim.
+    per_level_counts = {"beginner": 0, "intermediate": 0, "advanced": 0}
+    for rating in topic_ratings:
+        rec_level = _LEVEL_TO_RECOMMENDER.get((rating.get("level") or "").lower())
+        if rec_level:
+            per_level_counts[rec_level] += 1
+
+    chosen = profile.get("current_level", "beginner")
+    for lvl in reversed(_LEVEL_ORDER):
+        if per_level_counts[lvl] >= 2:
+            chosen = lvl
+            break
+
+    profile["interests"] = interests
+    profile["current_level"] = chosen
+    profile["topic_ratings"] = topic_ratings
+    return profile
