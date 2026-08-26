@@ -5,6 +5,7 @@ import GoalConfirm from '../components/onboarding/GoalConfirm'
 import GeneratingLoader from '../components/onboarding/GeneratingLoader'
 import ResumeUpload from '../components/onboarding/ResumeUpload'
 import AssessSkills from '../components/onboarding/AssessSkills'
+import SetupSidebar from '../components/onboarding/SetupSidebar'
 import NavBar from '../components/ui/NavBar'
 import api from '../lib/apiClient'
 
@@ -77,6 +78,25 @@ export default function OnboardingPage() {
     setExtractedProfile(null)
   }
 
+  // The "Assess skills" step gets the full artifact chrome: pale-gray page,
+  // left 5-step sidebar, white container — matching the approved design.
+  if (phase === 'topics') {
+    return (
+      <div className="min-h-screen flex" style={{ background: '#F5F7FC' }}>
+        <SetupSidebar current={2} />
+        <div className="flex-1 flex flex-col items-center justify-start px-4 py-10 overflow-y-auto">
+          <AssessSkills
+            topics={resumeTopics}
+            detectedYears={detectedYears}
+            onContinue={handleTopicsContinue}
+            onBack={() => setPhase('resume')}
+            onSkip={() => { setTopicRatings([]); setPhase('chat') }}
+          />
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-indigo-900 to-blue-900">
       <NavBar />
@@ -86,16 +106,6 @@ export default function OnboardingPage() {
             <ResumeUpload
               onExtracted={handleResumeExtracted}
               onSkip={() => setPhase('chat')}
-            />
-          )}
-
-          {phase === 'topics' && (
-            <AssessSkills
-              topics={resumeTopics}
-              detectedYears={detectedYears}
-              onContinue={handleTopicsContinue}
-              onBack={() => setPhase('resume')}
-              onSkip={() => { setTopicRatings([]); setPhase('chat') }}
             />
           )}
 
