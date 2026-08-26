@@ -78,5 +78,15 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            sleep 5
-            curl -sf http://localhost/health || (docker logs --tail 100 ${{ env.CONTAINER_NAME }} && exit 1)
+            set -e
+            for i in $(seq 1 20); do
+              if curl -sf http://localhost/health; then
+                echo "Healthy after ${i} attempt(s)"
+                exit 0
+              fi
+              echo "Not ready yet (attempt ${i}/20), waiting 5s..."
+              sleep 5
+            done
+            echo "Container never became healthy - dumping logs:"
+            docker logs --tail 150 ${{ env.CONTAINER_NAME }}
+            exit 1
