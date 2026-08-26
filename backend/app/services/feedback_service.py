@@ -215,7 +215,14 @@ Generate the learning path JSON now."""
             "role": "user",
             "content": "Return ONLY the JSON object. No markdown fences.",
         })
-        milestones = json.loads(_strip_fences(_call_groq(messages)))["milestones"]
+        try:
+            milestones = json.loads(_strip_fences(_call_groq(messages)))["milestones"]
+        except Exception as e:
+            # LLM couldn't produce valid JSON on either attempt. Rather than
+            # 500 the user, leave the path as-is (tail already deleted, but
+            # the frontend will just render fewer steps).
+            print(f"[feedback regen] gave up after 2 bad JSON attempts: {e!r}", flush=True)
+            return []
 
     course_lookup = {c["id"]: c for c in candidates}
     seq = _last_sequence_order(path_id)
@@ -261,6 +268,19 @@ def handle_feedback(step_id: str, event_type: str, note: str, user_id: str) -> d
 
     step, path = _load_step_with_path(step_id, user_id)
     path_id = path["id"]
+
+    # Idempotency guard: refuse to re-process a step whose feedback has already
+    # landed. Prevents cascade re-runs from React StrictMode double-invoke,
+    # rapid double-clicks, or stale button state in the dashboard.
+    current_status = step.get("status")
+    if current_status in ("completed", "skipped"):
+        return {
+            "feedback_id": None,
+            "path_updated": False,
+            "updated_steps": [],
+            "note": f"Step is already {current_status}; feedback ignored.",
+        }
+
     feedback_id = _write_feedback_event(user_id, path_id, step_id, event_type, note)
 
     if event_type == "completed":
