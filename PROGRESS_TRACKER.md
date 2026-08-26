@@ -10,9 +10,9 @@ Previously: kavindra-e-m (Member 1 — Backend) at 2026-08-26 (M1-S2 → M1-S4 c
 ## Infrastructure (Member 5)
 - [x] GitHub repo: https://github.com/abi6374/vortieQ
 - [x] Supabase tables live (all 5 tables) — `omnhtvxuvjnimokwqtje.supabase.co`, RLS enabled on all incl. read-only public policy on `courses`
-- [ ] Vercel URL: TBD — see `docs/deployment_guide.md` Part B (one-time connect, auto-deploys on every push after that)
+- [ ] Vercel URL: TBD — see `docs/deployment_guide.md` Part B (one-time connect, ~5 min, auto-deploys on every push after that)
 - [ ] Render URL: **superseded — backend deploys to AWS EC2 instead, see below**
-- [ ] AWS EC2 backend URL: TBD — `.github/workflows/deploy-backend.yml` + `docs/deployment_guide.md` Part A written and ready; **needs one-time manual AWS setup** (launch instance, Elastic IP, install Docker, create `~/app/.env`, add 3 GitHub secrets: `EC2_HOST`/`EC2_USER`/`EC2_SSH_KEY`) before the pipeline can run. Not yet executed — no AWS credentials/account access from this environment.
+- [x] AWS EC2 backend URL: **http://13.206.51.130** — `career-path-backend` (Ubuntu 24.04, t3.micro, ap-south-1, 16GB EBS after an 8→16GB resize for `docker load` headroom, 2GB swap). `.github/workflows/deploy-backend.yml` verified live end-to-end on a real `git push`: build → save → scp to EC2 → `docker load` → restart → poll `/health` — all green (run #5, commit `1c2468a`, 5m57s). Auto-deploys on every push to `main` touching `backend/**`. `/health` and `/docs` both confirmed reachable from outside.
 
 ## Backend — Member 1
 - [x] M1-S1: Skeleton + /health — uvicorn boots, `GET /health` returns 200, all 6 routers registered, Swagger UI live at `/docs`
@@ -53,7 +53,7 @@ Previously: kavindra-e-m (Member 1 — Backend) at 2026-08-26 (M1-S2 → M1-S4 c
 - [ ] MODULE 6: Roadmap shows real courses
 - [x] MODULE 7: Dashboard + feedback loop ✅ (M4-S2..S4 frontend + M1-S5 backend now both live; `POST /api/steps/{id}/feedback` returns real `{feedback_id, path_updated, updated_steps}` and mutates DB — Member 4's UI can stop treating the response as a no-op)
 - [x] MODULE 8: AI assistant grounded answers ✅ (`POST /api/assistant/ask` returns answers grounded on the real path — Q about "Python removed" correctly referenced completed/skipped statuses and course names from the DB. Frontend M4-S5 chat panel now live on Dashboard + Roadmap.)
-- [ ] MODULE 9: Full flow on deployed URL — CI/CD pipeline code is in place (`.github/workflows/deploy-backend.yml`, backend `Dockerfile` updated with CPU-only torch + baked-in embedding model + healthcheck); blocked on the one-time manual AWS EC2 setup in `docs/deployment_guide.md` Part A, then Vercel connect in Part B
+- [ ] MODULE 9: Full flow on deployed URL — **backend half done**: EC2 live at http://13.206.51.130, auto-deploy pipeline verified on a real push (see Infrastructure section above). Still needs Vercel connect (Part B) before the full frontend↔backend flow can be tested on a public URL.
 
 ## Notes
 - Backend runs locally: `cd backend && ./venv/Scripts/python.exe -m uvicorn app.main:app --port 8000`
