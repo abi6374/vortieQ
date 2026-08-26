@@ -22,6 +22,14 @@ export default function App() {
             }
           />
           <Route
+            path="/roadmap/:pathId"
+            element={
+              <ProtectedRoute>
+                <RoadmapPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/roadmap"
             element={
               <ProtectedRoute>

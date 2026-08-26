@@ -1,5 +1,5 @@
 # PROGRESS TRACKER
-Last updated by: Login-39t at 2026-08-26 (M3-S1 scaffold complete)
+Last updated by: Login-39t at 2026-08-26 (M3-S2 shared infra + routing complete)
 
 ## Infrastructure (Member 5)
 - [ ] GitHub repo: https://github.com/YOUR_ORG/career-path-recommender
@@ -23,7 +23,7 @@ Last updated by: Login-39t at 2026-08-26 (M3-S1 scaffold complete)
 
 ## Frontend Auth + Onboarding — Member 3
 - [x] M3-S1: React scaffold, folder structure — Vite+React+Tailwind scaffolded, all 24 component/page/lib/hook files created, `npm run dev` + `npm run build` pass, `.env.example` + `vercel.json` in place
-- [ ] M3-S2: AuthContext, routing, supabaseClient
+- [x] M3-S2: AuthContext, routing, supabaseClient — `supabaseClient.js` (createClient), `apiClient.js` (axios + JWT interceptor via `supabase.auth.getSession`), `AuthContext.jsx` (session/loading + signIn/signUp/signOut + onAuthStateChange), `useAuth` hook, `ProtectedRoute`, and full React Router setup (`/`, `/onboarding`, `/roadmap/:pathId`, `/roadmap`, `/dashboard`, `*`→`/`)
 - [ ] M3-S3: Landing page + AuthCard
 - [ ] M3-S4: Onboarding chat intake
 - [ ] M3-S5: Roadmap view with real data
