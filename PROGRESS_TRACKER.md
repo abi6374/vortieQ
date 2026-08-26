@@ -2,10 +2,11 @@
 Last updated by: Abinivas (Member 2 — ML) at 2026-08-26 (M2-S2 → M2-S5 complete, MODULE 2 gate passed)
 
 ## Infrastructure (Member 5)
-- [ ] GitHub repo: https://github.com/YOUR_ORG/career-path-recommender
+- [x] GitHub repo: https://github.com/abi6374/vortieQ
 - [x] Supabase tables live (all 5 tables) — `omnhtvxuvjnimokwqtje.supabase.co`, RLS enabled on all incl. read-only public policy on `courses`
-- [ ] Vercel URL: TBD
-- [ ] Render URL: TBD
+- [ ] Vercel URL: TBD — see `docs/deployment_guide.md` Part B (one-time connect, auto-deploys on every push after that)
+- [ ] Render URL: **superseded — backend deploys to AWS EC2 instead, see below**
+- [ ] AWS EC2 backend URL: TBD — `.github/workflows/deploy-backend.yml` + `docs/deployment_guide.md` Part A written and ready; **needs one-time manual AWS setup** (launch instance, Elastic IP, install Docker, create `~/app/.env`, add 3 GitHub secrets: `EC2_HOST`/`EC2_USER`/`EC2_SSH_KEY`) before the pipeline can run. Not yet executed — no AWS credentials/account access from this environment.
 
 ## Backend — Member 1
 - [x] M1-S1: Skeleton + /health — uvicorn boots, `GET /health` returns 200, all 6 routers registered, Swagger UI live at `/docs`
@@ -46,7 +47,7 @@ Last updated by: Abinivas (Member 2 — ML) at 2026-08-26 (M2-S2 → M2-S5 compl
 - [ ] MODULE 6: Roadmap shows real courses
 - [ ] MODULE 7: Dashboard + feedback loop
 - [ ] MODULE 8: AI assistant grounded answers
-- [ ] MODULE 9: Full flow on deployed URL
+- [ ] MODULE 9: Full flow on deployed URL — CI/CD pipeline code is in place (`.github/workflows/deploy-backend.yml`, backend `Dockerfile` updated with CPU-only torch + baked-in embedding model + healthcheck); blocked on the one-time manual AWS EC2 setup in `docs/deployment_guide.md` Part A, then Vercel connect in Part B
 
 ## Notes
 - Backend runs locally: `cd backend && ./venv/Scripts/python.exe -m uvicorn app.main:app --port 8000`
@@ -59,3 +60,10 @@ Last updated by: Abinivas (Member 2 — ML) at 2026-08-26 (M2-S2 → M2-S5 compl
 - **Member 1**: ML module interface is live and real (no more stubs) — `generate_path()` in `path_service.py` can now call `get_recommender().recommend(profile)` and expect up to 15 real, ranked course dicts (`id, title, description, provider, skill_tags, difficulty, duration_hrs, prerequisites, resource_url, similarity`) instead of `[]`. This unblocks M1-S4.
 - **Member 5**: MODULE 2 gate has live evidence above — just needs your sign-off (Table Editor row count + optional independent `--verify` run).
 - Nothing further blocks on Member 2 for the core pipeline; remaining ML-adjacent work (if any) would be tuning re-rank weights after real user feedback in MODULE 7/8.
+
+## Deployment (backend: AWS EC2, not Render — see `docs/deployment_guide.md`)
+- Decision: backend hosts on a single EC2 instance (Docker container) instead of Render, per team request. Frontend stays on Vercel as originally planned (Part 1 §20 Render references are now stale for backend).
+- CI/CD: `.github/workflows/deploy-backend.yml` — triggers on every push to `main` touching `backend/**`. Builds the Docker image on the GitHub Actions runner, `docker save`s it, `scp`s the tarball to EC2 over SSH, then `docker load` + restarts the container. No AWS IAM keys touch GitHub — only an SSH key, kept minimal on purpose.
+- `backend/Dockerfile` updated: CPU-only torch wheel (smaller image, no GPU on a t2.micro anyway), embedding model pre-downloaded at build time (fast/offline container start), `HEALTHCHECK` added.
+- **Still needed from Member 5 (or whoever owns AWS):** the one-time manual steps in `docs/deployment_guide.md` Part A — launch the EC2 instance + Elastic IP, install Docker, create `~/app/.env` on the box with the 5 real backend keys, add `EC2_HOST`/`EC2_USER`/`EC2_SSH_KEY` as GitHub secrets. After that, every backend push auto-deploys with no further action.
+- Vercel connect (Part B) is unchanged from the original plan and equally not yet done — also needed before MODULE 9 can close.

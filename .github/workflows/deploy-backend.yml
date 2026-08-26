@@ -1,0 +1,82 @@
+name: Deploy Backend to EC2
+
+# Fires automatically whenever backend/ changes on main, so a normal
+# `git push origin main` is all it takes to redeploy the FastAPI backend.
+# Can also be triggered manually from the Actions tab (workflow_dispatch).
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/deploy-backend.yml"
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: career-path-backend
+  CONTAINER_NAME: career-path-backend
+  REMOTE_DEPLOY_DIR: /home/ubuntu/deploy
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build backend Docker image
+        run: docker build -t ${{ env.IMAGE_NAME }}:latest -f backend/Dockerfile backend
+
+      - name: Save image to a compressed tarball
+        run: docker save ${{ env.IMAGE_NAME }}:latest | gzip > ${{ env.IMAGE_NAME }}.tar.gz
+
+      - name: Show image size
+        run: ls -lh ${{ env.IMAGE_NAME }}.tar.gz
+
+      - name: Ensure remote deploy directory exists
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: mkdir -p ${{ env.REMOTE_DEPLOY_DIR }}
+
+      - name: Copy image tarball to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "${{ env.IMAGE_NAME }}.tar.gz"
+          target: "${{ env.REMOTE_DEPLOY_DIR }}"
+
+      - name: Load image and restart container on EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -e
+            cd ${{ env.REMOTE_DEPLOY_DIR }}
+            gunzip -f ${{ env.IMAGE_NAME }}.tar.gz
+            docker load < ${{ env.IMAGE_NAME }}.tar
+            docker stop ${{ env.CONTAINER_NAME }} 2>/dev/null || true
+            docker rm ${{ env.CONTAINER_NAME }} 2>/dev/null || true
+            docker run -d \
+              --name ${{ env.CONTAINER_NAME }} \
+              --restart unless-stopped \
+              -p 80:8000 \
+              --env-file /home/ubuntu/app/.env \
+              ${{ env.IMAGE_NAME }}:latest
+            rm -f ${{ env.IMAGE_NAME }}.tar
+            docker image prune -f
+
+      - name: Verify /health on the deployed instance
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            sleep 5
+            curl -sf http://localhost/health || (docker logs --tail 100 ${{ env.CONTAINER_NAME }} && exit 1)
