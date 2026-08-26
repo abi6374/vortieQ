@@ -1,97 +1,146 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 
-export default function AuthCard({ onSuccess }) {
-  const [isSignUp, setIsSignUp] = useState(false)
+const INPUT_CLASS =
+  'w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500'
+
+function Spinner() {
+  return (
+    <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent align-[-2px]" />
+  )
+}
+
+export default function AuthCard() {
+  const [activeTab, setActiveTab] = useState('signin')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState(null)
+
   const { signIn, signUp } = useAuth()
+  const navigate = useNavigate()
+
+  // Clear the error as soon as the user starts correcting their input
+  const handleChange = (setter) => (e) => {
+    setter(e.target.value)
+    if (error) setError(null)
+  }
+
+  const switchTab = (tab) => {
+    setActiveTab(tab)
+    setError(null)
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setError('')
-    setLoading(true)
+    setError(null)
+    setIsLoading(true)
     try {
-      if (isSignUp) {
-        await signUp(email, password, fullName)
-      } else {
+      if (activeTab === 'signin') {
         await signIn(email, password)
+        navigate('/dashboard')
+      } else {
+        await signUp(email, password, fullName)
+        navigate('/onboarding')
       }
-      if (onSuccess) onSuccess()
     } catch (err) {
-      setError(err.message || 'Authentication failed')
+      setError(err?.message || 'Something went wrong. Please try again.')
     } finally {
-      setLoading(false)
+      setIsLoading(false)
     }
   }
 
+  const isSignUp = activeTab === 'signup'
+
   return (
-    <div className="w-full max-w-md bg-slate-900/90 border border-slate-800 backdrop-blur-xl rounded-2xl p-8 shadow-2xl">
-      <div className="flex border-b border-slate-800 mb-6">
+    <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
+      <div className="flex gap-2 mb-6">
         <button
-          onClick={() => setIsSignUp(false)}
-          className={`flex-1 py-3 text-sm font-semibold transition-colors ${!isSignUp ? 'border-b-2 border-blue-500 text-blue-400' : 'text-slate-400 hover:text-slate-200'}`}
+          type="button"
+          onClick={() => switchTab('signin')}
+          className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
+            !isSignUp
+              ? 'bg-indigo-600 text-white'
+              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+          }`}
         >
           Sign In
         </button>
         <button
-          onClick={() => setIsSignUp(true)}
-          className={`flex-1 py-3 text-sm font-semibold transition-colors ${isSignUp ? 'border-b-2 border-blue-500 text-blue-400' : 'text-slate-400 hover:text-slate-200'}`}
+          type="button"
+          onClick={() => switchTab('signup')}
+          className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
+            isSignUp
+              ? 'bg-indigo-600 text-white'
+              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+          }`}
         >
-          Create Account
+          Sign Up
         </button>
       </div>
-
-      {error && <div className="mb-4 p-3 bg-red-950/60 border border-red-800 text-red-300 text-xs rounded-lg">{error}</div>}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {isSignUp && (
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1">Full Name</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Full Name
+            </label>
             <input
               type="text"
               required
               value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-blue-500"
+              onChange={handleChange(setFullName)}
+              className={INPUT_CLASS}
               placeholder="Alex Smith"
             />
           </div>
         )}
+
         <div>
-          <label className="block text-xs font-medium text-slate-400 mb-1">Email Address</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Email
+          </label>
           <input
             type="email"
             required
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-blue-500"
-            placeholder="alex@example.com"
+            onChange={handleChange(setEmail)}
+            className={INPUT_CLASS}
+            placeholder="you@example.com"
           />
         </div>
+
         <div>
-          <label className="block text-xs font-medium text-slate-400 mb-1">Password</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Password
+          </label>
           <input
             type="password"
             required
+            minLength={6}
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-blue-500"
+            onChange={handleChange(setPassword)}
+            className={INPUT_CLASS}
             placeholder="••••••••"
           />
+          {isSignUp && (
+            <p className="mt-1 text-xs text-gray-500">At least 6 characters</p>
+          )}
         </div>
 
         <button
           type="submit"
-          disabled={loading}
-          className="w-full mt-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-medium py-2.5 rounded-lg transition shadow-lg shadow-blue-500/25 disabled:opacity-50"
+          disabled={isLoading}
+          className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          {loading ? 'Processing...' : isSignUp ? 'Sign Up' : 'Continue'}
+          {isLoading && <Spinner />}
+          {isSignUp ? 'Create Account' : 'Sign In'}
         </button>
       </form>
+
+      {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
     </div>
   )
 }
