@@ -201,14 +201,9 @@ export default function PersonalizedRoadmap({ pathData = null }) {
       })
   }, [pathData])
 
-  // Initialize completed task set from real step statuses
-  useEffect(() => {
-    const completedSet = new Set()
-    parsedSteps.forEach((s) => {
-      if (s.status === 'completed') completedSet.add(s.id)
-    })
-    setCompletedTaskIds(completedSet)
-  }, [parsedSteps])
+  // (Completion state is derived from useRoadmap.completedIds now — the old
+  // useEffect that seeded a local Set was dead code and referenced a setter
+  // that no longer exists.)
 
   // Auto-expand the second task's "Why this task?" by default if available
   useEffect(() => {
