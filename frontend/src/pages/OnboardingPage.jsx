@@ -4,6 +4,7 @@ import ChatInput from '../components/onboarding/ChatInput'
 import GoalConfirm from '../components/onboarding/GoalConfirm'
 import GeneratingLoader from '../components/onboarding/GeneratingLoader'
 import ResumeUpload from '../components/onboarding/ResumeUpload'
+import LearnerIntakeWorkspace from '../components/onboarding/LearnerIntakeWorkspace'
 import AssessSkills from '../components/onboarding/AssessSkills'
 import GoalCompass from '../components/onboarding/GoalCompass'
 import SetupSidebar from '../components/onboarding/SetupSidebar'
@@ -12,13 +13,13 @@ import api from '../lib/apiClient'
 
 /**
  * Onboarding is a wizard with two entry lanes:
- *   1. Skip resume → phase = 'chat' → 'confirm' → 'generating' (the original flow)
- *   2. Upload resume → phase = 'resume' → 'topics' → 'chat' → 'confirm' → 'generating'
+ *   1. Skip resume / Chat → phase = 'intake' → 'topics' → 'goalcompass' → 'generating'
+ *   2. Upload resume → phase = 'intake' → 'topics' → 'goalcompass' → 'generating'
  * At submit time, topic ratings (if any) ride along on the POST /api/profile/ call
  * as `topic_ratings`, which the backend merges into the learner profile.
  */
 export default function OnboardingPage() {
-  const [phase, setPhase] = useState('resume') // 'resume' | 'topics' | 'goalcompass' | 'chat' | 'confirm' | 'generating'
+  const [phase, setPhase] = useState('intake') // 'intake' | 'topics' | 'goalcompass' | 'chat' | 'confirm' | 'generating'
   const [goalText, setGoalText] = useState('')
   const [extractedProfile, setExtractedProfile] = useState(null)
   const [resumeTopics, setResumeTopics] = useState([])       // from LLM extraction
@@ -29,11 +30,21 @@ export default function OnboardingPage() {
 
   const navigate = useNavigate()
 
-  // ------------- resume step
+  // ------------- Step 1: Intake (Resume or Natural-language notes)
   const handleResumeExtracted = (topics, years) => {
     setResumeTopics(topics)
     setDetectedYears(years)
-    setPhase(topics.length > 0 ? 'topics' : 'chat')
+    setPhase(topics && topics.length > 0 ? 'topics' : 'goalcompass')
+  }
+
+  const handleChatIntake = (storyText) => {
+    setGoalText(storyText)
+    const fallbackTopics = [
+      { name: 'Python', level: 'beginner', evidence: 'Self-reported in natural-language intake' },
+      { name: 'Data Analysis', level: 'beginner', evidence: 'Self-reported projects' },
+    ]
+    setResumeTopics(fallbackTopics)
+    setPhase('topics')
   }
 
   // ------------- topic ratings step → Goal Compass (skills in hand)
@@ -101,6 +112,17 @@ export default function OnboardingPage() {
     setExtractedProfile(null)
   }
 
+  // Step 1: High-fidelity desktop learner intake screen
+  if (phase === 'intake' || phase === 'resume') {
+    return (
+      <LearnerIntakeWorkspace
+        onExtracted={handleResumeExtracted}
+        onChatSubmit={handleChatIntake}
+        onSkip={() => setPhase('topics')}
+      />
+    )
+  }
+
   // The "Assess skills" step gets the full artifact chrome: pale-gray page,
   // left 5-step sidebar, white container — matching the approved design.
   if (phase === 'topics') {
@@ -112,8 +134,8 @@ export default function OnboardingPage() {
             topics={resumeTopics}
             detectedYears={detectedYears}
             onContinue={handleTopicsContinue}
-            onBack={() => setPhase('resume')}
-            onSkip={() => { setTopicRatings([]); setPhase('chat') }}
+            onBack={() => setPhase('intake')}
+            onSkip={() => { setTopicRatings([]); setPhase('goalcompass') }}
           />
         </div>
       </div>
