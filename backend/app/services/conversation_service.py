@@ -19,13 +19,29 @@ def _load_prompt(name: str) -> str:
 
 # ── conversation plumbing ────────────────────────────────────────────────────
 def get_or_create_conversation(user_id: str) -> str:
+    """Idempotent, race-safe. ai_conversations has UNIQUE(user_id); two
+    near-simultaneous first-load requests will both find no row and both try
+    to INSERT — the second gets a unique-violation exception. Catch it and
+    re-select instead of 500'ing."""
     existing = (
         supabase_client.table("ai_conversations").select("id").eq("user_id", user_id).limit(1).execute()
     )
     if existing.data:
         return existing.data[0]["id"]
-    created = supabase_client.table("ai_conversations").insert({"user_id": user_id}).execute()
-    return created.data[0]["id"]
+    try:
+        created = supabase_client.table("ai_conversations").insert({"user_id": user_id}).execute()
+        if created.data:
+            return created.data[0]["id"]
+    except Exception as e:
+        # Only swallow the race; log anything else so we still see it.
+        msg = str(e).lower()
+        if "duplicate" not in msg and "unique" not in msg and "23505" not in msg:
+            print(f"[assistant] conversation insert failed: {type(e).__name__}: {e}", flush=True)
+    # Fall through to re-select — whichever writer won, the row now exists.
+    again = supabase_client.table("ai_conversations").select("id").eq("user_id", user_id).limit(1).execute()
+    if again.data:
+        return again.data[0]["id"]
+    raise RuntimeError("Could not obtain a conversation for user")
 
 
 def get_messages(user_id: str, limit: int = 100) -> list:
