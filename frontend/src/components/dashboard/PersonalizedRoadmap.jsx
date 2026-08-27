@@ -126,7 +126,7 @@ export default function PersonalizedRoadmap({ pathData = null }) {
     if (navId === 'roadmap') {
       setActiveModal(null)
     } else if (navId === 'skills') {
-      setActiveModal('skills')
+      navigate('/skills')
     } else if (navId === 'resources') {
       setActiveModal('resources')
     } else if (navId === 'progress') {

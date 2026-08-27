@@ -7,6 +7,7 @@ import OnboardingPage from './pages/OnboardingPage'
 import RoadmapPage from './pages/RoadmapPage'
 import DashboardPage from './pages/DashboardPage'
 import ProgressPage from './pages/ProgressPage'
+import SkillInsightsPage from './pages/SkillInsightsPage'
 
 export default function App() {
   return (
@@ -59,6 +60,22 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <ProgressPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/skills"
+            element={
+              <ProtectedRoute>
+                <SkillInsightsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/skill-insights"
+            element={
+              <ProtectedRoute>
+                <SkillInsightsPage />
               </ProtectedRoute>
             }
           />

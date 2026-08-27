@@ -98,7 +98,7 @@ export default function ProgressScreen() {
     if (navId === 'roadmap') {
       navigate('/dashboard')
     } else if (navId === 'skills') {
-      setActiveModal('skills')
+      navigate('/skills')
     } else if (navId === 'resources') {
       setActiveModal('resources')
     } else if (navId === 'coach') {
