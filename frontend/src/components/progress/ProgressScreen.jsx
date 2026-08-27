@@ -56,6 +56,7 @@ import { useAuth } from '../../hooks/useAuth'
 import AppSidebar from '../ui/AppSidebar'
 import { useRoadmap } from '../../hooks/useRoadmap'
 import { useStreak } from '../../hooks/useStreak'
+import UserProfileDropdown from '../ui/UserProfileDropdown'
 
 /**
  * PathFinder High-Fidelity Progress Page
