@@ -28,11 +28,28 @@ const V_BORDER = '#DDD2FF'
 // ── Type mapping. We only actually have courses in the DB, so we synthesise
 // "type" from difficulty + duration to keep the reference screenshot's variety.
 function typeOf(step) {
+  // Real filter buckets. DB stores only "courses" so we synthesise the
+  // reference screenshot's variety from real signals: URL host, title
+  // keywords, milestone label, then duration as a last resort.
+  const url = (step.resource_url || '').toLowerCase()
+  const title = (step.title || '').toLowerCase()
+  const ms = (step.milestone_label || '').toLowerCase()
+  const tags = (step.skill_tags || []).map((t) => (t || '').toLowerCase())
+  const hasWord = (w) => title.includes(w) || ms.includes(w) || tags.includes(w)
   const dur = step.duration_hrs || 0
-  if (dur <= 2) return { kind: 'ARTICLE', label: 'Read article' }
-  if (dur >= 20) return { kind: 'PROJECT', label: 'View project' }
-  if ((step.milestone_label || '').toLowerCase().includes('practice')) return { kind: 'PRACTICE', label: 'Start practice' }
+
+  if (url.includes('youtube.') || url.includes('vimeo.') || hasWord('video')) return { kind: 'VIDEO', label: 'Watch video' }
+  if (url.includes('docs.') || url.includes('/docs/') || url.includes('developer.mozilla') || hasWord('documentation')) return { kind: 'DOC', label: 'Open docs' }
+  if (hasWord('practice') || hasWord('exercise') || hasWord('problem')) return { kind: 'PRACTICE', label: 'Start practice' }
+  if (hasWord('project') || hasWord('portfolio') || hasWord('capstone') || dur >= 20) return { kind: 'PROJECT', label: 'View project' }
+  if (hasWord('article') || hasWord('blog') || (dur > 0 && dur <= 2)) return { kind: 'ARTICLE', label: 'Read article' }
   return { kind: 'COURSE', label: 'Start learning' }
+}
+
+// URL guard so Load-more / Start-learning never render a dead link.
+function isSafeUrl(u) {
+  if (!u) return false
+  try { const p = new URL(u); return p.protocol === 'https:' || p.protocol === 'http:' } catch { return false }
 }
 
 const TYPE_META = {
@@ -253,6 +270,12 @@ export default function ResourcesScreen() {
   })
   const [chip, setChip] = useState('All')
   const [query, setQuery] = useState('')
+  const [visibleCount, setVisibleCount] = useState(8)   // paginated by "Load more"
+  const [showFilters, setShowFilters] = useState(false)
+  const [whyOpen, setWhyOpen] = useState(false)
+  const [difficultyFilter, setDifficultyFilter] = useState('all')  // all|beginner|intermediate|advanced
+  const [durationFilter, setDurationFilter] = useState('all')      // all|short|medium|long
+  const [openMatchFor, setOpenMatchFor] = useState(null)           // step_id for the Why popover
 
   useEffect(() => {
     let cancelled = false
@@ -307,7 +330,17 @@ export default function ResourcesScreen() {
       .filter((s) => (chip === 'Recommended' ? s.status === 'not_started' : true))
       .filter((s) => (typeFilter ? s._type === typeFilter : true))
       .filter((s) => !q ? true : (s.title.toLowerCase().includes(q) || (s.skill_tags || []).some((t) => t.toLowerCase().includes(q))))
-  }, [steps, chip, query])
+      .filter((s) => difficultyFilter === 'all' ? true : s.difficulty === difficultyFilter)
+      .filter((s) => {
+        if (durationFilter === 'all') return true
+        const d = s.duration_hrs || 0
+        if (durationFilter === 'short') return d <= 5
+        if (durationFilter === 'medium') return d > 5 && d <= 15
+        return d > 15
+      })
+  }, [steps, chip, query, difficultyFilter, durationFilter])
+
+  useEffect(() => { setVisibleCount(8) }, [chip, query, difficultyFilter, durationFilter])
 
   const nextThree = activeSteps.slice(0, 4)
   const savedItems = steps.filter((s) => saved.has(s.id)).slice(0, 3)
@@ -321,7 +354,20 @@ export default function ResourcesScreen() {
   }
 
   return (
-    <div className="rx">
+    <div className="rx">{whyOpen && (
+        <div onClick={() => setWhyOpen(false)} style={{position:"fixed",inset:0,background:"rgba(23,37,84,.35)",display:"grid",placeItems:"center",zIndex:80,padding:20}}>
+          <div onClick={(e)=>e.stopPropagation()} style={{background:"#fff",border:"1px solid var(--vbd)",borderRadius:16,padding:22,maxWidth:460,width:"100%",boxShadow:"0 20px 40px rgba(25,40,75,.2)"}}>
+            <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
+              <span style={{width:34,height:34,borderRadius:10,background:"var(--vsoft)",color:"var(--v)",display:"grid",placeItems:"center"}}>{I.spark}</span>
+              <h3 style={{margin:0,fontFamily:"Manrope,sans-serif",fontSize:17,fontWeight:800}}>Why these resources?</h3>
+            </div>
+            <p style={{margin:0,fontSize:13.5,color:"var(--slate)",lineHeight:1.55}}>
+              PathFinder ranks these against your active roadmap: your target role, current level, weekly hours, completed courses, and per-topic skill gaps. Courses you have already completed are excluded. The current week’s prerequisites push closest-fit resources to the top.
+            </p>
+            <button onClick={() => setWhyOpen(false)} style={{marginTop:16,background:"var(--v)",border:"none",color:"#fff",padding:"9px 16px",borderRadius:10,fontWeight:700,fontSize:13,cursor:"pointer"}}>Got it</button>
+          </div>
+        </div>
+      )}
       <style>{STYLES}</style>
 
       <AppSidebar />
@@ -347,18 +393,43 @@ export default function ResourcesScreen() {
               <p>These resources match your current roadmap, skill gaps, and learning progress.</p>
             </div>
             <span className="p-meta">Week {Math.min(steps.length, 5)} · {(steps.find((s)=>s.status!=='completed')?.milestone_label) || 'Foundations'}</span>
-            <a href="#why">Why these resources? →</a>
+            <button type="button" onClick={() => setWhyOpen(true)} style={{background:"none",border:"none",padding:0,color:"var(--v)",fontSize:13,fontWeight:600,cursor:"pointer"}}>Why these resources? →</button>
           </section>
         )}
 
         <div className="rx-search">
           <div className="s-in">{I.search}<input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search courses, videos, articles, documentation, practice..." /><span className="kbd">⌘ K</span></div>
-          <button className="rx-filter">{I.slider}Filters</button>
+          <button className="rx-filter" onClick={() => setShowFilters((v) => !v)}>{I.slider}Filters{showFilters ? " ▾" : ""}</button>
         </div>
 
         <div className="rx-chips">
           {CHIPS.map((c) => (<button key={c} className={`rx-chip ${chip === c ? 'on' : ''}`} onClick={() => setChip(c)}>{c}</button>))}
         </div>
+
+        {showFilters && (
+          <div style={{background:'#fff',border:'1px solid var(--border)',borderRadius:12,padding:'14px 16px',display:'flex',gap:22,flexWrap:'wrap',alignItems:'flex-end'}}>
+            <div>
+              <div style={{fontSize:11.5,fontWeight:700,letterSpacing:.05,color:'var(--muted)',textTransform:'uppercase',marginBottom:6}}>Difficulty</div>
+              <div style={{display:'flex',gap:6}}>
+                {['all','beginner','intermediate','advanced'].map((d) => (
+                  <button key={d} onClick={() => setDifficultyFilter(d)}
+                    style={{padding:'6px 12px',borderRadius:999,border:'1px solid '+(difficultyFilter===d?'var(--v)':'var(--border)'),background:difficultyFilter===d?'var(--vsoft)':'#fff',color:difficultyFilter===d?'var(--v)':'#475569',fontSize:12.5,fontWeight:600,cursor:'pointer',textTransform:'capitalize'}}>{d}</button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <div style={{fontSize:11.5,fontWeight:700,letterSpacing:.05,color:'var(--muted)',textTransform:'uppercase',marginBottom:6}}>Duration</div>
+              <div style={{display:'flex',gap:6}}>
+                {[['all','Any'],['short','< 5h'],['medium','5–15h'],['long','15h+']].map(([k,l]) => (
+                  <button key={k} onClick={() => setDurationFilter(k)}
+                    style={{padding:'6px 12px',borderRadius:999,border:'1px solid '+(durationFilter===k?'var(--v)':'var(--border)'),background:durationFilter===k?'var(--vsoft)':'#fff',color:durationFilter===k?'var(--v)':'#475569',fontSize:12.5,fontWeight:600,cursor:'pointer'}}>{l}</button>
+                ))}
+              </div>
+            </div>
+            <button onClick={() => { setDifficultyFilter('all'); setDurationFilter('all'); setChip('All'); setQuery('') }}
+                    style={{marginLeft:'auto',background:'none',border:'none',color:'var(--v)',fontWeight:600,fontSize:12.5,cursor:'pointer'}}>Reset filters</button>
+          </div>
+        )}
 
         <div className="rx-stats">
           <div className="rx-stat"><span className="s-ic" style={{ background: V_SOFT, color: V }}>{I.star}</span><div><div className="s-num">{Math.max(0, steps.length - completedCount)}</div><div className="s-lbl">Recommended</div></div></div>
@@ -387,7 +458,7 @@ export default function ResourcesScreen() {
               </div>
             ) : (
               <div className="rx-list">
-                {filtered.map((s) => {
+                {filtered.slice(0, visibleCount).map((s) => {
                   const t = typeOf(s); const meta = TYPE_META[t.kind]; const isDone = s.status === 'completed'; const m = matchFor(s)
                   const label = isDone ? 'Review' : t.label
                   return (
@@ -407,10 +478,10 @@ export default function ResourcesScreen() {
                         {m != null ? <><div className="pct">{m}% match</div><div className="why">Based on your active roadmap</div></> : <div className="pct" style={{color:'#16A34A'}}>Completed</div>}
                       </div>
                       <button className={`r-save ${saved.has(s.id) ? 'on' : ''}`} onClick={() => toggleSave(s.id)} aria-label="Save">{I.bookmark(saved.has(s.id))}</button>
-                      {s.resource_url ? (
+                      {isSafeUrl(s.resource_url) ? (
                         <a className={`rx-btn ${isDone ? 'done' : 'ghost'}`} href={s.resource_url} target="_blank" rel="noreferrer">{label}</a>
                       ) : (
-                        <button className={`rx-btn ${isDone ? 'done' : 'ghost'}`}>{label}</button>
+                        <button className={`rx-btn ${isDone ? 'done' : 'ghost'}`} disabled title="Link unavailable" style={{opacity:.5,cursor:"not-allowed"}}>{label}</button>
                       )}
                     </div>
                   )
@@ -418,8 +489,8 @@ export default function ResourcesScreen() {
               </div>
             )}
 
-            {filtered.length > 0 && (
-              <div className="rx-load"><button>Load more resources {I.chev}</button></div>
+            {filtered.length > visibleCount && (
+              <div className="rx-load"><button onClick={() => setVisibleCount((n) => n + 8)}>Load more resources ({filtered.length - visibleCount} more) {I.chev}</button></div>
             )}
           </div>
 
