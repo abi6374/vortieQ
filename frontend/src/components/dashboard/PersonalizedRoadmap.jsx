@@ -357,10 +357,18 @@ export default function PersonalizedRoadmap({ pathData = null }) {
     completedTaskIds.has(t.id)
   ).length
 
-  // Overall Goal details
-  const goalTitle = pathData?.goal_text
-    ? pathData.goal_text.split('I can study')[0].replace(/I want to become|I want to be/i, '').trim() || 'AIML Engineer Internship'
-    : 'AIML Engineer Internship'
+  // Clean goal title for heading & cards
+  const cleanGoalTitle = useMemo(() => {
+    if (!pathData?.goal_text) return 'AIML Engineer Internship'
+    let text = pathData.goal_text.split('I can study')[0].trim()
+    text = text.replace(
+      /^(I want to become an?|I want to become|I want to be an?|I want to be|I want an?|I want|My goal is to become an?|My goal is to be an?|My goal is to|My goal is)\s+/i,
+      ''
+    )
+    text = text.charAt(0).toUpperCase() + text.slice(1)
+    text = text.replace(/\.$/, '').trim()
+    return text || 'AIML Engineer Internship'
+  }, [pathData?.goal_text])
 
   // Handle AI send
   const handleSendMessage = async (textToSend = null) => {
@@ -534,9 +542,13 @@ export default function PersonalizedRoadmap({ pathData = null }) {
             </nav>
           </div>
 
-          {/* User Profile Pill at Bottom of Sidebar */}
-          <div className="pt-6 border-t border-[#E1E6F0] flex items-center justify-between">
-            <UserProfileDropdown />
+          {/* Clean sidebar footer */}
+          <div className="pt-4 border-t border-[#E1E6F0] flex items-center justify-between text-xs text-[#74819A]">
+            <span className="font-semibold">PathFinder v2.0</span>
+            <span className="inline-flex items-center gap-1.5 text-[#22A06B] font-bold">
+              <span className="w-2 h-2 rounded-full bg-[#22A06B] animate-pulse" />
+              Online
+            </span>
           </div>
         </aside>
 
@@ -545,33 +557,34 @@ export default function PersonalizedRoadmap({ pathData = null }) {
            ========================================================================= */}
         <main className="flex-1 bg-[#FAFBFD] p-5 sm:p-7 md:p-9 overflow-y-auto max-h-[960px]">
           
-          {/* Top Header Row: Main Heading + Goal Card + User Profile */}
-          <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-7 pb-2">
+          {/* Top Header Row: Main Heading + Goal Card + User Profile on Top-Right */}
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-7 pb-2 border-b border-[#F0F3F8]">
             <div>
               <h1 className="font-['Manrope'] font-extrabold text-2xl sm:text-3xl text-[#0E1B38] tracking-tight">
-                Your path to an {goalTitle}
+                Your path to: {cleanGoalTitle}
               </h1>
               <p className="text-sm sm:text-base text-[#52617D] mt-1 font-normal">
                 Personalized roadmap calibrated from your skills and weekly availability.
               </p>
             </div>
 
-            {/* Goal Card & Profile Pill */}
-            <div className="flex items-center gap-3 flex-wrap">
-              <div className="bg-white border border-[#D8DFEB] rounded-2xl p-3.5 sm:p-4 flex items-center justify-between gap-4 shadow-2xs min-w-[260px]">
-                <div className="flex items-center gap-3">
-                  <span className="w-10 h-10 rounded-xl bg-[#F5F1FF] text-[#5B36E9] flex items-center justify-center flex-none">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            {/* Top-Right Action Controls: Goal Card & User Profile Dropdown */}
+            <div className="flex items-center gap-3 flex-wrap flex-none">
+              {/* Compact Goal Card */}
+              <div className="bg-white border border-[#D8DFEB] hover:border-[#CAD3E2] rounded-2xl px-3.5 py-2 flex items-center justify-between gap-3 shadow-2xs">
+                <div className="flex items-center gap-2.5">
+                  <span className="w-8 h-8 rounded-xl bg-[#F5F1FF] text-[#5B36E9] flex items-center justify-center flex-none">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <circle cx="12" cy="12" r="10" />
                       <circle cx="12" cy="12" r="6" />
                       <circle cx="12" cy="12" r="2" />
                     </svg>
                   </span>
-                  <div>
-                    <h2 className="font-['Manrope'] font-bold text-xs sm:text-sm text-[#0E1B38] leading-tight max-w-[160px] truncate">
-                      {goalTitle}
+                  <div className="text-left">
+                    <h2 className="font-['Manrope'] font-bold text-xs sm:text-[13px] text-[#0E1B38] leading-tight max-w-[150px] truncate">
+                      {cleanGoalTitle}
                     </h2>
-                    <p className="text-[11px] text-[#74819A] mt-0.5 font-medium">
+                    <p className="text-[10px] text-[#74819A] font-medium leading-tight mt-0.5">
                       Target: Ongoing Pace
                     </p>
                   </div>
@@ -579,15 +592,14 @@ export default function PersonalizedRoadmap({ pathData = null }) {
                 <button
                   type="button"
                   onClick={() => navigate('/onboarding')}
-                  className="px-3 py-1.5 rounded-xl border border-[#D8DFEB] hover:border-[#5B36E9] hover:bg-[#F5F1FF] text-[#5B36E9] text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer"
+                  className="px-2.5 py-1 rounded-lg border border-[#D8DFEB] hover:border-[#5B36E9] hover:bg-[#F5F1FF] text-[#5B36E9] text-xs font-bold transition-colors cursor-pointer"
                 >
-                  <span>Replan</span>
+                  Replan
                 </button>
               </div>
 
-              <div className="hidden sm:block">
-                <UserProfileDropdown />
-              </div>
+              {/* User Profile Dropdown Pill */}
+              <UserProfileDropdown />
             </div>
           </div>
 
@@ -826,27 +838,34 @@ export default function PersonalizedRoadmap({ pathData = null }) {
                             isSelected
                               ? 'border-2 border-[#5B36E9] bg-[#F5F1FF] shadow-xs ring-2 ring-[#5B36E9]/10'
                               : node.isPriority
-                              ? 'border-[#5B36E9] bg-white shadow-2xs hover:border-[#5B36E9]'
+                              ? 'border-[#F59E0B]/50 bg-[#FFFDF7] shadow-2xs hover:border-[#D97706]'
                               : 'border-[#D8DFEB] bg-white hover:border-[#CAD3E2]'
                           }`}
                         >
+                          {/* Consistent Clean Circle Number */}
                           <span
                             className={`w-6 h-6 rounded-full font-bold text-xs flex items-center justify-center mb-1 ${
                               isSelected
                                 ? 'bg-[#5B36E9] text-white shadow-xs'
-                                : 'bg-[#3B4860] text-white'
+                                : 'bg-[#475569] text-white'
                             }`}
                           >
-                            {node.isPriority ? `⭐${node.id}` : node.id}
+                            {node.id}
                           </span>
 
+                          {/* Milestone Label */}
                           <span className="text-[11px] sm:text-xs font-bold text-[#0E1B38] leading-tight truncate max-w-[95px]">
                             {node.label}
                           </span>
 
-                          {node.tag && (
-                            <span className="text-[10px] font-bold text-[#D88700] mt-0.5">
-                              {node.tag}
+                          {/* Priority Star Badge Below Label */}
+                          {node.isPriority ? (
+                            <span className="inline-flex items-center gap-0.5 text-[9.5px] font-bold text-[#D97706] bg-[#FEF3C7] border border-[#FDE68A] px-1.5 py-0.5 rounded-full mt-1 shadow-2xs">
+                              ★ Priority
+                            </span>
+                          ) : (
+                            <span className="text-[10px] text-[#74819A] mt-1">
+                              Step {node.id}
                             </span>
                           )}
                         </div>
