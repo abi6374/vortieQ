@@ -8,6 +8,7 @@ import RoadmapPage from './pages/RoadmapPage'
 import DashboardPage from './pages/DashboardPage'
 import ProgressPage from './pages/ProgressPage'
 import SkillInsightsPage from './pages/SkillInsightsPage'
+import ResourcesPage from './pages/ResourcesPage'
 
 export default function App() {
   return (
@@ -76,6 +77,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <SkillInsightsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/resources"
+            element={
+              <ProtectedRoute>
+                <ResourcesPage />
               </ProtectedRoute>
             }
           />
