@@ -6,6 +6,7 @@ import LandingPage from './pages/LandingPage'
 import OnboardingPage from './pages/OnboardingPage'
 import RoadmapPage from './pages/RoadmapPage'
 import DashboardPage from './pages/DashboardPage'
+import ProgressPage from './pages/ProgressPage'
 
 export default function App() {
   return (
@@ -50,6 +51,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/progress"
+            element={
+              <ProtectedRoute>
+                <ProgressPage />
               </ProtectedRoute>
             }
           />

@@ -130,7 +130,7 @@ export default function PersonalizedRoadmap({ pathData = null }) {
     } else if (navId === 'resources') {
       setActiveModal('resources')
     } else if (navId === 'progress') {
-      setActiveModal('progress')
+      navigate('/progress')
     } else if (navId === 'coach') {
       setIsChatOpen(true)
     }
