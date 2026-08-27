@@ -53,6 +53,7 @@ import {
   RotateCcw,
 } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
+import AppSidebar from '../ui/AppSidebar'
 
 /**
  * PathFinder High-Fidelity Progress Page
