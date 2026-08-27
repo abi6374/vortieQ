@@ -11,6 +11,8 @@ import DashboardPage from './pages/DashboardPage'
 import ProgressPage from './pages/ProgressPage'
 import SkillInsightsPage from './pages/SkillInsightsPage'
 import ResourcesPage from './pages/ResourcesPage'
+import AccountPage from './pages/AccountPage'
+import SettingsPage from './pages/SettingsPage'
 
 export default function App() {
   return (
@@ -88,6 +90,22 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <ResourcesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/account"
+            element={
+              <ProtectedRoute>
+                <AccountPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <SettingsPage />
               </ProtectedRoute>
             }
           />
