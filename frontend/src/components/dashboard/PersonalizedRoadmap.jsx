@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAIChat } from '../../contexts/AIChatContext'
+import { useRoadmap } from '../../hooks/useRoadmap'
 import { useAuth } from '../../hooks/useAuth'
 import apiClient from '../../lib/apiClient'
 import { supabase } from '../../lib/supabaseClient'
@@ -21,6 +22,9 @@ import UserProfileDropdown from '../ui/UserProfileDropdown'
 export default function PersonalizedRoadmap({ pathData = null }) {
   const navigate = useNavigate()
   const { open: openAICoach } = useAIChat()
+  // Real roadmap state: weeks, current week, lock state and completion all
+  // come from the backend (GET /api/roadmap). No client-side fabrication.
+  const roadmap = useRoadmap()
   const { user, signOut } = useAuth()
 
   // Navigation tab state
@@ -33,7 +37,8 @@ export default function PersonalizedRoadmap({ pathData = null }) {
   const [activeMilestone, setActiveMilestone] = useState(1)
 
   // Task completion tracking by step ID
-  const [completedTaskIds, setCompletedTaskIds] = useState(new Set())
+  // Completion is server state now; this Set is derived, never the source.
+  const completedTaskIds = roadmap.completedIds
 
   // "Why this task?" expanded state per step ID
   const [expandedWhyIds, setExpandedWhyIds] = useState(new Set())
@@ -214,49 +219,52 @@ export default function PersonalizedRoadmap({ pathData = null }) {
   // ---------------------------------------------------------------------------
   // Dynamic Week Grouping & Tabs
   // ---------------------------------------------------------------------------
-  const weekTabs = ['Week 1', 'Week 2', 'Week 3–4', 'Week 5–8', 'Week 9–12', 'Week 13–16']
+  // Week tabs come from the backend's real week_number grouping.
+  const weekTabs = useMemo(
+    () => (roadmap.weeks.length ? roadmap.weeks.map((w) => `Week ${w.week_number}`) : ['Week 1']),
+    [roadmap.weeks]
+  )
 
+  // Week -> {tasks, totalHrs, themeTitle, isLocked, lockedReason, isComplete}
   const weekGroups = useMemo(() => {
-    const total = parsedSteps.length
-    const sliceSizes = [2, 2, 2, 2, 2, 2] // distributed slices
-    let cursor = 0
-
     const groups = {}
-    weekTabs.forEach((tab, idx) => {
-      const count = sliceSizes[idx] || 2
-      let tasksForWeek = parsedSteps.slice(cursor, cursor + count)
-      if (tasksForWeek.length === 0 && parsedSteps.length > 0) {
-        // Fallback wrap around if steps are fewer
-        tasksForWeek = [parsedSteps[(cursor + idx) % parsedSteps.length]]
-      }
-      cursor += count
-
-      const totalHrs = tasksForWeek.reduce((sum, t) => sum + (t.duration_hrs || 2), 0)
-      const themeTitle =
-        tasksForWeek[0]?.milestone_label ||
-        (idx === 0
-          ? 'Build your foundations'
-          : idx === 1
-          ? 'Applied Concepts & Math'
-          : idx === 2
-          ? 'Data Wrangling & Analysis'
-          : idx === 3
-          ? 'Machine Learning & Models'
-          : 'Capstone & Portfolio')
-
-      groups[tab] = {
-        tasks: tasksForWeek,
-        totalHrs: totalHrs || 8,
-        themeTitle,
+    roadmap.weeks.forEach((w) => {
+      const tasks = (w.steps || []).map((st) => ({
+        id: st.step_id,
+        sequence_order: st.sequence_order,
+        title: st.title,
+        subtitle: (st.skill_tags || []).join(', ') || st.provider,
+        provider: st.provider,
+        duration_hrs: st.duration_hrs,
+        difficulty: st.difficulty,
+        skill_tags: st.skill_tags,
+        resource_url: st.resource_url,
+        explanation: st.explanation,
+        status: st.status,
+        milestone_label: st.milestone_label,
+      }))
+      groups[`Week ${w.week_number}`] = {
+        tasks,
+        totalHrs: tasks.reduce((sum, t) => sum + (t.duration_hrs || 0), 0),
+        themeTitle: w.milestone_label || `Week ${w.week_number}`,
+        isLocked: w.is_locked,
+        lockedReason: w.locked_reason,
+        isComplete: w.is_complete,
+        percent: w.percent,
+        weekNumber: w.week_number,
       }
     })
     return groups
-  }, [parsedSteps])
+  }, [roadmap.weeks])
+
+  // Follow the server's current week until the learner picks another tab.
+  useEffect(() => {
+    if (roadmap.currentWeek) setSelectedWeek(`Week ${roadmap.currentWeek}`)
+  }, [roadmap.currentWeek])
 
   const currentWeekData = weekGroups[selectedWeek] || {
-    tasks: parsedSteps.slice(0, 3),
-    totalHrs: 8,
-    themeTitle: 'Build your foundations',
+    tasks: [], totalHrs: 0, themeTitle: 'Your plan',
+    isLocked: false, lockedReason: null, isComplete: false, percent: 0,
   }
 
   // ---------------------------------------------------------------------------
@@ -301,29 +309,22 @@ export default function PersonalizedRoadmap({ pathData = null }) {
     setTimeout(() => setToastMessage(null), 3500)
   }
 
+  // Two-way completion, persisted server-side. The backend enforces week
+  // prerequisites and returns the whole recomputed roadmap, so Progress and
+  // Skill insights stay in step without extra requests.
   const toggleTask = async (task) => {
     const isCompleted = completedTaskIds.has(task.id)
-    const newSet = new Set(completedTaskIds)
+    const result = await roadmap.toggleTask(task.id, !isCompleted)
 
-    if (isCompleted) {
-      newSet.delete(task.id)
-      setCompletedTaskIds(newSet)
-      showToast(`Marked "${task.title}" as pending.`)
-    } else {
-      newSet.add(task.id)
-      setCompletedTaskIds(newSet)
-      showToast(`🎉 Completed "${task.title}"! Progress updated.`)
-
-      // Sync with backend & Supabase
-      try {
-        await apiClient.post(`/api/feedback/${task.id}/feedback`, {
-          event_type: 'completed',
-        })
-      } catch (err) {
-        // Direct Supabase fallback
-        await supabase.from('path_steps').update({ status: 'completed' }).eq('id', task.id)
-      }
+    if (!result.ok) {
+      showToast(result.reason || 'Unable to update. Try again.')
+      return
     }
+    showToast(
+      isCompleted
+        ? `Marked "${task.title}" as pending.`
+        : `🎉 Completed "${task.title}"! Progress updated.`
+    )
   }
 
   const toggleWhy = (taskId) => {
@@ -675,22 +676,47 @@ export default function PersonalizedRoadmap({ pathData = null }) {
                 <div className="flex flex-wrap items-center gap-2 mb-6 pb-4 border-b border-[#F0F3F8]">
                   {weekTabs.map((tab) => {
                     const isSel = selectedWeek === tab
+                    const wg = weekGroups[tab] || {}
+                    // Locked weeks stay VISIBLE but muted with a lock icon —
+                    // the learner can still open them to see what's ahead.
                     return (
                       <button
                         key={tab}
                         type="button"
                         onClick={() => setSelectedWeek(tab)}
-                        className={`px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+                        title={wg.isLocked ? wg.lockedReason : undefined}
+                        className={`px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer inline-flex items-center gap-1.5 ${
                           isSel
                             ? 'bg-[#5B36E9] text-white shadow-sm'
+                            : wg.isLocked
+                            ? 'bg-white text-[#94A3B8] hover:bg-gray-50'
                             : 'bg-white text-[#52617D] hover:text-[#0E1B38] hover:bg-gray-100/70'
                         }`}
                       >
+                        {wg.isComplete && !isSel && (
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#22A06B" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+                        )}
+                        {wg.isLocked && (
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
+                        )}
                         {tab}
                       </button>
                     )
                   })}
                 </div>
+
+                {currentWeekData.isLocked && (
+                  <div className="mb-4 flex items-center gap-3 rounded-xl border px-4 py-3"
+                       style={{ background: '#FEF6E7', borderColor: '#F3DB9B' }}>
+                    <span className="grid place-items-center rounded-full flex-none"
+                          style={{ width: 28, height: 28, background: '#E0A100', color: '#fff' }}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
+                    </span>
+                    <span className="text-sm font-semibold" style={{ color: '#8A6100' }}>
+                      {currentWeekData.lockedReason || 'Complete the previous week to unlock this one.'}
+                    </span>
+                  </div>
+                )}
 
                 {/* Active Week Theme Header */}
                 <div className="flex items-center justify-between mb-4">
