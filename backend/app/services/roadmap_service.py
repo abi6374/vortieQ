@@ -183,6 +183,15 @@ def set_task_completion(step_id: str, user_id: str, completed: bool) -> dict:
         if changed:
             supabase_client.table("profiles").update({"completed_courses": ids}).eq("id", user_id).execute()
 
+    # Completing a task is qualifying learning activity — log it so the streak
+    # on Progress is derived from what the learner actually did.
+    if completed:
+        try:
+            from app.services import account_service
+            account_service.log_session(user_id, activity="task_completed", step_id=step_id)
+        except Exception as e:
+            print(f"[roadmap] study session log failed: {type(e).__name__}: {e}", flush=True)
+
     # Return the whole recomputed roadmap so every dependent view can refresh
     # from one response instead of firing extra requests.
     return get_roadmap(user_id)
