@@ -56,15 +56,18 @@ const STYLES = `
 .pfa .welcome p{ font-size:clamp(16px,1.5vw,20px); color:var(--slate); margin:0; }
 .pfa .field{ margin-bottom:20px; }
 .pfa .field > label{ display:block; font-size:16px; font-weight:600; margin-bottom:9px; }
-.pfa .input{ position:relative; display:flex; align-items:center; border:1.5px solid var(--input-bd);
-  border-radius:12px; background:#fff; height:62px; padding:0 14px; gap:11px; transition:border-color .15s,box-shadow .15s; }
+.pfa .input{ position:relative; display:flex; align-items:stretch; border:1.5px solid var(--input-bd);
+  border-radius:12px; background:#fff; min-height:58px; transition:border-color .15s,box-shadow .15s; }
 .pfa .input:focus-within{ border-color:var(--violet); box-shadow:0 0 0 4px rgba(91,54,233,.18); }
-.pfa .input .lead{ color:var(--muted); flex:none; display:grid; place-items:center; }
-.pfa .input input{ border:none; outline:none; background:none; flex:1; min-width:0;
-  font:400 16.5px/1 "Inter",sans-serif; color:var(--navy); }
+/* Icon is a decorative overlay so it never steals click/focus from the field. */
+.pfa .input .lead{ position:absolute; left:14px; top:0; bottom:0; color:var(--muted); display:grid; place-items:center; pointer-events:none; z-index:1; }
+/* The input itself is the full interactive surface — clicking anywhere focuses it. */
+.pfa .input input{ border:none; outline:none; background:none; flex:1; width:100%; min-width:0; align-self:stretch;
+  padding:0 16px 0 44px; font:400 16.5px/1.2 "Inter",sans-serif; color:var(--navy); }
 .pfa .input input::placeholder{ color:var(--muted); }
-.pfa .input .toggle{ background:none; border:none; cursor:pointer; color:var(--muted); padding:6px;
-  display:grid; place-items:center; border-radius:8px; }
+.pfa .input:has(.toggle) input{ padding-right:50px; }
+.pfa .input .toggle{ position:absolute; right:8px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:var(--muted); padding:8px;
+  display:grid; place-items:center; border-radius:8px; z-index:1; }
 .pfa .input .toggle:hover{ color:var(--slate); }
 .pfa .utility{ display:flex; align-items:center; justify-content:space-between; margin:4px 0 26px; }
 .pfa .remember{ display:flex; align-items:center; gap:10px; cursor:pointer; user-select:none; font-size:15.5px; color:var(--slate); position:relative; }
