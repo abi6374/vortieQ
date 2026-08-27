@@ -5,8 +5,8 @@
 const STEPS = [
   { n: 1, label: 'Upload resume' },
   { n: 2, label: 'Assess skills' },
-  { n: 3, label: 'Take assessment' },
-  { n: 4, label: 'Review results' },
+  { n: 3, label: 'Set your goal' },
+  { n: 4, label: 'Create roadmap' },
   { n: 5, label: 'Track progress' },
 ]
 

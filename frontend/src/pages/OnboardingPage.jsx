@@ -5,6 +5,7 @@ import GoalConfirm from '../components/onboarding/GoalConfirm'
 import GeneratingLoader from '../components/onboarding/GeneratingLoader'
 import ResumeUpload from '../components/onboarding/ResumeUpload'
 import AssessSkills from '../components/onboarding/AssessSkills'
+import GoalCompass from '../components/onboarding/GoalCompass'
 import SetupSidebar from '../components/onboarding/SetupSidebar'
 import NavBar from '../components/ui/NavBar'
 import api from '../lib/apiClient'
@@ -17,7 +18,7 @@ import api from '../lib/apiClient'
  * as `topic_ratings`, which the backend merges into the learner profile.
  */
 export default function OnboardingPage() {
-  const [phase, setPhase] = useState('resume') // 'resume' | 'topics' | 'chat' | 'confirm' | 'generating'
+  const [phase, setPhase] = useState('resume') // 'resume' | 'topics' | 'goalcompass' | 'chat' | 'confirm' | 'generating'
   const [goalText, setGoalText] = useState('')
   const [extractedProfile, setExtractedProfile] = useState(null)
   const [resumeTopics, setResumeTopics] = useState([])       // from LLM extraction
@@ -35,10 +36,32 @@ export default function OnboardingPage() {
     setPhase(topics.length > 0 ? 'topics' : 'chat')
   }
 
-  // ------------- topic ratings step
+  // ------------- topic ratings step → Goal Compass (skills in hand)
   const handleTopicsContinue = (ratings) => {
     setTopicRatings(ratings)
-    setPhase('chat')
+    setPhase('goalcompass')
+  }
+
+  // ------------- Goal Compass "Create my learning plan"
+  const handleCreatePlan = async (goalTextInput, weeklyHours) => {
+    setError(null)
+    setPhase('generating')
+    try {
+      // Fold the weekly-hours choice into the goal text so extract_profile picks
+      // it up (backend derives weekly_hours from the free text).
+      const composed = weeklyHours
+        ? `${goalTextInput} I can study ${weeklyHours} hours per week.`
+        : goalTextInput
+      const body = { goal_text: composed }
+      if (topicRatings.length > 0) body.topic_ratings = topicRatings
+      if (detectedYears > 0) body.detected_years_experience = detectedYears
+      await api.post('/api/profile/', body)
+      const result = await api.post('/api/paths/generate', {})
+      navigate(`/roadmap/${result.data.path_id}`)
+    } catch (err) {
+      setError('Path generation failed. Please try again.')
+      setPhase('goalcompass')
+    }
   }
 
   // ------------- goal chat
@@ -92,6 +115,28 @@ export default function OnboardingPage() {
             onBack={() => setPhase('resume')}
             onSkip={() => { setTopicRatings([]); setPhase('chat') }}
           />
+        </div>
+      </div>
+    )
+  }
+
+  // The "Set your goal" step — Goal Compass with the live Ambition–Readiness Meter.
+  if (phase === 'goalcompass') {
+    return (
+      <div className="min-h-screen flex" style={{ background: '#F5F7FC' }}>
+        <SetupSidebar current={3} />
+        <div className="flex-1 flex flex-col items-center justify-start px-4 py-10 overflow-y-auto">
+          <GoalCompass
+            topicRatings={topicRatings}
+            detectedYears={detectedYears}
+            onCreate={handleCreatePlan}
+            onBack={() => setPhase('topics')}
+          />
+          {error && (
+            <p className="mt-4 text-center text-sm text-red-700 bg-red-100 rounded-lg py-2 px-4 max-w-md">
+              {error}
+            </p>
+          )}
         </div>
       </div>
     )
