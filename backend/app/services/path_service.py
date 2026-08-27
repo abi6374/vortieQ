@@ -142,6 +142,14 @@ Generate the learning path JSON now."""
             "steps": steps,
         })
 
+    # Assign contiguous week numbers so the roadmap week strip and prerequisite
+    # locking work for freshly generated paths, not just backfilled ones.
+    try:
+        from app.services import roadmap_service
+        roadmap_service.assign_week_numbers(path_id, int(profile.get("weekly_hours") or 10))
+    except Exception as e:
+        print(f"[generate_path] week assignment failed: {type(e).__name__}: {e}", flush=True)
+
     return {"path_id": path_id, "milestones": response_milestones}
 
 
