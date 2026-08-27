@@ -87,6 +87,11 @@ export default function ProgressScreen() {
 
   // Navigation tab state
   const [activeNav, setActiveNav] = useState('progress')
+  // Real KPIs — roadmap %, streak days and weekly hours come from the
+  // backend rather than hardcoded literals.
+  const roadmap = useRoadmap()
+  const streak = useStreak()
+  const hoursLoggedThisWeek = Math.round(((streak.minutes_this_week || 0) / 60) * 10) / 10
 
   // Roadmap filter & dropdown state
   const [isGoalDropdownOpen, setIsGoalDropdownOpen] = useState(false)
