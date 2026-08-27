@@ -101,7 +101,7 @@ export default function ProgressScreen() {
     } else if (navId === 'skills') {
       navigate('/skills')
     } else if (navId === 'resources') {
-      setActiveModal('resources')
+      navigate('/resources')
     } else if (navId === 'coach') {
       setIsChatOpen(true)
     }

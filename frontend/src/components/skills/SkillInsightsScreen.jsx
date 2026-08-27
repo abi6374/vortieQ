@@ -126,6 +126,8 @@ export default function SkillInsightsScreen() {
       navigate('/dashboard')
     } else if (navId === 'progress') {
       navigate('/progress')
+    } else if (navId === 'resources') {
+      navigate('/resources')
     } else if (navId === 'coach') {
       setIsChatOpen(true)
     }
