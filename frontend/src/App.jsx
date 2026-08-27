@@ -1,6 +1,8 @@
 import React from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
+import { AIChatProvider } from './contexts/AIChatContext'
+import AIChat from './components/ui/AIChat'
 import ProtectedRoute from './components/auth/ProtectedRoute'
 import LandingPage from './pages/LandingPage'
 import OnboardingPage from './pages/OnboardingPage'
@@ -14,6 +16,7 @@ export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <AIChatProvider>
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route
@@ -90,6 +93,10 @@ export default function App() {
           />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        {/* The single shared "Ask PathFinder" assistant, mounted once for the
+            whole app so the conversation persists across every route. */}
+        <AIChat />
+        </AIChatProvider>
       </BrowserRouter>
     </AuthProvider>
   )

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAIChat } from '../../contexts/AIChatContext'
 import UserProfileDropdown from '../ui/UserProfileDropdown'
 import {
   BarChart,
@@ -85,6 +86,7 @@ import { useAuth } from '../../hooks/useAuth'
  */
 export default function SkillInsightsScreen() {
   const navigate = useNavigate()
+  const { open: openAICoach } = useAIChat()
   const { user, signOut } = useAuth()
 
   // State Management
@@ -129,7 +131,7 @@ export default function SkillInsightsScreen() {
     } else if (navId === 'resources') {
       navigate('/resources')
     } else if (navId === 'coach') {
-      setIsChatOpen(true)
+      openAICoach()
     }
   }
 
@@ -444,16 +446,7 @@ export default function SkillInsightsScreen() {
             {/* Right Controls: Notifications & Profile */}
             <div className="flex items-center gap-4">
               {/* Notification Bell with Badge */}
-              <button
-                type="button"
-                className="relative p-2 text-[#52617D] hover:text-[#0E1B38] hover:bg-[#F5F7FC] rounded-full transition-colors"
-                aria-label="Notifications"
-              >
-                <Bell className="w-5 h-5" strokeWidth={2} />
-                <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-[#5B36E9] text-white text-[10px] font-bold flex items-center justify-center">
-                  3
-                </span>
-              </button>
+
 
               {/* User Profile Dropdown */}
               <UserProfileDropdown />
@@ -1393,7 +1386,7 @@ export default function SkillInsightsScreen() {
                     <button
                       type="button"
                       onClick={() => {
-                        setIsChatOpen(true)
+                        openAICoach()
                         handleSendMessage('Why is Statistics prioritized before Machine Learning?')
                       }}
                       className="mt-3 text-xs font-bold text-[#5B36E9] hover:underline flex items-center gap-1 self-start"
@@ -1590,7 +1583,7 @@ export default function SkillInsightsScreen() {
                   onClick={() => {
                     const skillName = selectedSkillModal.title
                     setSelectedSkillModal(null)
-                    setIsChatOpen(true)
+                    openAICoach()
                     handleSendMessage(`Explain key study topics for ${skillName}`)
                   }}
                   className="px-4 py-2.5 border border-[#5B36E9] text-[#5B36E9] hover:bg-[#F5F1FF] font-bold text-xs rounded-xl transition-all"

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAIChat } from '../../contexts/AIChatContext'
 import { useAuth } from '../../hooks/useAuth'
 import apiClient from '../../lib/apiClient'
 import { supabase } from '../../lib/supabaseClient'
@@ -19,6 +20,7 @@ import UserProfileDropdown from '../ui/UserProfileDropdown'
  */
 export default function PersonalizedRoadmap({ pathData = null }) {
   const navigate = useNavigate()
+  const { open: openAICoach } = useAIChat()
   const { user, signOut } = useAuth()
 
   // Navigation tab state
@@ -430,7 +432,7 @@ export default function PersonalizedRoadmap({ pathData = null }) {
     } else if (navId === 'progress') {
       navigate('/progress')
     } else if (navId === 'coach') {
-      setIsChatOpen(true)
+      openAICoach()
     }
   }
 
@@ -1031,7 +1033,7 @@ export default function PersonalizedRoadmap({ pathData = null }) {
         {!isChatOpen && (
           <button
             type="button"
-            onClick={() => setIsChatOpen(true)}
+            onClick={() => openAICoach()}
             className="flex items-center gap-2.5 px-4 py-3 bg-[#5B36E9] hover:bg-[#4826C9] text-white font-bold rounded-2xl shadow-xl transition-all cursor-pointer"
           >
             <span className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">

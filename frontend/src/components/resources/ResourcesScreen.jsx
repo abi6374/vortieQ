@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
+import { useAIChat } from '../../contexts/AIChatContext'
 import { supabase } from '../../lib/supabaseClient'
 import UserProfileDropdown from '../ui/UserProfileDropdown'
 
@@ -241,6 +242,7 @@ const I = {
 export default function ResourcesScreen() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const { open: openAICoach } = useAIChat()
 
   const [loading, setLoading] = useState(true)
   const [path, setPath] = useState(null)
@@ -330,7 +332,7 @@ export default function ResourcesScreen() {
         </div>
         <nav className="rx-nav">
           {SIDEBAR.map((n) => (
-            <a key={n.key} className={n.key === 'resources' ? 'on' : ''} onClick={() => n.path.startsWith('#') ? null : navigate(n.path)}>
+            <a key={n.key} className={n.key === 'resources' ? 'on' : ''} onClick={() => (n.key === 'coach' ? openAICoach() : navigate(n.path))}>
               {I[n.icon]}<span>{n.label}</span>
             </a>
           ))}
@@ -508,9 +510,6 @@ export default function ResourcesScreen() {
         </div>
       </main>
 
-      <button className="rx-chat" onClick={() => path && navigate(`/roadmap/${path.id}`)} aria-label="Ask PathFinder">
-        <span className="b">{I.chat}</span><span>Ask PathFinder</span>
-      </button>
     </div>
   )
 }

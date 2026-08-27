@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAIChat } from '../../contexts/AIChatContext'
 import {
   ResponsiveContainer,
   AreaChart,
@@ -77,6 +78,7 @@ import { useAuth } from '../../hooks/useAuth'
 
 export default function ProgressScreen() {
   const navigate = useNavigate()
+  const { open: openAICoach } = useAIChat()
   const { user, signOut } = useAuth()
 
   // Navigation tab state
@@ -122,7 +124,7 @@ export default function ProgressScreen() {
     } else if (navId === 'resources') {
       navigate('/dashboard')
     } else if (navId === 'coach') {
-      setIsChatOpen(true)
+      openAICoach()
     }
   }
 
@@ -1509,7 +1511,7 @@ export default function ProgressScreen() {
                 type="button"
                 onClick={() => {
                   setActiveActionModal(null)
-                  setIsChatOpen(true)
+                  openAICoach()
                   handleSendMessage('Give me a quick 1-minute summary of variance before the checkpoint.')
                 }}
                 className="px-4 py-2.5 border border-[#5B2FF3] text-[#5B2FF3] hover:bg-[#F3EEFF] font-bold text-xs rounded-xl transition-all"
