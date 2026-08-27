@@ -45,6 +45,14 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/workspace"
+            element={
+              <ProtectedRoute>
+                <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

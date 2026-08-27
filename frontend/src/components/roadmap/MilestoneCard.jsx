@@ -8,28 +8,28 @@ export default function MilestoneCard({ milestone, index, defaultOpen = false, o
   return (
     <div className="relative pl-10">
       {/* Numbered marker sitting on the timeline line */}
-      <div className="absolute left-0 top-4 flex items-center justify-center w-8 h-8 rounded-full bg-indigo-600 text-white font-bold text-sm ring-4 ring-gray-50">
+      <div className="absolute left-0 top-4 flex items-center justify-center w-8 h-8 rounded-full bg-[#5B36E9] text-white font-bold text-sm ring-4 ring-[#F5F7FC] shadow-sm">
         {index}
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+      <div className="bg-white border border-[#D8DFEB] rounded-2xl shadow-[0_4px_14px_rgba(25,40,75,0.05)] overflow-hidden transition-all hover:border-[#5B36E9]/40">
         <button
           onClick={() => setOpen((v) => !v)}
-          className="w-full flex items-center justify-between gap-3 p-5 text-left hover:bg-gray-50 transition-colors"
+          className="w-full flex items-center justify-between gap-3 p-5 text-left hover:bg-[#F5F1FF]/30 transition-colors"
         >
           <div>
-            <h3 className="text-base font-bold text-gray-900">{milestone.title}</h3>
+            <h3 className="text-base font-bold text-[#0E1B38] font-['Manrope',sans-serif]">{milestone.title}</h3>
             {milestone.description && (
-              <p className="text-xs text-gray-500 mt-0.5">{milestone.description}</p>
+              <p className="text-xs text-[#52617D] mt-0.5">{milestone.description}</p>
             )}
           </div>
           <div className="flex items-center gap-3 shrink-0">
             {milestone.estimated_weeks != null && (
-              <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700">
+              <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-[#F5F1FF] text-[#5B36E9] border border-[#E7E0FF]">
                 ~{milestone.estimated_weeks} weeks
               </span>
             )}
-            <span className={`text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`}>
+            <span className={`text-[#74819A] transition-transform ${open ? 'rotate-180' : ''}`}>
               ▾
             </span>
           </div>
@@ -46,3 +46,4 @@ export default function MilestoneCard({ milestone, index, defaultOpen = false, o
     </div>
   )
 }
+
