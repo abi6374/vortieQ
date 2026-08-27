@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
+import { supabase } from '../../lib/supabaseClient'
 
 /**
  * PathFinder sign-in / create-account screen. Split-panel violet design.
@@ -122,7 +123,22 @@ export default function AuthScreen() {
         navigate('/onboarding')
       } else {
         await signIn(email, password)
-        navigate('/dashboard')
+        // Check if user has an active learning path already
+        try {
+          const { data: paths } = await supabase
+            .from('learning_paths')
+            .select('id')
+            .eq('status', 'active')
+            .limit(1)
+
+          if (paths && paths.length > 0) {
+            navigate('/dashboard')
+          } else {
+            navigate('/onboarding')
+          }
+        } catch {
+          navigate('/onboarding')
+        }
       }
     } catch (err) {
       setError(err?.message || 'Something went wrong. Please try again.')

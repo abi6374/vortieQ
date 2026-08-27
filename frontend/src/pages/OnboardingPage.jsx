@@ -112,14 +112,19 @@ export default function OnboardingPage() {
     setExtractedProfile(null)
   }
 
-  // Step 1: High-fidelity desktop learner intake screen
+  // Step 1: High-fidelity desktop learner intake screen with unified 5-step sidebar
   if (phase === 'intake' || phase === 'resume') {
     return (
-      <LearnerIntakeWorkspace
-        onExtracted={handleResumeExtracted}
-        onChatSubmit={handleChatIntake}
-        onSkip={() => setPhase('topics')}
-      />
+      <div className="min-h-screen flex" style={{ background: '#F5F7FC' }}>
+        <SetupSidebar current={1} />
+        <div className="flex-1 flex flex-col items-center justify-start px-4 py-8 lg:py-10 overflow-y-auto">
+          <LearnerIntakeWorkspace
+            onExtracted={handleResumeExtracted}
+            onChatSubmit={handleChatIntake}
+            onSkip={() => setPhase('topics')}
+          />
+        </div>
+      </div>
     )
   }
 
