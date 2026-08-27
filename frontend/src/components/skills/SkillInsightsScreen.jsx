@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import UserProfileDropdown from '../ui/UserProfileDropdown'
 import {
   BarChart,
   Bar,
@@ -452,20 +453,8 @@ export default function SkillInsightsScreen() {
                 </span>
               </button>
 
-              {/* User Profile Pill */}
-              <div
-                className="flex items-center gap-2.5 p-1.5 rounded-full hover:bg-[#F5F7FC] cursor-pointer transition-colors"
-                onClick={() => setIsProfileMenuOpen((v) => !v)}
-              >
-                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#5B36E9] to-[#7C61F5] text-white flex items-center justify-center font-bold text-xs shadow-sm">
-                  K
-                </div>
-                <div className="hidden sm:flex flex-col text-left pr-1">
-                  <span className="font-bold text-xs text-[#0E1B38] leading-tight">Kavindra E M</span>
-                  <span className="text-[10px] text-[#74819A] font-medium leading-tight">AIML Learner</span>
-                </div>
-                <ChevronDown className="w-4 h-4 text-[#74819A]" />
-              </div>
+              {/* User Profile Dropdown */}
+              <UserProfileDropdown />
             </div>
           </header>
 

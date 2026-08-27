@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react'
 import apiClient from '../../lib/apiClient'
+import UserProfileDropdown from '../ui/UserProfileDropdown'
 
 /**
  * LearnerIntakeWorkspace
@@ -82,15 +83,20 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
       sender: 'user',
       text: trimmed,
     }
-    setChatMessages((prev) => [...prev, newMsg])
-    setProfileDraft((prev) => ({
-      ...prev,
-      summary: `We understood from your notes: "${trimmed.slice(0, 95)}${
-        trimmed.length > 95 ? '...' : ''
-      }"`,
-    }))
+    const updatedMessages = [...chatMessages, newMsg]
+    setChatMessages(updatedMessages)
     setChatStory('')
     setSelectedMethod('chat')
+
+    const userNotes = updatedMessages
+      .filter((m) => m.sender === 'user')
+      .map((m) => m.text)
+      .join(' ')
+
+    // Automatically accept background note and continue to skill calibration
+    if (onChatSubmit) {
+      onChatSubmit(userNotes)
+    }
   }
 
   // Handle Continue button action
@@ -151,23 +157,29 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
   return (
     <div className="w-full max-w-[1140px] bg-white rounded-2xl border border-[#E1E6F0] shadow-[0_14px_38px_rgba(25,40,75,0.08)] flex flex-col justify-between overflow-hidden">
       
-      {/* Top Header Badge & Title */}
-      <div className="pt-8 pb-4 px-6 sm:px-10 text-center">
-        <span className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1 text-[12px] font-bold uppercase tracking-wider mb-3 text-[#5B36E9] bg-[#F5F1FF] border border-[#EFE9FF]">
-          Step 1 · Learner Intake
-        </span>
-        <h1 className="text-2xl sm:text-3xl md:text-[38px] font-bold text-[#0E1B38] tracking-tight leading-tight flex items-center justify-center gap-2.5 flex-wrap">
-          <span>Let’s understand where you are today</span>
-          <span className="inline-flex text-[#5B36E9]">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2L14.4 7.6L20 10L14.4 12.4L12 18L9.6 12.4L4 10L9.6 7.6L12 2Z" />
-              <path d="M19 16L20.2 18.8L23 20L20.2 21.2L19 24L17.8 21.2L15 20L17.8 18.8L19 16Z" />
-            </svg>
+      {/* Top Header Row with Badge, Title, and Profile Dropdown */}
+      <div className="pt-6 sm:pt-8 pb-4 px-6 sm:px-10 relative">
+        <div className="flex items-center justify-between mb-2">
+          <span className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1 text-[12px] font-bold uppercase tracking-wider text-[#5B36E9] bg-[#F5F1FF] border border-[#EFE9FF]">
+            Step 1 · Learner Intake
           </span>
-        </h1>
-        <p className="text-[16px] text-[#52617D] mt-2 font-normal">
-          Upload your resume or describe your background in your own words.
-        </p>
+          <UserProfileDropdown />
+        </div>
+
+        <div className="text-center mt-2">
+          <h1 className="text-2xl sm:text-3xl md:text-[38px] font-bold text-[#0E1B38] tracking-tight leading-tight flex items-center justify-center gap-2.5 flex-wrap">
+            <span>Let’s understand where you are today</span>
+            <span className="inline-flex text-[#5B36E9]">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2L14.4 7.6L20 10L14.4 12.4L12 18L9.6 12.4L4 10L9.6 7.6L12 2Z" />
+                <path d="M19 16L20.2 18.8L23 20L20.2 21.2L19 24L17.8 21.2L15 20L17.8 18.8L19 16Z" />
+              </svg>
+            </span>
+          </h1>
+          <p className="text-[16px] text-[#52617D] mt-2 font-normal">
+            Upload your resume or describe your background in your own words.
+          </p>
+        </div>
       </div>
 
       {/* Primary Input Area: Two Equal Cards */}

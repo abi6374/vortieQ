@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import UserProfileDropdown from '../ui/UserProfileDropdown'
 
 /**
  * Goal Compass — the "Set your goal" onboarding step. Computes an
@@ -183,12 +184,15 @@ export default function GoalCompass({ topicRatings = [], detectedYears = 0, onCr
     <div className="gc">
       <style>{STYLES}</style>
 
-      <div className="head">
-        <span className="head-icon" aria-hidden="true"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polygon points="16.2 7.8 10.5 10.5 7.8 16.2 13.5 13.5" fill="currentColor" stroke="none" /></svg></span>
-        <div>
-          <h1>Where do you want to go?</h1>
-          <p>Tell us your goal. Goal Compass turns it into a realistic, personalized learning path.</p>
+      <div className="head" style={{ justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+          <span className="head-icon" aria-hidden="true"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polygon points="16.2 7.8 10.5 10.5 7.8 16.2 13.5 13.5" fill="currentColor" stroke="none" /></svg></span>
+          <div>
+            <h1>Where do you want to go?</h1>
+            <p>Tell us your goal. Goal Compass turns it into a realistic, personalized learning path.</p>
+          </div>
         </div>
+        <UserProfileDropdown />
       </div>
 
       <div className="cols">

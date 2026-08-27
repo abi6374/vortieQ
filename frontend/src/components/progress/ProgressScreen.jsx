@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
+import UserProfileDropdown from '../ui/UserProfileDropdown'
 
 /**
  * ProgressScreen Component for PathFinder
@@ -420,6 +421,7 @@ export default function ProgressScreen() {
                 </svg>
                 <span>View roadmap</span>
               </button>
+              <UserProfileDropdown />
             </div>
           </header>
 

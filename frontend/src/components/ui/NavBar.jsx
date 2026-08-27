@@ -1,23 +1,10 @@
 import React from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { useAuth } from '../../hooks/useAuth'
+import UserProfileDropdown from './UserProfileDropdown'
 
-/**
- * NavBar
- * Shared top navigation for authenticated pages with PathFinder branding.
- */
 export default function NavBar({ children }) {
   const navigate = useNavigate()
   const location = useLocation()
-  const { signOut } = useAuth()
-
-  const handleSignOut = async () => {
-    try {
-      await signOut()
-    } finally {
-      navigate('/')
-    }
-  }
 
   return (
     <nav className="sticky top-0 z-30 bg-white border-b border-[#D8DFEB] shadow-[0_2px_10px_rgba(25,40,75,0.04)]">
@@ -26,7 +13,7 @@ export default function NavBar({ children }) {
         <div className="flex items-center gap-6">
           <button
             onClick={() => navigate('/dashboard')}
-            className="flex items-center gap-2.5 group focus:outline-none"
+            className="flex items-center gap-2.5 group focus:outline-none cursor-pointer"
             aria-label="PathFinder Home"
           >
             <span className="w-9 h-9 rounded-xl bg-[#EEE9FF] text-[#5B36E9] flex items-center justify-center shadow-sm group-hover:bg-[#5B36E9] group-hover:text-white transition-all">
@@ -53,14 +40,24 @@ export default function NavBar({ children }) {
               Workspace
             </Link>
             <Link
-              to="/roadmap"
+              to="/skills"
               className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
-                location.pathname.startsWith('/roadmap')
+                location.pathname === '/skills'
                   ? 'bg-[#F5F1FF] text-[#5B36E9]'
                   : 'text-[#52617D] hover:text-[#0E1B38] hover:bg-gray-50'
               }`}
             >
-              Roadmap
+              Skills
+            </Link>
+            <Link
+              to="/progress"
+              className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
+                location.pathname === '/progress'
+                  ? 'bg-[#F5F1FF] text-[#5B36E9]'
+                  : 'text-[#52617D] hover:text-[#0E1B38] hover:bg-gray-50'
+              }`}
+            >
+              Progress
             </Link>
             <Link
               to="/onboarding"
@@ -74,12 +71,7 @@ export default function NavBar({ children }) {
         {/* Right action area */}
         <div className="flex items-center gap-3 sm:gap-4">
           {children}
-          <button
-            onClick={handleSignOut}
-            className="px-3.5 py-1.5 rounded-lg text-sm font-medium text-[#74819A] hover:text-[#0E1B38] hover:bg-gray-100 transition-colors"
-          >
-            Sign Out
-          </button>
+          <UserProfileDropdown />
         </div>
       </div>
     </nav>
