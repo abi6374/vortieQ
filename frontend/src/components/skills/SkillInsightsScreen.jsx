@@ -560,10 +560,21 @@ export default function SkillInsightsScreen() {
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F0F2F7" />
                         <XAxis
                           dataKey="skill"
-                          tick={{ fill: '#52617D', fontSize: 11, fontWeight: 600 }}
+                          tick={{ fill: '#52617D', fontSize: 10.5, fontWeight: 600 }}
                           axisLine={{ stroke: '#E6EAF2' }}
                           tickLine={false}
                           interval={0}
+                          height={54}
+                          angle={-22}
+                          textAnchor="end"
+                          // Long skill labels overlap when many bars share a
+                          // narrow chart. Shorten common multi-word skills
+                          // for the axis; the tooltip still shows the full
+                          // name so nothing important is hidden.
+                          tickFormatter={(v) => {
+                            const map = { 'Machine Learning': 'ML', 'Deep Learning': 'DL', 'Pandas & EDA': 'Pandas', 'Portfolio Project': 'Portfolio', 'Interview Prep': 'Interview' }
+                            return map[v] || (v && v.length > 12 ? v.slice(0, 11) + '…' : v)
+                          }}
                         />
                         <YAxis
                           domain={[0, 100]}

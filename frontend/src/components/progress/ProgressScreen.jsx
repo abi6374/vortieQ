@@ -54,6 +54,8 @@ import {
 } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import AppSidebar from '../ui/AppSidebar'
+import { useRoadmap } from '../../hooks/useRoadmap'
+import { useStreak } from '../../hooks/useStreak'
 
 /**
  * PathFinder High-Fidelity Progress Page
@@ -145,7 +147,7 @@ export default function ProgressScreen() {
           'Statistics is currently at 55% progress (your highest-priority focus). Completing the descriptive statistics checkpoint and practice set will bump your readiness to 62% and unlock the Machine Learning module.'
       } else if (lower.includes('streak') || lower.includes('consistency') || lower.includes('hours')) {
         reply =
-          "You're on an active 9-day streak with 17.4 hours logged this week! Your personal best is 14 days. Studying 1.5 hours today and tomorrow will put you within 3 days of your record."
+          "You're on an active {streak.current_streak}-day streak with 17.4 hours logged this week! Your personal best is 14 days. Studying 1.5 hours today and tomorrow will put you within 3 days of your record."
       } else if (lower.includes('milestone') || lower.includes('next')) {
         reply =
           'Your next milestone is Statistics Foundations (Week 5). Upcoming after that is Machine Learning Fundamentals (Week 7-10) and the Portfolio Project (Week 11-13).'
@@ -627,7 +629,7 @@ export default function ProgressScreen() {
               </span>
             </div>
             <span className="text-xs font-semibold text-[#64748B]">
-              Personal best: 14 days
+              Personal best: {streak.best_streak} days
             </span>
           </div>
 
@@ -1145,10 +1147,10 @@ export default function ProgressScreen() {
               <div>
                 <div className="flex items-center justify-between text-xs font-bold mb-1">
                   <span className="text-[#172554]">Roadmap status</span>
-                  <span className="text-[#5B2FF3]">68% complete</span>
+                  <span className="text-[#5B2FF3]">{roadmap.percent}% complete</span>
                 </div>
                 <div className="w-full bg-[#EEF2F7] h-2 rounded-full overflow-hidden">
-                  <div className="bg-[#5B2FF3] h-full rounded-full" style={{ width: '68%' }} />
+                  <div className="bg-[#5B2FF3] h-full rounded-full" style={{ width: roadmap.percent + '%' }} />
                 </div>
                 <p className="text-[11px] text-[#64748B] mt-1">You're on track for your February 2027 target.</p>
               </div>
