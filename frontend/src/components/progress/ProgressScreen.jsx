@@ -97,7 +97,7 @@ export default function ProgressScreen() {
     {
       id: 1,
       role: 'assistant',
-      text: "Hi Kavindra! You're 68% through your AIML Engineer Roadmap and currently on track for February 2027. You've logged 17.4 hours this week (+12% vs average). How can I help you accelerate your Statistics checkpoint today?",
+      text: 'Hi! Ask me anything about your learning path.',
     },
   ])
   const [inputMessage, setInputMessage] = useState('')
@@ -389,126 +389,12 @@ export default function ProgressScreen() {
       {/* =========================================================================
           1. LEFT SIDEBAR (~220px wide, matching Resources reference)
          ========================================================================= */}
-      <aside className="w-[220px] flex-none border-r border-[#EEF2F7] bg-white p-5 flex flex-col justify-between select-none fixed top-0 bottom-0 left-0 z-30">
-        <div>
-          {/* Top Logo: Purple rocket/pathfinder icon + PathFinder Wordmark */}
-          <div
-            className="flex items-center gap-3 mb-8 cursor-pointer group"
-            onClick={() => navigate('/dashboard')}
-          >
-            <span className="w-9 h-9 rounded-xl bg-[#5B2FF3] text-white flex items-center justify-center shadow-md shadow-[#5B2FF3]/25 group-hover:scale-105 transition-transform">
-              <Rocket className="w-5 h-5" />
-            </span>
-            <span className="font-['Inter'] font-extrabold text-[18px] text-[#172554] tracking-tight">
-              PathFinder
-            </span>
-          </div>
-
-          {/* Navigation Items */}
-          <nav className="space-y-1.5" aria-label="Main Navigation">
-            {/* 1. My roadmap */}
-            <button
-              type="button"
-              onClick={() => handleNavClick('roadmap')}
-              className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors text-left text-[#475569] hover:text-[#172554] hover:bg-[#FAF8FF]"
-            >
-              <Map className="w-4 h-4 text-[#64748B]" />
-              <span>My roadmap</span>
-            </button>
-
-            {/* 2. Progress (ACTIVE STATE) */}
-            <button
-              type="button"
-              onClick={() => handleNavClick('progress')}
-              className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-colors text-left bg-[#F3EEFF] text-[#5B2FF3]"
-            >
-              <TrendingUp className="w-4 h-4 text-[#5B2FF3]" />
-              <span>Progress</span>
-            </button>
-
-            {/* 3. Skill insights */}
-            <button
-              type="button"
-              onClick={() => handleNavClick('skills')}
-              className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors text-left text-[#475569] hover:text-[#172554] hover:bg-[#FAF8FF]"
-            >
-              <RadarIcon className="w-4 h-4 text-[#64748B]" />
-              <span>Skill insights</span>
-            </button>
-
-            {/* 4. Resources */}
-            <button
-              type="button"
-              onClick={() => handleNavClick('resources')}
-              className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors text-left text-[#475569] hover:text-[#172554] hover:bg-[#FAF8FF]"
-            >
-              <NotebookTabs className="w-4 h-4 text-[#64748B]" />
-              <span>Resources</span>
-            </button>
-
-            {/* 5. AI coach */}
-            <button
-              type="button"
-              onClick={() => handleNavClick('coach')}
-              className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors text-left text-[#475569] hover:text-[#172554] hover:bg-[#FAF8FF]"
-            >
-              <MessageCircle className="w-4 h-4 text-[#64748B]" />
-              <span>AI coach</span>
-            </button>
-          </nav>
-        </div>
-
-        {/* Bottom Profile Card */}
-        <div className="relative">
-          <div
-            className="flex items-center justify-between p-2.5 rounded-xl bg-white border border-[#EEF2F7] shadow-sm hover:border-[#DDD2FF] cursor-pointer transition-all"
-            onClick={() => setIsProfileMenuOpen((v) => !v)}
-          >
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full bg-[#F3EEFF] text-[#5B2FF3] font-bold text-xs flex items-center justify-center border border-[#DDD2FF]">
-                K
-              </div>
-              <div className="flex flex-col text-left">
-                <span className="font-bold text-xs text-[#172554]">Kavindra</span>
-                <span className="text-[10px] text-[#64748B]">AIML Learner</span>
-              </div>
-            </div>
-            <ChevronDown className={`w-3.5 h-3.5 text-[#94A3B8] transition-transform ${isProfileMenuOpen ? 'rotate-180' : ''}`} />
-          </div>
-
-          {/* Profile Dropdown */}
-          {isProfileMenuOpen && (
-            <div className="absolute bottom-14 left-0 w-full bg-white rounded-xl border border-[#E5E7EB] shadow-xl p-1.5 z-30 animate-in fade-in duration-150">
-              <button
-                type="button"
-                onClick={() => {
-                  setIsProfileMenuOpen(false)
-                  navigate('/skills')
-                }}
-                className="w-full text-left px-3 py-2 text-xs font-semibold text-[#475569] hover:text-[#5B2FF3] hover:bg-[#F3EEFF] rounded-lg"
-              >
-                View Skill Profile
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setIsProfileMenuOpen(false)
-                  signOut?.()
-                  navigate('/')
-                }}
-                className="w-full text-left px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 rounded-lg"
-              >
-                Sign out
-              </button>
-            </div>
-          )}
-        </div>
-      </aside>
+      <AppSidebar />
 
       {/* =========================================================================
           2. MAIN CONTENT AREA (Offset by sidebar width 220px, max-w-[1320px])
          ========================================================================= */}
-      <main className="flex-1 ml-[220px] p-6 lg:p-10 space-y-7 max-w-[1360px]">
+      <main className="flex-1 min-w-0 p-6 lg:p-10 space-y-7 max-w-[1360px]">
         
         {/* -----------------------------------------------------------------------
             HEADER ROW: Title + Subtitle on Left, Goal Selector & Roadmap on Right
@@ -575,6 +461,9 @@ export default function ProgressScreen() {
               <MapPinned className="w-4 h-4" />
               <span>View roadmap</span>
             </button>
+
+            {/* Primary profile control lives top-right on every section */}
+            <UserProfileDropdown />
           </div>
         </header>
 

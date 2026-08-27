@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAIChat } from '../../contexts/AIChatContext'
 import UserProfileDropdown from '../ui/UserProfileDropdown'
+import AppSidebar from '../ui/AppSidebar'
 import {
   BarChart,
   Bar,
@@ -109,7 +110,7 @@ export default function SkillInsightsScreen() {
     {
       id: 1,
       role: 'assistant',
-      text: 'Hi Kavindra! I’ve analyzed your skill profile for the AIML Engineer Internship (Target: Feb 2027). Your Python foundations (85%) and Pandas (70%) are strong, but Statistics (55%) and Machine Learning (45%) are your critical gaps. What would you like to explore first?',
+      text: 'Hi! Ask me anything about your learning path.',
     },
   ])
   const [inputMessage, setInputMessage] = useState('')
@@ -303,124 +304,7 @@ export default function SkillInsightsScreen() {
         {/* =========================================================================
             FIXED LEFT SIDEBAR (~255px wide, thin border #E6EAF2)
            ========================================================================= */}
-        <aside className="w-full md:w-[255px] flex-none border-b md:border-b-0 md:border-r border-[#E6EAF2] p-5 lg:p-6 flex flex-col justify-between bg-white select-none z-20">
-          <div>
-            {/* Top Logo: Violet compass icon + Navy wordmark */}
-            <div
-              className="flex items-center gap-3 mb-7 cursor-pointer group"
-              onClick={() => navigate('/dashboard')}
-            >
-              <span className="w-10 h-10 rounded-xl bg-[#5B36E9] text-white flex items-center justify-center shadow-md shadow-[#5B36E9]/20 group-hover:scale-105 transition-transform">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10" />
-                  <polygon points="16.2 7.8 10.5 10.5 7.8 16.2 13.5 13.5" fill="white" stroke="none" />
-                </svg>
-              </span>
-              <span className="font-['Manrope'] font-extrabold text-[22px] text-[#0E1B38] tracking-tight">
-                PathFinder
-              </span>
-            </div>
-
-            {/* Sidebar Navigation Items */}
-            <nav className="space-y-1.5" aria-label="Main Navigation">
-              {/* 1. My Roadmap */}
-              <button
-                type="button"
-                onClick={() => handleNavClick('roadmap')}
-                className="w-full flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors text-left text-[#52617D] hover:text-[#0E1B38] hover:bg-[#F8FAFD]"
-              >
-                <Compass className="w-5 h-5 text-[#74819A]" strokeWidth={2} />
-                <span>My Roadmap</span>
-              </button>
-
-              {/* 2. Progress */}
-              <button
-                type="button"
-                onClick={() => handleNavClick('progress')}
-                className="w-full flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors text-left text-[#52617D] hover:text-[#0E1B38] hover:bg-[#F8FAFD]"
-              >
-                <BarChart3 className="w-5 h-5 text-[#74819A]" strokeWidth={2} />
-                <span>Progress</span>
-              </button>
-
-              {/* 3. Skill Insights (Selected State) */}
-              <button
-                type="button"
-                onClick={() => handleNavClick('skills')}
-                className="w-full flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-sm font-bold transition-colors text-left bg-[#F5F1FF] text-[#5B36E9]"
-              >
-                <Sparkles className="w-5 h-5 text-[#5B36E9]" strokeWidth={2} />
-                <span>Skill Insights</span>
-              </button>
-
-              {/* 4. Resources */}
-              <button
-                type="button"
-                onClick={() => handleNavClick('resources')}
-                className="w-full flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors text-left text-[#52617D] hover:text-[#0E1B38] hover:bg-[#F8FAFD]"
-              >
-                <BookOpen className="w-5 h-5 text-[#74819A]" strokeWidth={2} />
-                <span>Resources</span>
-              </button>
-
-              {/* 5. AI Coach */}
-              <button
-                type="button"
-                onClick={() => handleNavClick('coach')}
-                className="w-full flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors text-left text-[#52617D] hover:text-[#0E1B38] hover:bg-[#F8FAFD]"
-              >
-                <Brain className="w-5 h-5 text-[#74819A]" strokeWidth={2} />
-                <span>AI Coach</span>
-              </button>
-            </nav>
-
-            {/* Account Section Divider & Navigation */}
-            <div className="mt-6 pt-5 border-t border-[#E6EAF2]">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[#98A3B7] px-4 block mb-2">
-                Account
-              </span>
-              <div className="space-y-1">
-                <button
-                  type="button"
-                  onClick={() => setIsProfileMenuOpen(true)}
-                  className="w-full flex items-center gap-3.5 px-4 py-2 rounded-xl text-xs font-semibold text-[#52617D] hover:text-[#0E1B38] hover:bg-[#F8FAFD]"
-                >
-                  <User className="w-4 h-4 text-[#74819A]" strokeWidth={2} />
-                  <span>Profile</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsProfileMenuOpen(true)}
-                  className="w-full flex items-center gap-3.5 px-4 py-2 rounded-xl text-xs font-semibold text-[#52617D] hover:text-[#0E1B38] hover:bg-[#F8FAFD]"
-                >
-                  <Settings className="w-4 h-4 text-[#74819A]" strokeWidth={2} />
-                  <span>Settings</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Bottom Sidebar Promo Card ("Upgrade your skills. Build your future.") */}
-          <div className="mt-6 p-4 rounded-2xl bg-[#F5F1FF] border border-[#E4DCFD] relative overflow-hidden">
-            <div className="w-8 h-8 rounded-full bg-[#EEE9FF] text-[#5B36E9] flex items-center justify-center mb-2.5 shadow-sm">
-              <Sparkles className="w-4 h-4" strokeWidth={2.2} />
-            </div>
-            <h4 className="font-['Manrope'] font-bold text-xs sm:text-[13px] text-[#0E1B38] leading-tight">
-              Upgrade your skills. Build your future.
-            </h4>
-            <p className="text-[11px] text-[#52617D] mt-1 leading-snug">
-              Stay consistent and achieve your AIML dream.
-            </p>
-            <button
-              type="button"
-              onClick={() => navigate('/dashboard')}
-              className="mt-3.5 w-full py-2 bg-[#5B36E9] hover:bg-[#4826C9] text-white text-xs font-bold rounded-xl shadow-sm transition-all flex items-center justify-center gap-1.5 active:scale-[0.98]"
-            >
-              <span>Keep Learning</span>
-              <span>→</span>
-            </button>
-          </div>
-        </aside>
+        <AppSidebar />
 
         {/* =========================================================================
             MAIN CONTENT AREA (Top Bar + Headers + KPI Summary + Analytics Grid)

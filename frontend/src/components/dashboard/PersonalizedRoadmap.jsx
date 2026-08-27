@@ -6,6 +6,7 @@ import { useAuth } from '../../hooks/useAuth'
 import apiClient from '../../lib/apiClient'
 import { supabase } from '../../lib/supabaseClient'
 import UserProfileDropdown from '../ui/UserProfileDropdown'
+import AppSidebar from '../ui/AppSidebar'
 
 /**
  * PersonalizedRoadmap
@@ -446,114 +447,7 @@ export default function PersonalizedRoadmap({ pathData = null }) {
         {/* =========================================================================
             LEFT FIXED SIDEBAR (~255px wide)
            ========================================================================= */}
-        <aside className="w-full md:w-[255px] flex-none border-b md:border-b-0 md:border-r border-[#E1E6F0] p-6 flex flex-col justify-between bg-white select-none">
-          <div>
-            {/* Logo */}
-            <div
-              className="flex items-center gap-3 mb-8 cursor-pointer"
-              onClick={() => handleNavClick('roadmap')}
-            >
-              <span className="w-10 h-10 rounded-full border-[2.2px] border-[#5B36E9] text-[#5B36E9] flex items-center justify-center shadow-xs">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10" />
-                  <polygon points="16.2 7.8 10.5 10.5 7.8 16.2 13.5 13.5" fill="#5B36E9" stroke="none" />
-                </svg>
-              </span>
-              <span className="font-['Manrope'] font-extrabold text-[22px] text-[#0E1B38] tracking-tight">
-                PathFinder
-              </span>
-            </div>
-
-            {/* Sidebar Navigation */}
-            <nav className="space-y-1.5">
-              <button
-                type="button"
-                onClick={() => handleNavClick('roadmap')}
-                className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-sm transition-colors text-left cursor-pointer ${
-                  activeNav === 'roadmap'
-                    ? 'bg-[#F5F1FF] text-[#5B36E9]'
-                    : 'text-[#52617D] hover:bg-[#F5F7FC] hover:text-[#0E1B38]'
-                }`}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-                </svg>
-                <span>My roadmap</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleNavClick('progress')}
-                className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-sm transition-colors text-left cursor-pointer ${
-                  activeNav === 'progress'
-                    ? 'bg-[#F5F1FF] text-[#5B36E9]'
-                    : 'text-[#52617D] hover:bg-[#F5F7FC] hover:text-[#0E1B38]'
-                }`}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-                  <polyline points="17 6 23 6 23 12" />
-                </svg>
-                <span>Progress</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleNavClick('skills')}
-                className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-sm transition-colors text-left cursor-pointer ${
-                  activeNav === 'skills'
-                    ? 'bg-[#F5F1FF] text-[#5B36E9]'
-                    : 'text-[#52617D] hover:bg-[#F5F7FC] hover:text-[#0E1B38]'
-                }`}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10" />
-                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                </svg>
-                <span>Skills</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleNavClick('resources')}
-                className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-sm transition-colors text-left cursor-pointer ${
-                  activeNav === 'resources'
-                    ? 'bg-[#F5F1FF] text-[#5B36E9]'
-                    : 'text-[#52617D] hover:bg-[#F5F7FC] hover:text-[#0E1B38]'
-                }`}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-                </svg>
-                <span>Resources</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleNavClick('coach')}
-                className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-sm transition-colors text-left cursor-pointer ${
-                  activeNav === 'coach'
-                    ? 'bg-[#F5F1FF] text-[#5B36E9]'
-                    : 'text-[#52617D] hover:bg-[#F5F7FC] hover:text-[#0E1B38]'
-                }`}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                </svg>
-                <span>AI Coach</span>
-              </button>
-            </nav>
-          </div>
-
-          {/* Clean sidebar footer */}
-          <div className="pt-4 border-t border-[#E1E6F0] flex items-center justify-between text-xs text-[#74819A]">
-            <span className="font-semibold">PathFinder v2.0</span>
-            <span className="inline-flex items-center gap-1.5 text-[#22A06B] font-bold">
-              <span className="w-2 h-2 rounded-full bg-[#22A06B] animate-pulse" />
-              Online
-            </span>
-          </div>
-        </aside>
+        <AppSidebar />
 
         {/* =========================================================================
             MAIN WORKSPACE CONTENT AREA

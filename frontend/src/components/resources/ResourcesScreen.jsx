@@ -4,6 +4,7 @@ import { useAuth } from '../../hooks/useAuth'
 import { useAIChat } from '../../contexts/AIChatContext'
 import { supabase } from '../../lib/supabaseClient'
 import UserProfileDropdown from '../ui/UserProfileDropdown'
+import AppSidebar from '../ui/AppSidebar'
 
 /**
  * ResourcesScreen — the "Resources" page from the PathFinder reference.
@@ -323,22 +324,7 @@ export default function ResourcesScreen() {
     <div className="rx">
       <style>{STYLES}</style>
 
-      <aside className="rx-side">
-        <div className="rx-brand">
-          <span className="rx-brand-mark">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>
-          </span>
-          <span className="rx-brand-name">PathFinder</span>
-        </div>
-        <nav className="rx-nav">
-          {SIDEBAR.map((n) => (
-            <a key={n.key} className={n.key === 'resources' ? 'on' : ''} onClick={() => (n.key === 'coach' ? openAICoach() : navigate(n.path))}>
-              {I[n.icon]}<span>{n.label}</span>
-            </a>
-          ))}
-        </nav>
-        <UserProfileDropdown />
-      </aside>
+      <AppSidebar />
 
       <main className="rx-main">
         <header className="rx-head">
@@ -349,6 +335,7 @@ export default function ResourcesScreen() {
           <div className="rx-head-actions">
             <div className="rx-goal">{I.cal}<div><div className="g-title">{(path?.goal_text || 'Your learning goal').slice(0, 40)}</div><div className="g-sub">Target: February 2027</div></div>{I.chev}</div>
             <button className="rx-view-road" onClick={() => path && navigate(`/roadmap/${path.id}`)}>{I.map}View roadmap</button>
+            <UserProfileDropdown />
           </div>
         </header>
 
