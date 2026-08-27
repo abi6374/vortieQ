@@ -126,9 +126,9 @@ function defaultTargetMonth() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
 }
 
-export default function GoalCompass({ topicRatings = [], detectedYears = 0, onCreate, onBack }) {
+export default function GoalCompass({ topicRatings = [], detectedYears = 0, initialGoal = '', onCreate, onBack }) {
   const [role, setRole] = useState('aiml')
-  const [goal, setGoal] = useState('I want an AIML Engineer internship within 6 months.')
+  const [goal, setGoal] = useState(initialGoal || 'I want an AIML Engineer internship within 6 months.')
   const [weekly, setWeekly] = useState(8)
   const [target, setTarget] = useState(defaultTargetMonth())
   const [priority, setPriority] = useState('intern')

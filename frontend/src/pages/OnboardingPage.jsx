@@ -38,13 +38,16 @@ export default function OnboardingPage() {
   }
 
   const handleChatIntake = (storyText) => {
-    setGoalText(storyText)
-    const fallbackTopics = [
-      { name: 'Python', level: 'beginner', evidence: 'Self-reported in natural-language intake' },
-      { name: 'Data Analysis', level: 'beginner', evidence: 'Self-reported projects' },
-    ]
-    setResumeTopics(fallbackTopics)
-    setPhase('topics')
+    // Chat lane: no resume => no extracted skills. Do NOT fabricate topics
+    // (the old code hardcoded "Python" + "Data Analysis" which would then be
+    // asked about even if the user described, say, wanting to learn React).
+    // Skip the assessment step; carry the user's own words into Goal Compass
+    // so the goal textarea is pre-filled instead of thrown away.
+    setGoalText(storyText || '')
+    setResumeTopics([])
+    setTopicRatings([])
+    setDetectedYears(0)
+    setPhase('goalcompass')
   }
 
   // ------------- topic ratings step → Goal Compass (skills in hand)
@@ -156,8 +159,9 @@ export default function OnboardingPage() {
           <GoalCompass
             topicRatings={topicRatings}
             detectedYears={detectedYears}
+            initialGoal={goalText}
             onCreate={handleCreatePlan}
-            onBack={() => setPhase('topics')}
+            onBack={() => setPhase(resumeTopics.length > 0 ? 'topics' : 'intake')}
           />
           {error && (
             <p className="mt-4 text-center text-sm text-red-700 bg-red-100 rounded-lg py-2 px-4 max-w-md">
