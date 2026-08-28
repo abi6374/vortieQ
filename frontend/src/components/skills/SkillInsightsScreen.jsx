@@ -87,7 +87,7 @@ import { useAuth } from '../../hooks/useAuth'
  */
 export default function SkillInsightsScreen() {
   const navigate = useNavigate()
-  const { open: openAICoach } = useAIChat()
+  const { open: openAICoach, send: sendToAICoach } = useAIChat()
   const { user, signOut } = useAuth()
 
   // State Management
@@ -104,25 +104,6 @@ export default function SkillInsightsScreen() {
   // Tooltip hover states for info icons
   const [activeTooltip, setActiveTooltip] = useState(null)
 
-  // Floating AI Coach State
-  const [isChatOpen, setIsChatOpen] = useState(false)
-  const [chatMessages, setChatMessages] = useState([
-    {
-      id: 1,
-      role: 'assistant',
-      text: 'Hi! Ask me anything about your learning path.',
-    },
-  ])
-  const [inputMessage, setInputMessage] = useState('')
-  const [isTyping, setIsTyping] = useState(false)
-  const chatEndRef = useRef(null)
-
-  useEffect(() => {
-    if (isChatOpen) {
-      chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-    }
-  }, [chatMessages, isTyping, isChatOpen])
-
   const handleNavClick = (navId) => {
     setActiveNav(navId)
     if (navId === 'roadmap') {
@@ -134,38 +115,6 @@ export default function SkillInsightsScreen() {
     } else if (navId === 'coach') {
       openAICoach()
     }
-  }
-
-  const handleSendMessage = (customText = null) => {
-    const text = (customText || inputMessage).trim()
-    if (!text || isTyping) return
-    setInputMessage('')
-    setChatMessages((prev) => [...prev, { id: Date.now(), role: 'user', text }])
-    setIsTyping(true)
-
-    setTimeout(() => {
-      let reply = 'Here is what PathFinder recommends based on your skill analytics:'
-      const lower = text.toLowerCase()
-      if (lower.includes('why') || lower.includes('statistics') || lower.includes('prerequisite')) {
-        reply =
-          'Statistics foundations (55% current → 80% target) is prioritized before Machine Learning because loss functions, gradient descent optimization, probability distributions, and evaluation metrics (ROC-AUC, Precision-Recall) directly require descriptive and inferential statistics.'
-      } else if (lower.includes('velocity') || lower.includes('speed') || lower.includes('rate')) {
-        reply =
-          'Your current learning velocity is 2.4 skills/week (+15% vs prior 2 weeks). At this velocity, you are projected to reach 85% readiness by early January 2027—well ahead of your February 2027 deadline!'
-      } else if (lower.includes('gap') || lower.includes('weak')) {
-        reply =
-          'Your top skill gaps are: 1. Machine Learning (45% vs 85% target), 2. Statistics (55% vs 80% target), 3. Deep Learning (35% vs 75% target), and 4. Interview Preparation (50% vs 80% target).'
-      } else if (lower.includes('strength') || lower.includes('python')) {
-        reply =
-          'Your strongest technical skills are Python Foundations (85%), Pandas & EDA (70%), and SQL (65%). You can leverage these to accelerate your practical ML modeling tasks!'
-      }
-
-      setChatMessages((prev) => [
-        ...prev,
-        { id: Date.now() + 1, role: 'assistant', text: reply },
-      ])
-      setIsTyping(false)
-    }, 650)
   }
 
   // ---------------------------------------------------------------------------
@@ -1282,7 +1231,7 @@ export default function SkillInsightsScreen() {
                       type="button"
                       onClick={() => {
                         openAICoach()
-                        handleSendMessage('Why is Statistics prioritized before Machine Learning?')
+                        sendToAICoach('Why is Statistics prioritized before Machine Learning?')
                       }}
                       className="mt-3 text-xs font-bold text-[#5B36E9] hover:underline flex items-center gap-1 self-start"
                     >
@@ -1298,129 +1247,6 @@ export default function SkillInsightsScreen() {
 
           </main>
         </div>
-
-        {/* =========================================================================
-            FLOATING AI COACH BUTTON (Lower-Right)
-           ========================================================================= */}
-        <div className="fixed bottom-6 right-6 z-40 flex items-center select-none">
-          <button
-            type="button"
-            onClick={() => setIsChatOpen((v) => !v)}
-            className="flex items-center group focus:outline-none"
-            aria-label="Ask PathFinder"
-          >
-            {/* Sparkle Chat Circle */}
-            <span className="w-12 h-12 rounded-full bg-[#5B36E9] hover:bg-[#4826C9] text-white flex items-center justify-center shadow-[0_8px_24px_rgba(91,54,233,0.4)] group-hover:scale-105 transition-all z-10">
-              <Sparkles className="w-5 h-5" />
-            </span>
-
-            {/* Attached White Pill Label: "Ask PathFinder" */}
-            <span className="bg-white border border-[#D8DFEB] text-[#0E1B38] text-xs font-bold pl-5 pr-4 py-2.5 rounded-r-full shadow-md -ml-3 group-hover:text-[#5B36E9] transition-colors">
-              Ask PathFinder
-            </span>
-          </button>
-        </div>
-
-        {/* =========================================================================
-            INTERACTIVE AI COACH CHAT DRAWER / PANEL
-           ========================================================================= */}
-        {isChatOpen && (
-          <div className="fixed bottom-20 right-6 z-50 w-full max-w-sm bg-white rounded-2xl border border-[#D8DFEB] shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200">
-            {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 bg-[#F5F1FF] border-b border-[#E4DCFD]">
-              <div className="flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-[#5B36E9] text-white flex items-center justify-center text-xs">
-                  ✨
-                </span>
-                <h3 className="font-['Manrope'] font-bold text-sm text-[#0E1B38]">
-                  PathFinder Skill Coach
-                </h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsChatOpen(false)}
-                className="text-[#74819A] hover:text-[#0E1B38] text-sm font-bold w-6 h-6 rounded flex items-center justify-center"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Messages */}
-            <div className="p-4 flex-1 max-h-[320px] overflow-y-auto space-y-3">
-              {chatMessages.map((msg) => {
-                const isAssistant = msg.role === 'assistant'
-                return (
-                  <div
-                    key={msg.id}
-                    className={`flex ${isAssistant ? 'justify-start' : 'justify-end'}`}
-                  >
-                    <div
-                      className={`max-w-[85%] px-3.5 py-2.5 rounded-2xl text-xs leading-relaxed ${
-                        isAssistant
-                          ? 'bg-[#F5F1FF] text-[#0E1B38] rounded-tl-sm border border-[#E4DCFD]'
-                          : 'bg-[#5B36E9] text-white rounded-tr-sm'
-                      }`}
-                    >
-                      {msg.text}
-                    </div>
-                  </div>
-                )
-              })}
-              {isTyping && (
-                <div className="flex justify-start">
-                  <div className="bg-[#F5F1FF] px-3.5 py-2 rounded-2xl rounded-tl-sm text-xs text-[#52617D] flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#5B36E9] animate-bounce [animation-delay:-0.3s]" />
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#5B36E9] animate-bounce [animation-delay:-0.15s]" />
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#5B36E9] animate-bounce" />
-                  </div>
-                </div>
-              )}
-              <div ref={chatEndRef} />
-            </div>
-
-            {/* Quick Suggestions */}
-            <div className="px-3 pb-2 flex gap-1.5 overflow-x-auto">
-              <button
-                type="button"
-                onClick={() => handleSendMessage('Why is Statistics prioritized before Machine Learning?')}
-                className="px-2.5 py-1 bg-[#F5F1FF] hover:bg-[#EEE9FF] text-[#5B36E9] text-[11px] font-semibold rounded-lg whitespace-nowrap"
-              >
-                Why Statistics first?
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSendMessage('How does my velocity compare to target?')}
-                className="px-2.5 py-1 bg-[#F5F1FF] hover:bg-[#EEE9FF] text-[#5B36E9] text-[11px] font-semibold rounded-lg whitespace-nowrap"
-              >
-                Velocity analysis
-              </button>
-            </div>
-
-            {/* Input Form */}
-            <form
-              onSubmit={(e) => {
-                e.preventDefault()
-                handleSendMessage()
-              }}
-              className="p-3 border-t border-[#E1E6F0] flex items-center gap-2 bg-[#FBFCFE]"
-            >
-              <input
-                type="text"
-                value={inputMessage}
-                onChange={(e) => setInputMessage(e.target.value)}
-                placeholder="Ask about skill gaps, benchmarks..."
-                className="flex-1 bg-white border border-[#D8DFEB] rounded-xl px-3 py-2 text-xs text-[#0E1B38] placeholder-[#74819A] focus:outline-none focus:border-[#5B36E9]"
-              />
-              <button
-                type="submit"
-                disabled={!inputMessage.trim() || isTyping}
-                className="w-8 h-8 rounded-xl bg-[#5B36E9] hover:bg-[#4826C9] disabled:opacity-40 text-white flex items-center justify-center flex-none"
-              >
-                ➔
-              </button>
-            </form>
-          </div>
-        )}
 
         {/* =========================================================================
             SKILL DRILL-DOWN MODAL
@@ -1479,7 +1305,7 @@ export default function SkillInsightsScreen() {
                     const skillName = selectedSkillModal.title
                     setSelectedSkillModal(null)
                     openAICoach()
-                    handleSendMessage(`Explain key study topics for ${skillName}`)
+                    sendToAICoach(`Explain key study topics for ${skillName}`)
                   }}
                   className="px-4 py-2.5 border border-[#5B36E9] text-[#5B36E9] hover:bg-[#F5F1FF] font-bold text-xs rounded-xl transition-all"
                 >

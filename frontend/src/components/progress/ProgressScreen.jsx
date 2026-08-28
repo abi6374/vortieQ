@@ -82,7 +82,7 @@ import UserProfileDropdown from '../ui/UserProfileDropdown'
 
 export default function ProgressScreen() {
   const navigate = useNavigate()
-  const { open: openAICoach } = useAIChat()
+  const { open: openAICoach, send: sendToAICoach } = useAIChat()
   const { user, signOut } = useAuth()
 
   // Navigation tab state
@@ -100,28 +100,8 @@ export default function ProgressScreen() {
   const [isTimeframeOpen, setIsTimeframeOpen] = useState(false)
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
 
-  // Floating AI Chat state
-  const [isChatOpen, setIsChatOpen] = useState(false)
-  const [chatMessages, setChatMessages] = useState([
-    {
-      id: 1,
-      role: 'assistant',
-      text: 'Hi! Ask me anything about your learning path.',
-    },
-  ])
-  const [inputMessage, setInputMessage] = useState('')
-  const [isTyping, setIsTyping] = useState(false)
-  const chatEndRef = useRef(null)
-
   // Interactive Task / Action Modal state
   const [activeActionModal, setActiveActionModal] = useState(null)
-
-  // Auto-scroll chat
-  useEffect(() => {
-    if (isChatOpen) {
-      chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-    }
-  }, [chatMessages, isTyping, isChatOpen])
 
   // Navigation handler
   const handleNavClick = (navId) => {
@@ -135,39 +115,6 @@ export default function ProgressScreen() {
     } else if (navId === 'coach') {
       openAICoach()
     }
-  }
-
-  // AI Chat message sender
-  const handleSendMessage = (customText = null) => {
-    const text = (customText || inputMessage).trim()
-    if (!text || isTyping) return
-    setInputMessage('')
-    setChatMessages((prev) => [...prev, { id: Date.now(), role: 'user', text }])
-    setIsTyping(true)
-
-    setTimeout(() => {
-      let reply = "I'm tracking your progress toward the AIML Engineer internship!"
-      const lower = text.toLowerCase()
-      if (lower.includes('statistics') || lower.includes('gap') || lower.includes('descriptive')) {
-        reply =
-          'Statistics is currently at 55% progress (your highest-priority focus). Completing the descriptive statistics checkpoint and practice set will bump your readiness to 62% and unlock the Machine Learning module.'
-      } else if (lower.includes('streak') || lower.includes('consistency') || lower.includes('hours')) {
-        reply =
-          "You're on an active {streak.current_streak}-day streak with 17.4 hours logged this week! Your personal best is 14 days. Studying 1.5 hours today and tomorrow will put you within 3 days of your record."
-      } else if (lower.includes('milestone') || lower.includes('next')) {
-        reply =
-          'Your next milestone is Statistics Foundations (Week 5). Upcoming after that is Machine Learning Fundamentals (Week 7-10) and the Portfolio Project (Week 11-13).'
-      } else if (lower.includes('readiness') || lower.includes('internship') || lower.includes('ready')) {
-        reply =
-          'At your current velocity of 2.4 skills/week, you are projected to reach 85%+ readiness by mid-January 2027—comfortably ahead of your February 2027 internship application target.'
-      }
-
-      setChatMessages((prev) => [
-        ...prev,
-        { id: Date.now() + 1, role: 'assistant', text: reply },
-      ])
-      setIsTyping(false)
-    }, 600)
   }
 
   // ---------------------------------------------------------------------------
@@ -1231,128 +1178,6 @@ export default function ProgressScreen() {
 
       </main>
 
-      {/* =========================================================================
-          3. FLOATING AI COACH BUTTON (Lower-Right matching Resources screenshot)
-         ========================================================================= */}
-      <div className="fixed bottom-6 right-6 z-40 flex items-center select-none">
-        <button
-          type="button"
-          onClick={() => setIsChatOpen((v) => !v)}
-          className="flex items-center group focus:outline-none"
-          title="Ask your AI learning coach"
-        >
-          {/* Sparkle Chat Circle */}
-          <span className="w-12 h-12 rounded-full bg-[#5B2FF3] hover:bg-[#4C1DCE] text-white flex items-center justify-center shadow-[0_8px_24px_rgba(91,47,243,0.35)] group-hover:scale-105 transition-all z-10">
-            <Sparkles className="w-5 h-5" />
-          </span>
-
-          {/* Attached White Pill Label: "Ask PathFinder" */}
-          <span className="bg-white border border-[#E5E7EB] text-[#172554] text-xs font-bold pl-5 pr-4 py-2.5 rounded-r-full shadow-md -ml-3 group-hover:text-[#5B2FF3] transition-colors">
-            Ask PathFinder
-          </span>
-        </button>
-      </div>
-
-      {/* =========================================================================
-          4. INTERACTIVE AI COACH DRAWER
-         ========================================================================= */}
-      {isChatOpen && (
-        <div className="fixed bottom-20 right-6 z-50 w-full max-w-sm bg-white rounded-2xl border border-[#E5E7EB] shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200">
-          {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 bg-[#F3EEFF] border-b border-[#DDD2FF]">
-            <div className="flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-[#5B2FF3] text-white flex items-center justify-center text-xs">
-                ✨
-              </span>
-              <h3 className="font-['Inter'] font-bold text-sm text-[#172554]">
-                PathFinder Progress Coach
-              </h3>
-            </div>
-            <button
-              type="button"
-              onClick={() => setIsChatOpen(false)}
-              className="text-[#64748B] hover:text-[#172554] text-sm font-bold w-6 h-6 rounded flex items-center justify-center"
-            >
-              ✕
-            </button>
-          </div>
-
-          {/* Messages */}
-          <div className="p-4 flex-1 max-h-[320px] overflow-y-auto space-y-3">
-            {chatMessages.map((msg) => {
-              const isAssistant = msg.role === 'assistant'
-              return (
-                <div
-                  key={msg.id}
-                  className={`flex ${isAssistant ? 'justify-start' : 'justify-end'}`}
-                >
-                  <div
-                    className={`max-w-[85%] px-3.5 py-2.5 rounded-2xl text-xs leading-relaxed ${
-                      isAssistant
-                        ? 'bg-[#F8F5FF] text-[#172554] rounded-tl-sm border border-[#DDD2FF]'
-                        : 'bg-[#5B2FF3] text-white rounded-tr-sm'
-                    }`}
-                  >
-                    {msg.text}
-                  </div>
-                </div>
-              )
-            })}
-            {isTyping && (
-              <div className="flex justify-start">
-                <div className="bg-[#F8F5FF] px-3.5 py-2 rounded-2xl rounded-tl-sm text-xs text-[#64748B] flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#5B2FF3] animate-bounce [animation-delay:-0.3s]" />
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#5B2FF3] animate-bounce [animation-delay:-0.15s]" />
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#5B2FF3] animate-bounce" />
-                </div>
-              </div>
-            )}
-            <div ref={chatEndRef} />
-          </div>
-
-          {/* Quick Suggestions */}
-          <div className="px-3 pb-2 flex gap-1.5 overflow-x-auto">
-            <button
-              type="button"
-              onClick={() => handleSendMessage('What is my highest-priority skill gap?')}
-              className="px-2.5 py-1 bg-[#F3EEFF] hover:bg-[#E5DBFF] text-[#5B2FF3] text-[11px] font-semibold rounded-lg whitespace-nowrap"
-            >
-              Primary skill gap
-            </button>
-            <button
-              type="button"
-              onClick={() => handleSendMessage('Am I on track for February 2027?')}
-              className="px-2.5 py-1 bg-[#F3EEFF] hover:bg-[#E5DBFF] text-[#5B2FF3] text-[11px] font-semibold rounded-lg whitespace-nowrap"
-            >
-              Check timeline
-            </button>
-          </div>
-
-          {/* Input Form */}
-          <form
-            onSubmit={(e) => {
-              e.preventDefault()
-              handleSendMessage()
-            }}
-            className="p-3 border-t border-[#EEF2F7] flex items-center gap-2 bg-[#FAF8FF]"
-          >
-            <input
-              type="text"
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              placeholder="Ask about progress, goals..."
-              className="flex-1 bg-white border border-[#E5E7EB] rounded-xl px-3 py-2 text-xs text-[#172554] placeholder-[#94A3B8] focus:outline-none focus:border-[#5B2FF3]"
-            />
-            <button
-              type="submit"
-              disabled={!inputMessage.trim() || isTyping}
-              className="w-8 h-8 rounded-xl bg-[#5B2FF3] hover:bg-[#4C1DCE] disabled:opacity-40 text-white flex items-center justify-center flex-none"
-            >
-              ➔
-            </button>
-          </form>
-        </div>
-      )}
 
       {/* =========================================================================
           5. ACTION PRACTICE / CHECKPOINT MODAL
@@ -1410,7 +1235,7 @@ export default function ProgressScreen() {
                 onClick={() => {
                   setActiveActionModal(null)
                   openAICoach()
-                  handleSendMessage('Give me a quick 1-minute summary of variance before the checkpoint.')
+                  sendToAICoach('Give me a quick 1-minute summary of variance before the checkpoint.')
                 }}
                 className="px-4 py-2.5 border border-[#5B2FF3] text-[#5B2FF3] hover:bg-[#F3EEFF] font-bold text-xs rounded-xl transition-all"
               >
