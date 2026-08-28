@@ -343,59 +343,60 @@ export default function SkillInsightsScreen() {
         </div>
       }
     >
-            {/* ---------------------------------------------------------------------
-                PAGE TITLE ROW: Icon + Heading/Subtitle (Left) + Goal Selector & Timestamp (Right)
-               --------------------------------------------------------------------- */}
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-              <div className="flex items-start gap-3.5">
-                {/* Purple Icon Badge */}
-                <div className="w-11 h-11 rounded-2xl bg-[#F5F1FF] border border-[#E4DCFD] text-[#5B36E9] flex items-center justify-center flex-none shadow-sm mt-0.5">
-                  <Lightbulb className="w-6 h-6" strokeWidth={2.2} />
-                </div>
-                <div>
-                  <h1 className="font-['Manrope'] font-extrabold text-2xl sm:text-[30px] lg:text-[32px] text-[#0E1B38] tracking-tight leading-tight">
-                    Skill Insights
-                  </h1>
-                  <p className="mt-0.5 text-xs sm:text-[14px] text-[#52617D]">
-                    Understand your strengths, find gaps and focus on what to learn next.
-                  </p>
-                </div>
-              </div>
+      <div className="w-full space-y-6 lg:space-y-8 font-['Inter',sans-serif] text-[#0E1B38]">
+        {/* ---------------------------------------------------------------------
+            PAGE TITLE ROW: Icon + Heading/Subtitle (Left) + Goal Selector & Timestamp (Right)
+           --------------------------------------------------------------------- */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex items-start gap-3.5">
+            {/* Purple Icon Badge */}
+            <div className="w-11 h-11 rounded-2xl bg-[#F5F1FF] border border-[#E4DCFD] text-[#5B36E9] flex items-center justify-center flex-none shadow-sm mt-0.5">
+              <Lightbulb className="w-6 h-6" strokeWidth={2.2} />
+            </div>
+            <div>
+              <h1 className="font-['Manrope'] font-extrabold text-2xl sm:text-[30px] lg:text-[32px] text-[#0E1B38] tracking-tight leading-tight">
+                Skill Insights
+              </h1>
+              <p className="mt-0.5 text-xs sm:text-[14px] text-[#52617D]">
+                Understand your strengths, find gaps and focus on what to learn next.
+              </p>
+            </div>
+          </div>
 
-              {/* Right Side: Real Goal & Last Updated (live-computed, so "now") */}
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 lg:self-center">
-                <div className="flex items-center gap-2 px-3.5 py-2 bg-white border border-[#D8DFEB] rounded-xl text-xs font-bold text-[#0E1B38] shadow-sm max-w-xs">
-                  <Target className="w-4 h-4 text-[#5B36E9] flex-none" strokeWidth={2.2} />
-                  <span className="truncate">
-                    {roadmap.path?.goal_text ? `Goal: ${roadmap.path.goal_text.split('.')[0]}` : 'No active goal yet'}
-                  </span>
-                </div>
-
-                <span className="text-xs font-medium text-[#74819A] self-center sm:self-auto">
-                  Last updated: {new Date().toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
-                </span>
-              </div>
+          {/* Right Side: Real Goal & Last Updated (live-computed, so "now") */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 lg:self-center">
+            <div className="flex items-center gap-2 px-3.5 py-2 bg-white border border-[#D8DFEB] rounded-xl text-xs font-bold text-[#0E1B38] shadow-sm max-w-xs">
+              <Target className="w-4 h-4 text-[#5B36E9] flex-none" strokeWidth={2.2} />
+              <span className="truncate">
+                {roadmap.path?.goal_text ? `Goal: ${roadmap.path.goal_text.split('.')[0]}` : 'No active goal yet'}
+              </span>
             </div>
 
-            {/* ---------------------------------------------------------------------
-                TOP KPI SUMMARY (4 Equal-Height Polished Cards)
-               --------------------------------------------------------------------- */}
-            <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" aria-label="KPI Cards">
-              
-              {/* KPI 1: Overall Skill Readiness */}
-              <div className="bg-white border border-[#D8DFEB] rounded-2xl p-4 sm:p-5 shadow-sm hover:border-[#CAD3E2] transition-colors flex flex-col justify-between">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-lg bg-[#F5F1FF] text-[#5B36E9] flex items-center justify-center flex-none">
-                      <BarChart3 className="w-3.5 h-3.5" />
-                    </span>
-                    <span className="text-xs font-bold text-[#52617D]">Overall Skill Readiness</span>
-                  </div>
-                  <Info
-                    className="w-3.5 h-3.5 text-[#98A3B7] cursor-pointer hover:text-[#5B36E9]"
-                    title="Calculated from assessments, completed learning activities, practice performance, and skill progress."
-                  />
-                </div>
+            <span className="text-xs font-medium text-[#74819A] self-center sm:self-auto">
+              Last updated: {new Date().toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
+            </span>
+          </div>
+        </div>
+
+        {/* ---------------------------------------------------------------------
+            TOP KPI SUMMARY (4 Equal-Height Polished Cards)
+           --------------------------------------------------------------------- */}
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6" aria-label="KPI Cards">
+          
+          {/* KPI 1: Overall Skill Readiness */}
+          <div className="bg-white border border-[#D8DFEB] rounded-2xl p-5 sm:p-6 shadow-sm hover:border-[#CAD3E2] transition-colors flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="w-6 h-6 rounded-lg bg-[#F5F1FF] text-[#5B36E9] flex items-center justify-center flex-none">
+                  <BarChart3 className="w-3.5 h-3.5" />
+                </span>
+                <span className="text-xs font-bold text-[#52617D]">Overall Skill Readiness</span>
+              </div>
+              <Info
+                className="w-3.5 h-3.5 text-[#98A3B7] cursor-pointer hover:text-[#5B36E9]"
+                title="Calculated from assessments, completed learning activities, practice performance, and skill progress."
+              />
+            </div>
 
                 <div className="flex items-baseline gap-3 my-2.5">
                   <span className="font-['Manrope'] font-extrabold text-2xl sm:text-[28px] text-[#0E1B38] tracking-tight leading-none">
@@ -413,7 +414,7 @@ export default function SkillInsightsScreen() {
               </div>
 
               {/* KPI 2: Skills Mastered */}
-              <div className="bg-white border border-[#D8DFEB] rounded-2xl p-4 sm:p-5 shadow-sm hover:border-[#CAD3E2] transition-colors flex flex-col justify-between">
+              <div className="bg-white border border-[#D8DFEB] rounded-2xl p-5 sm:p-6 shadow-sm hover:border-[#CAD3E2] transition-colors flex flex-col justify-between">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="w-6 h-6 rounded-lg bg-[#ECFDF3] text-[#22A06B] flex items-center justify-center flex-none">
@@ -438,7 +439,7 @@ export default function SkillInsightsScreen() {
               </div>
 
               {/* KPI 3: Skills In Progress */}
-              <div className="bg-white border border-[#D8DFEB] rounded-2xl p-4 sm:p-5 shadow-sm hover:border-[#CAD3E2] transition-colors flex flex-col justify-between">
+              <div className="bg-white border border-[#D8DFEB] rounded-2xl p-5 sm:p-6 shadow-sm hover:border-[#CAD3E2] transition-colors flex flex-col justify-between">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="w-6 h-6 rounded-lg bg-[#FFF7E6] text-[#D88700] flex items-center justify-center flex-none">
@@ -461,7 +462,7 @@ export default function SkillInsightsScreen() {
               </div>
 
               {/* KPI 4: Skills to Learn */}
-              <div className="bg-white border border-[#D8DFEB] rounded-2xl p-4 sm:p-5 shadow-sm hover:border-[#CAD3E2] transition-colors flex flex-col justify-between">
+              <div className="bg-white border border-[#D8DFEB] rounded-2xl p-5 sm:p-6 shadow-sm hover:border-[#CAD3E2] transition-colors flex flex-col justify-between">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="w-6 h-6 rounded-lg bg-[#F5F1FF] text-[#5B8DEF] flex items-center justify-center flex-none">
@@ -491,10 +492,10 @@ export default function SkillInsightsScreen() {
                 2. Skill Radar (Medium)
                 3. Top Skill Gaps (Right)
                --------------------------------------------------------------------- */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6">
               
               {/* CARD 1: Skill Proficiency Comparison (5.5 of 12 cols or 6 cols) */}
-              <div className="lg:col-span-6 bg-white border border-[#D8DFEB] rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+              <div className="lg:col-span-6 bg-white border border-[#D8DFEB] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between pb-3 border-b border-[#F0F2F7]">
                     <div className="flex items-center gap-2">
@@ -538,10 +539,6 @@ export default function SkillInsightsScreen() {
                           height={54}
                           angle={-22}
                           textAnchor="end"
-                          // Long skill labels overlap when many bars share a
-                          // narrow chart. Shorten common multi-word skills
-                          // for the axis; the tooltip still shows the full
-                          // name so nothing important is hidden.
                           tickFormatter={(v) => {
                             const map = { 'Machine Learning': 'ML', 'Deep Learning': 'DL', 'Pandas & EDA': 'Pandas', 'Portfolio Project': 'Portfolio', 'Interview Prep': 'Interview' }
                             return map[v] || (v && v.length > 12 ? v.slice(0, 11) + '…' : v)
@@ -592,7 +589,7 @@ export default function SkillInsightsScreen() {
               </div>
 
               {/* CARD 2: Skill Radar (3.5 of 12 cols) */}
-              <div className="lg:col-span-3 bg-white border border-[#D8DFEB] rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+              <div className="lg:col-span-3 bg-white border border-[#D8DFEB] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between pb-3 border-b border-[#F0F2F7]">
                     <div className="flex items-center gap-2">
@@ -650,7 +647,7 @@ export default function SkillInsightsScreen() {
               </div>
 
               {/* CARD 3: Top Skill Gaps (3 of 12 cols) */}
-              <div className="lg:col-span-3 bg-white border border-[#D8DFEB] rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+              <div className="lg:col-span-3 bg-white border border-[#D8DFEB] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between pb-3 border-b border-[#F0F2F7]">
                     <div className="flex items-center gap-2">
@@ -675,7 +672,7 @@ export default function SkillInsightsScreen() {
                       return (
                         <div
                           key={gap.title}
-                          className="p-2.5 rounded-xl border border-[#F0F2F7] hover:border-[#5B36E9] hover:bg-[#F8FAFD] cursor-pointer transition-all flex items-center justify-between"
+                          className="p-3 rounded-xl border border-[#F0F2F7] hover:border-[#5B36E9] hover:bg-[#F8FAFD] cursor-pointer transition-all flex items-center justify-between"
                           onClick={() => setSelectedSkillModal(gap)}
                         >
                           <div className="flex items-center gap-2.5">
@@ -709,10 +706,10 @@ export default function SkillInsightsScreen() {
                 2. Skill Category Breakdown (Donut Chart)
                 3. Recommended Focus (Actionable Card)
                --------------------------------------------------------------------- */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6">
               
               {/* CARD 1: Learning Trend (Large, 5.5 of 12 cols) */}
-              <div className="lg:col-span-6 bg-white border border-[#D8DFEB] rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+              <div className="lg:col-span-6 bg-white border border-[#D8DFEB] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between pb-3 border-b border-[#F0F2F7]">
                     <div className="flex items-center gap-2">
@@ -830,7 +827,7 @@ export default function SkillInsightsScreen() {
               </div>
 
               {/* CARD 2: Skill Category Breakdown (Donut Chart, 3.5 of 12 cols) */}
-              <div className="lg:col-span-3 bg-white border border-[#D8DFEB] rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+              <div className="lg:col-span-3 bg-white border border-[#D8DFEB] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between pb-2 border-b border-[#F0F2F7]">
                     <div className="flex items-center gap-2">
@@ -905,7 +902,7 @@ export default function SkillInsightsScreen() {
               </div>
 
               {/* CARD 3: Recommended Focus (Actionable Card, 3 of 12 cols) */}
-              <div className="lg:col-span-3 bg-white border border-[#D8DFEB] rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+              <div className="lg:col-span-3 bg-white border border-[#D8DFEB] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between pb-2 border-b border-[#F0F2F7]">
                     <div className="flex items-center gap-2">
@@ -930,7 +927,7 @@ export default function SkillInsightsScreen() {
                   )}
 
                   {/* Real next 3 not-started roadmap steps */}
-                  <div className="space-y-2.5 mt-3">
+                  <div className="space-y-3 mt-3">
                     {recommendedFocus.length === 0 && (
                       <p className="text-[11px] text-[#74819A] italic">You're all caught up on your roadmap!</p>
                     )}
@@ -939,7 +936,7 @@ export default function SkillInsightsScreen() {
                       return (
                         <div
                           key={item.title}
-                          className="p-2.5 rounded-xl border border-[#F0F2F7] hover:border-[#5B36E9] hover:bg-[#F8FAFD] cursor-pointer transition-all flex items-center justify-between group"
+                          className="p-3 rounded-xl border border-[#F0F2F7] hover:border-[#5B36E9] hover:bg-[#F8FAFD] cursor-pointer transition-all flex items-center justify-between group"
                           onClick={() => navigate('/dashboard')}
                         >
                           <div className="flex items-center gap-2.5">
@@ -967,7 +964,7 @@ export default function SkillInsightsScreen() {
                 SECONDARY DEEP ANALYTICS & AI INSIGHTS
                 (Heatmap Matrix, Learning Velocity, Time Spent, Strengths, AI Insight)
                --------------------------------------------------------------------- */}
-            <div className="pt-2 border-t border-[#F0F2F7]">
+            <div className="pt-6 border-t border-[#E6EAF2] space-y-6">
               
               <div className="flex items-center justify-between mb-4">
                 <div>
@@ -1006,7 +1003,7 @@ export default function SkillInsightsScreen() {
 
               {activeTab === 'heatmap' ? (
                 /* SKILL GAP HEATMAP MATRIX */
-                <div className="bg-white border border-[#D8DFEB] rounded-2xl p-5 shadow-sm">
+                <div className="bg-white border border-[#D8DFEB] rounded-2xl p-6 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
                     <span className="font-bold text-sm text-[#0E1B38]">
                       Tiered Skill-Gap Matrix (Foundations → Intermediate → Advanced)
@@ -1054,10 +1051,10 @@ export default function SkillInsightsScreen() {
                 </div>
               ) : (
                 /* INTELLIGENCE GRID: 4 Focused Cards */
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6">
                   
                   {/* Card 1: Learning Velocity */}
-                  <div className="bg-white border border-[#D8DFEB] rounded-2xl p-4 shadow-sm flex flex-col justify-between">
+                  <div className="bg-white border border-[#D8DFEB] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-xs font-bold text-[#74819A] uppercase tracking-wider">
@@ -1082,7 +1079,7 @@ export default function SkillInsightsScreen() {
                   </div>
 
                   {/* Card 2: Time Spent by Category */}
-                  <div className="bg-white border border-[#D8DFEB] rounded-2xl p-4 shadow-sm flex flex-col justify-between">
+                  <div className="bg-white border border-[#D8DFEB] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-xs font-bold text-[#74819A] uppercase tracking-wider">
@@ -1102,7 +1099,7 @@ export default function SkillInsightsScreen() {
                   </div>
 
                   {/* Card 3: Top Strengths */}
-                  <div className="bg-white border border-[#D8DFEB] rounded-2xl p-4 shadow-sm flex flex-col justify-between">
+                  <div className="bg-white border border-[#D8DFEB] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-xs font-bold text-[#74819A] uppercase tracking-wider">
@@ -1130,7 +1127,7 @@ export default function SkillInsightsScreen() {
                   </div>
 
                   {/* Card 4: AI-Powered PathFinder Explanation */}
-                  <div className="bg-[#F5F1FF] border border-[#E4DCFD] rounded-2xl p-4 shadow-sm flex flex-col justify-between">
+                  <div className="bg-[#F5F1FF] border border-[#E4DCFD] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
                     <div>
                       <div className="flex items-center gap-1.5 text-[#5B36E9] mb-1.5">
                         <Sparkles className="w-4 h-4" />
@@ -1164,6 +1161,7 @@ export default function SkillInsightsScreen() {
               )}
 
             </div>
+      </div>
 
         {/* =========================================================================
             SKILL DRILL-DOWN MODAL
