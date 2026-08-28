@@ -34,6 +34,7 @@ class ResumeExtractedTopic(BaseModel):
     name: str
     evidence: str
     suggested_level: str  # basic|intermediate|advanced|expert
+    confidence_pct: int = 80
 
 
 class ResumeExtractResponse(BaseModel):

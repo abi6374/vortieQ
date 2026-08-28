@@ -13,8 +13,16 @@ bigger and bigger static list, this searches live at request time.
 import time
 from concurrent.futures import ThreadPoolExecutor
 
-from ddgs import DDGS
-from ddgs.exceptions import DDGSException
+try:
+    from duckduckgo_search import DDGS
+    from duckduckgo_search.exceptions import DuckDuckGoSearchException as DDGSException
+except ImportError:
+    try:
+        from ddgs import DDGS
+        from ddgs.exceptions import DDGSException
+    except ImportError:
+        DDGS = None
+        DDGSException = Exception
 
 MAX_RESULTS = 8
 CACHE_TTL_SECONDS = 1800  # 30 min - identical queries reuse results instead of re-searching
@@ -59,7 +67,7 @@ def search_learning_resources(query: str, max_results: int = MAX_RESULTS) -> lis
     degrade gracefully (this is a "nice to have" supplement, not core path
     generation, and the whole app must not 500 if DuckDuckGo is unreachable).
     """
-    if not query or not query.strip():
+    if not query or not query.strip() or DDGS is None:
         return []
 
     search_query = f"{query.strip()} free online course"

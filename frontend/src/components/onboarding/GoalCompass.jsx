@@ -66,6 +66,96 @@ function suggestRole(topicRatings, goalText) {
 
 const cap = (s) => s.replace(/\b\w/g, (c) => c.toUpperCase())
 
+const PREVIEW_ICONS = {
+  code: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="16 18 22 12 16 6" /><polyline points="8 6 2 12 8 18" />
+    </svg>
+  ),
+  stat: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 3v18h18" /><path d="M7 15v-4" /><path d="M12 15V8" /><path d="M17 15v-6" />
+    </svg>
+  ),
+  ai: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="3" /><path d="M12 2v4M12 18v4M2 12h4M18 12h4" />
+    </svg>
+  ),
+  db: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <ellipse cx="12" cy="5" rx="9" ry="3" /><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" /><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+    </svg>
+  ),
+  cloud: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17.5 19a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.6 1.5A4 4 0 0 0 6.5 19z" />
+    </svg>
+  ),
+  project: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+    </svg>
+  ),
+  user: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 21v-2a4 4 0 0 0-3-3.87M9 21v-2a4 4 0 0 1 3-3.87M12 3a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z" />
+    </svg>
+  ),
+}
+
+const ROLE_PATH_PREVIEWS = {
+  aiml: [
+    { t: 'Python foundations', ic: 'code' },
+    { t: 'Applied Statistics', ic: 'stat' },
+    { t: 'Machine Learning', ic: 'ai' },
+    { t: 'Capstone Portfolio', ic: 'project' },
+    { t: 'AI Interview Prep', ic: 'user' },
+  ],
+  da: [
+    { t: 'SQL & Data Modeling', ic: 'db' },
+    { t: 'Python Data Wrangling', ic: 'code' },
+    { t: 'BI & Visualization', ic: 'stat' },
+    { t: 'Analytics Case Study', ic: 'project' },
+    { t: 'Analytics Interview Prep', ic: 'user' },
+  ],
+  py: [
+    { t: 'Python Core & OOP', ic: 'code' },
+    { t: 'Databases & ORM', ic: 'db' },
+    { t: 'REST APIs & Architecture', ic: 'cloud' },
+    { t: 'Production Web App', ic: 'project' },
+    { t: 'Backend Systems Prep', ic: 'user' },
+  ],
+  web: [
+    { t: 'HTML5 & Modern CSS', ic: 'code' },
+    { t: 'JavaScript (ES6+) Core', ic: 'code' },
+    { t: 'React & State Architecture', ic: 'ai' },
+    { t: 'Full-Stack Deployed App', ic: 'project' },
+    { t: 'Frontend Interview Prep', ic: 'user' },
+  ],
+  cloud: [
+    { t: 'Linux & Scripting', ic: 'code' },
+    { t: 'Docker & Containers', ic: 'cloud' },
+    { t: 'AWS / Cloud Architecture', ic: 'cloud' },
+    { t: 'CI/CD Pipeline Project', ic: 'project' },
+    { t: 'DevOps Scenario Prep', ic: 'user' },
+  ],
+  product: [
+    { t: 'Product Strategy & Vision', ic: 'user' },
+    { t: 'User Research & Metrics', ic: 'stat' },
+    { t: 'Agile Roadmapping', ic: 'cloud' },
+    { t: 'End-to-End Product Spec', ic: 'project' },
+    { t: 'PM Case Interviews', ic: 'user' },
+  ],
+  custom: [
+    { t: 'Core Domain Foundations', ic: 'code' },
+    { t: 'Essential Tools & Concepts', ic: 'cloud' },
+    { t: 'Specialized Techniques', ic: 'ai' },
+    { t: 'Showcase Portfolio Project', ic: 'project' },
+    { t: 'Career Readiness & Prep', ic: 'user' },
+  ],
+}
+
 const STYLES = `
 .gc{ --violet:#5B36E9; --violet-2:#6236EF; --violet-dark:#4826C9; --navy:#0E1B38; --slate:#52617D;
  --muted:#74819A; --lavender:#F5F1FF; --lav-icon:#EEE9FF; --card-bd:#D8DFEB; --input-bd:#CAD3E2;
@@ -385,16 +475,10 @@ export default function GoalCompass({ topicRatings = [], detectedYears = 0, init
         <h3>Your path preview</h3>
         <div className="preview-top">
           <div className="path">
-            {[
-              { t: 'Python foundations', first: true, ic: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="16" rx="2" /><path d="m7 9 3 3-3 3M13 15h4" /></svg> },
-              { t: 'Statistics', ic: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18" /><path d="M7 15v-4" /><path d="M12 15V8" /><path d="M17 15v-6" /></svg> },
-              { t: 'Machine Learning', ic: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M12 2v4M12 18v4M2 12h4M18 12h4" /></svg> },
-              { t: 'Portfolio project', ic: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /></svg> },
-              { t: 'Interview prep', ic: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-3-3.87M9 21v-2a4 4 0 0 1 3-3.87M12 3a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z" /></svg> },
-            ].map((s, i) => (
+            {(ROLE_PATH_PREVIEWS[role] || ROLE_PATH_PREVIEWS.custom).map((s, i) => (
               <span key={s.t} style={{ display: 'contents' }}>
                 {i > 0 && <svg className="arrow" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>}
-                <div className={`pstep ${s.first ? 'first' : ''}`}><span className="pic">{s.ic}</span><span>{s.t}</span></div>
+                <div className={`pstep ${i === 0 ? 'first' : ''}`}><span className="pic">{PREVIEW_ICONS[s.ic] || PREVIEW_ICONS.code}</span><span>{s.t}</span></div>
               </span>
             ))}
           </div>

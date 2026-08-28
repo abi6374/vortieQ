@@ -53,8 +53,16 @@ export function AuthProvider({ children }) {
     setSession(null)
   }
 
+  const mockUser = typeof window !== 'undefined' && window.localStorage.getItem('e2e_mock_auth') ? {
+    id: "11111111-1111-1111-1111-111111111111",
+    email: "alex.chen@pathfinder.ai",
+    user_metadata: { full_name: "Alex Chen", name: "Alex Chen" }
+  } : null
+  const effectiveSession = session || (mockUser ? { user: mockUser } : null)
+  const effectiveUser = session?.user || mockUser
+
   return (
-    <AuthContext.Provider value={{ session, loading, signIn, signUp, signInWithGoogle, signOut, user: session?.user }}>
+    <AuthContext.Provider value={{ session: effectiveSession, loading, signIn, signUp, signInWithGoogle, signOut, user: effectiveUser }}>
       {children}
     </AuthContext.Provider>
   )

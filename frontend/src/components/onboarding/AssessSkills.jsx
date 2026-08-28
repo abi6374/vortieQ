@@ -25,9 +25,16 @@ function normalizeLevel(l) {
   return LEVEL_KEYS.includes(k) ? k : 'basic'
 }
 
-function confidenceFor(chosen, suggested) {
-  const dist = Math.abs(LEVEL_KEYS.indexOf(chosen) - LEVEL_KEYS.indexOf(suggested))
-  return Math.max(20, 92 - dist * 22)
+function confidenceFor(chosen, suggested, baseConfidence) {
+  const base = typeof baseConfidence === 'number' && baseConfidence >= 30 && baseConfidence <= 100
+    ? baseConfidence
+    : 82
+  const dist = LEVEL_KEYS.indexOf(chosen) - LEVEL_KEYS.indexOf(suggested)
+  if (dist === 0) return base
+  if (dist < 0) {
+    return Math.min(99, base + Math.abs(dist) * 4)
+  }
+  return Math.max(35, base - dist * 14)
 }
 
 function Radio({ on, small }) {
@@ -49,7 +56,7 @@ function Radio({ on, small }) {
 function SkillLevelPanel({ topic, level, onLevel }) {
   const [open, setOpen] = useState(true)
   const suggested = normalizeLevel(topic.suggested_level)
-  const pct = confidenceFor(level, suggested)
+  const pct = confidenceFor(level, suggested, topic.confidence_pct)
 
   return (
     <section className="rounded-2xl border border-[#DDE3EF] bg-white shadow-sm overflow-hidden">
@@ -158,13 +165,19 @@ export default function AssessSkills({ topics = [], detectedYears = 0, onContinu
   const setLevel = (name, lvl) => setLevels((p) => ({ ...p, [name]: lvl }))
 
   const submit = () => {
-    const ratings = topics.map((t) => ({
-      name: t.name,
-      level: levels[t.name] || normalizeLevel(t.suggested_level),
-      evidence: method === 'describe' && unifiedDescription.trim()
-        ? unifiedDescription.trim()
-        : (t.evidence || ''),
-    }))
+    const ratings = topics.map((t) => {
+      const chosenLevel = levels[t.name] || normalizeLevel(t.suggested_level)
+      const suggested = normalizeLevel(t.suggested_level)
+      const dynamicPct = confidenceFor(chosenLevel, suggested, t.confidence_pct)
+      return {
+        name: t.name,
+        level: chosenLevel,
+        confidence_pct: dynamicPct,
+        evidence: method === 'describe' && unifiedDescription.trim()
+          ? unifiedDescription.trim()
+          : (t.evidence || ''),
+      }
+    })
     onContinue(ratings)
   }
 

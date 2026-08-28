@@ -77,6 +77,72 @@ const TAXONOMY = {
     advanced: 'Interactive rebase, bisect, hooks, workflows',
     expert: 'Monorepo strategy, release management, team conventions',
   },
+  typescript: {
+    basic: 'Types, interfaces, basic generics, tsconfig',
+    intermediate: 'Union types, type guards, utility types, enum patterns',
+    advanced: 'Conditional types, mapped types, declaration merging, strict config',
+    expert: 'Type-level programming, compiler API, monorepo type architecture',
+  },
+  html: {
+    basic: 'Semantic elements, attributes, forms, document structure',
+    intermediate: 'Accessibility (a11y), responsive media, meta tags, SEO basics',
+    advanced: 'Web components, canvas, shadow DOM, performance optimization',
+    expert: 'W3C standards, cross-platform architecture, rendering engine internals',
+  },
+  css: {
+    basic: 'Selectors, box model, flexbox, colors, typography',
+    intermediate: 'Grid, transitions, responsive design, media queries, variables',
+    advanced: 'Keyframe animations, fluid typography, BEM, Tailwind/Sass, layout isolation',
+    expert: 'CSS architecture at scale, Houdini, design token systems, render paint cost',
+  },
+  linux: {
+    basic: 'File navigation, permissions, piping, grep, curl, basic shell commands',
+    intermediate: 'Bash scripting, package managers, process management, cron jobs, SSH keys',
+    advanced: 'Systemd, networking, memory profiling, iptables, kernel tuning',
+    expert: 'Kernel compilation, security auditing, embedded/bare-metal systems',
+  },
+  postgresql: {
+    basic: 'Table creation, CRUD operations, foreign keys, data types',
+    intermediate: 'Indexes (B-tree, GIN), JSONB, constraints, complex joins, views',
+    advanced: 'EXPLAIN ANALYZE, query planner tuning, VACUUM, partitioning, triggers',
+    expert: 'High availability, replication, sharding, WAL archiving, scale tuning',
+  },
+  mongodb: {
+    basic: 'Collections, documents, CRUD queries, basic operators',
+    intermediate: 'Aggregation pipeline, indexing strategies, schema validation',
+    advanced: 'Replica sets, transactions, change streams, performance profiling',
+    expert: 'Cluster sharding, multi-region clusters, high-throughput optimization',
+  },
+  fastapi: {
+    basic: 'Path operations, Pydantic request/response models, query params',
+    intermediate: 'Dependency injection, JWT authentication, background tasks, CORS',
+    advanced: 'Async database sessions, custom middleware, testing with pytest, OpenAPI',
+    expert: 'High-concurrency architecture, microservice orchestration, scale profiling',
+  },
+  statistics: {
+    basic: 'Mean, median, mode, standard deviation, normal distribution',
+    intermediate: 'Hypothesis testing, p-values, confidence intervals, regression',
+    advanced: 'Bayesian statistics, multivariate analysis, ANOVA, non-parametric tests',
+    expert: 'Causal inference, stochastic processes, custom probabilistic models',
+  },
+  'deep learning': {
+    basic: 'Neural network intuition, forward/backprop, activation functions',
+    intermediate: 'CNNs, RNNs, transfer learning, regularization, PyTorch/TensorFlow',
+    advanced: 'Transformers, attention mechanisms, embeddings, fine-tuning LLMs',
+    expert: 'Custom model architectures, distributed training, model quantization, CUDA',
+  },
+  'product management': {
+    basic: 'User stories, acceptance criteria, product backlog, sprint basics',
+    intermediate: 'PRDs, user journey mapping, North Star metrics, competitor analysis',
+    advanced: 'Product discovery, growth loops, A/B experiment design, go-to-market strategy',
+    expert: 'Portfolio product strategy, org scaling, board-level stakeholder alignment',
+  },
+  'system design': {
+    basic: 'Client-server architecture, caching basics, load balancers',
+    intermediate: 'Microservices, message queues, rate limiting, SQL vs NoSQL trade-offs',
+    advanced: 'CAP theorem, distributed caching, database sharding, consistency models',
+    expert: 'Global scale multi-region architecture, disaster recovery, 99.999% availability',
+  },
 }
 
 const GENERIC = (name) => ({

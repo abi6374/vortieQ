@@ -113,16 +113,41 @@ function Illustration() {
 
 export default function GeneratingOverlay({ status = 'loading', onFinished, onRetry, onBack }) {
   const reduce = useReducedMotion()
-  const [pct, setPct] = useState(reduce ? (status === 'success' ? 100 : 60) : 0)
+  const [pct, setPct] = useState(reduce ? (status === 'success' ? 100 : 60) : 5)
+  const [activeStep, setActiveStep] = useState(0)
 
-  // Ease the progress value toward its target (60% while working, 100% on success).
+  // Dynamically advance through the 5 steps while loading
+  useEffect(() => {
+    if (status !== 'loading') return
+    setActiveStep(0)
+    const timers = [
+      setTimeout(() => setActiveStep(1), 1000),
+      setTimeout(() => setActiveStep(2), 2400),
+      setTimeout(() => setActiveStep(3), 4200),
+      setTimeout(() => setActiveStep(4), 6200),
+    ]
+    return () => timers.forEach(clearTimeout)
+  }, [status])
+
+  // Ease the progress value smoothly
   useEffect(() => {
     if (status === 'error') return
-    const target = status === 'success' ? 100 : 60
-    if (reduce) { setPct(target); return }
+    if (reduce) {
+      setPct(status === 'success' ? 100 : 60)
+      return
+    }
     const id = setInterval(() => {
-      setPct((p) => (Math.abs(target - p) < 0.5 ? target : p + (target - p) * 0.12))
-    }, 30)
+      setPct((p) => {
+        if (status === 'success') {
+          const delta = (100 - p) * 0.25
+          return Math.abs(100 - p) < 0.5 ? 100 : p + delta
+        }
+        if (p < 92) {
+          return p + (92 - p) * 0.03 + 0.1
+        }
+        return p
+      })
+    }, 40)
     return () => clearInterval(id)
   }, [status, reduce])
 
@@ -138,8 +163,8 @@ export default function GeneratingOverlay({ status = 'loading', onFinished, onRe
 
   const stepState = (i) => {
     if (isSuccess) return 'done'
-    if (i < ACTIVE_INDEX) return 'done'
-    if (i === ACTIVE_INDEX) return 'active'
+    if (i < activeStep) return 'done'
+    if (i === activeStep) return 'active'
     return 'todo'
   }
   const labelFor = { done: 'completed', active: 'in progress', todo: 'upcoming' }
@@ -169,7 +194,7 @@ export default function GeneratingOverlay({ status = 'loading', onFinished, onRe
             ? 'Something interrupted the plan. Your goal and skills are safe.'
             : isSuccess
             ? 'Taking you to your personalized roadmap.'
-            : 'We’re turning your goal, skills and schedule into a personalized 13-week plan.'}
+            : 'We’re turning your goal, skills, and schedule into a tailored, step-by-step roadmap.'}
         </p>
 
         {!isError && (

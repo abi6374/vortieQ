@@ -16,6 +16,12 @@ function levelLabel(topics) {
   return 'Basic'
 }
 
+function avgConfidence(topics) {
+  if (!topics || !topics.length) return ''
+  const sum = topics.reduce((acc, t) => acc + (t.confidence_pct || 80), 0)
+  return `${Math.round(sum / topics.length)}%`
+}
+
 /**
  * LearnerIntakeWorkspace
  * High-fidelity Step 1 Intake Workspace for PathFinder.
@@ -131,13 +137,14 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
           headers: { 'Content-Type': 'multipart/form-data' },
         })
         const topics = data.topics || []
+        const confStr = topics.length ? `${avgConfidence(topics)} (${levelLabel(topics)})` : ''
         setProfileDraft({
           ...EMPTY_DRAFT,
           skills: topics.map((t) => t.name).join(', '),
-          confidence: levelLabel(topics),
+          confidence: confStr,
           summary: topics.length
-            ? `Identified ${topics.length} skill${topics.length === 1 ? '' : 's'} from your resume${
-                data.detected_years_experience ? ` (~${data.detected_years_experience} years experience)` : ''
+            ? `Identified ${topics.length} skill${topics.length === 1 ? '' : 's'} (~${avgConfidence(topics)} confidence)${
+                data.detected_years_experience ? ` and ~${data.detected_years_experience} years experience` : ''
               }: ${topics.map((t) => t.name).join(', ')}.`
             : 'No specific technical topics were detected in this resume — you can still continue and describe your background.',
         })
@@ -388,29 +395,38 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
             </p>
           </div>
 
-          <div className="space-y-2.5">
-            <div className="flex items-start gap-2">
-              <div className="w-6 h-6 rounded-full bg-[#EEE9FF] text-[#5B36E9] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-xs">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2L14.4 7.6L20 10L14.4 12.4L12 18L9.6 12.4L4 10L9.6 7.6L12 2Z" />
-                </svg>
+          <div className="space-y-2.5 max-h-[170px] overflow-y-auto pr-1">
+            {chatMessages.map((msg) => (
+              <div
+                key={msg.id}
+                className={`flex items-start gap-2 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                {msg.sender === 'ai' && (
+                  <div className="w-6 h-6 rounded-full bg-[#EEE9FF] text-[#5B36E9] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-xs">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2L14.4 7.6L20 10L14.4 12.4L12 18L9.6 12.4L4 10L9.6 7.6L12 2Z" />
+                    </svg>
+                  </div>
+                )}
+                <div
+                  className={`text-[13.5px] leading-relaxed rounded-2xl px-3.5 py-2 max-w-[88%] ${
+                    msg.sender === 'user'
+                      ? 'bg-[#5B36E9] text-white rounded-tr-sm shadow-xs'
+                      : 'bg-[#F5F1FF] text-[#0E1B38] rounded-tl-sm border border-[#E9E3FE]'
+                  }`}
+                >
+                  {msg.text}
+                </div>
+                {msg.sender === 'user' && (
+                  <div className="w-6 h-6 rounded-full bg-[#E2E8F0] text-[#74819A] flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                      <circle cx="12" cy="7" r="4" />
+                    </svg>
+                  </div>
+                )}
               </div>
-              <div className="bg-[#F5F1FF] text-[#0E1B38] text-[13.5px] leading-relaxed rounded-2xl rounded-tl-sm px-3.5 py-2 max-w-[88%] border border-[#E9E3FE]">
-                Tell me about your skills, experience, and what you want to achieve.
-              </div>
-            </div>
-
-            <div className="flex items-start justify-end gap-2">
-              <div className="bg-[#EEF2F6] text-[#0E1B38] text-[13.5px] leading-relaxed rounded-2xl rounded-tr-sm px-3.5 py-2 max-w-[88%] border border-[#E1E7EF]">
-                I’m a second-year CSE student. I know Python basics and want an AIML internship.
-              </div>
-              <div className="w-6 h-6 rounded-full bg-[#E2E8F0] text-[#74819A] flex items-center justify-center flex-shrink-0 mt-0.5">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-                  <circle cx="12" cy="7" r="4" />
-                </svg>
-              </div>
-            </div>
+            ))}
           </div>
 
           <form

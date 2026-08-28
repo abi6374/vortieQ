@@ -82,10 +82,26 @@ def _call_groq(messages: list, max_tokens: int = 3000) -> str:
 VALID_LEVELS = {"basic", "intermediate", "advanced", "expert"}
 
 
+def _calculate_fallback_confidence(evidence: str, level: str, years: int) -> int:
+    level_weight = {"basic": 60, "intermediate": 76, "advanced": 88, "expert": 95}.get(level, 70)
+    words = len(evidence.split())
+    ev_bonus = min(words // 2, 8)
+    yr_bonus = min(max(years, 0) * 2, 6)
+    score = level_weight + ev_bonus + yr_bonus
+    return max(50, min(99, score))
+
+
 def _validate(payload: dict) -> dict:
     topics = payload.get("topics")
     if not isinstance(topics, list):
         raise ValueError("payload.topics is not a list")
+    years = payload.get("detected_years_experience", 0)
+    try:
+        years = int(years)
+    except (TypeError, ValueError):
+        years = 0
+    years = max(0, years)
+
     clean = []
     for t in topics:
         name = (t.get("name") or "").strip()
@@ -93,13 +109,21 @@ def _validate(payload: dict) -> dict:
         evidence = (t.get("evidence") or "").strip()
         if not name or level not in VALID_LEVELS:
             continue
-        clean.append({"name": name, "evidence": evidence, "suggested_level": level})
-    years = payload.get("detected_years_experience", 0)
-    try:
-        years = int(years)
-    except (TypeError, ValueError):
-        years = 0
-    return {"topics": clean, "detected_years_experience": max(0, years)}
+        conf = t.get("confidence_pct")
+        try:
+            conf = int(conf)
+            if conf < 30 or conf > 100:
+                conf = _calculate_fallback_confidence(evidence, level, years)
+        except (TypeError, ValueError):
+            conf = _calculate_fallback_confidence(evidence, level, years)
+
+        clean.append({
+            "name": name,
+            "evidence": evidence,
+            "suggested_level": level,
+            "confidence_pct": conf,
+        })
+    return {"topics": clean, "detected_years_experience": years}
 
 
 def extract_topics(resume_text: str) -> dict:

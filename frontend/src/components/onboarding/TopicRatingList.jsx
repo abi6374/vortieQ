@@ -17,6 +17,7 @@ export default function TopicRatingList({ topics, detectedYears, onContinue, onB
       topics.map((t) => ({
         name: t.name,
         level: levels[t.name] || t.suggested_level || 'basic',
+        confidence_pct: t.confidence_pct || 80,
         evidence: t.evidence || '',
       }))
     )

@@ -13,13 +13,19 @@ For each topic, output:
                    * intermediate = 1-2 projects, or ~1 year professional use
                    * advanced     = 2+ years, multiple production projects
                    * expert       = deep expertise, ownership at scale, teaching
+- confidence_pct : an integer between 50 and 99 reflecting the strength, clarity,
+                   and depth of proof in the resume for this specific skill:
+                   * 90-99 = Extensive verifiable track record, multi-year production experience or senior lead role
+                   * 75-89 = Clear production or significant hands-on project with specific technical achievements
+                   * 60-74 = Moderate proof, standard coursework, minor projects, or standard internship tasks
+                   * 50-59 = Mentioned in skills list or brief summary without detailed project context
 
 Also estimate detected_years_experience (integer, total years of technical work).
 
 Return ONLY a valid JSON object with this exact shape:
 {
   "topics": [
-    {"name": "Python", "evidence": "...", "suggested_level": "advanced"}
+    {"name": "Python", "evidence": "3 years building data pipelines with FastAPI", "suggested_level": "advanced", "confidence_pct": 92}
   ],
   "detected_years_experience": 3
 }
