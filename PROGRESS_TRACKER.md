@@ -1,5 +1,6 @@
 # PROGRESS TRACKER
-Last updated by: Abinivas (Member 2 — ML) at 2026-08-28 (/progress real-data rebuild COMPLETE — all 9 datasets + hero card + 4 KPI cards + a fake fabricated modal removed)
+Last updated by: Abinivas (Member 2 — ML) at 2026-08-28 (/skills real-data rebuild COMPLETE — both /progress and /skills are now fully real, zero hardcoded datasets on either page)
+Previously: Abinivas (Member 2 — ML) at 2026-08-28 (/progress real-data rebuild COMPLETE — all 9 datasets + hero card + 4 KPI cards + a fake fabricated modal removed)
 Previously: Abinivas (Member 2 — ML) at 2026-08-28 (real-data pass on /progress datasets #1-2 of 9, incremental — fixed a real 0-minutes logging bug along the way)
 Previously: Abinivas (Member 2 — ML) at 2026-08-28 (web search moved into the planner itself; removed 2 duplicate fake chatbots on /progress + /skills)
 Previously: Abinivas (Member 2 — ML) at 2026-08-28 (post-launch QA pass: fixed onboarding data-fabrication bugs, real resource URLs, new live web-search feature)
@@ -144,10 +145,18 @@ Done one dataset at a time per user direction, each committed/pushed/deployed se
 
 Net result: **zero remaining hardcoded datasets on `/progress`**. Every commit built clean and was verified against a real user's real Supabase data before pushing; backend changes confirmed deployed and healthy on EC2.
 
+## Round 4 — /skills real-data rebuild — COMPLETE
+Was ~100% mock, and didn't even import `useRoadmap`/`useStreak` at all. Wired both hooks in and reused the `/progress` skill-tag aggregation pattern (real current % = completed/total steps per tag; target is a uniform 100% since no per-skill target is stored anywhere). Rebuilt all 7 numbered datasets (proficiency bar chart, radar, learning trend, skill/time-spent donuts, top strengths, heatmap) **plus** the 4 KPI cards, goal selector, "last updated" timestamp, "Top Skill Gaps" panel, "Recommended Focus" panel, and the "PathFinder insight" paragraph — none of which were in the original numbered comments but were all equally hardcoded. Notable fixes:
+- Donut "category" breakdowns (Programming/Data Analysis/...) replaced with real skill-tag names — no category taxonomy is stored, so grouping into invented categories would have been fabricated either way.
+- "Top Skill Gaps" descriptions ("Focus on Cost Functions...") replaced with a real count of remaining courses for that skill.
+- "Learning Velocity" (2.4 skills/week) relabeled "Learning Pace" using real steps-completed/weeks-elapsed — "skills/week" implied a time-series we don't store, steps/week is what's actually measurable.
+- Removed dead state (`selectedGoal`/`isGoalDropdownOpen`) left over from a fake multi-goal switcher — there's only ever one real active goal.
+
+**Net result: zero remaining hardcoded datasets on `/skills` either.** Both pages from the original audit are now fully real.
+
 **Confirmed but NOT yet fixed — queued, roughly in priority order:**
-1. **`/skills` page data** — separate page from `/progress`, still ~100% mock (skill percentages, gaps, charts). Its fake chatbot is already gone (Round 2); the underlying data is not yet rebuilt. Same approach as `/progress` should apply directly — `roadmap.allSteps`' skill_tags already power the real skills computation used on `/progress` datasets #3-4, so this is largely reusable. Not yet started.
-2. **GoalCompass target-role picker** — currently 3 hardcoded roles, all one domain (vs. the dataset's 4 domains). Per user direction: role should be inferred from the resume/profile, with an option for the learner to specify their own custom role instead of picking from a fixed list. Not yet implemented.
-3. **"AI Coach" as a real full page** — user wants the *full* feature: dedicated page (not just the floating icon), practice questions, tests, and project suggestions, tailored per individual, described as needing "2 separate bots sharing the API key." This is a substantial multi-file feature (new page, new backend prompts/endpoints/schemas), not a bugfix. Scoped but not started.
-4. **AWS Bedrock evaluation** — user wants to consider migrating the assistant's LLM calls from Groq to AWS Bedrock. Real infra change (new AWS service, model access enablement, IAM, region/model choice) on top of everything else. Not started — will need AWS console access again, similar to the EC2 setup. Exact scope still being clarified with the user as of this writing.
+1. **GoalCompass target-role picker** — currently 3 hardcoded roles, all one domain (vs. the dataset's 4 domains). Per user direction: role should be inferred from the resume/profile, with an option for the learner to specify their own custom role instead of picking from a fixed list. Not yet implemented.
+2. **"AI Coach" as a real full page** — user wants the *full* feature: dedicated page (not just the floating icon), practice questions, tests, and project suggestions, tailored per individual, described as needing "2 separate bots sharing the API key." This is a substantial multi-file feature (new page, new backend prompts/endpoints/schemas), not a bugfix. Scoped but not started.
+3. **AWS Bedrock evaluation** — user wants to consider migrating the assistant's LLM calls from Groq to AWS Bedrock. Real infra change (new AWS service, model access enablement, IAM, region/model choice) on top of everything else. Not started — will need AWS console access again, similar to the EC2 setup. Confirmed by user as the intended scope.
 
 ## Note for whoever picks up next: read this file's "Post-launch QA pass" and "Round 2" sections above before touching onboarding/resources/skills/progress/assistant code — several things that look broken from the outside were already fixed, and a couple that look fine were not.
