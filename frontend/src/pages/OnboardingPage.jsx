@@ -1,8 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ChatInput from '../components/onboarding/ChatInput'
 import GoalConfirm from '../components/onboarding/GoalConfirm'
-import GeneratingLoader from '../components/onboarding/GeneratingLoader'
+import GeneratingOverlay from '../components/onboarding/GeneratingOverlay'
 import ResumeUpload from '../components/onboarding/ResumeUpload'
 import LearnerIntakeWorkspace from '../components/onboarding/LearnerIntakeWorkspace'
 import AssessSkills from '../components/onboarding/AssessSkills'
@@ -27,8 +27,17 @@ export default function OnboardingPage() {
   const [topicRatings, setTopicRatings] = useState([])       // user-adjusted levels
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [genStatus, setGenStatus] = useState('loading') // 'loading' | 'success' | 'error'
+  const [pendingPathId, setPendingPathId] = useState(null)
+  const lastPlanArgs = useRef(null)
+  const bgRef = useRef(null)
 
   const navigate = useNavigate()
+
+  // Freeze the Goal Compass page (pointer + keyboard) while the overlay is open.
+  useEffect(() => {
+    if (bgRef.current) bgRef.current.inert = phase === 'generating'
+  }, [phase])
 
   // ------------- Step 1: Intake (Resume or Natural-language notes)
   const handleResumeExtracted = (topics, years) => {
@@ -57,8 +66,11 @@ export default function OnboardingPage() {
   }
 
   // ------------- Goal Compass "Create my learning plan"
-  const handleCreatePlan = async (goalTextInput, weeklyHours) => {
+  const runPlan = async (goalTextInput, weeklyHours) => {
+    lastPlanArgs.current = { goalTextInput, weeklyHours }
     setError(null)
+    setPendingPathId(null)
+    setGenStatus('loading')
     setPhase('generating')
     try {
       // Fold the weekly-hours choice into the goal text so extract_profile picks
@@ -71,12 +83,19 @@ export default function OnboardingPage() {
       if (detectedYears > 0) body.detected_years_experience = detectedYears
       await api.post('/api/profile/', body)
       const result = await api.post('/api/paths/generate', {})
-      navigate(`/roadmap/${result.data.path_id}`)
+      setPendingPathId(result.data.path_id)
+      setGenStatus('success')
     } catch (err) {
-      setError('Path generation failed. Please try again.')
-      setPhase('goalcompass')
+      setGenStatus('error')
     }
   }
+  const handleCreatePlan = runPlan
+  const retryPlan = () => {
+    const a = lastPlanArgs.current
+    if (a) runPlan(a.goalTextInput, a.weeklyHours)
+  }
+  const backToGoal = () => { setGenStatus('loading'); setPhase('goalcompass') }
+  const finishToRoadmap = () => { if (pendingPathId) navigate(`/roadmap/${pendingPathId}`) }
 
   // ------------- goal chat
   const handleGoalSubmit = async (text) => {
@@ -151,25 +170,35 @@ export default function OnboardingPage() {
   }
 
   // The "Set your goal" step — Goal Compass with the live Ambition–Readiness Meter.
-  if (phase === 'goalcompass') {
+  if (phase === 'goalcompass' || phase === 'generating') {
     return (
-      <div className="min-h-screen flex" style={{ background: '#F5F7FC' }}>
-        <SetupSidebar current={3} />
-        <div className="flex-1 flex flex-col items-center justify-start px-4 py-10 overflow-y-auto">
-          <GoalCompass
-            topicRatings={topicRatings}
-            detectedYears={detectedYears}
-            initialGoal={goalText}
-            onCreate={handleCreatePlan}
-            onBack={() => setPhase(resumeTopics.length > 0 ? 'topics' : 'intake')}
-          />
-          {error && (
-            <p className="mt-4 text-center text-sm text-red-700 bg-red-100 rounded-lg py-2 px-4 max-w-md">
-              {error}
-            </p>
-          )}
+      <>
+        <div ref={bgRef} className="min-h-screen flex" style={{ background: '#F5F7FC' }}>
+          <SetupSidebar current={3} />
+          <div className="flex-1 flex flex-col items-center justify-start px-4 py-10 overflow-y-auto">
+            <GoalCompass
+              topicRatings={topicRatings}
+              detectedYears={detectedYears}
+              initialGoal={goalText}
+              onCreate={handleCreatePlan}
+              onBack={() => setPhase(resumeTopics.length > 0 ? 'topics' : 'intake')}
+            />
+            {error && phase !== 'generating' && (
+              <p className="mt-4 text-center text-sm text-red-700 bg-red-100 rounded-lg py-2 px-4 max-w-md">
+                {error}
+              </p>
+            )}
+          </div>
         </div>
-      </div>
+        {phase === 'generating' && (
+          <GeneratingOverlay
+            status={genStatus}
+            onFinished={finishToRoadmap}
+            onRetry={retryPlan}
+            onBack={backToGoal}
+          />
+        )}
+      </>
     )
   }
 
@@ -210,8 +239,6 @@ export default function OnboardingPage() {
               onEdit={handleEditGoal}
             />
           )}
-
-          {phase === 'generating' && <GeneratingLoader />}
         </div>
 
         {error && (
