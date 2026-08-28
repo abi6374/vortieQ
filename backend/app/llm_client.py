@@ -40,6 +40,14 @@ def _groq_chat(messages: list, max_tokens: int, temperature: float) -> str:
 
 _bedrock_runtime = None
 
+# Meta Llama 3 70B Instruct on Bedrock hard-caps output at 2048 tokens - found
+# live (a real ValidationException) when path_service's 6000-token request
+# for milestone-sequencing hit this. Clamping here means every caller keeps
+# working, but the tradeoff is real: prompts written assuming Groq's higher
+# ceiling (path generation especially) can come back truncated on this model.
+# Lighter prompts (coach practice/project, assistant replies) fit comfortably.
+BEDROCK_MAX_OUTPUT_TOKENS = 2048
+
 
 def _get_bedrock_runtime():
     global _bedrock_runtime
@@ -65,6 +73,9 @@ def _bedrock_chat(messages: list, max_tokens: int, temperature: float) -> str:
         modelId=settings.BEDROCK_MODEL_ID,
         system=system,
         messages=convo,
-        inferenceConfig={"maxTokens": max_tokens, "temperature": temperature},
+        inferenceConfig={
+            "maxTokens": min(max_tokens, BEDROCK_MAX_OUTPUT_TOKENS),
+            "temperature": temperature,
+        },
     )
     return response["output"]["message"]["content"][0]["text"].strip()
