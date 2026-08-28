@@ -158,18 +158,21 @@ const ROLE_PATH_PREVIEWS = {
 
 const STYLES = `
 .gc{ --violet:#5B36E9; --violet-2:#6236EF; --violet-dark:#4826C9; --navy:#0E1B38; --slate:#52617D;
- --muted:#74819A; --lavender:#F5F1FF; --lav-icon:#EEE9FF; --card-bd:#D8DFEB; --input-bd:#CAD3E2;
+ --muted:#74819A; --lavender:#F5F1FF; --lav-icon:#EEE9FF; --card-bd:#E1E6F0; --input-bd:#CAD3E2;
  --divider:#E6EAF2; --green:#22A06B; --green-surface:#ECFDF3; --green-bd:#B7E7C9; --green-text:#168052;
  --amber:#E0A100; --amber-surface:#FEF6E7; --amber-bd:#F3DB9B; --amber-text:#8A6100;
  --red:#DC2626; --red-surface:#FDECEC; --red-bd:#F3B9B9; --red-text:#B42318; --track:#E8EAF4;
- width:100%; max-width:1080px; }
+ width:100%; max-width:1140px; }
 .gc *{ box-sizing:border-box; }
-.gc .head{ display:flex; align-items:center; gap:20px; margin-bottom:26px; }
-.gc .head-icon{ width:60px; height:60px; border-radius:50%; flex:none; background:var(--lav-icon); color:var(--violet); display:grid; place-items:center; }
-.gc .head h1{ font-family:"Manrope",sans-serif; font-size:clamp(26px,3vw,40px); font-weight:800; letter-spacing:-.025em; margin:0 0 5px; line-height:1.05; color:var(--navy); }
-.gc .head p{ font-size:clamp(14px,1.3vw,18px); color:var(--slate); margin:0; line-height:1.45; }
-.gc .cols{ display:grid; grid-template-columns:57% 43%; gap:22px; align-items:start; }
-.gc .card{ background:#fff; border:1px solid var(--card-bd); border-radius:16px; box-shadow:0 1px 2px rgba(25,40,75,.04),0 4px 14px rgba(25,40,75,.05); padding:24px; }
+.gc .head{ display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:24px; }
+.gc .head-left{ display:flex; flex-direction:column; }
+.gc .step-badge{ display:inline-flex; align-items:center; gap:6px; border-radius:999px; padding:4px 14px; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--violet); background:var(--lavender); border:1px solid #EFE9FF; width:fit-content; margin-bottom:12px; }
+.gc .head-title-row{ display:flex; align-items:center; gap:16px; }
+.gc .head-icon{ width:52px; height:52px; border-radius:16px; flex:none; background:var(--lav-icon); color:var(--violet); display:grid; place-items:center; }
+.gc .head h1{ font-family:"Manrope",sans-serif; font-size:clamp(26px,3vw,38px); font-weight:800; letter-spacing:-.025em; margin:0 0 4px; line-height:1.1; color:var(--navy); }
+.gc .head p{ font-size:clamp(14px,1.3vw,16px); color:var(--slate); margin:0; line-height:1.45; }
+.gc .cols{ display:grid; grid-template-columns:1.15fr 0.85fr; gap:24px; align-items:start; }
+.gc .card{ background:#fff; border:1px solid var(--card-bd); border-radius:18px; box-shadow:0 14px 38px rgba(25,40,75,0.08); padding:28px; }
 .gc .sec-h{ font-size:19px; font-weight:600; margin:0 0 11px; color:var(--navy); letter-spacing:-.01em; }
 .gc .sec+.sec{ margin-top:24px; }
 .gc textarea{ width:100%; resize:none; border:1.5px solid var(--input-bd); border-radius:12px; padding:16px; font-family:inherit; font-size:16px; line-height:1.5; color:var(--navy); min-height:104px; background:#fff; }
@@ -342,12 +345,22 @@ export default function GoalCompass({ topicRatings = [], detectedYears = 0, init
     <div className="gc">
       <style>{STYLES}</style>
 
-      <div className="head" style={{ justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-          <span className="head-icon" aria-hidden="true"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polygon points="16.2 7.8 10.5 10.5 7.8 16.2 13.5 13.5" fill="currentColor" stroke="none" /></svg></span>
-          <div>
-            <h1>Where do you want to go?</h1>
-            <p>Tell us your goal. Goal Compass turns it into a realistic, personalized learning path.</p>
+      <div className="head">
+        <div className="head-left">
+          <span className="step-badge">
+            Step 3 · Goal Compass
+          </span>
+          <div className="head-title-row">
+            <span className="head-icon" aria-hidden="true">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <polygon points="16.2 7.8 10.5 10.5 7.8 16.2 13.5 13.5" fill="currentColor" stroke="none" />
+              </svg>
+            </span>
+            <div>
+              <h1>Where do you want to go?</h1>
+              <p>Tell us your goal. Goal Compass turns it into a realistic, personalized learning path.</p>
+            </div>
           </div>
         </div>
         <UserProfileDropdown />

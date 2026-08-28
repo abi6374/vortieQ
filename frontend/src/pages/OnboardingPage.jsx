@@ -150,13 +150,12 @@ export default function OnboardingPage() {
     )
   }
 
-  // The "Assess skills" step gets the full artifact chrome: pale-gray page,
-  // left 5-step sidebar, white container — matching the approved design.
+  // Step 2: The "Assess skills" step
   if (phase === 'topics') {
     return (
       <div className="min-h-screen flex" style={{ background: '#F5F7FC' }}>
         <SetupSidebar current={2} />
-        <div className="flex-1 flex flex-col items-center justify-start px-4 py-10 overflow-y-auto">
+        <div className="flex-1 flex flex-col items-center justify-start px-4 py-8 lg:py-10 overflow-y-auto">
           <AssessSkills
             topics={resumeTopics}
             detectedYears={detectedYears}
@@ -169,13 +168,13 @@ export default function OnboardingPage() {
     )
   }
 
-  // The "Set your goal" step — Goal Compass with the live Ambition–Readiness Meter.
+  // Step 3: The "Set your goal" step — Goal Compass with Ambition–Readiness Meter
   if (phase === 'goalcompass' || phase === 'generating') {
     return (
       <>
         <div ref={bgRef} className="min-h-screen flex" style={{ background: '#F5F7FC' }}>
           <SetupSidebar current={3} />
-          <div className="flex-1 flex flex-col items-center justify-start px-4 py-10 overflow-y-auto">
+          <div className="flex-1 flex flex-col items-center justify-start px-4 py-8 lg:py-10 overflow-y-auto">
             <GoalCompass
               topicRatings={topicRatings}
               detectedYears={detectedYears}
@@ -203,26 +202,19 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-indigo-900 to-blue-900">
-      <NavBar />
-      <div className="flex-1 flex flex-col items-center justify-center px-4 py-12">
-        <div className="w-full flex justify-center">
-          {phase === 'resume' && (
-            <ResumeUpload
-              onExtracted={handleResumeExtracted}
-              onSkip={() => setPhase('chat')}
-            />
-          )}
-
+    <div className="min-h-screen flex" style={{ background: '#F5F7FC' }}>
+      <SetupSidebar current={1} />
+      <div className="flex-1 flex flex-col items-center justify-start px-4 py-8 lg:py-10 overflow-y-auto">
+        <div className="w-full max-w-[1140px] flex justify-center">
           {phase === 'chat' && (
-            <div className="bg-white rounded-2xl shadow-xl p-8 max-w-2xl w-full">
-              <h1 className="text-2xl font-bold text-gray-900">Let's map your path</h1>
-              <p className="mt-2 text-sm text-gray-600">
+            <div className="bg-white rounded-2xl border border-[#E1E6F0] shadow-[0_14px_38px_rgba(25,40,75,0.08)] p-8 max-w-2xl w-full">
+              <h1 className="text-2xl font-bold text-[#0E1B38]">Let's map your path</h1>
+              <p className="mt-2 text-sm text-[#52617D]">
                 Describe your learning goal in your own words. Our AI will turn it into a
                 personalized roadmap.
               </p>
               {topicRatings.length > 0 && (
-                <p className="mt-3 text-xs text-indigo-700 bg-indigo-50 rounded-lg px-3 py-2">
+                <p className="mt-3 text-xs text-[#5B36E9] bg-[#F5F1FF] rounded-lg px-3 py-2 border border-[#EFE9FF]">
                   Using {topicRatings.length} skill{topicRatings.length === 1 ? '' : 's'} from your resume to personalize recommendations.
                 </p>
               )}
@@ -233,16 +225,18 @@ export default function OnboardingPage() {
           )}
 
           {phase === 'confirm' && (
-            <GoalConfirm
-              profile={extractedProfile}
-              onConfirm={handleConfirm}
-              onEdit={handleEditGoal}
-            />
+            <div className="w-full max-w-[1140px] flex justify-center">
+              <GoalConfirm
+                profile={extractedProfile}
+                onConfirm={handleConfirm}
+                onEdit={handleEditGoal}
+              />
+            </div>
           )}
         </div>
 
         {error && (
-          <p className="mt-4 text-center text-sm text-red-200 bg-red-900/40 rounded-lg py-2 px-4 max-w-md">
+          <p className="mt-4 text-center text-sm text-red-700 bg-red-100 rounded-lg py-2 px-4 max-w-md">
             {error}
           </p>
         )}

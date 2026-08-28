@@ -216,7 +216,7 @@ export default function AssessSkills({ topics = [], detectedYears = 0, onContinu
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl w-full" style={{ maxWidth: 940, padding: 'clamp(24px,4vw,40px)' }}>
+    <div className="w-full max-w-[1140px] bg-white rounded-2xl border border-[#E1E6F0] shadow-[0_14px_38px_rgba(25,40,75,0.08)] p-6 sm:p-10 flex flex-col justify-between overflow-hidden">
       
       {/* Top Header Row with Step Badge and User Profile */}
       <div className="flex items-center justify-between mb-4">
