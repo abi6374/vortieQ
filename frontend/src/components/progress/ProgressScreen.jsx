@@ -165,73 +165,55 @@ export default function ProgressScreen() {
   }))
   const weeklyHoursTotal = Math.round(((streak.minutes_this_week || 0) / 60) * 10) / 10
 
-  // 3. Core Skills Development
-  const skillsData = [
-    {
-      id: 'py',
-      name: 'Python',
-      category: 'Programming',
-      progress: 88,
-      status: 'Strong',
-      statusColor: 'bg-[#ECFDF3] text-[#16A34A] border-[#D1FADF]',
-      icon: Code2,
-    },
-    {
-      id: 'stats',
-      name: 'Statistics',
-      category: 'Mathematics',
-      progress: 55,
-      status: 'Needs attention',
-      statusColor: 'bg-[#FFF7E6] text-[#F59E0B] border-[#FEE4B2]',
-      icon: BarChart3,
-    },
-    {
-      id: 'ml',
-      name: 'Machine Learning',
-      category: 'Core AI',
-      progress: 62,
-      status: 'Developing',
-      statusColor: 'bg-[#EFF6FF] text-[#3B82F6] border-[#DBEAFE]',
-      icon: Brain,
-    },
-    {
-      id: 'pandas',
-      name: 'Pandas & NumPy',
-      category: 'Data Analysis',
-      progress: 76,
-      status: 'Good',
-      statusColor: 'bg-[#F3EEFF] text-[#5B2FF3] border-[#DDD2FF]',
-      icon: Layers,
-    },
-    {
-      id: 'sql',
-      name: 'SQL',
-      category: 'Databases',
-      progress: 48,
-      status: 'Needs attention',
-      statusColor: 'bg-[#FFF7E6] text-[#F59E0B] border-[#FEE4B2]',
-      icon: FileText,
-    },
-    {
-      id: 'dl',
-      name: 'Deep Learning',
-      category: 'Advanced AI',
-      progress: 35,
-      status: 'Upcoming',
-      statusColor: 'bg-[#F8FAFC] text-[#64748B] border-[#E2E8F0]',
-      icon: Activity,
-    },
+  // 3 & 4. Core Skills Development + Skill Profile Radar — REAL, derived from
+  // roadmap.allSteps' real skill_tags and completion status. There's no
+  // stored "category" taxonomy per tag, so that label is dropped rather than
+  // invented; icon is a cosmetic lookup only, not a data field.
+  const SKILL_ICON_MAP = [
+    [/python|programming/i, Code2],
+    [/statistic|sql|analy/i, BarChart3],
+    [/machine.?learning|deep.?learning|ai\b/i, Brain],
+    [/pandas|data/i, Layers],
+    [/docs?|documentation/i, FileText],
   ]
+  const iconFor = (tag) => (SKILL_ICON_MAP.find(([re]) => re.test(tag)) || [null, Activity])[1]
+  const statusFor = (pct) => {
+    if (pct >= 80) return { status: 'Strong', color: 'bg-[#ECFDF3] text-[#16A34A] border-[#D1FADF]' }
+    if (pct >= 60) return { status: 'Good', color: 'bg-[#F3EEFF] text-[#5B2FF3] border-[#DDD2FF]' }
+    if (pct >= 40) return { status: 'Developing', color: 'bg-[#EFF6FF] text-[#3B82F6] border-[#DBEAFE]' }
+    if (pct > 0) return { status: 'Needs attention', color: 'bg-[#FFF7E6] text-[#F59E0B] border-[#FEE4B2]' }
+    return { status: 'Upcoming', color: 'bg-[#F8FAFC] text-[#64748B] border-[#E2E8F0]' }
+  }
 
-  // 4. Skill Profile Radar Data
-  const radarData = [
-    { skill: 'Python', value: 88 },
-    { skill: 'Statistics', value: 55 },
-    { skill: 'ML', value: 62 },
-    { skill: 'Data Analysis', value: 76 },
-    { skill: 'SQL', value: 48 },
-    { skill: 'Deep Learning', value: 35 },
-  ]
+  const skillTagStats = {}
+  roadmap.allSteps.forEach((step) => {
+    ;(step.skill_tags || []).forEach((tag) => {
+      if (!skillTagStats[tag]) skillTagStats[tag] = { total: 0, done: 0 }
+      skillTagStats[tag].total += 1
+      if (step.completed) skillTagStats[tag].done += 1
+    })
+  })
+  const rankedSkills = Object.entries(skillTagStats)
+    .map(([tag, s]) => ({ tag, total: s.total, progress: Math.round((s.done / s.total) * 100) }))
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 6)
+
+  const cap = (s) => s.replace(/[-_]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+
+  const skillsData = rankedSkills.map((s) => {
+    const { status, color } = statusFor(s.progress)
+    return {
+      id: s.tag,
+      name: cap(s.tag),
+      progress: s.progress,
+      status,
+      statusColor: color,
+      icon: iconFor(s.tag),
+    }
+  })
+
+  // 4. Skill Profile Radar Data — same real per-skill progress, reshaped for the radar chart.
+  const radarData = rankedSkills.map((s) => ({ skill: cap(s.tag), value: s.progress }))
 
   // 5. 5-Week Mini Activity Heatmap Matrix (7 days x 5 weeks)
   // Intensity: 0 (gray), 1 (very light), 2 (light), 3 (medium), 4 (strong purple)
@@ -752,9 +734,6 @@ export default function ProgressScreen() {
                               </span>
                               <span className="font-bold text-xs text-[#172554] group-hover:text-[#5B2FF3] transition-colors">
                                 {skill.name}
-                              </span>
-                              <span className="text-[10px] text-[#94A3B8] font-medium hidden sm:inline">
-                                · {skill.category}
                               </span>
                             </div>
                             <div className="flex items-center gap-2">
