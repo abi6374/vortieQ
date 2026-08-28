@@ -40,10 +40,10 @@ const STYLES = `
 .genov .row.done{ background:#F7F4FF; color:#0E1B38; }
 .genov .row.active{ background:#F5F1FF; color:#5B36E9; }
 .genov .row.todo{ background:transparent; color:#74819A; font-weight:500; }
-.genov .ic{ width:22px; height:22px; flex:none; display:grid; place-items:center; }
-.genov .ic .dot-done{ width:22px; height:22px; border-radius:50%; background:#5B36E9; display:grid; place-items:center; }
+.genov .ic{ width:22px; height:22px; flex:none; display:flex; align-items:center; justify-content:center; }
+.genov .ic .dot-done{ width:22px; height:22px; border-radius:50%; background:#5B36E9; display:flex; align-items:center; justify-content:center; }
 .genov .ic .dot-todo{ width:20px; height:20px; border-radius:50%; border:1.5px solid #D8DFEB; }
-.genov .ic .ring{ width:22px; height:22px; }
+.genov .ic .ring{ width:22px; height:22px; display:block; }
 .genov .progress-wrap{ margin-top:24px; }
 .genov .track{ width:100%; height:9px; background:#E8EAF4; border-radius:999px; overflow:hidden; }
 .genov .fill{ height:100%; background:#5B36E9; border-radius:999px; box-shadow:0 0 10px rgba(91,54,233,.45); }
@@ -62,9 +62,9 @@ const STYLES = `
 .genov .btn-ghost{ background:#fff; color:#52617D; border-color:#D8DFEB; }
 .genov .btn-ghost:hover{ background:#F7F8FB; }
 .genov .btn:focus-visible{ outline:none; box-shadow:0 0 0 3px rgba(91,54,233,.35); }
-.genov .spin{ transform-box:fill-box; transform-origin:center; animation:genov-spin 1.2s linear infinite; }
-.genov .compass{ transform-box:fill-box; transform-origin:center; animation:genov-spin 14s linear infinite; }
-.genov .orbit{ transform-box:fill-box; transform-origin:center; animation:genov-spin 18s linear infinite; }
+.genov .spin{ transform-origin:center; animation:genov-spin 1s linear infinite; }
+.genov .compass{ transform-origin:60px 60px; animation:genov-spin 14s linear infinite; }
+.genov .orbit{ transform-origin:60px 60px; animation:genov-spin 18s linear infinite; }
 @keyframes genov-spin{ to{ transform:rotate(360deg); } }
 @media (prefers-reduced-motion:reduce){
   .genov .spin,.genov .compass,.genov .orbit{ animation:none; }
@@ -81,9 +81,9 @@ function CheckIcon() {
 
 function ActiveRing() {
   return (
-    <svg className="ring" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <circle cx="12" cy="12" r="9" stroke="#DcccF9" strokeWidth="2.5" />
-      <path className="spin" d="M12 3a9 9 0 0 1 9 9" stroke="#5B36E9" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+    <svg className="ring spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="12" cy="12" r="9.5" stroke="#DDD2FF" strokeWidth="2.5" />
+      <path d="M12 2.5a9.5 9.5 0 0 1 9.5 9.5" stroke="#5B36E9" strokeWidth="2.5" strokeLinecap="round" fill="none" />
     </svg>
   )
 }
