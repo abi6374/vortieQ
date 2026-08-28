@@ -23,7 +23,11 @@ class Settings(BaseSettings):
     # read from .env on purpose; boto3's default credential chain picks up
     # the instance role automatically, so there's nothing secret to leak.
     LLM_PROVIDER: str = "groq"  # "groq" | "bedrock"
-    AWS_REGION: str = "ap-south-1"
+    # us-east-1 (not ap-south-1, where the EC2 box actually runs) - Bedrock
+    # model availability varies a lot by region and ap-south-1's is limited.
+    # A boto3 client can call any AWS region regardless of where the calling
+    # instance lives, so this is independent of EC2's own region.
+    AWS_REGION: str = "us-east-1"
     BEDROCK_MODEL_ID: str = "meta.llama3-70b-instruct-v1:0"
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
