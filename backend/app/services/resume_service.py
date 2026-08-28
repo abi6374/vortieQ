@@ -17,17 +17,28 @@ MAX_TEXT_CHARS = 60_000       # trim very long resumes before sending to the LLM
 
 def _load_prompt(name: str) -> str:
     return (_Path(__file__).parent.parent / "prompts" / name).read_text(encoding="utf-8")
+try:
+    from pypdf import PdfReader
+except ImportError:
+    PdfReader = None
+
+try:
+    from docx import Document
+except ImportError:
+    Document = None
 
 
 # ---------------------------------------------------------------- text extraction
 def _pdf_to_text(data: bytes) -> str:
-    from pypdf import PdfReader
+    if PdfReader is None:
+        raise ValueError("pypdf is not installed. Please install pypdf to process PDF files.")
     reader = PdfReader(io.BytesIO(data))
     return "\n".join((page.extract_text() or "") for page in reader.pages)
 
 
 def _docx_to_text(data: bytes) -> str:
-    from docx import Document
+    if Document is None:
+        raise ValueError("python-docx is not installed. Please install python-docx to process DOCX files.")
     doc = Document(io.BytesIO(data))
     parts = [p.text for p in doc.paragraphs if p.text]
     for table in doc.tables:

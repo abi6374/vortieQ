@@ -17,12 +17,8 @@ try:
     from duckduckgo_search import DDGS
     from duckduckgo_search.exceptions import DuckDuckGoSearchException as DDGSException
 except ImportError:
-    try:
-        from ddgs import DDGS
-        from ddgs.exceptions import DDGSException
-    except ImportError:
-        DDGS = None
-        DDGSException = Exception
+    DDGS = None
+    DDGSException = Exception
 
 MAX_RESULTS = 8
 CACHE_TTL_SECONDS = 1800  # 30 min - identical queries reuse results instead of re-searching

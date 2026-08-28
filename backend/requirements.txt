@@ -11,5 +11,5 @@ numpy
 pypdf
 python-docx
 python-multipart
-ddgs
+duckduckgo_search
 boto3
