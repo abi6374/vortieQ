@@ -1,5 +1,6 @@
 # PROGRESS TRACKER
-Last updated by: Abinivas (Member 2 — ML) at 2026-08-28 (GoalCompass role picker: resume-driven auto-suggest + custom role, was hardcoded to 3 roles always defaulting to AIML Engineer)
+Last updated by: Abinivas (Member 2 — ML) at 2026-08-28 (NEW: real dedicated /coach page — chat, practice questions, project ideas, all grounded in the real learner)
+Previously: Abinivas (Member 2 — ML) at 2026-08-28 (GoalCompass role picker: resume-driven auto-suggest + custom role, was hardcoded to 3 roles always defaulting to AIML Engineer)
 Previously: Abinivas (Member 2 — ML) at 2026-08-28 (/skills real-data rebuild COMPLETE — both /progress and /skills are now fully real, zero hardcoded datasets on either page)
 Previously: Abinivas (Member 2 — ML) at 2026-08-28 (/progress real-data rebuild COMPLETE — all 9 datasets + hero card + 4 KPI cards + a fake fabricated modal removed)
 Previously: Abinivas (Member 2 — ML) at 2026-08-28 (real-data pass on /progress datasets #1-2 of 9, incremental — fixed a real 0-minutes logging bug along the way)
@@ -162,8 +163,14 @@ Was 3 hardcoded roles all in one domain (AIML Engineer/Data Analyst/Python Devel
 - Added a free-text "Custom role" option. No stored requirement thresholds exist for an arbitrary typed-in role, so its readiness gauge honestly degrades to a simple message instead of inventing requirement numbers.
 - **Bug fixed along the way**: some requirement keys used the course dataset's hyphenated tag slugs (`machine-learning`) instead of the natural-language names the resume-extraction prompt actually outputs (`machine learning`) — would have silently never matched real topicRatings. Caught and fixed before commit.
 
-**Confirmed but NOT yet fixed — queued, roughly in priority order:**
-1. **"AI Coach" as a real full page** — user wants the *full* feature: dedicated page (not just the floating icon), practice questions, tests, and project suggestions, tailored per individual, described as needing "2 separate bots sharing the API key." This is a substantial multi-file feature (new page, new backend prompts/endpoints/schemas), not a bugfix. Scoped but not started.
-2. **AWS Bedrock evaluation** — user wants to consider migrating the assistant's LLM calls from Groq to AWS Bedrock. Real infra change (new AWS service, model access enablement, IAM, region/model choice) on top of everything else. Not started — will need AWS console access again, similar to the EC2 setup. Confirmed by user as the intended scope.
+## Round 6 — real dedicated /coach page — COMPLETE
+Answers the original ask directly: a real full page (not just the floating icon) with practice questions, project ideas, and chat, tailored per individual.
+- **Backend**: `coach_service.py` + `routers/coach.py` — `POST /api/coach/practice` (real level-appropriate MCQ questions for a topic, grounded in the learner's real `current_level`) and `POST /api/coach/project-idea` (a project suggestion built ONLY from skills the learner has actually completed/is in-progress on — never a skill they have no exposure to). Both verified live against a real user: got 3 correct, well-formed Python MCQs, and a Data Analyst project idea (SQL/Python/Tableau) matching that learner's real completed skills exactly.
+- **Deliberately stateless server-side** for this first version — no new Supabase table. Questions/ideas generate fresh per call and grade client-side (the response ships `correct_index`). A persisted "past attempts" history is a natural v2, not built yet.
+- **Frontend**: new `/coach` route, 3 tabs (Chat / Practice / Project ideas). The Chat tab reuses the exact same real persisted conversation (`useAIChat`) as the floating widget everywhere else — this is the SAME one real bot in a bigger dedicated space, not a second disconnected one. `AppSidebar`'s "AI coach" nav now navigates here instead of just popping the floating panel; the floating widget itself is untouched and still available on every other page for quick in-context questions.
+- Backend auto-deployed to EC2 and confirmed healthy post-deploy.
+
+**Confirmed but NOT yet fixed — queued:**
+1. **AWS Bedrock evaluation** — user wants to consider migrating the assistant's LLM calls from Groq to AWS Bedrock. Real infra change (new AWS service, model access enablement, IAM, region/model choice) on top of everything else. Not started — will need AWS console access again, similar to the EC2 setup. Confirmed by user as the intended scope. **This is now the only remaining item in the backlog.**
 
 ## Note for whoever picks up next: read this file's "Post-launch QA pass" and "Round 2" sections above before touching onboarding/resources/skills/progress/assistant code — several things that look broken from the outside were already fixed, and a couple that look fine were not.
