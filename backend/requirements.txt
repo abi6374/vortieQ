@@ -11,3 +11,4 @@ numpy
 pypdf
 python-docx
 python-multipart
+ddgs

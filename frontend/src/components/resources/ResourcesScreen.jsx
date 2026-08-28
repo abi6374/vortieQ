@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import { useAIChat } from '../../contexts/AIChatContext'
 import { supabase } from '../../lib/supabaseClient'
+import api from '../../lib/apiClient'
 import UserProfileDropdown from '../ui/UserProfileDropdown'
 import AppSidebar from '../ui/AppSidebar'
 
@@ -277,6 +278,14 @@ export default function ResourcesScreen() {
   const [durationFilter, setDurationFilter] = useState('all')      // all|short|medium|long
   const [openMatchFor, setOpenMatchFor] = useState(null)           // step_id for the Why popover
 
+  // Live web-search recommendations — real results fetched from the backend
+  // (DuckDuckGo, no API key) to supplement the fixed 80-course dataset.
+  const [webQuery, setWebQuery] = useState('')
+  const [webResults, setWebResults] = useState([])
+  const [webLoading, setWebLoading] = useState(false)
+  const [webError, setWebError] = useState('')
+  const [webSearched, setWebSearched] = useState(false)
+
   useEffect(() => {
     let cancelled = false
     async function load() {
@@ -309,6 +318,30 @@ export default function ResourcesScreen() {
     load()
     return () => { cancelled = true }
   }, [user])
+
+  // Default the web-search box to something sensible once the real path loads.
+  useEffect(() => {
+    if (!webQuery && path?.goal_text) {
+      setWebQuery(path.goal_text.split('.')[0].slice(0, 100))
+    }
+  }, [path, webQuery])
+
+  const handleWebSearch = async (e) => {
+    e?.preventDefault()
+    const q = webQuery.trim()
+    if (!q) return
+    setWebLoading(true)
+    setWebError('')
+    try {
+      const { data } = await api.get('/api/resources/search', { params: { query: q } })
+      setWebResults(data.results || [])
+      setWebSearched(true)
+    } catch (err) {
+      setWebError('Could not fetch live recommendations right now. Please try again.')
+    } finally {
+      setWebLoading(false)
+    }
+  }
 
   const toggleSave = (id) => setSaved((s) => {
     const next = new Set(s)
@@ -528,6 +561,65 @@ export default function ResourcesScreen() {
                     : "Kick things off with onboarding to get your personalized plan."}
               </p>
               <button className="ask">Ask why →</button>
+            </div>
+
+            <div className="rx-panel">
+              <h3>{I.spark} Find more resources</h3>
+              <p style={{ fontSize: 13, color: 'var(--slate, #52617D)', margin: '0 0 10px', lineHeight: 1.5 }}>
+                Live web search (incl. NPTEL) to supplement the courses above.
+              </p>
+              <form onSubmit={handleWebSearch} style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+                <input
+                  type="text"
+                  value={webQuery}
+                  onChange={(e) => setWebQuery(e.target.value)}
+                  placeholder="e.g. machine learning, React, SQL..."
+                  style={{
+                    flex: 1, minWidth: 0, fontSize: 13, padding: '8px 10px',
+                    border: '1px solid #D8DFEB', borderRadius: 8, outline: 'none',
+                  }}
+                />
+                <button
+                  type="submit"
+                  disabled={webLoading || !webQuery.trim()}
+                  style={{
+                    fontSize: 13, fontWeight: 700, color: '#fff', background: V,
+                    border: 'none', borderRadius: 8, padding: '8px 14px', cursor: 'pointer',
+                    opacity: webLoading || !webQuery.trim() ? 0.6 : 1,
+                  }}
+                >
+                  {webLoading ? '...' : 'Search'}
+                </button>
+              </form>
+
+              {webError && (
+                <p style={{ fontSize: 12.5, color: '#B42318', margin: '0 0 8px' }}>{webError}</p>
+              )}
+
+              {webSearched && !webLoading && webResults.length === 0 && !webError && (
+                <p style={{ fontSize: 12.5, color: '#74819A', margin: 0 }}>No results found. Try a different search.</p>
+              )}
+
+              {webResults.length > 0 && (
+                <div className="rx-saved-list">
+                  {webResults.map((r) => (
+                    <a
+                      key={r.url}
+                      href={r.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="rx-saved-item"
+                      style={{ textDecoration: 'none', cursor: 'pointer' }}
+                    >
+                      <span className="s-ic">{I.grad}</span>
+                      <div className="s-body">
+                        <div className="s-t">{r.title || r.url}</div>
+                        <div className="s-m" style={{ whiteSpace: 'normal' }}>{new URL(r.url).hostname.replace('www.', '')}</div>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              )}
             </div>
 
             {savedItems.length > 0 && (

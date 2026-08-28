@@ -2,6 +2,20 @@ import React, { useState, useRef } from 'react'
 import apiClient from '../../lib/apiClient'
 import UserProfileDropdown from '../ui/UserProfileDropdown'
 
+const EMPTY_DRAFT = { skills: '', education: '', projects: '', confidence: '', goal: '', summary: '' }
+
+// Qualitative label for an average suggested_level across real extracted topics.
+// Purely descriptive of what was actually detected — never a guess.
+function levelLabel(topics) {
+  if (!topics.length) return ''
+  const order = { basic: 0, intermediate: 1, advanced: 2, expert: 3 }
+  const avg = topics.reduce((s, t) => s + (order[t.suggested_level] ?? 0), 0) / topics.length
+  if (avg >= 2.5) return 'Expert'
+  if (avg >= 1.5) return 'Advanced'
+  if (avg >= 0.5) return 'Intermediate'
+  return 'Basic'
+}
+
 /**
  * LearnerIntakeWorkspace
  * High-fidelity Step 1 Intake Workspace for PathFinder.
@@ -18,7 +32,9 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
   const [dragOver, setDragOver] = useState(false)
   const fileInputRef = useRef(null)
 
-  // Chat conversation state
+  // Chat conversation state — only the assistant's opening prompt is seeded.
+  // A fake "user" reply used to be hardcoded here and would get submitted as
+  // real profile data if someone clicked Continue without typing anything.
   const [chatStory, setChatStory] = useState('')
   const [chatMessages, setChatMessages] = useState([
     {
@@ -26,32 +42,24 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
       sender: 'ai',
       text: 'Tell me about your skills, experience, and what you want to achieve.',
     },
-    {
-      id: 2,
-      sender: 'user',
-      text: 'I’m a second-year CSE student. I know Python basics and want an AIML internship.',
-    },
   ])
+  const [continueError, setContinueError] = useState('')
 
-  // AI Profile Draft state (editable)
-  const [profileDraft, setProfileDraft] = useState({
-    skills: 'Python (Basics), Data Analysis',
-    education: '2nd Year Computer Science & Engineering',
-    projects: '1 Data Analysis Project',
-    confidence: 'Intermediate beginner',
-    goal: 'AIML Engineer Internship (Summer 2026/2027)',
-    summary:
-      'We understood that you know Python basics, have one data-analysis project, and want an AIML internship.',
-  })
+  // AI Profile Draft — starts empty. It's only ever filled from real input
+  // (an actual uploaded resume's real extraction, or what the user actually
+  // typed in chat) — never from invented placeholder content.
+  const [profileDraft, setProfileDraft] = useState(null)
 
   // Review & Edit Modal state
   const [isEditingDraft, setIsEditingDraft] = useState(false)
-  const [editFormData, setEditFormData] = useState({ ...profileDraft })
+  const [editFormData, setEditFormData] = useState({ ...EMPTY_DRAFT })
 
   const acceptTypes =
     '.pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document'
 
-  // Handle file selection
+  // Handle file selection. No fabricated content here — the real analysis
+  // only happens in handleContinue when the file is actually sent to the
+  // backend; this just confirms the file is ready.
   const handleFileChange = (f) => {
     if (!f) return
     const isDoc = /\.(pdf|docx)$/i.test(f.name)
@@ -64,12 +72,13 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
       return
     }
     setUploadError('')
+    setContinueError('')
     setFile(f)
     setSelectedMethod('resume')
-    setProfileDraft((prev) => ({
-      ...prev,
-      summary: `Extracted from "${f.name}": Identified background in Computer Science & Python foundations. Ready for skill calibration.`,
-    }))
+    setProfileDraft({
+      ...EMPTY_DRAFT,
+      summary: `"${f.name}" is ready. Click Continue to analyze your real skills, projects and experience.`,
+    })
   }
 
   // Handle chat submission
@@ -87,20 +96,31 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
     setChatMessages(updatedMessages)
     setChatStory('')
     setSelectedMethod('chat')
+    setContinueError('')
 
     const userNotes = updatedMessages
       .filter((m) => m.sender === 'user')
       .map((m) => m.text)
       .join(' ')
 
-    // Automatically accept background note and continue to skill calibration
+    // Live draft preview built from what was actually typed — quoted, not
+    // invented. The authoritative structured profile still comes from the
+    // backend later (POST /api/profile/), this is just an honest preview.
+    setProfileDraft({
+      ...EMPTY_DRAFT,
+      summary: `In your own words: "${userNotes.slice(0, 220)}${userNotes.length > 220 ? '…' : ''}"`,
+    })
+
     if (onChatSubmit) {
       onChatSubmit(userNotes)
     }
   }
 
-  // Handle Continue button action
+  // Handle Continue button action — every branch now either uses the real
+  // backend response or surfaces a real error. Nothing fabricates data.
   const handleContinue = async () => {
+    setContinueError('')
+
     if (selectedMethod === 'resume' && file) {
       setUploading(true)
       setUploadError('')
@@ -110,15 +130,24 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
         const { data } = await apiClient.post('/api/profile/resume', form, {
           headers: { 'Content-Type': 'multipart/form-data' },
         })
-        onExtracted(data.topics || [], data.detected_years_experience || 0)
+        const topics = data.topics || []
+        setProfileDraft({
+          ...EMPTY_DRAFT,
+          skills: topics.map((t) => t.name).join(', '),
+          confidence: levelLabel(topics),
+          summary: topics.length
+            ? `Identified ${topics.length} skill${topics.length === 1 ? '' : 's'} from your resume${
+                data.detected_years_experience ? ` (~${data.detected_years_experience} years experience)` : ''
+              }: ${topics.map((t) => t.name).join(', ')}.`
+            : 'No specific technical topics were detected in this resume — you can still continue and describe your background.',
+        })
+        onExtracted(topics, data.detected_years_experience || 0)
       } catch (err) {
-        console.warn('Backend resume extract endpoint fallback:', err)
-        const fallbackTopics = [
-          { name: 'Python', level: 'intermediate', evidence: 'From uploaded resume foundations' },
-          { name: 'Data Analysis', level: 'beginner', evidence: 'Project mentioned in resume' },
-          { name: 'Machine Learning Basics', level: 'beginner', evidence: 'Curriculum coursework' },
-        ]
-        onExtracted(fallbackTopics, 1)
+        console.error('Resume extraction failed:', err)
+        setUploadError(
+          err?.response?.data?.detail ||
+            'Could not analyze this resume. Please try a different file, or use the chat option instead.'
+        )
       } finally {
         setUploading(false)
       }
@@ -127,30 +156,25 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
         .filter((m) => m.sender === 'user')
         .map((m) => m.text)
         .join(' ')
-      if (onChatSubmit) {
-        onChatSubmit(userNotes || profileDraft.summary)
-      } else {
-        const fallbackTopics = [
-          { name: 'Python', level: 'beginner', evidence: 'Self-reported in natural-language intake' },
-          { name: 'Data Analysis', level: 'beginner', evidence: 'Self-reported project' },
-        ]
-        onExtracted(fallbackTopics, 0)
+        .trim()
+      if (!userNotes) {
+        setContinueError('Tell PathFinder a bit about yourself in the chat box before continuing.')
+        return
       }
+      onChatSubmit?.(userNotes)
     } else {
-      const defaultTopics = [
-        { name: 'Python', level: 'intermediate', evidence: 'Identified from initial draft' },
-        { name: 'Data Structures', level: 'beginner', evidence: 'Core CS Foundations' },
-        { name: 'Statistics & Math', level: 'beginner', evidence: 'Target AIML prerequisite' },
-      ]
-      onExtracted(defaultTopics, 0)
+      setContinueError('Upload a resume or describe your background in the chat box before continuing.')
     }
   }
 
   const handleSaveDraft = () => {
-    setProfileDraft({
+    setProfileDraft((prev) => ({
+      ...EMPTY_DRAFT,
       ...editFormData,
-      summary: `We understood that you know ${editFormData.skills}, studied ${editFormData.education}, and aim for ${editFormData.goal}.`,
-    })
+      summary: `We understood that you know ${editFormData.skills || '—'}, studied ${
+        editFormData.education || '—'
+      }, and aim for ${editFormData.goal || '—'}.`,
+    }))
     setIsEditingDraft(false)
   }
 
@@ -516,16 +540,19 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
             </div>
 
             <p className="text-[13px] text-[#52617D] leading-relaxed mt-1">
-              “{profileDraft.summary}”
+              {profileDraft?.summary
+                ? `"${profileDraft.summary}"`
+                : 'Upload a resume or start describing your background — your real profile draft will appear here.'}
             </p>
 
             <button
               type="button"
+              disabled={!profileDraft}
               onClick={() => {
-                setEditFormData({ ...profileDraft })
+                setEditFormData({ ...EMPTY_DRAFT, ...profileDraft })
                 setIsEditingDraft(true)
               }}
-              className="mt-2 text-[#5B36E9] text-[12.5px] font-bold inline-flex items-center gap-1.5 hover:underline cursor-pointer focus:outline-none"
+              className="mt-2 text-[#5B36E9] text-[12.5px] font-bold inline-flex items-center gap-1.5 hover:underline cursor-pointer focus:outline-none disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:no-underline"
             >
               <svg
                 width="13"
@@ -545,6 +572,15 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
 
         </div>
       </div>
+
+      {/* Continue-blocking validation, shown right above the footer */}
+      {continueError && (
+        <div className="mx-6 sm:mx-10 -mt-1 mb-2">
+          <p className="text-xs font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg px-3.5 py-2">
+            {continueError}
+          </p>
+        </div>
+      )}
 
       {/* Footer Controls */}
       <div className="h-[76px] px-6 sm:px-10 border-t border-[#E6EAF2] flex items-center justify-between">
