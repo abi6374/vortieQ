@@ -100,10 +100,22 @@ export default function SkillInsightsScreen() {
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
   const [selectedSkillModal, setSelectedSkillModal] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
+  const [isSearchFocused, setIsSearchFocused] = useState(false)
+  const searchContainerRef = useRef(null)
   const [activeTab, setActiveTab] = useState('overview') // 'overview' | 'deep_analytics' | 'heatmap'
 
   // Tooltip hover states for info icons
   const [activeTooltip, setActiveTooltip] = useState(null)
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target)) {
+        setIsSearchFocused(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   const handleNavClick = (navId) => {
     setActiveNav(navId)
@@ -156,8 +168,36 @@ export default function SkillInsightsScreen() {
     .map(([tag, s]) => ({ tag, total: s.total, done: s.done, hours: s.hours, byDifficulty: s.byDifficulty, progress: Math.round((s.done / s.total) * 100) }))
   const topSkills = [...allSkillEntries].sort((a, b) => b.total - a.total).slice(0, 8)
 
+  // Search Results
+  const matchingSkills = useMemo(() => {
+    if (!searchQuery.trim()) return []
+    const q = searchQuery.toLowerCase().trim()
+    return allSkillEntries.filter(
+      (s) => s.tag.toLowerCase().includes(q) || cap(s.tag).toLowerCase().includes(q)
+    )
+  }, [searchQuery, allSkillEntries])
+
+  const matchingSteps = useMemo(() => {
+    if (!searchQuery.trim()) return []
+    const q = searchQuery.toLowerCase().trim()
+    return (roadmap.allSteps || [])
+      .filter(
+        (s) =>
+          (s.title || '').toLowerCase().includes(q) ||
+          (s.provider || '').toLowerCase().includes(q) ||
+          (s.skill_tags || []).some((t) => (t || '').toLowerCase().includes(q))
+      )
+      .slice(0, 4)
+  }, [searchQuery, roadmap.allSteps])
+
+  // Filtered skills for charts when search is active
+  const displayedSkills = useMemo(() => {
+    if (matchingSkills.length > 0) return matchingSkills.slice(0, 8)
+    return topSkills
+  }, [matchingSkills, topSkills])
+
   // 1. Skill Proficiency Comparison Data (Grouped Bar Chart)
-  const proficiencyData = topSkills.map((s) => ({
+  const proficiencyData = displayedSkills.map((s) => ({
     skill: cap(s.tag).replace(' ', '\n'),
     name: cap(s.tag),
     current: s.progress,
@@ -167,7 +207,7 @@ export default function SkillInsightsScreen() {
   }))
 
   // 2. Radar Chart Data — same real skills, reshaped.
-  const radarData = topSkills.slice(0, 7).map((s) => ({
+  const radarData = displayedSkills.slice(0, 7).map((s) => ({
     skill: cap(s.tag),
     current: s.progress,
     target: 100,
@@ -331,19 +371,129 @@ export default function SkillInsightsScreen() {
   return (
     <AppShell
       topBar={
-        <div className="relative flex-1 max-w-md hidden sm:block">
+        <div className="relative flex-1 max-w-md hidden sm:block" ref={searchContainerRef}>
           <Search className="w-4 h-4 text-[#74819A] absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value)
+              setIsSearchFocused(true)
+            }}
+            onFocus={() => setIsSearchFocused(true)}
             placeholder="Search courses, skills, resources..."
-            className="w-full pl-9 pr-4 py-2 bg-[#F5F7FC] border border-[#E6EAF2] rounded-full text-xs text-[#0E1B38] placeholder-[#74819A] focus:outline-none focus:border-[#5B36E9] focus:bg-white transition-colors"
+            className="w-full pl-9 pr-8 py-2 bg-[#F5F7FC] border border-[#E6EAF2] rounded-full text-xs text-[#0E1B38] placeholder-[#74819A] focus:outline-none focus:border-[#5B36E9] focus:bg-white transition-colors shadow-2xs"
           />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#74819A] hover:text-[#0E1B38] text-xs font-bold p-1 cursor-pointer"
+              title="Clear search"
+            >
+              ✕
+            </button>
+          )}
+
+          {/* Live Search Results Floating Panel */}
+          {isSearchFocused && searchQuery.trim().length > 0 && (
+            <div className="absolute left-0 right-0 mt-2 bg-white rounded-2xl border border-[#D8DFEB] shadow-[0_14px_36px_rgba(25,40,75,0.16)] p-3 z-50 animate-in fade-in zoom-in-95 duration-100 max-h-80 overflow-y-auto">
+              {matchingSkills.length === 0 && matchingSteps.length === 0 ? (
+                <div className="p-4 text-center text-xs text-[#74819A]">
+                  No skills or courses found matching "<strong>{searchQuery}</strong>"
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {matchingSkills.length > 0 && (
+                    <div>
+                      <div className="text-[10px] font-bold text-[#74819A] uppercase tracking-wider px-2 mb-1.5">
+                        Matching Skills ({matchingSkills.length})
+                      </div>
+                      <div className="space-y-1">
+                        {matchingSkills.slice(0, 5).map((s) => (
+                          <button
+                            key={s.tag}
+                            type="button"
+                            onClick={() => {
+                              setSelectedSkillModal({
+                                title: cap(s.tag),
+                                desc: `${s.total - s.done} course${s.total - s.done === 1 ? '' : 's'} remaining in your roadmap for this skill.`,
+                                current: `${s.progress}%`,
+                                target: '100%',
+                                priority: statusFor(s.progress),
+                              })
+                              setIsSearchFocused(false)
+                            }}
+                            className="w-full text-left p-2 rounded-xl hover:bg-[#F5F1FF] flex items-center justify-between transition-colors cursor-pointer"
+                          >
+                            <div className="flex items-center gap-2.5">
+                              <span className="w-6 h-6 rounded-lg bg-[#F5F1FF] text-[#5B36E9] flex items-center justify-center text-xs font-bold flex-none">
+                                ✦
+                              </span>
+                              <span className="text-xs font-bold text-[#0E1B38]">{cap(s.tag)}</span>
+                            </div>
+                            <span className="text-xs font-bold text-[#5B36E9]">{s.progress}%</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {matchingSteps.length > 0 && (
+                    <div className="pt-2 border-t border-[#F0F3F8]">
+                      <div className="text-[10px] font-bold text-[#74819A] uppercase tracking-wider px-2 mb-1.5">
+                        Roadmap Courses & Lessons ({matchingSteps.length})
+                      </div>
+                      <div className="space-y-1">
+                        {matchingSteps.map((step) => (
+                          <button
+                            key={step.step_id || step.title}
+                            type="button"
+                            onClick={() => {
+                              setIsSearchFocused(false)
+                              navigate('/dashboard')
+                            }}
+                            className="w-full text-left p-2 rounded-xl hover:bg-[#F5F1FF] flex items-center justify-between transition-colors cursor-pointer"
+                          >
+                            <div className="min-w-0 flex-1 pr-2">
+                              <p className="text-xs font-bold text-[#0E1B38] truncate">{step.title}</p>
+                              <p className="text-[10px] text-[#74819A]">{step.provider || 'Course'} · ~{step.duration_hrs || 2}h</p>
+                            </div>
+                            <span className="text-[10px] font-bold text-[#5B36E9] px-2 py-0.5 rounded bg-[#F5F1FF] flex-none capitalize">
+                              {step.status || 'Active'}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       }
     >
       <div className="w-full space-y-6 lg:space-y-8 font-['Inter',sans-serif] text-[#0E1B38]">
+        {/* Active Search Filter Banner */}
+        {searchQuery.trim() && (
+          <div className="p-3.5 bg-[#F5F1FF] border border-[#DDD2FF] rounded-2xl flex items-center justify-between gap-3 shadow-2xs">
+            <div className="flex items-center gap-2 text-xs font-semibold text-[#5B36E9]">
+              <Search className="w-4 h-4 flex-none" />
+              <span>
+                Filtered by: "<strong>{searchQuery}</strong>" — showing {matchingSkills.length} matching skill{matchingSkills.length === 1 ? '' : 's'}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSearchQuery('')}
+              className="text-xs font-bold text-[#5B36E9] hover:underline cursor-pointer bg-white px-3 py-1 rounded-lg border border-[#DDD2FF]"
+            >
+              Clear filter
+            </button>
+          </div>
+        )}
+
         {/* ---------------------------------------------------------------------
             PAGE TITLE ROW: Icon + Heading/Subtitle (Left) + Goal Selector & Timestamp (Right)
            --------------------------------------------------------------------- */}

@@ -90,15 +90,15 @@ body {
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 28px 36px 32px;
+  padding: 28px 36px 110px;
   width: 100%;
   box-sizing: border-box;
 }
 @media (max-width: 1279px) {
-  .pf-content { padding: 24px; }
+  .pf-content { padding: 24px 24px 110px; }
 }
 @media (max-width: 767px) {
-  .pf-content { padding: 16px 16px calc(16px + 64px); }
+  .pf-content { padding: 16px 16px calc(16px + 100px); }
 }
 
 /* Dashboard main roadmap grid: fixed 330px right rail on desktop, stacks below lg. */
