@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from app.middleware.auth import verify_jwt
-from app.services import assistant_service, conversation_service
+from app.services import conversation_service
 
 router = APIRouter()
 
