@@ -3,6 +3,7 @@ from pathlib import Path
 
 from app.config import groq_client, settings, supabase_client
 from app.ml.registry import get_recommender
+from app.services import web_search_service
 
 
 def _load_prompt(name: str) -> str:
@@ -150,6 +151,7 @@ Generate the learning path JSON now."""
     except Exception as e:
         print(f"[generate_path] week assignment failed: {type(e).__name__}: {e}", flush=True)
 
+    web_search_service.enrich_with_web_resources(response_milestones, target_role=profile.get("target_role", ""))
     return {"path_id": path_id, "milestones": response_milestones}
 
 
@@ -196,7 +198,9 @@ def get_path(path_id: str, user_id: str) -> dict:
             "status": step.get("status", "not_started"),
         })
 
-    return {"path_id": path_id, "milestones": list(milestones_dict.values())}
+    milestones = list(milestones_dict.values())
+    web_search_service.enrich_with_web_resources(milestones)
+    return {"path_id": path_id, "milestones": milestones}
 
 
 # ---------------------------------------------------------------- SWAP

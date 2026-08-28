@@ -13,6 +13,7 @@ mirror of this, so a crafted request can't complete week 5 first.
 """
 
 from app.config import supabase_client
+from app.services import web_search_service
 
 TERMINAL = ("completed", "skipped")
 
@@ -108,6 +109,16 @@ def get_roadmap(user_id: str) -> dict:
     steps = _steps_for(path["id"])
     weeks, current = _assemble_weeks(steps)
     done = sum(1 for s in steps if s["status"] in TERMINAL)
+
+    # Only enrich the current week + the next 2 upcoming ones with live web
+    # search — that's what's actually relevant to the learner right now, and
+    # it keeps the common case (loading your dashboard) fast even before the
+    # cache warms up. Everything else gets an empty list, not a missing key.
+    relevant = [w for w in weeks if current is not None and current <= w["week_number"] <= current + 2]
+    web_search_service.enrich_with_web_resources(relevant, label_key="milestone_label", steps_key="steps")
+    for w in weeks:
+        w.setdefault("web_resources", [])
+
     return {
         "path": {"id": path["id"], "goal_text": path.get("goal_text"), "status": path.get("status")},
         "weeks": weeks,
