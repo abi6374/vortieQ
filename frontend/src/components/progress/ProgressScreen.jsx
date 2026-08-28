@@ -323,45 +323,40 @@ export default function ProgressScreen() {
     }))
 
   // 8. Recent Activity Timeline
-  const recentActivities = [
-    {
-      id: 1,
-      title: 'Statistics Fundamentals completed',
-      time: 'Today',
-      progressChange: '+6% progress',
+  // 8. Recent Activity Timeline — REAL, the learner's actually-completed
+  // steps, most recent first. "progressChange" is each step's real
+  // fractional contribution to overall roadmap progress (1/totalSteps),
+  // not an invented number.
+  const perStepPercent = roadmap.totalSteps ? Math.round((1 / roadmap.totalSteps) * 100) : 0
+  const relativeDay = (iso) => {
+    if (!iso) return ''
+    const d = new Date(iso)
+    const days = Math.floor((new Date().setHours(0, 0, 0, 0) - new Date(d).setHours(0, 0, 0, 0)) / 86400000)
+    if (days <= 0) return 'Today'
+    if (days === 1) return 'Yesterday'
+    return `${days} days ago`
+  }
+  const recentActivities = roadmap.allSteps
+    .filter((s) => s.completed && s.completed_at)
+    .sort((a, b) => new Date(b.completed_at) - new Date(a.completed_at))
+    .slice(0, 4)
+    .map((s) => ({
+      id: s.step_id,
+      title: `${s.title} completed`,
+      time: relativeDay(s.completed_at),
+      progressChange: perStepPercent ? `+${perStepPercent}% progress` : '',
       type: 'completed',
-    },
-    {
-      id: 2,
-      title: 'Python Functions: Practice Guide completed',
-      time: 'Yesterday',
-      progressChange: '+4% progress',
-      type: 'completed',
-    },
-    {
-      id: 3,
-      title: 'Pandas Data Analysis lesson completed',
-      time: '2 days ago',
-      progressChange: '+5% progress',
-      type: 'completed',
-    },
-    {
-      id: 4,
-      title: 'Descriptive Statistics practice started',
-      time: '3 days ago',
-      progressChange: '6 / 10 completed',
-      type: 'practice',
-    },
-  ]
+    }))
 
-  // 9. Achievements Badges
+  // 9. Achievements Badges — REAL, unlocked from actual streak/completion data.
+  const hasCompletedMilestone = milestones.some((m) => m.status === 'completed')
   const achievements = [
-    { icon: '🏆', title: '7-day streak', status: 'Unlocked', unlocked: true },
-    { icon: '🎯', title: 'First milestone', status: 'Unlocked', unlocked: true },
-    { icon: '📚', title: '10 resources completed', status: 'Unlocked', unlocked: true },
-    { icon: '🚀', title: 'Roadmap starter', status: 'Unlocked', unlocked: true },
-    { icon: '🔒', title: '30-day streak', status: 'Locked', unlocked: false },
-  ]
+    { icon: '🏆', title: '7-day streak', unlocked: streak.best_streak >= 7 },
+    { icon: '🎯', title: 'First milestone', unlocked: hasCompletedMilestone },
+    { icon: '📚', title: '10 resources completed', unlocked: roadmap.completedSteps >= 10 },
+    { icon: '🚀', title: 'Roadmap starter', unlocked: roadmap.totalSteps > 0 },
+    { icon: '🔒', title: '30-day streak', unlocked: streak.best_streak >= 30 },
+  ].map((a) => ({ ...a, status: a.unlocked ? 'Unlocked' : 'Locked' }))
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex font-['Inter',sans-serif] text-[#172554]">
