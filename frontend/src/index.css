@@ -53,6 +53,10 @@ select:-webkit-autofill {
   grid-template-columns: 240px minmax(0, 1fr);
   overflow: hidden;
   background: var(--bg-main);
+  transition: grid-template-columns 0.3s ease;
+}
+.pf-shell.sidebar-collapsed {
+  grid-template-columns: minmax(0, 1fr) !important;
 }
 @media (max-width: 1279px) {
   .pf-shell { grid-template-columns: 72px minmax(0, 1fr); }
@@ -67,7 +71,7 @@ select:-webkit-autofill {
   border-right: 1px solid #E6EAF2;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible;
 }
 @media (max-width: 767px) {
   .pf-sidebar { display: none; }

@@ -52,13 +52,17 @@ export default function PersonalizedRoadmap({ pathData = null }) {
   // useEffect that seeded a local Set was dead code and referenced a setter
   // that no longer exists.)
 
-  // Auto-expand the first NOT-YET-DONE real task's "Why this task?" panel by
-  // default, once the real roadmap has loaded. Previously this seeded from a
-  // hardcoded fake dataset's second entry ("step-2") regardless of what the
-  // learner's real path actually contained.
+  // Auto-expand the first NOT-YET-DONE real task's "Why this task?" panel ONCE by
+  // default on initial load, but never overwrite user's manual toggles afterwards.
+  const initializedWhyRef = useRef(false)
   useEffect(() => {
-    const firstOpenStep = roadmap.allSteps.find((s) => s.status !== 'completed' && s.status !== 'skipped')
-    if (firstOpenStep) setExpandedWhyIds(new Set([firstOpenStep.step_id]))
+    if (!initializedWhyRef.current && roadmap.allSteps.length > 0) {
+      const firstOpenStep = roadmap.allSteps.find((s) => s.status !== 'completed' && s.status !== 'skipped')
+      if (firstOpenStep) {
+        setExpandedWhyIds(new Set([firstOpenStep.step_id]))
+        initializedWhyRef.current = true
+      }
+    }
   }, [roadmap.allSteps])
 
   // ---------------------------------------------------------------------------
