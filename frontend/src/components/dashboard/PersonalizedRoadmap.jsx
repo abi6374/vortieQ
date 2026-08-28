@@ -48,154 +48,18 @@ export default function PersonalizedRoadmap({ pathData = null }) {
   // Modals for other views (Resources, etc.)
   const [activeModal, setActiveModal] = useState(null)
 
-  // ---------------------------------------------------------------------------
-  // Parse and process real path steps from pathData
-  // ---------------------------------------------------------------------------
-  const parsedSteps = useMemo(() => {
-    if (!pathData?.path_steps || pathData.path_steps.length === 0) {
-      // If pathData steps are not yet populated, provide clean structured modules
-      return [
-        {
-          id: 'step-1',
-          sequence_order: 1,
-          title: 'Python Core & Scripting Foundations',
-          subtitle: 'Functions, Data Structures, OOP',
-          provider: 'Coursera · DeepLearning.AI',
-          duration_hrs: 3,
-          difficulty: 'Beginner',
-          skill_tags: ['Python', 'Programming'],
-          resource_url: 'https://docs.python.org/3/tutorial/',
-          explanation: 'Python is your core foundation for building scripts, data processing pipelines, and AI algorithms.',
-          status: 'not_started',
-          milestone_label: 'Python Foundations',
-        },
-        {
-          id: 'step-2',
-          sequence_order: 2,
-          title: 'Applied Statistics & Probability for ML',
-          subtitle: 'Distributions, Variance, Bayes Rule',
-          provider: 'Khan Academy / MIT OpenCourseWare',
-          duration_hrs: 3,
-          difficulty: 'Intermediate',
-          skill_tags: ['Statistics', 'Probability'],
-          resource_url: 'https://www.khanacademy.org/math/statistics-probability',
-          explanation: 'Statistics is required before Machine Learning to understand distributions, loss functions, and variance.',
-          status: 'not_started',
-          milestone_label: 'Statistics',
-        },
-        {
-          id: 'step-3',
-          sequence_order: 3,
-          title: 'Hands-on Python Practice Labs',
-          subtitle: 'Algorithms & Practical Exercises',
-          provider: 'PathFinder Interactive Labs',
-          duration_hrs: 2,
-          difficulty: 'Beginner',
-          skill_tags: ['Python', 'Problem Solving'],
-          resource_url: 'https://leetcode.com/problemset/all/',
-          explanation: 'Solidifying theory with hands-on practice ensures retention and coding fluency.',
-          status: 'not_started',
-          milestone_label: 'Python Foundations',
-        },
-        {
-          id: 'step-4',
-          sequence_order: 4,
-          title: 'Data Wrangling with Pandas & NumPy',
-          subtitle: 'DataFrames, Vectorization, Cleaning',
-          provider: 'Kaggle Learn',
-          duration_hrs: 4,
-          difficulty: 'Intermediate',
-          skill_tags: ['Pandas', 'NumPy', 'Data Analysis'],
-          resource_url: 'https://www.kaggle.com/learn/pandas',
-          explanation: 'Data manipulation is the everyday bread-and-butter for any data scientist or AI practitioner.',
-          status: 'not_started',
-          milestone_label: 'Pandas & EDA',
-        },
-        {
-          id: 'step-5',
-          sequence_order: 5,
-          title: 'Exploratory Data Analysis & Visualization',
-          subtitle: 'Matplotlib, Seaborn, Insight Extraction',
-          provider: 'Coursera · IBM',
-          duration_hrs: 4,
-          difficulty: 'Intermediate',
-          skill_tags: ['EDA', 'Visualization'],
-          resource_url: 'https://matplotlib.org/stable/tutorials/index.html',
-          explanation: 'Visualization lets you uncover patterns, anomalies, and feature correlations in real-world data.',
-          status: 'not_started',
-          milestone_label: 'Pandas & EDA',
-        },
-        {
-          id: 'step-6',
-          sequence_order: 6,
-          title: 'Machine Learning Supervised Algorithms',
-          subtitle: 'Linear Regression, Decision Trees, SVM',
-          provider: 'Stanford Online / Coursera',
-          duration_hrs: 5,
-          difficulty: 'Intermediate',
-          skill_tags: ['Machine Learning', 'Scikit-Learn'],
-          resource_url: 'https://scikit-learn.org/stable/tutorial/index.html',
-          explanation: 'Core predictive algorithms that form the basis of modern ML engineering pipelines.',
-          status: 'not_started',
-          milestone_label: 'Machine Learning',
-        },
-        {
-          id: 'step-7',
-          sequence_order: 7,
-          title: 'End-to-End Capstone Machine Learning Project',
-          subtitle: 'Data Pipeline, Training, Evaluation & API',
-          provider: 'PathFinder Portfolio Labs',
-          duration_hrs: 8,
-          difficulty: 'Advanced',
-          skill_tags: ['Portfolio', 'FastAPI', 'MLOps'],
-          resource_url: 'https://github.com',
-          explanation: 'Showcasing a deployed, end-to-end model in your portfolio is what lands technical interviews.',
-          status: 'not_started',
-          milestone_label: 'Portfolio Project',
-        },
-      ]
-    }
-
-    return pathData.path_steps
-      .slice()
-      .sort((a, b) => (a.sequence_order || 0) - (b.sequence_order || 0))
-      .map((step) => {
-        const course = step.courses || {}
-        return {
-          id: step.id,
-          sequence_order: step.sequence_order,
-          title: course.title || step.milestone_label || 'Course Module',
-          subtitle:
-            course.skill_tags?.join(', ') ||
-            course.provider ||
-            'Foundational skills',
-          provider: course.provider || 'PathFinder',
-          duration_hrs: course.duration_hrs || 3,
-          difficulty: course.difficulty || 'Intermediate',
-          skill_tags: course.skill_tags || [],
-          resource_url:
-            course.resource_url || 'https://www.coursera.org',
-          explanation:
-            step.explanation ||
-            `Recommended step for mastering ${
-              course.skill_tags?.[0] || 'your core goal'
-            }.`,
-          status: step.status || 'not_started',
-          milestone_label: step.milestone_label || 'Foundations',
-        }
-      })
-  }, [pathData])
-
   // (Completion state is derived from useRoadmap.completedIds now — the old
   // useEffect that seeded a local Set was dead code and referenced a setter
   // that no longer exists.)
 
-  // Auto-expand the second task's "Why this task?" by default if available
+  // Auto-expand the first NOT-YET-DONE real task's "Why this task?" panel by
+  // default, once the real roadmap has loaded. Previously this seeded from a
+  // hardcoded fake dataset's second entry ("step-2") regardless of what the
+  // learner's real path actually contained.
   useEffect(() => {
-    if (parsedSteps.length > 1) {
-      setExpandedWhyIds(new Set([parsedSteps[1].id]))
-    }
-  }, [parsedSteps])
+    const firstOpenStep = roadmap.allSteps.find((s) => s.status !== 'completed' && s.status !== 'skipped')
+    if (firstOpenStep) setExpandedWhyIds(new Set([firstOpenStep.step_id]))
+  }, [roadmap.allSteps])
 
   // ---------------------------------------------------------------------------
   // Dynamic Week Grouping & Tabs
@@ -233,6 +97,10 @@ export default function PersonalizedRoadmap({ pathData = null }) {
         isComplete: w.is_complete,
         percent: w.percent,
         weekNumber: w.week_number,
+        // Real live-web-search resources for this week (NPTEL, Coursera, etc.)
+        // - the backend already computes these (roadmap_service.get_roadmap()),
+        // this was just never read on the frontend before.
+        webResources: w.web_resources || [],
       }
     })
     return groups
@@ -246,34 +114,51 @@ export default function PersonalizedRoadmap({ pathData = null }) {
   const currentWeekData = weekGroups[selectedWeek] || {
     tasks: [], totalHrs: 0, themeTitle: 'Your plan',
     isLocked: false, lockedReason: null, isComplete: false, percent: 0,
+    webResources: [],
   }
 
   // ---------------------------------------------------------------------------
-  // Milestone Nodes (Extracted from real steps or sequence)
+  // "Priority gaps" — real skill tags ranked by real completion % (lowest
+  // first = biggest gap), from roadmap.allSteps. Same computation used on
+  // /skills ("Top Skill Gaps"). Previously this widget hardcoded
+  // "Statistics 30%" / "Machine Learning 18%" for every single learner.
+  // ---------------------------------------------------------------------------
+  const priorityGaps = useMemo(() => {
+    const stats = {}
+    roadmap.allSteps.forEach((s) => {
+      ;(s.skill_tags || []).forEach((tag) => {
+        if (!stats[tag]) stats[tag] = { total: 0, done: 0 }
+        stats[tag].total += 1
+        if (s.status === 'completed') stats[tag].done += 1
+      })
+    })
+    return Object.entries(stats)
+      .map(([tag, s]) => ({ tag, progress: Math.round((s.done / s.total) * 100) }))
+      .filter((s) => s.progress < 100)
+      .sort((a, b) => a.progress - b.progress)
+      .slice(0, 2)
+  }, [roadmap.allSteps])
+
+  // ---------------------------------------------------------------------------
+  // Milestone Nodes — one per REAL week, using that week's real milestone
+  // label (or "Week N" if the backend didn't set one). Previously fell back to
+  // a hardcoded 6-item Python/ML-specific list whenever the real path had
+  // fewer than 4 distinct milestone labels - a Web Developer or Product
+  // Manager's real 2-3-milestone path would silently show fake "Machine
+  // Learning" / "Pandas & EDA" nodes that had nothing to do with their goal.
   // ---------------------------------------------------------------------------
   const milestoneNodes = useMemo(() => {
-    const labels = Array.from(new Set(parsedSteps.map((s) => s.milestone_label))).filter(Boolean)
-    const defaults = [
-      'Python foundations',
-      'Statistics',
-      'Pandas & EDA',
-      'Machine Learning',
-      'Portfolio project',
-      'Interview prep',
-    ]
-
-    const allMilestones = labels.length >= 4 ? labels : defaults
-    return allMilestones.slice(0, 6).map((label, idx) => {
-      const id = idx + 1
+    return weekTabs.map((tab, idx) => {
+      const wg = weekGroups[tab] || {}
       return {
-        id,
-        label,
-        weekTab: weekTabs[Math.min(idx, weekTabs.length - 1)],
-        isPriority: idx === 1,
-        tag: idx === 1 ? 'High priority' : null,
+        id: idx + 1,
+        label: wg.themeTitle || tab,
+        weekTab: tab,
+        isLocked: !!wg.isLocked,
+        isComplete: !!wg.isComplete,
       }
     })
-  }, [parsedSteps])
+  }, [weekTabs, weekGroups])
 
   // Handle clicking a milestone node
   const handleMilestoneClick = (milestone) => {
@@ -341,18 +226,24 @@ export default function PersonalizedRoadmap({ pathData = null }) {
     completedTaskIds.has(t.id)
   ).length
 
-  // Clean goal title for heading & cards
+  // Clean goal title for heading & cards. roadmap.path.goal_text (the real
+  // backend roadmap response) is the primary source; the pathData prop is a
+  // secondary/earlier-available source from the dashboard's own initial
+  // fetch. Never a role-specific hardcoded fallback (was "AIML Engineer
+  // Internship" regardless of the learner's actual goal) - a neutral,
+  // honest placeholder only, for the brief moment before either loads.
+  const rawGoalText = roadmap.path?.goal_text || pathData?.goal_text || ''
   const cleanGoalTitle = useMemo(() => {
-    if (!pathData?.goal_text) return 'AIML Engineer Internship'
-    let text = pathData.goal_text.split('I can study')[0].trim()
+    if (!rawGoalText) return 'your learning goal'
+    let text = rawGoalText.split('I can study')[0].trim()
     text = text.replace(
       /^(I want to become an?|I want to become|I want to be an?|I want to be|I want an?|I want|My goal is to become an?|My goal is to be an?|My goal is to|My goal is)\s+/i,
       ''
     )
     text = text.charAt(0).toUpperCase() + text.slice(1)
     text = text.replace(/\.$/, '').trim()
-    return text || 'AIML Engineer Internship'
-  }, [pathData?.goal_text])
+    return text || 'your learning goal'
+  }, [rawGoalText])
 
   const handleNavClick = (navId) => {
     setActiveNav(navId)
@@ -421,7 +312,7 @@ export default function PersonalizedRoadmap({ pathData = null }) {
               </span>
               <div>
                 <div className="font-['Manrope'] font-extrabold text-2xl sm:text-[26px] text-[#0E1B38] leading-none">
-                  16
+                  {weekTabs.length}
                 </div>
                 <div className="text-xs sm:text-sm font-medium text-[#52617D] mt-1">
                   weeks total
@@ -455,7 +346,7 @@ export default function PersonalizedRoadmap({ pathData = null }) {
               </span>
               <div>
                 <div className="font-['Manrope'] font-extrabold text-2xl sm:text-[26px] text-[#0E1B38] leading-none">
-                  {Math.round((completedTaskIds.size / Math.max(parsedSteps.length, 1)) * 100)}%
+                  {roadmap.percent}%
                 </div>
                 <div className="text-xs sm:text-sm font-medium text-[#52617D] mt-1">
                   curriculum completed
@@ -667,8 +558,8 @@ export default function PersonalizedRoadmap({ pathData = null }) {
                           className={`flex-none rounded-xl p-2.5 sm:p-3 flex flex-col items-center justify-center text-center cursor-pointer transition-all min-w-[95px] sm:min-w-[110px] border ${
                             isSelected
                               ? 'border-2 border-[#5B36E9] bg-[#F5F1FF] shadow-xs ring-2 ring-[#5B36E9]/10'
-                              : node.isPriority
-                              ? 'border-[#F59E0B]/50 bg-[#FFFDF7] shadow-2xs hover:border-[#D97706]'
+                              : node.isComplete
+                              ? 'border-[#22A06B]/40 bg-[#F6FEF9] shadow-2xs hover:border-[#22A06B]'
                               : 'border-[#D8DFEB] bg-white hover:border-[#CAD3E2]'
                           }`}
                         >
@@ -688,10 +579,14 @@ export default function PersonalizedRoadmap({ pathData = null }) {
                             {node.label}
                           </span>
 
-                          {/* Priority Star Badge Below Label */}
-                          {node.isPriority ? (
-                            <span className="inline-flex items-center gap-0.5 text-[9.5px] font-bold text-[#D97706] bg-[#FEF3C7] border border-[#FDE68A] px-1.5 py-0.5 rounded-full mt-1 shadow-2xs">
-                              ★ Priority
+                          {/* Real state badge: locked / complete / real step number */}
+                          {node.isLocked ? (
+                            <span className="inline-flex items-center gap-0.5 text-[9.5px] font-bold text-[#94A3B8] bg-[#F1F5F9] border border-[#E2E8F0] px-1.5 py-0.5 rounded-full mt-1 shadow-2xs">
+                              🔒 Locked
+                            </span>
+                          ) : node.isComplete ? (
+                            <span className="inline-flex items-center gap-0.5 text-[9.5px] font-bold text-[#22A06B] bg-[#ECFDF3] border border-[#D1FADF] px-1.5 py-0.5 rounded-full mt-1 shadow-2xs">
+                              ✓ Complete
                             </span>
                           ) : (
                             <span className="text-[10px] text-[#74819A] mt-1">
@@ -779,33 +674,30 @@ export default function PersonalizedRoadmap({ pathData = null }) {
                 </button>
               </div>
 
-              {/* WIDGET 2: Priority Gaps */}
+              {/* WIDGET 2: Priority Gaps — real skill tags, real gap %, from
+                  the learner's actual roadmap steps. */}
               <div className="bg-white border border-[#D8DFEB] rounded-2xl p-5 sm:p-6 shadow-2xs">
                 <h3 className="font-['Manrope'] font-bold text-base text-[#0E1B38] mb-4">
                   Priority gaps
                 </h3>
 
-                <div className="space-y-3.5">
-                  <div>
-                    <div className="flex justify-between text-xs font-bold text-[#0E1B38] mb-1">
-                      <span>Statistics</span>
-                      <span className="text-[#5B36E9]">30%</span>
-                    </div>
-                    <div className="w-full h-2 bg-[#EEF2F6] rounded-full overflow-hidden">
-                      <div className="w-[30%] h-full bg-[#5B36E9] rounded-full" />
-                    </div>
+                {priorityGaps.length > 0 ? (
+                  <div className="space-y-3.5">
+                    {priorityGaps.map((g) => (
+                      <div key={g.tag}>
+                        <div className="flex justify-between text-xs font-bold text-[#0E1B38] mb-1">
+                          <span className="capitalize">{g.tag}</span>
+                          <span className="text-[#5B36E9]">{g.progress}%</span>
+                        </div>
+                        <div className="w-full h-2 bg-[#EEF2F6] rounded-full overflow-hidden">
+                          <div className="h-full bg-[#5B36E9] rounded-full" style={{ width: `${g.progress}%` }} />
+                        </div>
+                      </div>
+                    ))}
                   </div>
-
-                  <div>
-                    <div className="flex justify-between text-xs font-bold text-[#0E1B38] mb-1">
-                      <span>Machine Learning</span>
-                      <span className="text-[#5B36E9]">18%</span>
-                    </div>
-                    <div className="w-full h-2 bg-[#EEF2F6] rounded-full overflow-hidden">
-                      <div className="w-[18%] h-full bg-[#5B36E9] rounded-full" />
-                    </div>
-                  </div>
-                </div>
+                ) : (
+                  <p className="text-xs text-[#94A3B8]">No skill gaps yet — keep completing steps to see this fill in.</p>
+                )}
 
                 <button
                   type="button"
@@ -817,38 +709,51 @@ export default function PersonalizedRoadmap({ pathData = null }) {
                 </button>
               </div>
 
-              {/* WIDGET 3: Recommended for you */}
+              {/* WIDGET 3: Recommended for you — a real live-web-search
+                  resource for the current week (NPTEL, Coursera, etc. -
+                  backend already computes this via web_search_service, it
+                  just never reached this component before). Previously this
+                  duplicated the first task already shown above and fell back
+                  to a hardcoded Python-docs link when none existed - neither
+                  was a real recommendation. */}
               <div className="bg-white border border-[#D8DFEB] rounded-2xl p-5 sm:p-6 shadow-2xs">
                 <h3 className="font-['Manrope'] font-bold text-base text-[#0E1B38] mb-3">
                   Recommended for you
                 </h3>
 
-                <div className="flex items-center justify-between gap-3 p-3 bg-[#FAF9FF] border border-[#E7E0FF] rounded-xl">
-                  <div className="flex items-center gap-3">
-                    <span className="w-9 h-9 rounded-full bg-[#EEE9FF] text-[#5B36E9] flex items-center justify-center flex-none">
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-                        <polygon points="5 3 19 12 5 21 5 3" />
-                      </svg>
-                    </span>
-                    <div>
-                      <h4 className="text-xs font-bold text-[#0E1B38] max-w-[130px] truncate">
-                        {currentWeekData.tasks[0]?.title || 'Python Functions Guide'}
-                      </h4>
-                      <p className="text-[11px] text-[#74819A]">
-                        Free · {currentWeekData.tasks[0]?.duration_hrs || 2} hrs
-                      </p>
+                {currentWeekData.webResources?.[0] ? (
+                  <div className="flex items-center justify-between gap-3 p-3 bg-[#FAF9FF] border border-[#E7E0FF] rounded-xl">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className="w-9 h-9 rounded-full bg-[#EEE9FF] text-[#5B36E9] flex items-center justify-center flex-none">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                          <polygon points="5 3 19 12 5 21 5 3" />
+                        </svg>
+                      </span>
+                      <div className="min-w-0">
+                        <h4 className="text-xs font-bold text-[#0E1B38] max-w-[130px] truncate">
+                          {currentWeekData.webResources[0].title || currentWeekData.webResources[0].url}
+                        </h4>
+                        <p className="text-[11px] text-[#74819A] truncate max-w-[150px]">
+                          {(() => {
+                            try { return new URL(currentWeekData.webResources[0].url).hostname.replace('www.', '') }
+                            catch { return 'External resource' }
+                          })()}
+                        </p>
+                      </div>
                     </div>
-                  </div>
 
-                  <a
-                    href={currentWeekData.tasks[0]?.resource_url || 'https://docs.python.org/3/'}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="px-3 py-1 bg-white border border-[#5B36E9] text-[#5B36E9] hover:bg-[#5B36E9] hover:text-white rounded-lg text-xs font-bold transition-all shadow-2xs"
-                  >
-                    Open
-                  </a>
-                </div>
+                    <a
+                      href={currentWeekData.webResources[0].url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="px-3 py-1 bg-white border border-[#5B36E9] text-[#5B36E9] hover:bg-[#5B36E9] hover:text-white rounded-lg text-xs font-bold transition-all shadow-2xs flex-none"
+                    >
+                      Open
+                    </a>
+                  </div>
+                ) : (
+                  <p className="text-xs text-[#94A3B8]">No extra resources found for this week yet.</p>
+                )}
               </div>
 
             </div>
