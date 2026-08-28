@@ -1,6 +1,5 @@
 import React from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { useAIChat } from '../../contexts/AIChatContext'
 
 /**
  * The one PathFinder sidebar.
@@ -50,13 +49,14 @@ const NAV = [
   { key: 'progress',  label: 'Progress',       path: '/progress' },
   { key: 'skills',    label: 'Skill insights', path: '/skills' },
   { key: 'resources', label: 'Resources',      path: '/resources' },
-  { key: 'coach',     label: 'AI coach',       path: null }, // opens the shared assistant
+  { key: 'coach',     label: 'AI coach',       path: '/coach' }, // dedicated full page: chat + practice + project ideas
 ]
 
 function activeKeyFor(pathname) {
   if (pathname.startsWith('/progress')) return 'progress'
   if (pathname.startsWith('/skill')) return 'skills'
   if (pathname.startsWith('/resources')) return 'resources'
+  if (pathname.startsWith('/coach')) return 'coach'
   if (pathname.startsWith('/roadmap') || pathname.startsWith('/dashboard') || pathname.startsWith('/workspace')) return 'roadmap'
   return ''
 }
@@ -64,7 +64,6 @@ function activeKeyFor(pathname) {
 export default function AppSidebar() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { open: openAICoach } = useAIChat()
   const active = activeKeyFor(location.pathname)
 
   return (
@@ -99,7 +98,7 @@ export default function AppSidebar() {
               key={item.key}
               type="button"
               aria-current={on ? 'page' : undefined}
-              onClick={() => (item.path ? navigate(item.path) : openAICoach())}
+              onClick={() => navigate(item.path)}
               className="flex items-center gap-3 rounded-[10px] border-none cursor-pointer text-left transition-colors"
               style={{
                 padding: '9px 12px',
