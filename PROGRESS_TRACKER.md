@@ -1,5 +1,6 @@
 # PROGRESS TRACKER
-Last updated by: Abinivas (Member 2 — ML) at 2026-08-28 (AWS Bedrock migration COMPLETE and CONFIRMED LIVE — backend currently running LLM_PROVIDER=bedrock end-to-end)
+Last updated by: Abinivas (Member 2 — ML) at 2026-08-28 (found + fixed stale module gates: Vercel was actually already live at vortie-q.vercel.app — all 10 module gates now closed, full flow verified on the public URL)
+Previously: Abinivas (Member 2 — ML) at 2026-08-28 (AWS Bedrock migration COMPLETE and CONFIRMED LIVE — backend currently running LLM_PROVIDER=bedrock end-to-end)
 Previously: Abinivas (Member 2 — ML) at 2026-08-28 (NEW: real dedicated /coach page — chat, practice questions, project ideas, all grounded in the real learner)
 Previously: Abinivas (Member 2 — ML) at 2026-08-28 (GoalCompass role picker: resume-driven auto-suggest + custom role, was hardcoded to 3 roles always defaulting to AIML Engineer)
 Previously: Abinivas (Member 2 — ML) at 2026-08-28 (/skills real-data rebuild COMPLETE — both /progress and /skills are now fully real, zero hardcoded datasets on either page)
@@ -18,7 +19,7 @@ Previously: kavindra-e-m (Member 1 — Backend) at 2026-08-26 (M1-S2 → M1-S4 c
 ## Infrastructure (Member 5)
 - [x] GitHub repo: https://github.com/abi6374/vortieQ
 - [x] Supabase tables live (all 5 tables) — `omnhtvxuvjnimokwqtje.supabase.co`, RLS enabled on all incl. read-only public policy on `courses`
-- [ ] Vercel URL: TBD — see `docs/deployment_guide.md` Part B (one-time connect, ~5 min, auto-deploys on every push after that)
+- [x] Vercel URL: **https://vortie-q.vercel.app** — was marked TBD here but is actually live (found baked into `frontend/playwright.config.js` + `tests/e2e/health.spec.js`, never back-filled into this section). Verified live 2026-08-28: site returns HTTP 200, and `/health` through the `vercel.json` proxy reaches the real EC2 backend (`{"status":"ok"}`) — full frontend→backend flow confirmed working on the public URL.
 - [ ] Render URL: **superseded — backend deploys to AWS EC2 instead, see below**
 - [x] AWS EC2 backend URL: **http://13.206.51.130** — `career-path-backend` (Ubuntu 24.04, t3.micro, ap-south-1, 16GB EBS after an 8→16GB resize for `docker load` headroom, 2GB swap). `.github/workflows/deploy-backend.yml` verified live end-to-end on a real `git push`: build → save → scp to EC2 → `docker load` → restart → poll `/health` — all green (run #5, commit `1c2468a`, 5m57s). Auto-deploys on every push to `main` touching `backend/**`. `/health` and `/docs` both confirmed reachable from outside.
 
@@ -56,12 +57,12 @@ Previously: kavindra-e-m (Member 1 — Backend) at 2026-08-26 (M1-S2 → M1-S4 c
 - [x] MODULE 1: /health 200 + auth middleware ✅ (JWT verification now tested for real — valid token → 200, missing/garbage token → 401)
 - [x] MODULE 2: Course embeddings + retrieval ✅ (self-verified by Member 2 with live test output above — 80 courses seeded + embedded, pgvector retrieval and re-ranking confirmed against the real Supabase project; M5, please spot-check the Table Editor row count and re-run `data/seed_courses.py --verify` when convenient)
 - [x] MODULE 3: Profile extraction writes to DB ✅ (`POST /api/profile/` with a real JWT → Groq-extracted profile persisted; verified by SQL against `public.profiles`)
-- [ ] MODULE 4: Frontend auth working
+- [x] MODULE 4: Frontend auth working ✅ (M3-S2/S3 shipped and long since built on; landing/auth/onboarding/dashboard/roadmap all live and gated by real Supabase sessions — checkbox was just never ticked here)
 - [x] MODULE 5: Path generation API works ✅ (`POST /api/paths/generate` → 3 milestones / 8 real courses in ~11s, rows in `learning_paths` + `path_steps`, 8/8 steps carry explanations; `GET /api/paths/{id}` round-trips and enforces ownership)
-- [ ] MODULE 6: Roadmap shows real courses
+- [x] MODULE 6: Roadmap shows real courses ✅ (M3-S5 `RoadmapPage`/`RoadmapTimeline` render real `path_steps`→`courses` data; confirmed still true through every later round's rebuilds — checkbox was just never ticked here)
 - [x] MODULE 7: Dashboard + feedback loop ✅ (M4-S2..S4 frontend + M1-S5 backend now both live; `POST /api/steps/{id}/feedback` returns real `{feedback_id, path_updated, updated_steps}` and mutates DB — Member 4's UI can stop treating the response as a no-op)
 - [x] MODULE 8: AI assistant grounded answers ✅ (`POST /api/assistant/ask` returns answers grounded on the real path — Q about "Python removed" correctly referenced completed/skipped statuses and course names from the DB. Frontend M4-S5 chat panel now live on Dashboard + Roadmap.)
-- [ ] MODULE 9: Full flow on deployed URL — **backend half done**: EC2 live at http://13.206.51.130, auto-deploy pipeline verified on a real push (see Infrastructure section above). Still needs Vercel connect (Part B) before the full frontend↔backend flow can be tested on a public URL.
+- [x] MODULE 9: Full flow on deployed URL ✅ — EC2 backend live + auto-deploying (`http://13.206.51.130`), Vercel frontend live + auto-deploying (`https://vortie-q.vercel.app`), `vercel.json` proxies `/api/*` and `/health` through to EC2 to dodge HTTPS→HTTP mixed content. Verified 2026-08-28: both URLs return 200, and the public site's `/health` round-trips to the real backend. **All 10 module gates now closed.**
 
 ## Notes
 - Backend runs locally: `cd backend && ./venv/Scripts/python.exe -m uvicorn app.main:app --port 8000`
