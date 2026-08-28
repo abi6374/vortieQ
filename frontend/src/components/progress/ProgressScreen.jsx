@@ -19,7 +19,6 @@ import {
 } from 'recharts'
 import {
   Rocket,
-  Map,
   TrendingUp,
   Radar as RadarIcon,
   NotebookTabs,
