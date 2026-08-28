@@ -1,5 +1,6 @@
 # PROGRESS TRACKER
-Last updated by: Abinivas (Member 2 — ML) at 2026-08-28 (NEW: real dedicated /coach page — chat, practice questions, project ideas, all grounded in the real learner)
+Last updated by: Abinivas (Member 2 — ML) at 2026-08-28 (AWS Bedrock migration in progress: unified llm_client.py shipped, EC2 disk-space deploy failure caught + recovered, AWS console setup underway)
+Previously: Abinivas (Member 2 — ML) at 2026-08-28 (NEW: real dedicated /coach page — chat, practice questions, project ideas, all grounded in the real learner)
 Previously: Abinivas (Member 2 — ML) at 2026-08-28 (GoalCompass role picker: resume-driven auto-suggest + custom role, was hardcoded to 3 roles always defaulting to AIML Engineer)
 Previously: Abinivas (Member 2 — ML) at 2026-08-28 (/skills real-data rebuild COMPLETE — both /progress and /skills are now fully real, zero hardcoded datasets on either page)
 Previously: Abinivas (Member 2 — ML) at 2026-08-28 (/progress real-data rebuild COMPLETE — all 9 datasets + hero card + 4 KPI cards + a fake fabricated modal removed)
@@ -170,7 +171,18 @@ Answers the original ask directly: a real full page (not just the floating icon)
 - **Frontend**: new `/coach` route, 3 tabs (Chat / Practice / Project ideas). The Chat tab reuses the exact same real persisted conversation (`useAIChat`) as the floating widget everywhere else — this is the SAME one real bot in a bigger dedicated space, not a second disconnected one. `AppSidebar`'s "AI coach" nav now navigates here instead of just popping the floating panel; the floating widget itself is untouched and still available on every other page for quick in-context questions.
 - Backend auto-deployed to EC2 and confirmed healthy post-deploy.
 
+## Round 7 — AWS Bedrock migration (IN PROGRESS)
+- **Shipped**: `backend/app/llm_client.py` — single `chat_completion()` entry point every service now calls (was 7 separate files calling `groq_client.chat.completions.create()` directly: profile/path/feedback/resume/assistant/conversation/coach). Routes to Groq or Bedrock via `settings.LLM_PROVIDER` (`"groq"` default, `"bedrock"` opt-in) — a one-line config flip once AWS setup is done, not a re-editing every call site. Bedrock path uses the Converse API (one consistent shape across model families) and authenticates via the **EC2 instance's IAM role**, not static AWS keys in `.env` — nothing new to leak. `AWS_REGION` defaults to `us-east-1` (not the box's own `ap-south-1` — Bedrock model availability there is limited; a boto3 client can call any region regardless of where the caller runs).
+- Verified live end-to-end with zero behavior change: direct `chat_completion()` call + a full `coach_service.generate_practice()` run both still answer correctly through Groq via the new abstraction.
+- **Deploy incident + recovery**: the two pushes for this (`1061704`, `1539db6`) both failed at the "Load image and restart container" step — EC2 disk hit 97% used (448MB free), same class of issue as the original EC2 setup, made worse by `boto3` growing the image and by failed-run tarballs never getting cleaned up (the workflow's cleanup step never got reached). Recovered manually: removed the leftover 1.6GB tarball, ran `docker builder prune -af` + `docker image prune -af` (reclaimed ~3GB), manually `docker run` the already-loaded image. Confirmed live and healthy afterward, running the correct latest code (`boto3` present, region defaults right, `LLM_PROVIDER` still `groq`). Disk is at ~57% now, but will likely need another resize (16GB → 30GB, still within AWS free tier) before this is fully done — flagged to the user as part of the AWS console steps below rather than waiting for it to fail again.
+- **Not yet done (needs the user at the AWS console, in progress)**:
+  1. Create an IAM role (`AmazonBedrockFullAccess`) and attach it to the EC2 instance (no restart needed — takes effect immediately for new API calls). Confirmed via instance metadata that no role is attached yet.
+  2. Enable model access for the chosen model (`meta.llama3-70b-instruct-v1:0` by default, configurable via `BEDROCK_MODEL_ID`) in the Bedrock console, **us-east-1** region specifically (matching `AWS_REGION`'s default).
+  3. Resize the EBS volume again for headroom (see disk incident above).
+  4. Flip `LLM_PROVIDER=bedrock` in the EC2 box's `.env` and restart the container to actually switch over.
+  5. Verify a real request end-to-end through Bedrock, then decide whether to keep it as the default or keep Groq as primary with Bedrock as a fallback/option.
+
 **Confirmed but NOT yet fixed — queued:**
-1. **AWS Bedrock evaluation** — user wants to consider migrating the assistant's LLM calls from Groq to AWS Bedrock. Real infra change (new AWS service, model access enablement, IAM, region/model choice) on top of everything else. Not started — will need AWS console access again, similar to the EC2 setup. Confirmed by user as the intended scope. **This is now the only remaining item in the backlog.**
+1. **AWS Bedrock evaluation** — see "Round 7" above for exact status. This is the only remaining item in the backlog once the console steps are done.
 
 ## Note for whoever picks up next: read this file's "Post-launch QA pass" and "Round 2" sections above before touching onboarding/resources/skills/progress/assistant code — several things that look broken from the outside were already fixed, and a couple that look fine were not.
