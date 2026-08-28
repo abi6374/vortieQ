@@ -15,6 +15,8 @@ import AccountPage from './pages/AccountPage'
 import SettingsPage from './pages/SettingsPage'
 import CoachPage from './pages/CoachPage'
 
+import BackToTop from './components/ui/BackToTop'
+
 export default function App() {
   return (
     <AuthProvider>
@@ -123,6 +125,8 @@ export default function App() {
         {/* The single shared "Ask PathFinder" assistant, mounted once for the
             whole app so the conversation persists across every route. */}
         <AIChat />
+        {/* Universal Back-To-Top button */}
+        <BackToTop />
         </AIChatProvider>
       </BrowserRouter>
     </AuthProvider>

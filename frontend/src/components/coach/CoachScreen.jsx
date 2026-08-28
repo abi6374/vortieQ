@@ -316,33 +316,95 @@ function ProjectsTab() {
 
 export default function CoachScreen() {
   const [tab, setTab] = useState('chat')
+  const { send } = useAIChat()
+
+  const handleQuickPrompt = (prompt) => {
+    setTab('chat')
+    send(prompt)
+  }
 
   return (
     <AppShell>
-      <div className="coach-page max-w-[1000px] font-['Inter',sans-serif] text-[#172554]">
-        <header>
+      <div className="w-full font-['Inter',sans-serif] text-[#172554]">
+        <header className="mb-6">
           <h1 className="font-['Manrope'] font-extrabold text-2xl sm:text-[28px] text-[#0E1B38] tracking-tight">AI Coach</h1>
           <p className="mt-0.5 text-sm text-[#52617D]">Chat, practice questions, and project ideas — all grounded in your real progress.</p>
         </header>
 
-        <div className="flex gap-1.5 bg-[#EEF2F7] rounded-xl p-1 w-fit">
-          {TABS.map((t) => (
-            <button
-              key={t.key}
-              type="button"
-              onClick={() => setTab(t.key)}
-              className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors ${
-                tab === t.key ? 'bg-white text-[#5B36E9] shadow-sm' : 'text-[#64748B] hover:text-[#0E1B38]'
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start w-full">
+          {/* Main Coach Column */}
+          <div className="lg:col-span-8 flex flex-col gap-4 min-w-0">
+            <div className="flex gap-1.5 bg-[#EEF2F7] rounded-xl p-1 w-fit">
+              {TABS.map((t) => (
+                <button
+                  key={t.key}
+                  type="button"
+                  onClick={() => setTab(t.key)}
+                  className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors cursor-pointer ${
+                    tab === t.key ? 'bg-white text-[#5B36E9] shadow-sm' : 'text-[#64748B] hover:text-[#0E1B38]'
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
 
-        {tab === 'chat' && <ChatTab />}
-        {tab === 'practice' && <PracticeTab />}
-        {tab === 'projects' && <ProjectsTab />}
+            {tab === 'chat' && <ChatTab />}
+            {tab === 'practice' && <PracticeTab />}
+            {tab === 'projects' && <ProjectsTab />}
+          </div>
+
+          {/* Right Rail: Quick Actions & Coach Context */}
+          <div className="lg:col-span-4 space-y-6">
+            {/* Quick Prompts */}
+            <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5 shadow-2xs">
+              <h3 className="font-['Manrope'] font-bold text-sm text-[#0E1B38] mb-3 flex items-center gap-2">
+                <span className="w-6 h-6 rounded-lg bg-[#F5F1FF] text-[#5B36E9] flex items-center justify-center text-xs">⚡</span>
+                Suggested Questions
+              </h3>
+              <div className="space-y-2">
+                {STARTER_PROMPTS.map((p) => (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => handleQuickPrompt(p)}
+                    className="w-full text-left px-3.5 py-2.5 bg-[#F8FAFC] hover:bg-[#F5F1FF] border border-[#E5E7EB] hover:border-[#DDD2FF] text-xs font-semibold text-[#0E1B38] rounded-xl transition-colors cursor-pointer"
+                  >
+                    {p} →
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Context Awareness Notice */}
+            <div className="bg-gradient-to-br from-[#FAF8FF] to-[#F5F1FF] border border-[#DDD2FF] rounded-2xl p-5 shadow-2xs">
+              <h4 className="font-['Manrope'] font-bold text-sm text-[#0E1B38] mb-1.5 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#22A06B]" />
+                Roadmap-Grounded
+              </h4>
+              <p className="text-xs text-[#52617D] leading-relaxed">
+                Your AI Coach continuously inspects your completed lessons, quiz outcomes, and target roles to provide accurate, tailored answers.
+              </p>
+            </div>
+
+            {/* Study Mode Tips */}
+            <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5 shadow-2xs">
+              <h4 className="font-['Manrope'] font-bold text-xs uppercase tracking-wider text-[#74819A] mb-2">
+                Coaching Modes
+              </h4>
+              <ul className="text-xs text-[#52617D] space-y-2">
+                <li className="flex items-start gap-2">
+                  <span className="text-[#5B36E9] font-bold">•</span>
+                  <span><strong>Practice:</strong> Generate multiple-choice questions tailored to your active skills.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#5B36E9] font-bold">•</span>
+                  <span><strong>Project Ideas:</strong> Get portfolio-ready project concepts with step-by-step guidance.</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
       </div>
     </AppShell>
   )
