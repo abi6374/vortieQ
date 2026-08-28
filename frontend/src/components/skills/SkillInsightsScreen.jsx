@@ -59,6 +59,8 @@ import {
   Compass,
 } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
+import { useRoadmap } from '../../hooks/useRoadmap'
+import { useStreak } from '../../hooks/useStreak'
 
 /**
  * SkillInsightsScreen Component for PathFinder
@@ -89,11 +91,11 @@ export default function SkillInsightsScreen() {
   const navigate = useNavigate()
   const { open: openAICoach, send: sendToAICoach } = useAIChat()
   const { user, signOut } = useAuth()
+  const roadmap = useRoadmap()
+  const streak = useStreak()
 
   // State Management
   const [activeNav, setActiveNav] = useState('skills')
-  const [selectedGoal, setSelectedGoal] = useState('Goal: AIML Engineer Internship')
-  const [isGoalDropdownOpen, setIsGoalDropdownOpen] = useState(false)
   const [trendTimeframe, setTrendTimeframe] = useState('Last 8 Weeks')
   const [isTrendDropdownOpen, setIsTrendDropdownOpen] = useState(false)
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
@@ -118,77 +120,161 @@ export default function SkillInsightsScreen() {
   }
 
   // ---------------------------------------------------------------------------
-  // DATASETS FOR RECHARTS & CUSTOM VISUALS
+  // DATASETS FOR RECHARTS & CUSTOM VISUALS — REAL, derived from roadmap.allSteps'
+  // real skill_tags/difficulty/completion (same source as the /progress rebuild).
+  // There's no stored per-skill "target" or category taxonomy, so:
+  //  - target is a uniform 100 (full completion of the steps assigned for that
+  //    skill) — the only honest target available, not an invented per-skill goal
+  //  - "category" groupings (Programming/Data Analysis/...) are dropped in favor
+  //    of the real skill tag names themselves
   // ---------------------------------------------------------------------------
 
+  const cap = (s) => s.replace(/[-_]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+  const statusFor = (pct) => {
+    if (pct >= 90) return 'Mastered'
+    if (pct >= 65) return 'Developing'
+    if (pct >= 40) return 'Medium'
+    return 'High Priority'
+  }
+
+  const skillTagStats = {}
+  roadmap.allSteps.forEach((step) => {
+    ;(step.skill_tags || []).forEach((tag) => {
+      if (!skillTagStats[tag]) skillTagStats[tag] = { total: 0, done: 0, hours: 0, byDifficulty: {} }
+      const bucket = skillTagStats[tag]
+      bucket.total += 1
+      if (step.completed) {
+        bucket.done += 1
+        bucket.hours += step.duration_hrs || 0
+      }
+      const diff = step.difficulty || 'beginner'
+      if (!bucket.byDifficulty[diff]) bucket.byDifficulty[diff] = { total: 0, done: 0 }
+      bucket.byDifficulty[diff].total += 1
+      if (step.completed) bucket.byDifficulty[diff].done += 1
+    })
+  })
+  const allSkillEntries = Object.entries(skillTagStats)
+    .map(([tag, s]) => ({ tag, total: s.total, done: s.done, hours: s.hours, byDifficulty: s.byDifficulty, progress: Math.round((s.done / s.total) * 100) }))
+  const topSkills = [...allSkillEntries].sort((a, b) => b.total - a.total).slice(0, 8)
+
   // 1. Skill Proficiency Comparison Data (Grouped Bar Chart)
-  const proficiencyData = [
-    { skill: 'Python', current: 85, target: 85, gap: 0, status: 'Mastered' },
-    { skill: 'Statistics', current: 55, target: 80, gap: 25, status: 'High Priority' },
-    { skill: 'Pandas\n& EDA', name: 'Pandas & EDA', current: 70, target: 80, gap: 10, status: 'Developing' },
-    { skill: 'Machine\nLearning', name: 'Machine Learning', current: 45, target: 85, gap: 40, status: 'High Priority' },
-    { skill: 'Deep\nLearning', name: 'Deep Learning', current: 35, target: 75, gap: 40, status: 'Medium' },
-    { skill: 'SQL', current: 65, target: 75, gap: 10, status: 'Developing' },
-    { skill: 'Portfolio', current: 60, target: 75, gap: 15, status: 'Developing' },
-    { skill: 'Interview\nPrep', name: 'Interview Prep', current: 50, target: 80, gap: 30, status: 'Medium' },
-  ]
+  const proficiencyData = topSkills.map((s) => ({
+    skill: cap(s.tag).replace(' ', '\n'),
+    name: cap(s.tag),
+    current: s.progress,
+    target: 100,
+    gap: 100 - s.progress,
+    status: statusFor(s.progress),
+  }))
 
-  // 2. Radar Chart Data
-  const radarData = [
-    { skill: 'Python', current: 85, target: 85 },
-    { skill: 'Statistics', current: 55, target: 80 },
-    { skill: 'Pandas & EDA', current: 70, target: 80 },
-    { skill: 'Machine Learning', current: 45, target: 85 },
-    { skill: 'Deep Learning', current: 35, target: 75 },
-    { skill: 'SQL', current: 65, target: 75 },
-    { skill: 'Communication', current: 60, target: 70 },
-  ]
+  // 2. Radar Chart Data — same real skills, reshaped.
+  const radarData = topSkills.slice(0, 7).map((s) => ({
+    skill: cap(s.tag),
+    current: s.progress,
+    target: 100,
+  }))
 
-  // 3. Learning Trend Data (8 Weeks)
-  const trendData = [
-    { week: 'W1', readiness: 25 },
-    { week: 'W2', readiness: 32 },
-    { week: 'W3', readiness: 42 },
-    { week: 'W4', readiness: 48 },
-    { week: 'W5', readiness: 53 },
-    { week: 'W6', readiness: 61 },
-    { week: 'W7', readiness: 70 },
-    { week: 'W8', readiness: 78 },
-  ]
+  // 3. Learning Trend Data — cumulative real completion mapped onto the
+  // roadmap's own real week axis (same computation as /progress dataset #1).
+  const trendTotalSteps = roadmap.totalSteps || 0
+  let _trendCumulative = 0
+  const trendData = roadmap.weeks.map((w) => {
+    _trendCumulative += w.completed_steps || 0
+    return {
+      week: `W${w.week_number}`,
+      readiness: trendTotalSteps ? Math.round((_trendCumulative / trendTotalSteps) * 100) : 0,
+    }
+  })
 
-  // 4. Skill Category Breakdown (Donut Chart)
-  const categoryData = [
-    { name: 'Programming', value: 28, color: '#5B36E9' },
-    { name: 'Data Analysis', value: 22, color: '#5B8DEF' },
-    { name: 'Machine Learning', value: 18, color: '#18A999' },
-    { name: 'Deep Learning', value: 12, color: '#E96A91' },
-    { name: 'Tools & Databases', value: 10, color: '#F2A33A' },
-    { name: 'Soft Skills', value: 10, color: '#7C61F5' },
-  ]
+  // 4. Skill Breakdown by real tag (step-count share) — donut chart.
+  const DONUT_COLORS = ['#5B36E9', '#5B8DEF', '#18A999', '#E96A91', '#F2A33A', '#7C61F5', '#22A06B', '#DC7633']
+  const totalTaggedSteps = allSkillEntries.reduce((a, s) => a + s.total, 0)
+  const categoryData = topSkills.slice(0, 6).map((s, i) => ({
+    name: cap(s.tag),
+    value: totalTaggedSteps ? Math.round((s.total / totalTaggedSteps) * 100) : 0,
+    color: DONUT_COLORS[i % DONUT_COLORS.length],
+  }))
 
-  // 5. Time Spent By Category (Donut Chart)
-  const timeSpentData = [
-    { name: 'Programming', value: 40, hours: '9.8h', color: '#5B36E9' },
-    { name: 'Data Analysis', value: 25, hours: '6.1h', color: '#5B8DEF' },
-    { name: 'Machine Learning', value: 20, hours: '4.9h', color: '#18A999' },
-    { name: 'Tools & Others', value: 15, hours: '3.7h', color: '#F2A33A' },
-  ]
+  // 5. Time Spent by real tag (real duration_hrs of completed steps) — donut chart.
+  const totalTaggedHours = allSkillEntries.reduce((a, s) => a + s.hours, 0) || 1
+  const timeSpentData = [...allSkillEntries]
+    .sort((a, b) => b.hours - a.hours)
+    .slice(0, 4)
+    .map((s, i) => ({
+      name: cap(s.tag),
+      value: Math.round((s.hours / totalTaggedHours) * 100),
+      hours: `${s.hours.toFixed(1)}h`,
+      color: DONUT_COLORS[i % DONUT_COLORS.length],
+    }))
 
-  // 6. Top Strengths Data
-  const strengthsList = [
-    { rank: 1, name: 'Python Foundations', score: 75 },
-    { rank: 2, name: 'SQL Basics', score: 70 },
-    { rank: 3, name: 'Data Wrangling', score: 65 },
-    { rank: 4, name: 'Problem Solving', score: 60 },
-    { rank: 5, name: 'Git & GitHub', score: 58 },
-  ]
+  // 6. Top Strengths — real skills ranked by real completion %.
+  const strengthsList = [...allSkillEntries]
+    .filter((s) => s.progress > 0)
+    .sort((a, b) => b.progress - a.progress)
+    .slice(0, 5)
+    .map((s, i) => ({ rank: i + 1, name: cap(s.tag), score: s.progress }))
 
-  // 7. Heatmap Matrix Data
-  const heatmapData = [
-    { level: 'Foundations', python: 92, stats: 68, ml: 58, pandas: 88, sql: 78 },
-    { level: 'Intermediate', python: 80, stats: 48, ml: 40, pandas: 62, sql: 56 },
-    { level: 'Advanced', python: 60, stats: 28, ml: 22, pandas: 40, sql: 32 },
+  // 7. Heatmap Matrix — real completion % per (skill tag, real difficulty level).
+  const DIFFICULTY_ROWS = [
+    { key: 'beginner', level: 'Foundations' },
+    { key: 'intermediate', level: 'Intermediate' },
+    { key: 'advanced', level: 'Advanced' },
   ]
+  const heatmapSkills = topSkills.slice(0, 5)
+  const heatmapData = DIFFICULTY_ROWS.map((row) => {
+    const out = { level: row.level }
+    heatmapSkills.forEach((s) => {
+      const cell = s.byDifficulty[row.key]
+      out[s.tag] = cell ? Math.round((cell.done / cell.total) * 100) : null
+    })
+    return out
+  })
+
+  // Real KPI summary + velocity/insight stats, all derived from the same
+  // real allSkillEntries/roadmap/streak data above.
+  const totalSkillsCount = allSkillEntries.length
+  const masteredSkillsCount = allSkillEntries.filter((s) => s.progress >= 90).length
+  const inProgressSkillsCount = allSkillEntries.filter((s) => s.progress > 0 && s.progress < 90).length
+  const toLearnSkillsCount = allSkillEntries.filter((s) => s.progress === 0).length
+  const totalRealHours = allSkillEntries.reduce((a, s) => a + s.hours, 0)
+  // Real pace: total real steps completed per week elapsed so far. Labeled
+  // "steps/week" rather than "skills/week" - we can't measure discrete
+  // skills gained per week without a stored time series, but step
+  // completion pace is directly real and computable.
+  const stepsPerWeek = roadmap.currentWeek ? Math.round((roadmap.completedSteps / roadmap.currentWeek) * 10) / 10 : 0
+  const topStrength = strengthsList[0]
+  const biggestGap = [...allSkillEntries].sort((a, b) => a.progress - b.progress)[0]
+
+  // "Recommended Focus" panel — the learner's real next 3 not-started steps.
+  const FOCUS_ICONS = [Target, Sparkles, Briefcase]
+  const recommendedFocus = roadmap.allSteps
+    .filter((s) => s.status === 'not_started')
+    .sort((a, b) => (a.sequence_order || 0) - (b.sequence_order || 0))
+    .slice(0, 3)
+    .map((s, i) => ({
+      title: s.title,
+      subtitle: s.duration_hrs ? `Estimated time: ${s.duration_hrs}h` : (s.milestone_label || ''),
+      icon: FOCUS_ICONS[i % FOCUS_ICONS.length],
+    }))
+
+  // "Top Skill Gaps" panel — real skills ranked by real gap (100 - progress),
+  // with a real remaining-course count instead of an invented curriculum blurb.
+  const GAP_ICONS = [Brain, BarChart3, Layers, Briefcase, Database, Code]
+  const topGaps = [...allSkillEntries]
+    .filter((s) => s.progress < 100)
+    .sort((a, b) => a.progress - b.progress)
+    .slice(0, 4)
+    .map((s, i) => {
+      const remaining = s.total - s.done
+      return {
+        title: cap(s.tag),
+        current: `${s.progress}%`,
+        target: '100%',
+        priority: statusFor(s.progress),
+        desc: `${remaining} course${remaining === 1 ? '' : 's'} remaining in your roadmap for this skill.`,
+        icon: GAP_ICONS[i % GAP_ICONS.length],
+      }
+    })
 
   const getHeatmapColor = (val) => {
     if (val >= 75) return 'bg-[#ECFDF3] text-[#22A06B] border-[#D1FADF]' // Strong green
@@ -310,49 +396,17 @@ export default function SkillInsightsScreen() {
                 </div>
               </div>
 
-              {/* Right Side: Goal Selector & Last Updated */}
+              {/* Right Side: Real Goal & Last Updated (live-computed, so "now") */}
               <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 lg:self-center">
-                {/* White Rounded Dropdown: Goal Selector */}
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={() => setIsGoalDropdownOpen((v) => !v)}
-                    className="flex items-center gap-2 px-3.5 py-2 bg-white border border-[#D8DFEB] hover:border-[#B9C2D4] rounded-xl text-xs font-bold text-[#0E1B38] shadow-sm transition-all"
-                  >
-                    <Target className="w-4 h-4 text-[#5B36E9]" strokeWidth={2.2} />
-                    <span>{selectedGoal}</span>
-                    <ChevronDown className={`w-4 h-4 text-[#74819A] transition-transform ${isGoalDropdownOpen ? 'rotate-180' : ''}`} />
-                  </button>
-
-                  {isGoalDropdownOpen && (
-                    <div className="absolute right-0 mt-1.5 w-64 bg-white rounded-xl border border-[#D8DFEB] shadow-xl p-2 z-30 animate-in fade-in duration-100">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSelectedGoal('Goal: AIML Engineer Internship')
-                          setIsGoalDropdownOpen(false)
-                        }}
-                        className="w-full text-left p-2 rounded-lg bg-[#F5F1FF] text-[#5B36E9] font-bold text-xs mb-1"
-                      >
-                        Goal: AIML Engineer Internship
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSelectedGoal('Goal: Data Scientist')
-                          setIsGoalDropdownOpen(false)
-                        }}
-                        className="w-full text-left p-2 rounded-lg hover:bg-gray-50 text-[#0E1B38] font-semibold text-xs"
-                      >
-                        Goal: Data Scientist
-                      </button>
-                    </div>
-                  )}
+                <div className="flex items-center gap-2 px-3.5 py-2 bg-white border border-[#D8DFEB] rounded-xl text-xs font-bold text-[#0E1B38] shadow-sm max-w-xs">
+                  <Target className="w-4 h-4 text-[#5B36E9] flex-none" strokeWidth={2.2} />
+                  <span className="truncate">
+                    {roadmap.path?.goal_text ? `Goal: ${roadmap.path.goal_text.split('.')[0]}` : 'No active goal yet'}
+                  </span>
                 </div>
 
-                {/* Last Updated Timestamp */}
                 <span className="text-xs font-medium text-[#74819A] self-center sm:self-auto">
-                  Last updated: 28 Aug 2026
+                  Last updated: {new Date().toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
                 </span>
               </div>
             </div>
@@ -379,16 +433,16 @@ export default function SkillInsightsScreen() {
 
                 <div className="flex items-baseline gap-3 my-2.5">
                   <span className="font-['Manrope'] font-extrabold text-2xl sm:text-[28px] text-[#0E1B38] tracking-tight leading-none">
-                    78%
+                    {roadmap.percent}%
                   </span>
                   <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#22A06B] bg-[#ECFDF3] px-2 py-0.5 rounded-full border border-[#D1FADF]">
                     <TrendingUp className="w-3 h-3" />
-                    <span>+12% vs last assessment</span>
+                    <span>{roadmap.completedSteps} of {roadmap.totalSteps} steps done</span>
                   </span>
                 </div>
 
                 <div className="w-full bg-[#E8ECF4] h-2 rounded-full overflow-hidden">
-                  <div className="bg-[#5B36E9] h-full rounded-full transition-all duration-500" style={{ width: '78%' }} />
+                  <div className="bg-[#5B36E9] h-full rounded-full transition-all duration-500" style={{ width: `${roadmap.percent}%` }} />
                 </div>
               </div>
 
@@ -401,17 +455,19 @@ export default function SkillInsightsScreen() {
                     </span>
                     <span className="text-xs font-bold text-[#52617D]">Skills Mastered</span>
                   </div>
-                  <span className="text-[11px] font-bold text-[#74819A]">43%</span>
+                  <span className="text-[11px] font-bold text-[#74819A]">
+                    {totalSkillsCount ? Math.round((masteredSkillsCount / totalSkillsCount) * 100) : 0}%
+                  </span>
                 </div>
 
                 <div className="my-2.5">
                   <span className="font-['Manrope'] font-extrabold text-2xl sm:text-[28px] text-[#0E1B38] tracking-tight leading-none">
-                    3 / 8
+                    {masteredSkillsCount} / {totalSkillsCount}
                   </span>
                 </div>
 
                 <div className="w-full bg-[#E8ECF4] h-2 rounded-full overflow-hidden">
-                  <div className="bg-[#22A06B] h-full rounded-full transition-all duration-500" style={{ width: '37.5%' }} />
+                  <div className="bg-[#22A06B] h-full rounded-full transition-all duration-500" style={{ width: `${totalSkillsCount ? (masteredSkillsCount / totalSkillsCount) * 100 : 0}%` }} />
                 </div>
               </div>
 
@@ -424,17 +480,17 @@ export default function SkillInsightsScreen() {
                     </span>
                     <span className="text-xs font-bold text-[#52617D]">Skills In Progress</span>
                   </div>
-                  <span className="text-[11px] font-bold text-[#D88700]">Keep going!</span>
+                  <span className="text-[11px] font-bold text-[#D88700]">{inProgressSkillsCount > 0 ? 'Keep going!' : '—'}</span>
                 </div>
 
                 <div className="my-2.5">
                   <span className="font-['Manrope'] font-extrabold text-2xl sm:text-[28px] text-[#0E1B38] tracking-tight leading-none">
-                    4
+                    {inProgressSkillsCount}
                   </span>
                 </div>
 
                 <div className="w-full bg-[#E8ECF4] h-2 rounded-full overflow-hidden">
-                  <div className="bg-[#D88700] h-full rounded-full transition-all duration-500" style={{ width: '50%' }} />
+                  <div className="bg-[#D88700] h-full rounded-full transition-all duration-500" style={{ width: `${totalSkillsCount ? (inProgressSkillsCount / totalSkillsCount) * 100 : 0}%` }} />
                 </div>
               </div>
 
@@ -447,17 +503,17 @@ export default function SkillInsightsScreen() {
                     </span>
                     <span className="text-xs font-bold text-[#52617D]">Skills to Learn</span>
                   </div>
-                  <span className="text-[11px] font-bold text-[#5B8DEF]">Focus recommended</span>
+                  <span className="text-[11px] font-bold text-[#5B8DEF]">{toLearnSkillsCount > 0 ? 'Focus recommended' : '—'}</span>
                 </div>
 
                 <div className="my-2.5">
                   <span className="font-['Manrope'] font-extrabold text-2xl sm:text-[28px] text-[#0E1B38] tracking-tight leading-none">
-                    1
+                    {toLearnSkillsCount}
                   </span>
                 </div>
 
                 <div className="w-full bg-[#E8ECF4] h-2 rounded-full overflow-hidden">
-                  <div className="bg-[#5B8DEF] h-full rounded-full transition-all duration-500" style={{ width: '15%' }} />
+                  <div className="bg-[#5B8DEF] h-full rounded-full transition-all duration-500" style={{ width: `${totalSkillsCount ? (toLearnSkillsCount / totalSkillsCount) * 100 : 0}%` }} />
                 </div>
               </div>
 
@@ -481,7 +537,7 @@ export default function SkillInsightsScreen() {
                       </h2>
                       <Info
                         className="w-3.5 h-3.5 text-[#98A3B7] cursor-pointer hover:text-[#5B36E9]"
-                        title="Current level compared with the proficiency recommended for your target AIML Engineer internship."
+                        title="Current completion compared with full completion of the steps assigned for each skill in your roadmap."
                       />
                     </div>
 
@@ -642,115 +698,39 @@ export default function SkillInsightsScreen() {
                     </div>
                   </div>
 
-                  {/* Actionable Gap Rows */}
+                  {/* Actionable Gap Rows — real skills, ranked by real gap */}
                   <div className="space-y-3 mt-3">
-                    {/* Gap 1: Machine Learning */}
-                    <div
-                      className="p-2.5 rounded-xl border border-[#F0F2F7] hover:border-[#5B36E9] hover:bg-[#F8FAFD] cursor-pointer transition-all flex items-center justify-between"
-                      onClick={() => {
-                        setSelectedSkillModal({
-                          title: 'Machine Learning',
-                          current: '45%',
-                          target: '85%',
-                          priority: 'High Priority',
-                          desc: 'Focus on Supervised Learning algorithms, Cost Functions, and Model Validation.',
-                        })
-                      }}
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <span className="w-8 h-8 rounded-lg bg-[#F5F1FF] text-[#5B36E9] flex items-center justify-center flex-none">
-                          <Brain className="w-4 h-4" />
-                        </span>
-                        <div>
-                          <h4 className="font-bold text-xs text-[#0E1B38]">Machine Learning</h4>
-                          <p className="text-[11px] text-[#74819A]">Current 45% → Target 85%</p>
+                    {topGaps.length === 0 && (
+                      <p className="text-[11px] text-[#74819A] italic">No gaps yet — generate a path to see this.</p>
+                    )}
+                    {topGaps.map((gap) => {
+                      const GapIcon = gap.icon
+                      const isHigh = gap.priority === 'High Priority'
+                      return (
+                        <div
+                          key={gap.title}
+                          className="p-2.5 rounded-xl border border-[#F0F2F7] hover:border-[#5B36E9] hover:bg-[#F8FAFD] cursor-pointer transition-all flex items-center justify-between"
+                          onClick={() => setSelectedSkillModal(gap)}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <span className="w-8 h-8 rounded-lg bg-[#F5F1FF] text-[#5B36E9] flex items-center justify-center flex-none">
+                              <GapIcon className="w-4 h-4" />
+                            </span>
+                            <div>
+                              <h4 className="font-bold text-xs text-[#0E1B38]">{gap.title}</h4>
+                              <p className="text-[11px] text-[#74819A]">Current {gap.current} → Target {gap.target}</p>
+                            </div>
+                          </div>
+                          <span className={`px-2 py-0.5 rounded-md font-bold text-[10px] border ${
+                            isHigh
+                              ? 'bg-[#FFF0F0] text-[#E5484D] border-[#FECDCA]'
+                              : 'bg-[#FFF7E6] text-[#D88700] border-[#FEE4B2]'
+                          }`}>
+                            {gap.priority}
+                          </span>
                         </div>
-                      </div>
-                      <span className="px-2 py-0.5 rounded-md bg-[#FFF0F0] text-[#E5484D] font-bold text-[10px] border border-[#FECDCA]">
-                        High Priority
-                      </span>
-                    </div>
-
-                    {/* Gap 2: Statistics */}
-                    <div
-                      className="p-2.5 rounded-xl border border-[#F0F2F7] hover:border-[#5B36E9] hover:bg-[#F8FAFD] cursor-pointer transition-all flex items-center justify-between"
-                      onClick={() => {
-                        setSelectedSkillModal({
-                          title: 'Statistics',
-                          current: '55%',
-                          target: '80%',
-                          priority: 'High Priority',
-                          desc: 'Master descriptive statistics, probability distributions, variance, and hypothesis testing.',
-                        })
-                      }}
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <span className="w-8 h-8 rounded-lg bg-[#F5F1FF] text-[#5B36E9] flex items-center justify-center flex-none">
-                          <BarChart3 className="w-4 h-4" />
-                        </span>
-                        <div>
-                          <h4 className="font-bold text-xs text-[#0E1B38]">Statistics</h4>
-                          <p className="text-[11px] text-[#74819A]">Current 55% → Target 80%</p>
-                        </div>
-                      </div>
-                      <span className="px-2 py-0.5 rounded-md bg-[#FFF0F0] text-[#E5484D] font-bold text-[10px] border border-[#FECDCA]">
-                        High Priority
-                      </span>
-                    </div>
-
-                    {/* Gap 3: Deep Learning */}
-                    <div
-                      className="p-2.5 rounded-xl border border-[#F0F2F7] hover:border-[#5B36E9] hover:bg-[#F8FAFD] cursor-pointer transition-all flex items-center justify-between"
-                      onClick={() => {
-                        setSelectedSkillModal({
-                          title: 'Deep Learning',
-                          current: '35%',
-                          target: '75%',
-                          priority: 'Medium',
-                          desc: 'Neural network architectures, Backpropagation, and PyTorch tensors.',
-                        })
-                      }}
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <span className="w-8 h-8 rounded-lg bg-[#F5F1FF] text-[#7C61F5] flex items-center justify-center flex-none">
-                          <Layers className="w-4 h-4" />
-                        </span>
-                        <div>
-                          <h4 className="font-bold text-xs text-[#0E1B38]">Deep Learning</h4>
-                          <p className="text-[11px] text-[#74819A]">Current 35% → Target 75%</p>
-                        </div>
-                      </div>
-                      <span className="px-2 py-0.5 rounded-md bg-[#FFF7E6] text-[#D88700] font-bold text-[10px] border border-[#FEE4B2]">
-                        Medium
-                      </span>
-                    </div>
-
-                    {/* Gap 4: Interview Preparation */}
-                    <div
-                      className="p-2.5 rounded-xl border border-[#F0F2F7] hover:border-[#5B36E9] hover:bg-[#F8FAFD] cursor-pointer transition-all flex items-center justify-between"
-                      onClick={() => {
-                        setSelectedSkillModal({
-                          title: 'Interview Preparation',
-                          current: '50%',
-                          target: '80%',
-                          priority: 'Medium',
-                          desc: 'ML system design mock scenarios, behavioral questions, and coding questions.',
-                        })
-                      }}
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <span className="w-8 h-8 rounded-lg bg-[#F5F1FF] text-[#5B8DEF] flex items-center justify-center flex-none">
-                          <Briefcase className="w-4 h-4" />
-                        </span>
-                        <div>
-                          <h4 className="font-bold text-xs text-[#0E1B38]">Interview Preparation</h4>
-                          <p className="text-[11px] text-[#74819A]">Current 50% → Target 80%</p>
-                        </div>
-                      </div>
-                      <span className="px-2 py-0.5 rounded-md bg-[#FFF7E6] text-[#D88700] font-bold text-[10px] border border-[#FEE4B2]">
-                        Medium
-                      </span>
-                    </div>
+                      )
+                    })}
                   </div>
                 </div>
               </div>
@@ -860,20 +840,27 @@ export default function SkillInsightsScreen() {
                       </AreaChart>
                     </ResponsiveContainer>
 
-                    {/* Pinned 78% Tooltip Callout at W8 */}
+                    {/* Real current readiness, pinned at the latest week */}
                     <div className="absolute top-1 right-2 sm:right-4 bg-[#5B36E9] text-white text-[11px] font-extrabold px-2 py-0.5 rounded-md shadow-md">
-                      78%
+                      {roadmap.percent}%
                     </div>
                   </div>
                 </div>
 
                 {/* Green Insight Banner at bottom */}
-                <div className="mt-3 p-3 bg-[#ECFDF3] border border-[#D1FADF] rounded-xl flex items-center gap-2.5">
-                  <CheckCircle className="w-4 h-4 text-[#22A06B] flex-none" />
-                  <p className="text-xs font-semibold text-[#0E1B38]">
-                    Great progress! Your skill readiness improved by 18% in the last 8 weeks.
-                  </p>
-                </div>
+                {trendData.length > 1 && (
+                  <div className="mt-3 p-3 bg-[#ECFDF3] border border-[#D1FADF] rounded-xl flex items-center gap-2.5">
+                    <CheckCircle className="w-4 h-4 text-[#22A06B] flex-none" />
+                    <p className="text-xs font-semibold text-[#0E1B38]">
+                      {(() => {
+                        const gain = trendData[trendData.length - 1].readiness - trendData[0].readiness
+                        return gain > 0
+                          ? `Great progress! Your skill readiness improved by ${gain}% over ${trendData.length} weeks.`
+                          : "Complete more steps to build up your readiness trend."
+                      })()}
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* CARD 2: Skill Category Breakdown (Donut Chart, 3.5 of 12 cols) */}
@@ -925,10 +912,10 @@ export default function SkillInsightsScreen() {
                       </PieChart>
                     </ResponsiveContainer>
 
-                    {/* Centered 78% Overall Text */}
+                    {/* Centered real overall readiness */}
                     <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                       <span className="font-['Manrope'] font-extrabold text-xl text-[#0E1B38] leading-none">
-                        78%
+                        {roadmap.percent}%
                       </span>
                       <span className="text-[10px] font-semibold text-[#74819A] uppercase tracking-wider mt-0.5">
                         Overall
@@ -966,72 +953,44 @@ export default function SkillInsightsScreen() {
                     </div>
                   </div>
 
-                  {/* Priority Banner (Green Surface) */}
-                  <div className="mt-2.5 p-2.5 rounded-xl bg-[#ECFDF3] border border-[#D1FADF] flex items-start gap-2">
-                    <Shield className="w-4 h-4 text-[#22A06B] flex-none mt-0.5" />
-                    <p className="text-[11px] font-bold text-[#0E1B38] leading-tight">
-                      Next Priority: Complete <span className="text-[#5B36E9]">Statistics</span> foundations to prepare for Machine Learning
-                    </p>
-                  </div>
+                  {/* Priority Banner (Green Surface) — real biggest gap */}
+                  {biggestGap && (
+                    <div className="mt-2.5 p-2.5 rounded-xl bg-[#ECFDF3] border border-[#D1FADF] flex items-start gap-2">
+                      <Shield className="w-4 h-4 text-[#22A06B] flex-none mt-0.5" />
+                      <p className="text-[11px] font-bold text-[#0E1B38] leading-tight">
+                        Next Priority: Complete <span className="text-[#5B36E9]">{cap(biggestGap.tag)}</span> to close your biggest real gap
+                      </p>
+                    </div>
+                  )}
 
-                  {/* 3 Actionable Recommendation Rows */}
+                  {/* Real next 3 not-started roadmap steps */}
                   <div className="space-y-2.5 mt-3">
-                    {/* Item 1 */}
-                    <div
-                      className="p-2.5 rounded-xl border border-[#F0F2F7] hover:border-[#5B36E9] hover:bg-[#F8FAFD] cursor-pointer transition-all flex items-center justify-between group"
-                      onClick={() => navigate('/progress')}
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <span className="w-7 h-7 rounded-lg bg-[#F5F1FF] text-[#5B36E9] flex items-center justify-center flex-none">
-                          <Target className="w-3.5 h-3.5" />
-                        </span>
-                        <div>
-                          <h4 className="font-bold text-xs text-[#0E1B38] group-hover:text-[#5B36E9]">
-                            Improve Statistics to 80%
-                          </h4>
-                          <p className="text-[10px] text-[#74819A]">Estimated time: 2 weeks</p>
+                    {recommendedFocus.length === 0 && (
+                      <p className="text-[11px] text-[#74819A] italic">You're all caught up on your roadmap!</p>
+                    )}
+                    {recommendedFocus.map((item) => {
+                      const ItemIcon = item.icon
+                      return (
+                        <div
+                          key={item.title}
+                          className="p-2.5 rounded-xl border border-[#F0F2F7] hover:border-[#5B36E9] hover:bg-[#F8FAFD] cursor-pointer transition-all flex items-center justify-between group"
+                          onClick={() => navigate('/dashboard')}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <span className="w-7 h-7 rounded-lg bg-[#F5F1FF] text-[#5B36E9] flex items-center justify-center flex-none">
+                              <ItemIcon className="w-3.5 h-3.5" />
+                            </span>
+                            <div>
+                              <h4 className="font-bold text-xs text-[#0E1B38] group-hover:text-[#5B36E9]">
+                                {item.title}
+                              </h4>
+                              <p className="text-[10px] text-[#74819A]">{item.subtitle}</p>
+                            </div>
+                          </div>
+                          <ChevronRight className="w-4 h-4 text-[#74819A] group-hover:text-[#5B36E9] transition-transform group-hover:translate-x-0.5" />
                         </div>
-                      </div>
-                      <ChevronRight className="w-4 h-4 text-[#74819A] group-hover:text-[#5B36E9] transition-transform group-hover:translate-x-0.5" />
-                    </div>
-
-                    {/* Item 2 */}
-                    <div
-                      className="p-2.5 rounded-xl border border-[#F0F2F7] hover:border-[#5B36E9] hover:bg-[#F8FAFD] cursor-pointer transition-all flex items-center justify-between group"
-                      onClick={() => navigate('/dashboard')}
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <span className="w-7 h-7 rounded-lg bg-[#F5F1FF] text-[#5B36E9] flex items-center justify-center flex-none">
-                          <Sparkles className="w-3.5 h-3.5" />
-                        </span>
-                        <div>
-                          <h4 className="font-bold text-xs text-[#0E1B38] group-hover:text-[#5B36E9]">
-                            Start Machine Learning module
-                          </h4>
-                          <p className="text-[10px] text-[#74819A]">After Statistics completion</p>
-                        </div>
-                      </div>
-                      <ChevronRight className="w-4 h-4 text-[#74819A] group-hover:text-[#5B36E9] transition-transform group-hover:translate-x-0.5" />
-                    </div>
-
-                    {/* Item 3 */}
-                    <div
-                      className="p-2.5 rounded-xl border border-[#F0F2F7] hover:border-[#5B36E9] hover:bg-[#F8FAFD] cursor-pointer transition-all flex items-center justify-between group"
-                      onClick={() => navigate('/dashboard')}
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <span className="w-7 h-7 rounded-lg bg-[#F5F1FF] text-[#5B36E9] flex items-center justify-center flex-none">
-                          <Briefcase className="w-3.5 h-3.5" />
-                        </span>
-                        <div>
-                          <h4 className="font-bold text-xs text-[#0E1B38] group-hover:text-[#5B36E9]">
-                            Build portfolio project
-                          </h4>
-                          <p className="text-[10px] text-[#74819A]">Target: Week 10</p>
-                        </div>
-                      </div>
-                      <ChevronRight className="w-4 h-4 text-[#74819A] group-hover:text-[#5B36E9] transition-transform group-hover:translate-x-0.5" />
-                    </div>
+                      )
+                    })}
                   </div>
                 </div>
               </div>
@@ -1098,42 +1057,29 @@ export default function SkillInsightsScreen() {
                       <thead>
                         <tr className="border-b border-[#E6EAF2] text-[#74819A]">
                           <th className="py-2.5 px-3 font-bold">Tier Level</th>
-                          <th className="py-2.5 px-3 font-bold text-center">Python</th>
-                          <th className="py-2.5 px-3 font-bold text-center">Statistics</th>
-                          <th className="py-2.5 px-3 font-bold text-center">Machine Learning</th>
-                          <th className="py-2.5 px-3 font-bold text-center">Pandas & EDA</th>
-                          <th className="py-2.5 px-3 font-bold text-center">SQL</th>
+                          {heatmapSkills.map((s) => (
+                            <th key={s.tag} className="py-2.5 px-3 font-bold text-center">{cap(s.tag)}</th>
+                          ))}
                         </tr>
                       </thead>
                       <tbody>
                         {heatmapData.map((row) => (
                           <tr key={row.level} className="border-b border-[#F0F2F7]">
                             <td className="py-3 px-3 font-bold text-[#0E1B38]">{row.level}</td>
-                            <td className="py-3 px-3 text-center">
-                              <span className={`inline-block px-3 py-1 rounded-lg border font-bold ${getHeatmapColor(row.python)}`}>
-                                {row.python}%
-                              </span>
-                            </td>
-                            <td className="py-3 px-3 text-center">
-                              <span className={`inline-block px-3 py-1 rounded-lg border font-bold ${getHeatmapColor(row.stats)}`}>
-                                {row.stats}%
-                              </span>
-                            </td>
-                            <td className="py-3 px-3 text-center">
-                              <span className={`inline-block px-3 py-1 rounded-lg border font-bold ${getHeatmapColor(row.ml)}`}>
-                                {row.ml}%
-                              </span>
-                            </td>
-                            <td className="py-3 px-3 text-center">
-                              <span className={`inline-block px-3 py-1 rounded-lg border font-bold ${getHeatmapColor(row.pandas)}`}>
-                                {row.pandas}%
-                              </span>
-                            </td>
-                            <td className="py-3 px-3 text-center">
-                              <span className={`inline-block px-3 py-1 rounded-lg border font-bold ${getHeatmapColor(row.sql)}`}>
-                                {row.sql}%
-                              </span>
-                            </td>
+                            {heatmapSkills.map((s) => {
+                              const val = row[s.tag]
+                              return (
+                                <td key={s.tag} className="py-3 px-3 text-center">
+                                  {val === null ? (
+                                    <span className="text-[#B7C0D1]">—</span>
+                                  ) : (
+                                    <span className={`inline-block px-3 py-1 rounded-lg border font-bold ${getHeatmapColor(val)}`}>
+                                      {val}%
+                                    </span>
+                                  )}
+                                </td>
+                              )
+                            })}
                           </tr>
                         ))}
                       </tbody>
@@ -1149,23 +1095,20 @@ export default function SkillInsightsScreen() {
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-xs font-bold text-[#74819A] uppercase tracking-wider">
-                          Learning Velocity
-                        </span>
-                        <span className="text-[11px] font-bold text-[#22A06B] bg-[#ECFDF3] px-2 py-0.5 rounded-full border border-[#D1FADF]">
-                          +15%
+                          Learning Pace
                         </span>
                       </div>
                       <h4 className="font-['Manrope'] font-extrabold text-2xl text-[#0E1B38]">
-                        2.4 skills / week
+                        {stepsPerWeek} steps / week
                       </h4>
                       <p className="text-[11px] text-[#52617D] mt-0.5 font-medium">
-                        +15% vs last 2 weeks
+                        {roadmap.completedSteps} steps done over {roadmap.currentWeek} week{roadmap.currentWeek === 1 ? '' : 's'}
                       </p>
                     </div>
-                    {/* Mini Sparkline */}
+                    {/* Real cumulative-readiness trend (same series as the chart above) */}
                     <div className="h-10 w-full mt-3">
                       <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={[{ v: 1.8 }, { v: 1.9 }, { v: 2.1 }, { v: 2.0 }, { v: 2.3 }, { v: 2.4 }]}>
+                        <LineChart data={trendData.map((d) => ({ v: d.readiness }))}>
                           <Line type="monotone" dataKey="v" stroke="#5B36E9" strokeWidth={2} dot={false} />
                         </LineChart>
                       </ResponsiveContainer>
@@ -1179,7 +1122,7 @@ export default function SkillInsightsScreen() {
                         <span className="text-xs font-bold text-[#74819A] uppercase tracking-wider">
                           Time Spent
                         </span>
-                        <span className="text-[11px] font-bold text-[#5B36E9]">24.5 hrs</span>
+                        <span className="text-[11px] font-bold text-[#5B36E9]">{totalRealHours.toFixed(1)} hrs</span>
                       </div>
                       <div className="space-y-1.5 mt-2">
                         {timeSpentData.map((item) => (
@@ -1199,9 +1142,12 @@ export default function SkillInsightsScreen() {
                         <span className="text-xs font-bold text-[#74819A] uppercase tracking-wider">
                           Top Strengths
                         </span>
-                        <span className="text-[10px] font-bold text-[#22A06B]">5 Skills Strong</span>
+                        <span className="text-[10px] font-bold text-[#22A06B]">{strengthsList.length} Skill{strengthsList.length === 1 ? '' : 's'} Strong</span>
                       </div>
                       <div className="space-y-1.5 mt-2">
+                        {strengthsList.length === 0 && (
+                          <p className="text-[11px] text-[#74819A] italic">Complete some steps to see your strengths here.</p>
+                        )}
                         {strengthsList.slice(0, 4).map((s) => (
                           <div key={s.name} className="flex items-center justify-between text-[11px]">
                             <span className="text-[#0E1B38] font-semibold truncate">{s.rank}. {s.name}</span>
@@ -1210,9 +1156,11 @@ export default function SkillInsightsScreen() {
                         ))}
                       </div>
                     </div>
-                    <div className="mt-2 text-[10px] text-[#22A06B] font-bold bg-[#ECFDF3] px-2 py-1 rounded-lg text-center">
-                      Great job! Build on these strengths.
-                    </div>
+                    {strengthsList.length > 0 && (
+                      <div className="mt-2 text-[10px] text-[#22A06B] font-bold bg-[#ECFDF3] px-2 py-1 rounded-lg text-center">
+                        Great job! Build on these strengths.
+                      </div>
+                    )}
                   </div>
 
                   {/* Card 4: AI-Powered PathFinder Explanation */}
@@ -1223,7 +1171,13 @@ export default function SkillInsightsScreen() {
                         <span className="text-xs font-bold font-['Manrope']">PathFinder insight</span>
                       </div>
                       <p className="text-[11px] text-[#52617D] leading-relaxed">
-                        Your strongest foundation is <strong>Python</strong>, while <strong>Statistics</strong> and <strong>Machine Learning</strong> are the biggest gaps relative to your AIML internship target. Complete Statistics first because it unlocks the next Machine Learning stage in your roadmap.
+                        {topStrength && biggestGap && topStrength.name !== biggestGap.name ? (
+                          <>Your strongest foundation is <strong>{topStrength.name}</strong>, while <strong>{biggestGap.name}</strong> is your biggest real gap right now. Focus there next to keep your roadmap moving.</>
+                        ) : topStrength ? (
+                          <>You're making solid progress across the board — <strong>{topStrength.name}</strong> is your strongest skill at {topStrength.score}%.</>
+                        ) : (
+                          'Complete a few roadmap steps to start seeing real insights here.'
+                        )}
                       </p>
                     </div>
 
@@ -1231,7 +1185,7 @@ export default function SkillInsightsScreen() {
                       type="button"
                       onClick={() => {
                         openAICoach()
-                        sendToAICoach('Why is Statistics prioritized before Machine Learning?')
+                        sendToAICoach(biggestGap ? `Why should I prioritize ${cap(biggestGap.tag)}?` : 'What should I focus on next?')
                       }}
                       className="mt-3 text-xs font-bold text-[#5B36E9] hover:underline flex items-center gap-1 self-start"
                     >
