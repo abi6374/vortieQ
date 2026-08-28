@@ -166,9 +166,12 @@ export default function AuthScreen({ initialMode = 'signin' }) {
     setError(null)
     setIsLoading(true)
     try {
-      await signInWithGoogle() // redirects away on success
+      const res = await signInWithGoogle()
+      if (res?.url) {
+        window.location.assign(res.url)
+      }
     } catch (err) {
-      setError('Google sign-in isn’t available yet. Please use email or GitHub.')
+      setError(err?.message || 'Google sign-in isn’t available yet. Please use email or GitHub.')
       setIsLoading(false)
     }
   }
@@ -177,9 +180,13 @@ export default function AuthScreen({ initialMode = 'signin' }) {
     setError(null)
     setIsLoading(true)
     try {
-      await signInWithGithub() // redirects to GitHub OAuth
+      const res = await signInWithGithub()
+      if (res?.url) {
+        window.location.assign(res.url)
+      }
     } catch (err) {
-      setError('GitHub sign-in is not configured yet in Supabase Auth.')
+      console.error('GitHub OAuth error:', err)
+      setError(err?.message || 'GitHub sign-in failed. Please ensure the GitHub provider is saved in Supabase.')
       setIsLoading(false)
     }
   }

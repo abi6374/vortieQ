@@ -60,6 +60,9 @@ export function AuthProvider({ children }) {
       options: { redirectTo: `${window.location.origin}/dashboard` },
     })
     if (error) throw error
+    if (data?.url) {
+      window.location.assign(data.url)
+    }
     return data
   }
 
@@ -72,6 +75,9 @@ export function AuthProvider({ children }) {
       },
     })
     if (error) throw error
+    if (data?.url) {
+      window.location.assign(data.url)
+    }
     return data
   }
 
