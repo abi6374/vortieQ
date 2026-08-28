@@ -154,16 +154,16 @@ export default function ProgressScreen() {
     })
   })()
 
-  // 2. Weekly Learning Activity (Bar Chart - 17.4 hrs total)
-  const weeklyActivityData = [
-    { day: 'Mon', hours: 1.5, avgDiff: '-10%' },
-    { day: 'Tue', hours: 2.8, avgDiff: '+15%' },
-    { day: 'Wed', hours: 1.2, avgDiff: '-20%' },
-    { day: 'Thu', hours: 3.4, avgDiff: '+24%', highlight: true },
-    { day: 'Fri', hours: 2.6, avgDiff: '+12%' },
-    { day: 'Sat', hours: 4.1, avgDiff: '+40%' },
-    { day: 'Sun', hours: 1.8, avgDiff: 'On par' },
-  ]
+  // 2. Weekly Learning Activity (Bar Chart) — REAL, from streak.daily_minutes_this_week
+  // (backend: study_sessions rows summed per day, this calendar week). There's
+  // no stored historical average across weeks, so the old "+15% vs avg" style
+  // comparison per day can't be computed honestly - dropped rather than faked.
+  const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+  const weeklyActivityData = (streak.daily_minutes_this_week || []).map((d, i) => ({
+    day: DAY_LABELS[i] || d.date,
+    hours: Math.round((d.minutes / 60) * 10) / 10,
+  }))
+  const weeklyHoursTotal = Math.round(((streak.minutes_this_week || 0) / 60) * 10) / 10
 
   // 3. Core Skills Development
   const skillsData = [
@@ -1002,14 +1002,16 @@ export default function ProgressScreen() {
                   <h3 className="font-['Inter'] font-bold text-sm text-[#172554]">
                     Weekly activity
                   </h3>
-                  <span className="text-[11px] font-bold text-[#5B2FF3] bg-[#F3EEFF] px-2 py-0.5 rounded-full">
-                    +12% vs avg
-                  </span>
+                  {streak.current_streak > 0 && (
+                    <span className="text-[11px] font-bold text-[#5B2FF3] bg-[#F3EEFF] px-2 py-0.5 rounded-full">
+                      {streak.current_streak}-day streak
+                    </span>
+                  )}
                 </div>
                 <p className="text-xs text-[#64748B] mt-0.5">Hours spent learning</p>
                 <div className="flex items-baseline gap-2 mt-2">
                   <span className="font-['Inter'] font-extrabold text-2xl text-[#172554]">
-                    17.4 hrs
+                    {weeklyHoursTotal} hrs
                   </span>
                   <span className="text-xs text-[#64748B]">This week</span>
                 </div>
@@ -1041,7 +1043,6 @@ export default function ProgressScreen() {
                             <div className="bg-white border border-[#E5E7EB] p-2 rounded-md shadow-md text-[11px]">
                               <div className="font-bold text-[#172554]">{d.day}</div>
                               <div className="text-[#5B2FF3] font-bold">{d.hours} hours</div>
-                              <div className="text-[#16A34A] text-[10px]">{d.avgDiff}</div>
                             </div>
                           )
                         }

@@ -145,8 +145,15 @@ def get_streak(user_id: str) -> dict:
     )
     rows = r.data or []
     if not rows:
-        return {"current_streak": 0, "best_streak": 0, "active_today": False,
-                "total_days": 0, "minutes_this_week": 0}
+        week_start = date.today() - timedelta(days=date.today().weekday())
+        return {
+            "current_streak": 0, "best_streak": 0, "active_today": False,
+            "total_days": 0, "minutes_this_week": 0, "recent_days": [],
+            "daily_minutes_this_week": [
+                {"date": (week_start + timedelta(days=i)).isoformat(), "minutes": 0}
+                for i in range(7)
+            ],
+        }
 
     days = sorted({row["activity_date"] for row in rows if row.get("activity_date")}, reverse=True)
     parsed = [date.fromisoformat(d) if isinstance(d, str) else d for d in days]
@@ -170,11 +177,24 @@ def get_streak(user_id: str) -> dict:
         prev = d
 
     week_start = today - timedelta(days=today.weekday())
+
+    def _row_date(row: dict):
+        d = row.get("activity_date")
+        return date.fromisoformat(d) if isinstance(d, str) else d
+
     minutes_week = sum(
         (row.get("minutes") or 0) for row in rows
-        if row.get("activity_date") and
-        (date.fromisoformat(row["activity_date"]) if isinstance(row["activity_date"], str) else row["activity_date"]) >= week_start
+        if _row_date(row) and _row_date(row) >= week_start
     )
+
+    # Real per-day breakdown for this calendar week (Mon..Sun), summed from
+    # actual study_sessions rows - no fabricated hours, days with zero real
+    # activity just show 0.
+    daily_minutes = {(week_start + timedelta(days=i)).isoformat(): 0 for i in range(7)}
+    for row in rows:
+        d = _row_date(row)
+        if d and d.isoformat() in daily_minutes:
+            daily_minutes[d.isoformat()] += row.get("minutes") or 0
 
     return {
         "current_streak": current,
@@ -183,4 +203,7 @@ def get_streak(user_id: str) -> dict:
         "total_days": len(parsed),
         "minutes_this_week": minutes_week,
         "recent_days": [d.isoformat() for d in parsed[:35]],
+        "daily_minutes_this_week": [
+            {"date": iso, "minutes": mins} for iso, mins in daily_minutes.items()
+        ],
     }

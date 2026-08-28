@@ -141,7 +141,10 @@ def get_week(user_id: str, week_number: int) -> dict:
 def _owned_step(step_id: str, user_id: str) -> dict:
     r = (
         supabase_client.table("path_steps")
-        .select("id, path_id, week_number, status, course_id, learning_paths!inner(id, user_id)")
+        .select(
+            "id, path_id, week_number, status, course_id, "
+            "learning_paths!inner(id, user_id), courses(duration_hrs)"
+        )
         .eq("id", step_id).execute()
     )
     if not r.data:
@@ -195,11 +198,19 @@ def set_task_completion(step_id: str, user_id: str, completed: bool) -> dict:
             supabase_client.table("profiles").update({"completed_courses": ids}).eq("id", user_id).execute()
 
     # Completing a task is qualifying learning activity — log it so the streak
-    # on Progress is derived from what the learner actually did.
+    # AND the weekly-activity hours on Progress are derived from what the
+    # learner actually did. We don't track live session duration (no timer),
+    # so the course's own real duration_hrs is used as the time-investment
+    # estimate for that session — a real, grounded number, not a guess like
+    # the fixed 0 this used to log unconditionally.
     if completed:
         try:
             from app.services import account_service
-            account_service.log_session(user_id, activity="task_completed", step_id=step_id)
+            duration_hrs = (step.get("courses") or {}).get("duration_hrs") or 0
+            account_service.log_session(
+                user_id, activity="task_completed", step_id=step_id,
+                minutes=round(duration_hrs * 60),
+            )
         except Exception as e:
             print(f"[roadmap] study session log failed: {type(e).__name__}: {e}", flush=True)
 
