@@ -14,7 +14,7 @@ export function AuthProvider({ children }) {
       return
     }
     try {
-      const { data } = await supabase.table('profiles').select('*').eq('id', userId).maybeSingle()
+      const { data } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle()
       if (data) setProfile(data)
     } catch (err) {
       console.warn('Could not load profile:', err)
