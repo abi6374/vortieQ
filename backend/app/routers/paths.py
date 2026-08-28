@@ -2,13 +2,14 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from app.config import supabase_client
 from app.middleware.auth import verify_jwt
+from app.middleware.rate_limit import rate_limit
 from app.services import feedback_service, path_service
 
 router = APIRouter()
 
 
 @router.post("/generate")
-def generate_path(user_id: str = Depends(verify_jwt)):
+def generate_path(user_id: str = Depends(rate_limit("paths.generate", max_calls=5))):
     profile_result = (
         supabase_client.table("profiles").select("*").eq("id", user_id).execute()
     )
@@ -26,7 +27,7 @@ def get_path(path_id: str, user_id: str = Depends(verify_jwt)):
 
 
 @router.post("/{path_id}/rebuild-tail")
-def rebuild_tail(path_id: str, user_id: str = Depends(verify_jwt)):
+def rebuild_tail(path_id: str, user_id: str = Depends(rate_limit("paths.rebuild_tail", max_calls=3))):
     """Escape-hatch: full regeneration of the not_started tail of the path.
 
     Not called from the normal feedback flow anymore (that uses per-step swap).

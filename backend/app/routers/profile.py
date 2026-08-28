@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 
 from app.config import supabase_client
 from app.middleware.auth import verify_jwt
+from app.middleware.rate_limit import rate_limit
 from app.schemas.profile import ProfileCreateSchema, ResumeExtractResponse
 from app.services import profile_service, resume_service
 
@@ -13,7 +14,7 @@ router = APIRouter()
 @router.post("/")
 def create_or_update_profile(
     payload: ProfileCreateSchema,
-    user_id: str = Depends(verify_jwt),
+    user_id: str = Depends(rate_limit("profile.create", max_calls=10)),
 ):
     extracted = profile_service.extract_profile(payload.goal_text)
     extracted["goal_text"] = payload.goal_text
@@ -50,7 +51,7 @@ def _ext_for(filename: str, content_type: str) -> str:
 @router.post("/resume", response_model=ResumeExtractResponse)
 async def upload_resume(
     file: UploadFile = File(...),
-    user_id: str = Depends(verify_jwt),
+    user_id: str = Depends(rate_limit("profile.resume", max_calls=10)),
 ):
     """Parse a resume (PDF/DOCX), persist it to Storage + `resumes` table, and
     return extracted topics + suggested levels.

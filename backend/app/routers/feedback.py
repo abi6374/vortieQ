@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Body, Depends, HTTPException
 
-from app.middleware.auth import verify_jwt
+from app.middleware.rate_limit import rate_limit
 from app.schemas.feedback import FeedbackCreateSchema
 from app.services import feedback_service, path_service
 
@@ -11,7 +11,7 @@ router = APIRouter()
 def post_feedback(
     step_id: str,
     payload: FeedbackCreateSchema,
-    user_id: str = Depends(verify_jwt),
+    user_id: str = Depends(rate_limit("steps.feedback", max_calls=20)),
 ):
     try:
         return feedback_service.handle_feedback(
@@ -30,7 +30,7 @@ def post_feedback(
 def swap_step(
     step_id: str,
     payload: dict = Body(default={}),
-    user_id: str = Depends(verify_jwt),
+    user_id: str = Depends(rate_limit("steps.swap", max_calls=20)),
 ):
     """Replace one step with an alternative. `level_hint`: 0 = same level,
     1 = harder (the "too easy" signal). No global profile mutation happens."""
