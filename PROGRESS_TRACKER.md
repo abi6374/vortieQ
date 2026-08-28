@@ -1,5 +1,6 @@
 # PROGRESS TRACKER
-Last updated by: Abinivas (Member 2 — ML) at 2026-08-26 (merged in AWS EC2 + Vercel deploy pipeline alongside everyone else's work)
+Last updated by: Abinivas (Member 2 — ML) at 2026-08-28 (post-launch QA pass: fixed onboarding data-fabrication bugs, real resource URLs, new live web-search feature)
+Previously: Abinivas (Member 2 — ML) at 2026-08-26 (merged in AWS EC2 + Vercel deploy pipeline alongside everyone else's work)
 Previously: Kubojah-Dan (Member 4 — Dashboard) at 2026-08-26 (M4-S5 + M4-S6 complete — all M4 steps done, frontend polish pass)
 Previously: Login-39t (Member 3 — Frontend) at 2026-08-26 (M3-S5 roadmap view complete — all M3 steps done)
 Previously: Login-39t (Member 3 — Frontend) at 2026-08-26 (M3-S4 onboarding chat intake complete)
@@ -109,3 +110,23 @@ now pass `reasoning_effort="low"` with generous `max_tokens`, and coalesce `cont
 - `POST /api/paths/generate` first-run: ~11s. Cold model load + 1 sequence call + N explain calls.
 - `POST /api/steps/{id}/feedback` with `too_easy`/`not_interested`: first ~40s, warm ~10s (N sequential explain calls). If demo timing is tight, consider making explanations async and rendering them progressively on the frontend.
 - `POST /api/assistant/ask`: 1–2s. Fine as-is.
+
+## Post-launch QA pass — Member 2, 2026-08-28
+The product has grown well past the original hackathon MVP (rebrand to "PathFinder", resume upload, Progress/Resources/Skills/Account pages, a persistent AI assistant). Went through a real-user handwritten bug list against the actual current code (not assumptions) and fixed what was confirmed real:
+
+**Fixed and pushed:**
+- **Onboarding data fabrication** (`LearnerIntakeWorkspace.jsx`): the chat lane seeded a fake hardcoded "user" reply that would get submitted as real profile data if someone clicked Continue without typing anything. The "AI Profile Draft" panel was permanently hardcoded regardless of real input. The resume-upload error path silently fabricated fake skills on any backend failure instead of showing an error. All three now use only real data or show a real validation/error message — nothing invents content anymore.
+- **Broken resource links on `/resources`**: root-caused to the seeded 80-course dataset itself — `resource_url` values were plausible-looking but never-verified slugs (by original design spec) that all 404'd. Regenerated all 80 with real resolving URLs (exact real pages where the provider genuinely publishes one, real search/catalog pages otherwise) and pushed the update to the live Supabase `courses` table (not a re-seed — just an UPDATE by title, embeddings untouched).
+- **NEW live web-search recommendations**: `backend/app/services/web_search_service.py` + `GET /api/resources/search` — real-time DuckDuckGo search via the `ddgs` package (no API key, no cost, no signup) to supplement the fixed course dataset. Directly answers the "add NPTEL" / "need more recommendations" feedback. Ranks real course-platform domains (NPTEL, Coursera, edX, MIT OCW, etc.) first. Never raises — degrades to an empty list on failure so it can't break anything else. Wired into `ResourcesScreen.jsx` as a "Find more resources" panel. Verified working both standalone and live on the deployed EC2 backend (auto-deployed via the existing pipeline, container healthy post-deploy).
+
+**Investigated, found already fixed by a later commit (no action needed, but worth a fresh manual test):**
+- Roadmap week-splitting — already reads real `roadmap.weeks` state, not hardcoded 8/10 weeks.
+- `/resources` data fetching — already wired to a real Supabase query (only the URLs themselves were the problem, fixed above).
+
+**Confirmed but NOT yet fixed — queued, roughly in priority order:**
+1. **`/skills` page** — confirmed 100% hardcoded, zero backend/Supabase calls anywhere in the file, including a second fully-scripted fake chatbot (keyword-matched canned replies, no LLM call) separate from the app's real assistant. Needs a real rebuild on real data.
+2. **GoalCompass target-role picker** — currently 3 hardcoded roles, all one domain (vs. the dataset's 4 domains). Per user direction: role should be inferred from the resume/profile, with an option for the learner to specify their own custom role instead of picking from a fixed list. Not yet implemented.
+3. **"AI Coach" as a real full page** — user wants the *full* feature: dedicated page (not just the floating icon), practice questions, tests, and project suggestions, tailored per individual, described as needing "2 separate bots sharing the API key." This is a substantial multi-file feature (new page, new backend prompts/endpoints/schemas), not a bugfix. Scoped but not started.
+4. **AWS Bedrock evaluation** — user wants to consider migrating the assistant's LLM calls from Groq to AWS Bedrock. Real infra change (new AWS service, model access enablement, IAM, region/model choice) on top of everything else. Not started — will need AWS console access again, similar to the EC2 setup.
+
+## Note for whoever picks up next: read this file's "Post-launch QA pass" section above before touching onboarding/resources/skills/assistant code — several things that look broken from the outside were already fixed, and a couple that look fine were not.
