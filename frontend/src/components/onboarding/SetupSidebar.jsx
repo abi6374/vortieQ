@@ -18,7 +18,7 @@ const STEPS = [
   { n: 5, label: 'Track progress' },
 ]
 
-const V = '#5B36E9'
+const V = '#0066cc'
 const GREEN = '#22A06B'
 
 export default function SetupSidebar({ current = 1 }) {
@@ -27,9 +27,9 @@ export default function SetupSidebar({ current = 1 }) {
       className="hidden md:block flex-none"
       style={{
         width: 270,
-        borderRight: '1px solid #E6EAF2',
+        borderRight: '1px solid #f0f0f0',
         padding: '36px 28px',
-        background: 'linear-gradient(180deg, #FFFFFF 0%, #FAF9FF 100%)',
+        background: 'linear-gradient(180deg, #FFFFFF 0%, #f9fcff 100%)',
       }}
     >
       {/* Brand Header */}
@@ -39,8 +39,8 @@ export default function SetupSidebar({ current = 1 }) {
           style={{
             width: 38,
             height: 38,
-            background: 'linear-gradient(135deg, #6B47F0, #5B36E9)',
-            boxShadow: '0 4px 14px rgba(91, 54, 233, 0.35)',
+            background: 'linear-gradient(135deg, #0071e3, #0066cc)',
+            boxShadow: '0 4px 14px rgba(0, 102, 204, 0.35)',
           }}
         >
           <svg
@@ -57,7 +57,7 @@ export default function SetupSidebar({ current = 1 }) {
           </svg>
         </span>
         <span
-          className="font-['Manrope'] font-extrabold text-[#0E1B38]"
+          className="font-['Manrope'] font-extrabold text-[#1d1d1f]"
           style={{ fontSize: 21, letterSpacing: '-0.02em' }}
         >
           PathFinder
@@ -93,8 +93,8 @@ export default function SetupSidebar({ current = 1 }) {
                     background: done
                       ? `linear-gradient(180deg, ${GREEN}, ${V})`
                       : active
-                      ? `linear-gradient(180deg, ${V}, #DDE3EF)`
-                      : '#E2E8F0',
+                      ? `linear-gradient(180deg, ${V}, #e6e6e6)`
+                      : '#e9e9e9',
                   }}
                 />
               )}
@@ -107,7 +107,7 @@ export default function SetupSidebar({ current = 1 }) {
                   height: 36,
                   fontSize: 14,
                   border: `2px solid ${
-                    done ? GREEN : active ? V : '#DDE3EF'
+                    done ? GREEN : active ? V : '#e6e6e6'
                   }`,
                   background: done
                     ? '#ECFDF3'
@@ -118,9 +118,9 @@ export default function SetupSidebar({ current = 1 }) {
                     ? GREEN
                     : active
                     ? '#FFFFFF'
-                    : '#74819A',
+                    : '#7a7a7a',
                   boxShadow: active
-                    ? '0 4px 14px rgba(91, 54, 233, 0.40)'
+                    ? '0 4px 14px rgba(0, 102, 204, 0.40)'
                     : 'none',
                 }}
               >
@@ -145,10 +145,10 @@ export default function SetupSidebar({ current = 1 }) {
               {/* Step Label & Subtitle */}
               <div style={{ marginTop: 3 }}>
                 <div
-                  className="font-bold text-[#0E1B38]"
+                  className="font-bold text-[#1d1d1f]"
                   style={{
                     fontSize: 15,
-                    color: active ? V : done ? '#0E1B38' : '#52617D',
+                    color: active ? V : done ? '#1d1d1f' : '#333333',
                     fontWeight: active ? 700 : done ? 650 : 500,
                   }}
                 >
@@ -159,7 +159,7 @@ export default function SetupSidebar({ current = 1 }) {
                     fontSize: 12.5,
                     marginTop: 2,
                     fontWeight: 600,
-                    color: done ? GREEN : active ? V : '#94A3B8',
+                    color: done ? GREEN : active ? V : '#86868b',
                   }}
                 >
                   {done ? 'Completed' : active ? 'In progress' : 'Upcoming'}

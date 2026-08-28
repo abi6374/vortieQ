@@ -9,25 +9,25 @@ import { supabase } from '../../lib/supabaseClient'
  */
 
 const STYLES = `
-.pfa { --violet:#5B36E9; --violet-2:#6236EF; --violet-dark:#4826C9; --navy:#0E1B38;
-  --slate:#52617D; --muted:#74819A; --input-bd:#C9D1DF; --divider:#E6EAF2;
-  --app-bd:#E1E6F0; --lav-circle:#EEE9FF;
-  min-height:100vh; background:#F5F7FC; display:flex; align-items:center;
+.pfa { --violet:#0066cc; --violet-2:#0071e3; --violet-dark:#004fa3; --navy:#1d1d1f;
+  --slate:#333333; --muted:#7a7a7a; --input-bd:#d3d4d5; --divider:#f0f0f0;
+  --app-bd:#f0f0f0; --lav-circle:#dbeafc;
+  min-height:100vh; background:#f5f5f7; display:flex; align-items:center;
   justify-content:center; padding:clamp(16px,3vw,48px);
   font-family:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif; color:var(--navy); }
 .pfa *{ box-sizing:border-box; }
 .pfa .app{ width:100%; max-width:1400px; background:#fff; border:1px solid var(--app-bd);
-  border-radius:20px; box-shadow:0 14px 38px rgba(25,40,75,.12);
+  border-radius:20px; box-shadow:0 14px 38px rgba(25,49,75,.12);
   display:grid; grid-template-columns:43% 57%; overflow:hidden; min-height:760px; }
 .pfa .brand-panel{ position:relative; overflow:hidden; padding:clamp(36px,4vw,60px);
-  background:linear-gradient(160deg,#fff 0%,#FBFAFF 55%,#F7F5FF 100%);
+  background:linear-gradient(160deg,#fff 0%,#fafcff 55%,#f5faff 100%);
   border-right:1px solid var(--divider); display:flex; flex-direction:column; }
 .pfa .path-deco{ position:absolute; inset:0; z-index:0; pointer-events:none; }
 .pfa .brand-inner{ position:relative; z-index:1; display:flex; flex-direction:column; height:100%; }
 .pfa .logo-row{ display:flex; align-items:center; gap:16px; margin-bottom:clamp(28px,5vh,56px); }
 .pfa .logo-mark{ width:60px; height:60px; border-radius:16px; flex:none;
   background:linear-gradient(160deg,var(--violet-2),var(--violet)); display:grid; place-items:center;
-  box-shadow:0 8px 20px rgba(91,54,233,.32); }
+  box-shadow:0 8px 20px rgba(0,102,204,.32); }
 .pfa .logo-name{ font-family:"Manrope",sans-serif; font-weight:800; font-size:clamp(26px,2.4vw,36px); letter-spacing:-.02em; }
 .pfa .hero{ margin-top:auto; }
 .pfa .hero h1{ font-family:"Manrope",sans-serif; font-weight:800; font-size:clamp(32px,3.6vw,50px);
@@ -58,7 +58,7 @@ const STYLES = `
 .pfa .field > label{ display:block; font-size:16px; font-weight:600; margin-bottom:9px; }
 .pfa .input{ position:relative; display:flex; align-items:stretch; border:1.5px solid var(--input-bd);
   border-radius:12px; background:#fff; min-height:58px; transition:border-color .15s,box-shadow .15s; overflow:hidden; }
-.pfa .input:focus-within{ border-color:var(--violet); box-shadow:0 0 0 4px rgba(91,54,233,.18); }
+.pfa .input:focus-within{ border-color:var(--violet); box-shadow:0 0 0 4px rgba(0,102,204,.18); }
 /* Icon is a decorative overlay so it never steals click/focus from the field. */
 .pfa .input .lead{ position:absolute; left:14px; top:0; bottom:0; color:var(--muted); display:grid; place-items:center; pointer-events:none; z-index:1; }
 /* The input itself is the full interactive surface — clicking anywhere focuses it. */
@@ -91,14 +91,14 @@ const STYLES = `
   font:700 19px/1 "Inter",sans-serif; display:inline-flex; align-items:center; justify-content:center; gap:11px;
   transition:background .15s,box-shadow .15s,transform .1s; }
 .pfa .btn:disabled{ opacity:.6; cursor:not-allowed; }
-.pfa .btn-primary{ background:linear-gradient(180deg,var(--violet-2),var(--violet)); color:#fff; box-shadow:0 10px 24px rgba(91,54,233,.30); }
-.pfa .btn-primary:hover:not(:disabled){ background:linear-gradient(180deg,var(--violet),var(--violet-dark)); box-shadow:0 12px 28px rgba(91,54,233,.38); }
+.pfa .btn-primary{ background:linear-gradient(180deg,var(--violet-2),var(--violet)); color:#fff; box-shadow:0 10px 24px rgba(0,102,204,.30); }
+.pfa .btn-primary:hover:not(:disabled){ background:linear-gradient(180deg,var(--violet),var(--violet-dark)); box-shadow:0 12px 28px rgba(0,102,204,.38); }
 .pfa .btn-primary:active:not(:disabled){ transform:translateY(1px); }
 .pfa .divider-row{ display:flex; align-items:center; gap:16px; margin:26px 0; }
 .pfa .divider-row .line{ flex:1; height:1px; background:var(--divider); }
 .pfa .divider-row .or{ font-size:12.5px; font-weight:600; letter-spacing:.1em; color:var(--muted); }
 .pfa .btn-google{ background:#fff; color:var(--navy); border:1.5px solid var(--input-bd); font-weight:600; }
-.pfa .btn-google:hover:not(:disabled){ background:#FBFCFE; border-color:#B9C2D4; }
+.pfa .btn-google:hover:not(:disabled){ background:#FBFCFE; border-color:#c6c6c7; }
 .pfa .btn-github{ background:#181717; color:#fff; font-weight:600; margin-bottom:12px; box-shadow:0 4px 14px rgba(24,23,23,0.15); }
 .pfa .btn-github:hover:not(:disabled){ background:#000000; }
 .pfa .signup-foot{ text-align:center; margin-top:26px; font-size:17px; color:var(--slate); }
@@ -198,12 +198,12 @@ export default function AuthScreen({ initialMode = 'signin' }) {
         {/* LEFT */}
         <section className="brand-panel">
           <svg className="path-deco" viewBox="0 0 600 850" fill="none" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-            <path d="M520 40 C 560 200, 300 260, 340 420 S 120 560, 240 760" stroke="#E4DEFB" strokeWidth="2.5" strokeDasharray="3 12" strokeLinecap="round" />
-            <circle cx="520" cy="40" r="9" fill="#EEE9FF" stroke="#D9CFFA" strokeWidth="2" />
-            <circle cx="336" cy="300" r="9" fill="#EEE9FF" stroke="#D9CFFA" strokeWidth="2" />
-            <circle cx="300" cy="470" r="9" fill="#EEE9FF" stroke="#D9CFFA" strokeWidth="2" />
-            <circle cx="240" cy="760" r="14" fill="#F5F1FF" stroke="#C9BCF6" strokeWidth="2" />
-            <path d="M240 760 v-20 h13 l-4 6 4 6 h-13" fill="#C9BCF6" />
+            <path d="M520 40 C 560 200, 300 260, 340 420 S 120 560, 240 760" stroke="#deecfb" strokeWidth="2.5" strokeDasharray="3 12" strokeLinecap="round" />
+            <circle cx="520" cy="40" r="9" fill="#dbeafc" stroke="#cfe4fa" strokeWidth="2" />
+            <circle cx="336" cy="300" r="9" fill="#dbeafc" stroke="#cfe4fa" strokeWidth="2" />
+            <circle cx="300" cy="470" r="9" fill="#dbeafc" stroke="#cfe4fa" strokeWidth="2" />
+            <circle cx="240" cy="760" r="14" fill="#eaf2fc" stroke="#bcd8f6" strokeWidth="2" />
+            <path d="M240 760 v-20 h13 l-4 6 4 6 h-13" fill="#bcd8f6" />
           </svg>
           <div className="brand-inner">
             <div className="logo-row">

@@ -8,9 +8,9 @@ import api from '../lib/apiClient'
  * Fully responsive 2-column layout filling available viewport width.
  */
 
-const V = '#5B36E9'
-const FIELD = 'w-full rounded-xl border border-[#D8DFEB] bg-white px-3.5 py-2.5 text-[14.5px] text-[#0E1B38] outline-none focus:border-[#5B36E9] focus:ring-[3px] focus:ring-[#5B36E9]/20 transition-colors'
-const LABEL = 'block text-[13.5px] font-semibold text-[#0E1B38] mb-1.5'
+const V = '#0066cc'
+const FIELD = 'w-full rounded-xl border border-[#e0e0e0] bg-white px-3.5 py-2.5 text-[14.5px] text-[#1d1d1f] outline-none focus:border-[#0066cc] focus:ring-[3px] focus:ring-[#0066cc]/20 transition-colors'
+const LABEL = 'block text-[13.5px] font-semibold text-[#1d1d1f] mb-1.5'
 
 export default function AccountPage() {
   const { user, profile, updateProfile } = useAuth()
@@ -76,19 +76,19 @@ export default function AccountPage() {
 
   return (
     <AppShell>
-      <div className="w-full font-['Inter',sans-serif] text-[#0E1B38]">
+      <div className="w-full font-['Inter',sans-serif] text-[#1d1d1f]">
         {/* Page Header */}
         <header className="mb-6">
-          <h1 className="font-['Manrope'] font-extrabold text-2xl sm:text-3xl text-[#0E1B38] tracking-tight">
+          <h1 className="font-['Manrope'] font-extrabold text-2xl sm:text-3xl text-[#1d1d1f] tracking-tight">
             Account & Profile
           </h1>
-          <p className="text-sm sm:text-base text-[#52617D] mt-1">
+          <p className="text-sm sm:text-base text-[#333333] mt-1">
             Manage your personal profile, career ambition, and learning preferences.
           </p>
         </header>
 
         {loading ? (
-          <div className="p-8 text-center text-[#74819A] text-sm bg-white rounded-2xl border border-[#E5E7EB]">
+          <div className="p-8 text-center text-[#7a7a7a] text-sm bg-white rounded-2xl border border-[#e0e0e0]">
             Loading your profile…
           </div>
         ) : (
@@ -96,19 +96,19 @@ export default function AccountPage() {
             {/* Primary Left Column: 8 cols on desktop */}
             <div className="lg:col-span-8 space-y-6">
               {/* Profile Information Card */}
-              <section className="bg-white border border-[#E5E7EB] rounded-2xl p-6 shadow-2xs">
+              <section className="bg-white border border-[#e0e0e0] rounded-2xl p-6 shadow-2xs">
                 <div className="flex items-center gap-3 mb-5">
-                  <span className="w-9 h-9 rounded-xl bg-[#F5F1FF] text-[#5B36E9] flex items-center justify-center flex-none">
+                  <span className="w-9 h-9 rounded-xl bg-[#eaf2fc] text-[#0066cc] flex items-center justify-center flex-none">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                       <circle cx="12" cy="7" r="4" />
                     </svg>
                   </span>
                   <div>
-                    <h2 className="font-['Manrope'] font-bold text-[16px] text-[#0E1B38]">
+                    <h2 className="font-['Manrope'] font-bold text-[16px] text-[#1d1d1f]">
                       Personal Details
                     </h2>
-                    <p className="text-xs text-[#74819A]">
+                    <p className="text-xs text-[#7a7a7a]">
                       Your identity across the PathFinder learning workspace
                     </p>
                   </div>
@@ -129,7 +129,7 @@ export default function AccountPage() {
                     <label className={LABEL} htmlFor="email">Email Address</label>
                     <input
                       id="email"
-                      className={`${FIELD} bg-[#F8FAFC] text-[#74819A] cursor-not-allowed`}
+                      className={`${FIELD} bg-[#fafafc] text-[#7a7a7a] cursor-not-allowed`}
                       value={email}
                       disabled
                       title="Email is managed via authentication"
@@ -139,19 +139,19 @@ export default function AccountPage() {
               </section>
 
               {/* Learning Goal & Career Ambition */}
-              <section className="bg-white border border-[#E5E7EB] rounded-2xl p-6 shadow-2xs">
+              <section className="bg-white border border-[#e0e0e0] rounded-2xl p-6 shadow-2xs">
                 <div className="flex items-center gap-3 mb-5">
-                  <span className="w-9 h-9 rounded-xl bg-[#F5F1FF] text-[#5B36E9] flex items-center justify-center flex-none">
+                  <span className="w-9 h-9 rounded-xl bg-[#eaf2fc] text-[#0066cc] flex items-center justify-center flex-none">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <circle cx="12" cy="12" r="10" />
                       <polygon points="16.2 7.8 10.5 10.5 7.8 16.2 13.5 13.5" fill="currentColor" />
                     </svg>
                   </span>
                   <div>
-                    <h2 className="font-['Manrope'] font-bold text-[16px] text-[#0E1B38]">
+                    <h2 className="font-['Manrope'] font-bold text-[16px] text-[#1d1d1f]">
                       Learning Goal & Direction
                     </h2>
-                    <p className="text-xs text-[#74819A]">
+                    <p className="text-xs text-[#7a7a7a]">
                       Changes automatically recalibrate your recommendations and roadmap
                     </p>
                   </div>
@@ -217,7 +217,7 @@ export default function AccountPage() {
                       onChange={set('interests')}
                       placeholder="e.g. python, machine learning, docker, kubernetes"
                     />
-                    <p className="text-[12px] text-[#74819A] mt-1.5">
+                    <p className="text-[12px] text-[#7a7a7a] mt-1.5">
                       Comma separated keywords. These directly steer your curated resources and practice problems.
                     </p>
                   </div>
@@ -235,7 +235,7 @@ export default function AccountPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="rounded-xl px-7 py-3 text-white font-bold text-[14.5px] disabled:opacity-60 shadow-sm transition-all hover:bg-[#4826C9] cursor-pointer"
+                  className="rounded-xl px-7 py-3 text-white font-bold text-[14.5px] disabled:opacity-60 shadow-sm transition-all hover:bg-[#004fa3] cursor-pointer"
                   style={{ background: V }}
                 >
                   {saving ? 'Saving changes…' : 'Save changes'}
@@ -254,16 +254,16 @@ export default function AccountPage() {
             {/* Right Rail Context & Quick Insights: 4 cols on desktop */}
             <div className="lg:col-span-4 space-y-6">
               {/* Learner Identity Summary Card */}
-              <div className="bg-white border border-[#E5E7EB] rounded-2xl p-6 shadow-2xs">
+              <div className="bg-white border border-[#e0e0e0] rounded-2xl p-6 shadow-2xs">
                 <div className="flex items-center gap-4 mb-4">
-                  <span className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#6B47F0] to-[#5B36E9] text-white font-extrabold text-lg flex items-center justify-center shadow-sm flex-none">
+                  <span className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#0071e3] to-[#0066cc] text-white font-extrabold text-lg flex items-center justify-center shadow-sm flex-none">
                     {initials}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <h3 className="font-['Manrope'] font-bold text-base text-[#0E1B38] truncate">
+                    <h3 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] truncate">
                       {fullName}
                     </h3>
-                    <p className="text-xs text-[#74819A] truncate">{email}</p>
+                    <p className="text-xs text-[#7a7a7a] truncate">{email}</p>
                     <div className="mt-1.5 flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-[#22A06B]" />
                       <span className="text-[11px] font-semibold text-[#22A06B]">
@@ -273,22 +273,22 @@ export default function AccountPage() {
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-[#F0F3F8] space-y-3">
+                <div className="pt-4 border-t border-[#f5f5f7] space-y-3">
                   <div className="flex justify-between items-center text-xs">
-                    <span className="text-[#74819A]">Target Role</span>
-                    <span className="font-bold text-[#0E1B38] bg-[#F5F1FF] text-[#5B36E9] px-2.5 py-1 rounded-lg">
+                    <span className="text-[#7a7a7a]">Target Role</span>
+                    <span className="font-bold text-[#1d1d1f] bg-[#eaf2fc] text-[#0066cc] px-2.5 py-1 rounded-lg">
                       {form.target_role || 'Not Set'}
                     </span>
                   </div>
                   <div className="flex justify-between items-center text-xs">
-                    <span className="text-[#74819A]">Study Commitment</span>
-                    <span className="font-semibold text-[#0E1B38]">
+                    <span className="text-[#7a7a7a]">Study Commitment</span>
+                    <span className="font-semibold text-[#1d1d1f]">
                       {form.weekly_hours || 10} hrs / week
                     </span>
                   </div>
                   <div className="flex justify-between items-center text-xs">
-                    <span className="text-[#74819A]">Proficiency Level</span>
-                    <span className="font-semibold capitalize text-[#0E1B38]">
+                    <span className="text-[#7a7a7a]">Proficiency Level</span>
+                    <span className="font-semibold capitalize text-[#1d1d1f]">
                       {form.current_level || 'Beginner'}
                     </span>
                   </div>
@@ -296,9 +296,9 @@ export default function AccountPage() {
               </div>
 
               {/* Real-time Dynamic Sync Card */}
-              <div className="bg-gradient-to-br from-[#FAF8FF] to-[#F5F1FF] border border-[#DDD2FF] rounded-2xl p-5 shadow-2xs">
+              <div className="bg-gradient-to-br from-[#fafbfc] to-[#eaf2fc] border border-[#cfe4fb] rounded-2xl p-5 shadow-2xs">
                 <div className="flex items-start gap-3">
-                  <span className="w-8 h-8 rounded-xl bg-white text-[#5B36E9] flex items-center justify-center flex-none shadow-2xs">
+                  <span className="w-8 h-8 rounded-xl bg-white text-[#0066cc] flex items-center justify-center flex-none shadow-2xs">
                     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M12 2v4" />
                       <path d="m4.93 4.93 2.83 2.83" />
@@ -311,10 +311,10 @@ export default function AccountPage() {
                     </svg>
                   </span>
                   <div>
-                    <h4 className="font-['Manrope'] font-bold text-sm text-[#0E1B38]">
+                    <h4 className="font-['Manrope'] font-bold text-sm text-[#1d1d1f]">
                       Instant Cloud Sync
                     </h4>
-                    <p className="text-xs text-[#52617D] mt-1 leading-relaxed">
+                    <p className="text-xs text-[#333333] mt-1 leading-relaxed">
                       Your profile updates synchronize seamlessly across your dashboard, skill graph, and AI coach recommendations in real time.
                     </p>
                   </div>
@@ -322,11 +322,11 @@ export default function AccountPage() {
               </div>
 
               {/* Data & Security Notice */}
-              <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5 shadow-2xs">
-                <h4 className="font-['Manrope'] font-bold text-xs uppercase tracking-wider text-[#74819A] mb-2">
+              <div className="bg-white border border-[#e0e0e0] rounded-2xl p-5 shadow-2xs">
+                <h4 className="font-['Manrope'] font-bold text-xs uppercase tracking-wider text-[#7a7a7a] mb-2">
                   Account Privacy
                 </h4>
-                <p className="text-xs text-[#64748B] leading-relaxed">
+                <p className="text-xs text-[#6e6e73] leading-relaxed">
                   Your learning data and progress are encrypted and private to your account.
                 </p>
               </div>

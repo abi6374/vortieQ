@@ -267,8 +267,8 @@ export default function PersonalizedRoadmap({ pathData = null }) {
   return (
     <AppShell
       topBar={
-        <div className="bg-white border border-[#D8DFEB] hover:border-[#CAD3E2] rounded-2xl px-3.5 py-2 flex items-center gap-3 shadow-2xs min-w-0">
-          <span className="w-8 h-8 rounded-xl bg-[#F5F1FF] text-[#5B36E9] flex items-center justify-center flex-none">
+        <div className="bg-white border border-[#e0e0e0] hover:border-[#d2d2d7] rounded-2xl px-3.5 py-2 flex items-center gap-3 shadow-2xs min-w-0">
+          <span className="w-8 h-8 rounded-xl bg-[#eaf2fc] text-[#0066cc] flex items-center justify-center flex-none">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10" />
               <circle cx="12" cy="12" r="6" />
@@ -276,17 +276,17 @@ export default function PersonalizedRoadmap({ pathData = null }) {
             </svg>
           </span>
           <div className="text-left min-w-0">
-            <h2 className="font-['Manrope'] font-bold text-xs sm:text-[13px] text-[#0E1B38] leading-tight max-w-[220px] truncate">
+            <h2 className="font-['Manrope'] font-bold text-xs sm:text-[13px] text-[#1d1d1f] leading-tight max-w-[220px] truncate">
               {cleanGoalTitle}
             </h2>
-            <p className="text-[10px] text-[#74819A] font-medium leading-tight mt-0.5">
+            <p className="text-[10px] text-[#7a7a7a] font-medium leading-tight mt-0.5">
               Target: Ongoing Pace
             </p>
           </div>
           <button
             type="button"
             onClick={() => navigate('/onboarding')}
-            className="px-2.5 py-1 rounded-lg border border-[#D8DFEB] hover:border-[#5B36E9] hover:bg-[#F5F1FF] text-[#5B36E9] text-xs font-bold transition-colors cursor-pointer flex-none"
+            className="px-2.5 py-1 rounded-lg border border-[#e0e0e0] hover:border-[#0066cc] hover:bg-[#eaf2fc] text-[#0066cc] text-xs font-bold transition-colors cursor-pointer flex-none"
           >
             Replan
           </button>
@@ -295,18 +295,18 @@ export default function PersonalizedRoadmap({ pathData = null }) {
     >
           {/* Page header */}
           <div className="mb-6">
-            <h1 className="font-['Manrope'] font-extrabold text-2xl sm:text-3xl text-[#0E1B38] tracking-tight">
+            <h1 className="font-['Manrope'] font-extrabold text-2xl sm:text-3xl text-[#1d1d1f] tracking-tight">
               Your path to: {cleanGoalTitle}
             </h1>
-            <p className="text-sm sm:text-base text-[#52617D] mt-1 font-normal">
+            <p className="text-sm sm:text-base text-[#333333] mt-1 font-normal">
               Personalized roadmap calibrated from your skills and weekly availability.
             </p>
           </div>
 
           {/* 3 Top Stats Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-            <div className="bg-white border border-[#D8DFEB] rounded-2xl p-4 sm:p-5 flex items-center gap-4 shadow-2xs">
-              <span className="w-12 h-12 rounded-xl bg-[#F5F1FF] text-[#5B36E9] flex items-center justify-center flex-none">
+            <div className="bg-white border border-[#e0e0e0] rounded-2xl p-4 sm:p-5 flex items-center gap-4 shadow-2xs">
+              <span className="w-12 h-12 rounded-xl bg-[#eaf2fc] text-[#0066cc] flex items-center justify-center flex-none">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
                   <line x1="16" y1="2" x2="16" y2="6" />
@@ -315,44 +315,44 @@ export default function PersonalizedRoadmap({ pathData = null }) {
                 </svg>
               </span>
               <div>
-                <div className="font-['Manrope'] font-extrabold text-2xl sm:text-[26px] text-[#0E1B38] leading-none">
+                <div className="font-['Manrope'] font-extrabold text-2xl sm:text-[26px] text-[#1d1d1f] leading-none">
                   {weekTabs.length}
                 </div>
-                <div className="text-xs sm:text-sm font-medium text-[#52617D] mt-1">
+                <div className="text-xs sm:text-sm font-medium text-[#333333] mt-1">
                   weeks total
                 </div>
               </div>
             </div>
 
-            <div className="bg-white border border-[#D8DFEB] rounded-2xl p-4 sm:p-5 flex items-center gap-4 shadow-2xs">
-              <span className="w-12 h-12 rounded-xl bg-[#F5F1FF] text-[#5B36E9] flex items-center justify-center flex-none">
+            <div className="bg-white border border-[#e0e0e0] rounded-2xl p-4 sm:p-5 flex items-center gap-4 shadow-2xs">
+              <span className="w-12 h-12 rounded-xl bg-[#eaf2fc] text-[#0066cc] flex items-center justify-center flex-none">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10" />
                   <polyline points="12 6 12 12 16 14" />
                 </svg>
               </span>
               <div>
-                <div className="font-['Manrope'] font-extrabold text-2xl sm:text-[26px] text-[#0E1B38] leading-none">
+                <div className="font-['Manrope'] font-extrabold text-2xl sm:text-[26px] text-[#1d1d1f] leading-none">
                   {currentWeekData.totalHrs}
                 </div>
-                <div className="text-xs sm:text-sm font-medium text-[#52617D] mt-1">
+                <div className="text-xs sm:text-sm font-medium text-[#333333] mt-1">
                   hrs/week
                 </div>
               </div>
             </div>
 
-            <div className="bg-white border border-[#D8DFEB] rounded-2xl p-4 sm:p-5 flex items-center gap-4 shadow-2xs">
-              <span className="w-12 h-12 rounded-xl bg-[#F5F1FF] text-[#5B36E9] flex items-center justify-center flex-none">
+            <div className="bg-white border border-[#e0e0e0] rounded-2xl p-4 sm:p-5 flex items-center gap-4 shadow-2xs">
+              <span className="w-12 h-12 rounded-xl bg-[#eaf2fc] text-[#0066cc] flex items-center justify-center flex-none">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
                   <polyline points="17 6 23 6 23 12" />
                 </svg>
               </span>
               <div>
-                <div className="font-['Manrope'] font-extrabold text-2xl sm:text-[26px] text-[#0E1B38] leading-none">
+                <div className="font-['Manrope'] font-extrabold text-2xl sm:text-[26px] text-[#1d1d1f] leading-none">
                   {roadmap.percent}%
                 </div>
-                <div className="text-xs sm:text-sm font-medium text-[#52617D] mt-1">
+                <div className="text-xs sm:text-sm font-medium text-[#333333] mt-1">
                   curriculum completed
                 </div>
               </div>
@@ -363,14 +363,14 @@ export default function PersonalizedRoadmap({ pathData = null }) {
           <div className="grid pf-roadmap-grid gap-6 items-start">
 
             {/* LEFT COLUMN: Your learning roadmap */}
-            <div className="bg-white border border-[#D8DFEB] rounded-2xl p-6 sm:p-7 shadow-[0_4px_20px_rgba(25,40,75,0.03)] flex flex-col justify-between min-w-0">
+            <div className="bg-white border border-[#e0e0e0] rounded-2xl p-6 sm:p-7 shadow-[0_4px_20px_rgba(25,49,75,0.03)] flex flex-col justify-between min-w-0">
               <div>
-                <h2 className="font-['Manrope'] font-bold text-lg text-[#0E1B38] mb-4">
+                <h2 className="font-['Manrope'] font-bold text-lg text-[#1d1d1f] mb-4">
                   Your learning roadmap
                 </h2>
 
                 {/* Week Tabs Navigation */}
-                <div className="flex flex-wrap items-center gap-2 mb-6 pb-4 border-b border-[#F0F3F8]">
+                <div className="flex flex-wrap items-center gap-2 mb-6 pb-4 border-b border-[#f5f5f7]">
                   {weekTabs.map((tab) => {
                     const isSel = selectedWeek === tab
                     const wg = weekGroups[tab] || {}
@@ -384,10 +384,10 @@ export default function PersonalizedRoadmap({ pathData = null }) {
                         title={wg.isLocked ? wg.lockedReason : undefined}
                         className={`px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer inline-flex items-center gap-1.5 ${
                           isSel
-                            ? 'bg-[#5B36E9] text-white shadow-sm'
+                            ? 'bg-[#0066cc] text-white shadow-sm'
                             : wg.isLocked
-                            ? 'bg-white text-[#94A3B8] hover:bg-gray-50'
-                            : 'bg-white text-[#52617D] hover:text-[#0E1B38] hover:bg-gray-100/70'
+                            ? 'bg-white text-[#86868b] hover:bg-gray-50'
+                            : 'bg-white text-[#333333] hover:text-[#1d1d1f] hover:bg-gray-100/70'
                         }`}
                       >
                         {wg.isComplete && !isSel && (
@@ -418,16 +418,16 @@ export default function PersonalizedRoadmap({ pathData = null }) {
                 {/* Active Week Theme Header */}
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2.5">
-                    <h3 className="font-['Manrope'] font-bold text-base text-[#0E1B38]">
+                    <h3 className="font-['Manrope'] font-bold text-base text-[#1d1d1f]">
                       {currentWeekData.themeTitle}
                     </h3>
                     {selectedWeek === 'Week 1' && (
-                      <span className="bg-[#F5F1FF] text-[#5B36E9] font-bold text-xs px-2.5 py-0.5 rounded-full">
+                      <span className="bg-[#eaf2fc] text-[#0066cc] font-bold text-xs px-2.5 py-0.5 rounded-full">
                         Current week
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center gap-1.5 text-xs sm:text-sm text-[#74819A] font-medium">
+                  <div className="flex items-center gap-1.5 text-xs sm:text-sm text-[#7a7a7a] font-medium">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <circle cx="12" cy="12" r="10" />
                       <polyline points="12 6 12 12 16 14" />
@@ -447,7 +447,7 @@ export default function PersonalizedRoadmap({ pathData = null }) {
                         <div className={`border rounded-xl p-3.5 sm:p-4 flex items-center justify-between gap-3 transition-colors ${
                           isCompleted
                             ? 'border-[#22A06B]/30 bg-[#F6FEF9]'
-                            : 'border-[#D8DFEB] bg-white hover:border-[#5B36E9]/40'
+                            : 'border-[#e0e0e0] bg-white hover:border-[#0066cc]/40'
                         }`}>
                           <div className="flex items-center gap-3.5 min-w-0">
                             {/* Checkbox button */}
@@ -457,7 +457,7 @@ export default function PersonalizedRoadmap({ pathData = null }) {
                               className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0 cursor-pointer ${
                                 isCompleted
                                   ? 'bg-[#22A06B] border-[#22A06B] text-white shadow-xs'
-                                  : 'border-[#CAD3E2] hover:border-[#5B36E9]'
+                                  : 'border-[#d2d2d7] hover:border-[#0066cc]'
                               }`}
                               aria-label="Toggle task completion"
                             >
@@ -469,7 +469,7 @@ export default function PersonalizedRoadmap({ pathData = null }) {
                             </button>
 
                             {/* Task Icon / Emoji */}
-                            <span className="w-9 h-9 rounded-lg bg-[#F5F1FF] text-[#5B36E9] flex items-center justify-center flex-none font-bold text-sm">
+                            <span className="w-9 h-9 rounded-lg bg-[#eaf2fc] text-[#0066cc] flex items-center justify-center flex-none font-bold text-sm">
                               {task.skill_tags?.[0]?.toLowerCase().includes('python')
                                 ? '🐍'
                                 : task.skill_tags?.[0]?.toLowerCase().includes('stat')
@@ -483,10 +483,10 @@ export default function PersonalizedRoadmap({ pathData = null }) {
 
                             {/* Title & Subtitle */}
                             <div className="min-w-0">
-                              <h4 className={`font-bold text-sm text-[#0E1B38] truncate ${isCompleted ? 'line-through opacity-60' : ''}`}>
+                              <h4 className={`font-bold text-sm text-[#1d1d1f] truncate ${isCompleted ? 'line-through opacity-60' : ''}`}>
                                 {task.title}
                               </h4>
-                              <p className="text-xs text-[#74819A] mt-0.5 truncate">
+                              <p className="text-xs text-[#7a7a7a] mt-0.5 truncate">
                                 {task.subtitle}
                               </p>
                             </div>
@@ -494,13 +494,13 @@ export default function PersonalizedRoadmap({ pathData = null }) {
 
                           {/* Right Controls */}
                           <div className="flex items-center gap-3 flex-shrink-0">
-                            <span className="text-xs font-semibold text-[#5B36E9] bg-[#F5F1FF] px-2.5 py-1 rounded-lg">
+                            <span className="text-xs font-semibold text-[#0066cc] bg-[#eaf2fc] px-2.5 py-1 rounded-lg">
                               {task.duration_hrs} hrs
                             </span>
                             <button
                               type="button"
                               onClick={() => toggleWhy(task.id)}
-                              className="text-xs font-semibold text-[#5B36E9] hover:underline whitespace-nowrap cursor-pointer"
+                              className="text-xs font-semibold text-[#0066cc] hover:underline whitespace-nowrap cursor-pointer"
                             >
                               Why this?
                             </button>
@@ -509,7 +509,7 @@ export default function PersonalizedRoadmap({ pathData = null }) {
                                 href={task.resource_url}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="px-2.5 py-1 bg-white border border-[#D8DFEB] hover:border-[#5B36E9] hover:text-[#5B36E9] rounded-lg text-xs font-semibold text-[#52617D] transition-colors"
+                                className="px-2.5 py-1 bg-white border border-[#e0e0e0] hover:border-[#0066cc] hover:text-[#0066cc] rounded-lg text-xs font-semibold text-[#333333] transition-colors"
                               >
                                 Open ↗
                               </a>
@@ -519,22 +519,22 @@ export default function PersonalizedRoadmap({ pathData = null }) {
 
                         {/* Expanded "Why this task?" explanation */}
                         {isExpanded && (
-                          <div className="bg-[#F5F1FF] border-l-[3.5px] border-[#5B36E9] rounded-xl p-4 sm:p-5 relative animate-in fade-in duration-150">
+                          <div className="bg-[#eaf2fc] border-l-[3.5px] border-[#0066cc] rounded-xl p-4 sm:p-5 relative animate-in fade-in duration-150">
                             <div className="flex items-center justify-between mb-1.5">
-                              <span className="font-['Manrope'] font-bold text-xs sm:text-sm text-[#5B36E9]">
+                              <span className="font-['Manrope'] font-bold text-xs sm:text-sm text-[#0066cc]">
                                 Why this task?
                               </span>
                               <button
                                 type="button"
                                 onClick={() => toggleWhy(task.id)}
-                                className="text-[#5B36E9] hover:opacity-75 focus:outline-none cursor-pointer"
+                                className="text-[#0066cc] hover:opacity-75 focus:outline-none cursor-pointer"
                               >
                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                   <polyline points="18 15 12 9 6 15" />
                                 </svg>
                               </button>
                             </div>
-                            <p className="text-xs sm:text-sm text-[#0E1B38] leading-relaxed">
+                            <p className="text-xs sm:text-sm text-[#1d1d1f] leading-relaxed">
                               {task.explanation}
                             </p>
                           </div>
@@ -546,14 +546,14 @@ export default function PersonalizedRoadmap({ pathData = null }) {
               </div>
 
               {/* ROADMAP MILESTONE STRIP (Bottom Nodes with Arrows) */}
-              <div className="mt-8 pt-6 border-t border-[#F0F3F8]">
+              <div className="mt-8 pt-6 border-t border-[#f5f5f7]">
                 <div className="flex items-center gap-2 overflow-x-auto pb-2">
                   {milestoneNodes.map((node, i) => {
                     const isSelected = activeMilestone === node.id
                     return (
                       <React.Fragment key={node.id}>
                         {i > 0 && (
-                          <span className="text-[#CAD3E2] font-bold text-sm flex-none">
+                          <span className="text-[#d2d2d7] font-bold text-sm flex-none">
                             →
                           </span>
                         )}
@@ -561,31 +561,31 @@ export default function PersonalizedRoadmap({ pathData = null }) {
                           onClick={() => handleMilestoneClick(node)}
                           className={`flex-none rounded-xl p-2.5 sm:p-3 flex flex-col items-center justify-center text-center cursor-pointer transition-all min-w-[95px] sm:min-w-[110px] border ${
                             isSelected
-                              ? 'border-2 border-[#5B36E9] bg-[#F5F1FF] shadow-xs ring-2 ring-[#5B36E9]/10'
+                              ? 'border-2 border-[#0066cc] bg-[#eaf2fc] shadow-xs ring-2 ring-[#0066cc]/10'
                               : node.isComplete
                               ? 'border-[#22A06B]/40 bg-[#F6FEF9] shadow-2xs hover:border-[#22A06B]'
-                              : 'border-[#D8DFEB] bg-white hover:border-[#CAD3E2]'
+                              : 'border-[#e0e0e0] bg-white hover:border-[#d2d2d7]'
                           }`}
                         >
                           {/* Consistent Clean Circle Number */}
                           <span
                             className={`w-6 h-6 rounded-full font-bold text-xs flex items-center justify-center mb-1 ${
                               isSelected
-                                ? 'bg-[#5B36E9] text-white shadow-xs'
-                                : 'bg-[#475569] text-white'
+                                ? 'bg-[#0066cc] text-white shadow-xs'
+                                : 'bg-[#333333] text-white'
                             }`}
                           >
                             {node.id}
                           </span>
 
                           {/* Milestone Label */}
-                          <span className="text-[11px] sm:text-xs font-bold text-[#0E1B38] leading-tight truncate max-w-[95px]">
+                          <span className="text-[11px] sm:text-xs font-bold text-[#1d1d1f] leading-tight truncate max-w-[95px]">
                             {node.label}
                           </span>
 
                           {/* Real state badge: locked / complete / real step number */}
                           {node.isLocked ? (
-                            <span className="inline-flex items-center gap-0.5 text-[9.5px] font-bold text-[#94A3B8] bg-[#F1F5F9] border border-[#E2E8F0] px-1.5 py-0.5 rounded-full mt-1 shadow-2xs">
+                            <span className="inline-flex items-center gap-0.5 text-[9.5px] font-bold text-[#86868b] bg-[#f5f5f5] border border-[#e9e9e9] px-1.5 py-0.5 rounded-full mt-1 shadow-2xs">
                               🔒 Locked
                             </span>
                           ) : node.isComplete ? (
@@ -593,7 +593,7 @@ export default function PersonalizedRoadmap({ pathData = null }) {
                               ✓ Complete
                             </span>
                           ) : (
-                            <span className="text-[10px] text-[#74819A] mt-1">
+                            <span className="text-[10px] text-[#7a7a7a] mt-1">
                               Step {node.id}
                             </span>
                           )}
@@ -609,8 +609,8 @@ export default function PersonalizedRoadmap({ pathData = null }) {
             <div className="space-y-5 min-w-0">
               
               {/* WIDGET 1: "This week's plan" */}
-              <div className="bg-[#F5F1FF] border border-[#E7E0FF] rounded-2xl p-5 sm:p-6 shadow-sm">
-                <h3 className="font-['Manrope'] font-bold text-base text-[#0E1B38] mb-4">
+              <div className="bg-[#eaf2fc] border border-[#e1effe] rounded-2xl p-5 sm:p-6 shadow-sm">
+                <h3 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] mb-4">
                   This week’s plan ({selectedWeek})
                 </h3>
 
@@ -618,13 +618,13 @@ export default function PersonalizedRoadmap({ pathData = null }) {
                   {/* Progress Ring */}
                   <div className="relative w-20 h-20 flex-none">
                     <svg className="w-full h-full -rotate-90" viewBox="0 0 48 48">
-                      <circle cx="24" cy="24" r="20" fill="none" stroke="#E1D7FA" strokeWidth="4.5" />
+                      <circle cx="24" cy="24" r="20" fill="none" stroke="#d7e8fa" strokeWidth="4.5" />
                       <circle
                         cx="24"
                         cy="24"
                         r="20"
                         fill="none"
-                        stroke="#5B36E9"
+                        stroke="#0066cc"
                         strokeWidth="4.5"
                         strokeDasharray="125.6"
                         strokeDashoffset={
@@ -636,23 +636,23 @@ export default function PersonalizedRoadmap({ pathData = null }) {
                       />
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                      <span className="font-['Manrope'] font-extrabold text-sm text-[#0E1B38] leading-tight">
+                      <span className="font-['Manrope'] font-extrabold text-sm text-[#1d1d1f] leading-tight">
                         {weekCompletedCount} of {currentWeekData.tasks.length}
                       </span>
-                      <span className="text-[10px] text-[#74819A] font-semibold">
+                      <span className="text-[10px] text-[#7a7a7a] font-semibold">
                         tasks
                       </span>
                     </div>
                   </div>
 
                   {/* Checklist Summary */}
-                  <div className="space-y-1.5 text-xs text-[#0E1B38] font-medium min-w-0">
+                  <div className="space-y-1.5 text-xs text-[#1d1d1f] font-medium min-w-0">
                     {currentWeekData.tasks.map((t) => (
                       <div key={t.id} className="flex items-center gap-2 truncate">
                         <span className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                          completedTaskIds.has(t.id) ? 'bg-[#22A06B]' : 'bg-[#D8DFEB]'
+                          completedTaskIds.has(t.id) ? 'bg-[#22A06B]' : 'bg-[#e0e0e0]'
                         }`} />
-                        <span className={`truncate ${completedTaskIds.has(t.id) ? 'line-through text-[#74819A]' : ''}`}>
+                        <span className={`truncate ${completedTaskIds.has(t.id) ? 'line-through text-[#7a7a7a]' : ''}`}>
                           {t.title}
                         </span>
                       </div>
@@ -664,7 +664,7 @@ export default function PersonalizedRoadmap({ pathData = null }) {
                 <button
                   type="button"
                   onClick={handleStartWeek}
-                  className="w-full py-3 bg-[#5B36E9] hover:bg-[#4826C9] active:scale-[0.99] text-white font-bold text-sm rounded-xl shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
+                  className="w-full py-3 bg-[#0066cc] hover:bg-[#004fa3] active:scale-[0.99] text-white font-bold text-sm rounded-xl shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
                 >
                   <span>
                     {weekCompletedCount === currentWeekData.tasks.length
@@ -680,8 +680,8 @@ export default function PersonalizedRoadmap({ pathData = null }) {
 
               {/* WIDGET 2: Priority Gaps — real skill tags, real gap %, from
                   the learner's actual roadmap steps. */}
-              <div className="bg-white border border-[#D8DFEB] rounded-2xl p-5 sm:p-6 shadow-2xs">
-                <h3 className="font-['Manrope'] font-bold text-base text-[#0E1B38] mb-4">
+              <div className="bg-white border border-[#e0e0e0] rounded-2xl p-5 sm:p-6 shadow-2xs">
+                <h3 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] mb-4">
                   Priority gaps
                 </h3>
 
@@ -689,24 +689,24 @@ export default function PersonalizedRoadmap({ pathData = null }) {
                   <div className="space-y-3.5">
                     {priorityGaps.map((g) => (
                       <div key={g.tag}>
-                        <div className="flex justify-between text-xs font-bold text-[#0E1B38] mb-1">
+                        <div className="flex justify-between text-xs font-bold text-[#1d1d1f] mb-1">
                           <span className="capitalize">{g.tag}</span>
-                          <span className="text-[#5B36E9]">{g.progress}%</span>
+                          <span className="text-[#0066cc]">{g.progress}%</span>
                         </div>
-                        <div className="w-full h-2 bg-[#EEF2F6] rounded-full overflow-hidden">
-                          <div className="h-full bg-[#5B36E9] rounded-full" style={{ width: `${g.progress}%` }} />
+                        <div className="w-full h-2 bg-[#f2f2f2] rounded-full overflow-hidden">
+                          <div className="h-full bg-[#0066cc] rounded-full" style={{ width: `${g.progress}%` }} />
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-xs text-[#94A3B8]">No skill gaps yet — keep completing steps to see this fill in.</p>
+                  <p className="text-xs text-[#86868b]">No skill gaps yet — keep completing steps to see this fill in.</p>
                 )}
 
                 <button
                   type="button"
                   onClick={() => navigate('/skills')}
-                  className="mt-4 text-xs font-bold text-[#5B36E9] hover:underline flex items-center gap-1 cursor-pointer"
+                  className="mt-4 text-xs font-bold text-[#0066cc] hover:underline flex items-center gap-1 cursor-pointer"
                 >
                   <span>View skill insights</span>
                   <span>→</span>
@@ -720,24 +720,24 @@ export default function PersonalizedRoadmap({ pathData = null }) {
                   duplicated the first task already shown above and fell back
                   to a hardcoded Python-docs link when none existed - neither
                   was a real recommendation. */}
-              <div className="bg-white border border-[#D8DFEB] rounded-2xl p-5 sm:p-6 shadow-2xs">
-                <h3 className="font-['Manrope'] font-bold text-base text-[#0E1B38] mb-3">
+              <div className="bg-white border border-[#e0e0e0] rounded-2xl p-5 sm:p-6 shadow-2xs">
+                <h3 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] mb-3">
                   Recommended for you
                 </h3>
 
                 {currentWeekData.webResources?.[0] ? (
-                  <div className="flex items-center justify-between gap-3 p-3 bg-[#FAF9FF] border border-[#E7E0FF] rounded-xl">
+                  <div className="flex items-center justify-between gap-3 p-3 bg-[#f9fcff] border border-[#e1effe] rounded-xl">
                     <div className="flex items-center gap-3 min-w-0">
-                      <span className="w-9 h-9 rounded-full bg-[#EEE9FF] text-[#5B36E9] flex items-center justify-center flex-none">
+                      <span className="w-9 h-9 rounded-full bg-[#dbeafc] text-[#0066cc] flex items-center justify-center flex-none">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
                           <polygon points="5 3 19 12 5 21 5 3" />
                         </svg>
                       </span>
                       <div className="min-w-0">
-                        <h4 className="text-xs font-bold text-[#0E1B38] max-w-[130px] truncate">
+                        <h4 className="text-xs font-bold text-[#1d1d1f] max-w-[130px] truncate">
                           {currentWeekData.webResources[0].title || currentWeekData.webResources[0].url}
                         </h4>
-                        <p className="text-[11px] text-[#74819A] truncate max-w-[150px]">
+                        <p className="text-[11px] text-[#7a7a7a] truncate max-w-[150px]">
                           {(() => {
                             try { return new URL(currentWeekData.webResources[0].url).hostname.replace('www.', '') }
                             catch { return 'External resource' }
@@ -750,13 +750,13 @@ export default function PersonalizedRoadmap({ pathData = null }) {
                       href={currentWeekData.webResources[0].url}
                       target="_blank"
                       rel="noreferrer"
-                      className="px-3 py-1 bg-white border border-[#5B36E9] text-[#5B36E9] hover:bg-[#5B36E9] hover:text-white rounded-lg text-xs font-bold transition-all shadow-2xs flex-none"
+                      className="px-3 py-1 bg-white border border-[#0066cc] text-[#0066cc] hover:bg-[#0066cc] hover:text-white rounded-lg text-xs font-bold transition-all shadow-2xs flex-none"
                     >
                       Open
                     </a>
                   </div>
                 ) : (
-                  <p className="text-xs text-[#94A3B8]">No extra resources found for this week yet.</p>
+                  <p className="text-xs text-[#86868b]">No extra resources found for this week yet.</p>
                 )}
               </div>
 
@@ -767,7 +767,7 @@ export default function PersonalizedRoadmap({ pathData = null }) {
           once in App.jsx) already covers the floating assistant; no per-page
           duplicate here. */}
       {toastMessage && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#0E1B38] text-white px-5 py-2.5 rounded-xl shadow-xl text-xs sm:text-sm font-semibold animate-in fade-in slide-in-from-bottom duration-150 flex items-center gap-2">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#1d1d1f] text-white px-5 py-2.5 rounded-xl shadow-xl text-xs sm:text-sm font-semibold animate-in fade-in slide-in-from-bottom duration-150 flex items-center gap-2">
           <span>{toastMessage}</span>
         </div>
       )}

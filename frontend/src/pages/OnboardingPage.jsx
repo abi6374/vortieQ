@@ -181,7 +181,7 @@ export default function OnboardingPage() {
   // Step 1: High-fidelity desktop learner intake screen with unified 5-step sidebar
   if (phase === 'intake' || phase === 'resume') {
     return (
-      <div className="min-h-screen flex" style={{ background: '#F5F7FC' }}>
+      <div className="min-h-screen flex" style={{ background: '#f5f5f7' }}>
         <SetupSidebar current={1} />
         <div className="flex-1 flex flex-col items-center justify-start px-4 py-8 lg:py-10 overflow-y-auto">
           <LearnerIntakeWorkspace
@@ -199,7 +199,7 @@ export default function OnboardingPage() {
   // Step 2: The "Assess skills" step
   if (phase === 'topics') {
     return (
-      <div className="min-h-screen flex" style={{ background: '#F5F7FC' }}>
+      <div className="min-h-screen flex" style={{ background: '#f5f5f7' }}>
         <SetupSidebar current={2} />
         <div className="flex-1 flex flex-col items-center justify-start px-4 py-8 lg:py-10 overflow-y-auto">
           <AssessSkills
@@ -218,7 +218,7 @@ export default function OnboardingPage() {
   if (phase === 'goalcompass' || phase === 'generating') {
     return (
       <>
-        <div ref={bgRef} className="min-h-screen flex" style={{ background: '#F5F7FC' }}>
+        <div ref={bgRef} className="min-h-screen flex" style={{ background: '#f5f5f7' }}>
           <SetupSidebar current={3} />
           <div className="flex-1 flex flex-col items-center justify-start px-4 py-8 lg:py-10 overflow-y-auto">
             <GoalCompass
@@ -248,19 +248,19 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen flex" style={{ background: '#F5F7FC' }}>
+    <div className="min-h-screen flex" style={{ background: '#f5f5f7' }}>
       <SetupSidebar current={1} />
       <div className="flex-1 flex flex-col items-center justify-start px-4 py-8 lg:py-10 overflow-y-auto">
         <div className="w-full max-w-[1140px] flex justify-center">
           {phase === 'chat' && (
-            <div className="bg-white rounded-2xl border border-[#E1E6F0] shadow-[0_14px_38px_rgba(25,40,75,0.08)] p-8 max-w-2xl w-full">
-              <h1 className="text-2xl font-bold text-[#0E1B38]">Let's map your path</h1>
-              <p className="mt-2 text-sm text-[#52617D]">
+            <div className="bg-white rounded-2xl border border-[#f0f0f0] shadow-[0_14px_38px_rgba(25,49,75,0.08)] p-8 max-w-2xl w-full">
+              <h1 className="text-2xl font-bold text-[#1d1d1f]">Let's map your path</h1>
+              <p className="mt-2 text-sm text-[#333333]">
                 Describe your learning goal in your own words. Our AI will turn it into a
                 personalized roadmap.
               </p>
               {topicRatings.length > 0 && (
-                <p className="mt-3 text-xs text-[#5B36E9] bg-[#F5F1FF] rounded-lg px-3 py-2 border border-[#EFE9FF]">
+                <p className="mt-3 text-xs text-[#0066cc] bg-[#eaf2fc] rounded-lg px-3 py-2 border border-[#eaf2fc]">
                   Using {topicRatings.length} skill{topicRatings.length === 1 ? '' : 's'} from your resume to personalize recommendations.
                 </p>
               )}

@@ -9,8 +9,8 @@ import { useSidebar } from '../../contexts/SidebarContext'
  * - Navigation links in vertical rhythm.
  */
 
-const V = '#5B36E9'
-const V_SOFT = '#F5F1FF'
+const V = '#0066cc'
+const V_SOFT = '#eaf2fc'
 
 export const SidebarIcon = ({ className = "w-4 h-4" }) => (
   <svg
@@ -81,9 +81,9 @@ export default function AppSidebar() {
   const { setCollapsed } = useSidebar()
 
   return (
-    <aside className="pf-sidebar relative z-30 flex flex-col h-full bg-white border-r border-[#E6EAF2]">
+    <aside className="pf-sidebar relative z-30 flex flex-col h-full bg-white border-r border-[#f0f0f0]">
       {/* 72px Top Header: Logo on the left, Toggle button directly next to the name */}
-      <div className="h-[72px] flex items-center justify-between px-3 border-b border-[#E6EAF2] flex-none">
+      <div className="h-[72px] flex items-center justify-between px-3 border-b border-[#f0f0f0] flex-none">
         <button
           type="button"
           onClick={() => navigate('/dashboard')}
@@ -92,13 +92,13 @@ export default function AppSidebar() {
         >
           <span
             className="grid place-items-center rounded-xl flex-none"
-            style={{ width: 34, height: 34, background: `linear-gradient(160deg,#6B47F0,${V})`, boxShadow: '0 4px 10px rgba(91,54,233,.30)' }}
+            style={{ width: 34, height: 34, background: `linear-gradient(160deg,#0071e3,${V})`, boxShadow: '0 4px 10px rgba(0,102,204,.30)' }}
           >
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M3 12h4l3 8 4-16 3 8h4" />
             </svg>
           </span>
-          <span className="font-['Manrope'] font-extrabold text-[#0E1B38]" style={{ fontSize: 17, letterSpacing: '-.02em' }}>
+          <span className="font-['Manrope'] font-extrabold text-[#1d1d1f]" style={{ fontSize: 17, letterSpacing: '-.02em' }}>
             PathFinder
           </span>
         </button>
@@ -109,10 +109,10 @@ export default function AppSidebar() {
           onClick={() => setCollapsed(true)}
           title="Hide sidebar"
           aria-label="Hide sidebar"
-          className="relative group flex items-center justify-center w-8 h-8 rounded-lg text-[#74819A] hover:text-[#5B36E9] hover:bg-[#F5F1FF] border border-[#E6EAF2] hover:border-[#5B36E9] transition-all cursor-pointer shadow-2xs"
+          className="relative group flex items-center justify-center w-8 h-8 rounded-lg text-[#7a7a7a] hover:text-[#0066cc] hover:bg-[#eaf2fc] border border-[#f0f0f0] hover:border-[#0066cc] transition-all cursor-pointer shadow-2xs"
         >
           <SidebarIcon className="w-4 h-4" />
-          <span className="pointer-events-none absolute left-full ml-2 px-2 py-1 bg-[#0E1B38] text-white text-[11px] font-bold rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg z-50">
+          <span className="pointer-events-none absolute left-full ml-2 px-2 py-1 bg-[#1d1d1f] text-white text-[11px] font-bold rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg z-50">
             Hide sidebar
           </span>
         </button>
@@ -134,14 +134,14 @@ export default function AppSidebar() {
                 style={{
                   padding: '9px 12px',
                   background: on ? V_SOFT : 'transparent',
-                  color: on ? V : '#475569',
+                  color: on ? V : '#333333',
                   fontWeight: on ? 600 : 500,
                   fontSize: 14,
                 }}
-                onMouseEnter={(e) => { if (!on) e.currentTarget.style.background = '#FAF8FF' }}
+                onMouseEnter={(e) => { if (!on) e.currentTarget.style.background = '#fafbfc' }}
                 onMouseLeave={(e) => { if (!on) e.currentTarget.style.background = 'transparent' }}
               >
-                <span style={{ color: on ? V : '#64748B', display: 'flex' }}>{ICONS[item.key]}</span>
+                <span style={{ color: on ? V : '#6e6e73', display: 'flex' }}>{ICONS[item.key]}</span>
                 <span>{item.label}</span>
               </button>
             )

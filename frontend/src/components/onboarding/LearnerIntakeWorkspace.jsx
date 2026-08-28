@@ -195,28 +195,28 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
   }
 
   return (
-    <div className="w-full max-w-[1140px] bg-white rounded-2xl border border-[#E1E6F0] shadow-[0_14px_38px_rgba(25,40,75,0.08)] flex flex-col justify-between overflow-hidden">
+    <div className="w-full max-w-[1140px] bg-white rounded-2xl border border-[#f0f0f0] shadow-[0_14px_38px_rgba(25,49,75,0.08)] flex flex-col justify-between overflow-hidden">
       
       {/* Top Header Row with Badge, Title, and Profile Dropdown */}
       <div className="pt-6 sm:pt-8 pb-3 px-6 sm:px-10 relative">
         <div className="flex items-center justify-between mb-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1 text-[12px] font-bold uppercase tracking-wider text-[#5B36E9] bg-[#F5F1FF] border border-[#EFE9FF]">
+          <span className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1 text-[12px] font-bold uppercase tracking-wider text-[#0066cc] bg-[#eaf2fc] border border-[#eaf2fc]">
             Step 1 · Learner Intake
           </span>
           <UserProfileDropdown />
         </div>
 
         <div className="text-center mt-2">
-          <h1 className="text-2xl sm:text-3xl md:text-[38px] font-bold text-[#0E1B38] tracking-tight leading-tight flex items-center justify-center gap-2.5 flex-wrap">
+          <h1 className="text-2xl sm:text-3xl md:text-[38px] font-bold text-[#1d1d1f] tracking-tight leading-tight flex items-center justify-center gap-2.5 flex-wrap">
             <span>Let’s understand where you are today</span>
-            <span className="inline-flex text-[#5B36E9]">
+            <span className="inline-flex text-[#0066cc]">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 2L14.4 7.6L20 10L14.4 12.4L12 18L9.6 12.4L4 10L9.6 7.6L12 2Z" />
                 <path d="M19 16L20.2 18.8L23 20L20.2 21.2L19 24L17.8 21.2L15 20L17.8 18.8L19 16Z" />
               </svg>
             </span>
           </h1>
-          <p className="text-[16px] text-[#52617D] mt-2 font-normal">
+          <p className="text-[16px] text-[#333333] mt-2 font-normal">
             {githubData?.topics?.length > 0
               ? 'Your GitHub repositories are linked. Uploading a resume or adding notes is completely optional.'
               : 'Upload your resume or describe your background in your own words.'}
@@ -225,8 +225,8 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
 
         {/* GitHub Ingestion Banner if active */}
         {githubLoading && (
-          <div className="mt-4 bg-[#F5F1FF] border border-[#DDD2FF] rounded-xl p-3 flex items-center justify-center gap-2 text-sm text-[#5B36E9] animate-pulse">
-            <svg className="animate-spin h-4 w-4 text-[#5B36E9]" viewBox="0 0 24 24" fill="none">
+          <div className="mt-4 bg-[#eaf2fc] border border-[#cfe4fb] rounded-xl p-3 flex items-center justify-center gap-2 text-sm text-[#0066cc] animate-pulse">
+            <svg className="animate-spin h-4 w-4 text-[#0066cc]" viewBox="0 0 24 24" fill="none">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
             </svg>
@@ -235,7 +235,7 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
         )}
 
         {githubData?.topics && githubData.topics.length > 0 && !githubLoading && (
-          <div className="mt-4 bg-[#F8FAFD] border border-[#DCE4F0] rounded-xl p-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
+          <div className="mt-4 bg-[#fafafb] border border-[#e6e6e7] rounded-xl p-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-lg bg-[#181717] text-white flex items-center justify-center flex-none">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -243,13 +243,13 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
                 </svg>
               </div>
               <div>
-                <p className="text-xs font-bold text-[#0E1B38] flex items-center gap-1.5">
+                <p className="text-xs font-bold text-[#1d1d1f] flex items-center gap-1.5">
                   <span>GitHub Profile Connected</span>
                   <span className="bg-[#ECFDF3] text-[#22A06B] text-[11px] px-2 py-0.5 rounded-full font-bold">
                     {githubData.github_projects?.length || 0} Repos Synced
                   </span>
                 </p>
-                <p className="text-[12px] text-[#52617D] mt-0.5">
+                <p className="text-[12px] text-[#333333] mt-0.5">
                   Stack: {githubData.top_languages?.join(', ') || 'Python, TypeScript'} · Experience: ~{githubData.detected_years_experience || 1} yrs
                 </p>
               </div>
@@ -257,7 +257,7 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
             <button
               type="button"
               onClick={handleContinue}
-              className="px-3.5 py-1.5 bg-[#5B36E9] hover:bg-[#4826C9] text-white text-xs font-bold rounded-lg shadow-xs transition-colors cursor-pointer flex-none"
+              className="px-3.5 py-1.5 bg-[#0066cc] hover:bg-[#004fa3] text-white text-xs font-bold rounded-lg shadow-xs transition-colors cursor-pointer flex-none"
             >
               Continue with GitHub Stack →
             </button>
@@ -273,18 +273,18 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
           onClick={() => setSelectedMethod('resume')}
           className={`rounded-2xl p-6 sm:p-7 flex flex-col justify-between transition-all cursor-pointer ${
             selectedMethod === 'resume'
-              ? 'bg-[#FDFBFF] border-2 border-[#5B36E9] shadow-[0_6px_24px_rgba(91,54,233,0.08)] ring-1 ring-[#5B36E9]/20'
-              : 'bg-white border border-[#D8DFEB] hover:border-[#B7A7FF] shadow-xs'
+              ? 'bg-[#fbfdff] border-2 border-[#0066cc] shadow-[0_6px_24px_rgba(0,102,204,0.08)] ring-1 ring-[#0066cc]/20'
+              : 'bg-white border border-[#e0e0e0] hover:border-[#abd2fb] shadow-xs'
           }`}
         >
           <div>
-            <div className="w-[74px] h-[74px] rounded-2xl bg-[#EEE9FF] flex items-center justify-center mb-4">
+            <div className="w-[74px] h-[74px] rounded-2xl bg-[#dbeafc] flex items-center justify-center mb-4">
               <svg
                 width="34"
                 height="34"
                 viewBox="0 0 24 24"
                 fill="none"
-                stroke="#5B36E9"
+                stroke="#0066cc"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -296,10 +296,10 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
               </svg>
             </div>
 
-            <h2 className="text-[22px] font-bold text-[#0E1B38] mb-1">
+            <h2 className="text-[22px] font-bold text-[#1d1d1f] mb-1">
               Upload my resume
             </h2>
-            <p className="text-[14.5px] text-[#52617D] leading-snug mb-4">
+            <p className="text-[14.5px] text-[#333333] leading-snug mb-4">
               Upload a PDF or DOCX and we’ll identify your skills, projects and experience.
             </p>
           </div>
@@ -321,8 +321,8 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
             }}
             className={`border-2 border-dashed rounded-xl p-5 text-center flex flex-col items-center justify-center relative min-h-[160px] transition-colors ${
               dragOver
-                ? 'border-[#5B36E9] bg-[#F5F1FF]'
-                : 'border-[#B7A7FF] bg-[#FAF8FF] hover:bg-[#F5F0FF]'
+                ? 'border-[#0066cc] bg-[#eaf2fc]'
+                : 'border-[#abd2fb] bg-[#fafbfc] hover:bg-[#f1f7fe]'
             }`}
           >
             <input
@@ -340,8 +340,8 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
                     <path d="M20 6 9 17l-5-5" />
                   </svg>
                 </div>
-                <p className="font-bold text-[#0E1B38] text-[14.5px] max-w-[240px] truncate">{file.name}</p>
-                <p className="text-[12.5px] text-[#74819A] mt-0.5">
+                <p className="font-bold text-[#1d1d1f] text-[14.5px] max-w-[240px] truncate">{file.name}</p>
+                <p className="text-[12.5px] text-[#7a7a7a] mt-0.5">
                   {(file.size / (1024 * 1024)).toFixed(2)} MB · Ready to analyze
                 </p>
                 <button
@@ -351,14 +351,14 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
                     setFile(null)
                     if (fileInputRef.current) fileInputRef.current.value = ''
                   }}
-                  className="mt-2 text-xs font-semibold text-[#5B36E9] hover:underline"
+                  className="mt-2 text-xs font-semibold text-[#0066cc] hover:underline"
                 >
                   Change file
                 </button>
               </div>
             ) : (
               <>
-                <div className="text-[#5B36E9] mb-1">
+                <div className="text-[#0066cc] mb-1">
                   <svg
                     width="28"
                     height="28"
@@ -374,13 +374,13 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
                   </svg>
                 </div>
 
-                <p className="text-[14.5px] text-[#0E1B38] font-medium">
+                <p className="text-[14.5px] text-[#1d1d1f] font-medium">
                   Drop your resume here or{' '}
-                  <span className="text-[#5B36E9] font-semibold underline underline-offset-2">
+                  <span className="text-[#0066cc] font-semibold underline underline-offset-2">
                     browse
                   </span>
                 </p>
-                <p className="text-[12.5px] text-[#74819A] mt-0.5 mb-2.5">
+                <p className="text-[12.5px] text-[#7a7a7a] mt-0.5 mb-2.5">
                   PDF or DOCX · up to 10 MB
                 </p>
 
@@ -390,14 +390,14 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
                     e.stopPropagation()
                     fileInputRef.current?.click()
                   }}
-                  className="bg-white border border-[#5B36E9] text-[#5B36E9] font-semibold text-[13px] px-5 py-1.5 rounded-xl hover:bg-[#F5F1FF] transition-colors shadow-xs"
+                  className="bg-white border border-[#0066cc] text-[#0066cc] font-semibold text-[13px] px-5 py-1.5 rounded-xl hover:bg-[#eaf2fc] transition-colors shadow-xs"
                 >
                   Choose file
                 </button>
               </>
             )}
 
-            <div className="absolute left-3.5 bottom-2.5 flex items-center gap-1.5 text-[11.5px] font-medium text-[#52617D]">
+            <div className="absolute left-3.5 bottom-2.5 flex items-center gap-1.5 text-[11.5px] font-medium text-[#333333]">
               <span className="text-[#22A06B]">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
@@ -418,31 +418,31 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
           onClick={() => setSelectedMethod('chat')}
           className={`rounded-2xl p-6 sm:p-7 flex flex-col justify-between transition-all cursor-pointer ${
             selectedMethod === 'chat'
-              ? 'bg-[#FDFBFF] border-2 border-[#5B36E9] shadow-[0_6px_24px_rgba(91,54,233,0.08)] ring-1 ring-[#5B36E9]/20'
-              : 'bg-white border border-[#D8DFEB] hover:border-[#B7A7FF] shadow-xs'
+              ? 'bg-[#fbfdff] border-2 border-[#0066cc] shadow-[0_6px_24px_rgba(0,102,204,0.08)] ring-1 ring-[#0066cc]/20'
+              : 'bg-white border border-[#e0e0e0] hover:border-[#abd2fb] shadow-xs'
           }`}
         >
           <div>
-            <div className="w-[74px] h-[74px] rounded-2xl bg-[#EEE9FF] flex items-center justify-center mb-4">
+            <div className="w-[74px] h-[74px] rounded-2xl bg-[#dbeafc] flex items-center justify-center mb-4">
               <svg
                 width="34"
                 height="34"
                 viewBox="0 0 24 24"
                 fill="none"
-                stroke="#5B36E9"
+                stroke="#0066cc"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               >
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                <path d="M13 8l1 2 2 1-2 1-1 2-1-2-2-1 2-1z" fill="#5B36E9" />
+                <path d="M13 8l1 2 2 1-2 1-1 2-1-2-2-1 2-1z" fill="#0066cc" />
               </svg>
             </div>
 
-            <h2 className="text-[22px] font-bold text-[#0E1B38] mb-1">
+            <h2 className="text-[22px] font-bold text-[#1d1d1f] mb-1">
               Tell PathFinder in a chat
             </h2>
-            <p className="text-[14.5px] text-[#52617D] leading-snug mb-4">
+            <p className="text-[14.5px] text-[#333333] leading-snug mb-4">
               Describe your background naturally. We’ll build your learner profile together.
             </p>
           </div>
@@ -454,7 +454,7 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
                 className={`flex items-start gap-2 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 {msg.sender === 'ai' && (
-                  <div className="w-6 h-6 rounded-full bg-[#EEE9FF] text-[#5B36E9] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-xs">
+                  <div className="w-6 h-6 rounded-full bg-[#dbeafc] text-[#0066cc] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-xs">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M12 2L14.4 7.6L20 10L14.4 12.4L12 18L9.6 12.4L4 10L9.6 7.6L12 2Z" />
                     </svg>
@@ -463,14 +463,14 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
                 <div
                   className={`text-[13.5px] leading-relaxed rounded-2xl px-3.5 py-2 max-w-[88%] ${
                     msg.sender === 'user'
-                      ? 'bg-[#5B36E9] text-white rounded-tr-sm shadow-xs'
-                      : 'bg-[#F5F1FF] text-[#0E1B38] rounded-tl-sm border border-[#E9E3FE]'
+                      ? 'bg-[#0066cc] text-white rounded-tr-sm shadow-xs'
+                      : 'bg-[#eaf2fc] text-[#1d1d1f] rounded-tl-sm border border-[#e3f0fe]'
                   }`}
                 >
                   {msg.text}
                 </div>
                 {msg.sender === 'user' && (
-                  <div className="w-6 h-6 rounded-full bg-[#E2E8F0] text-[#74819A] flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <div className="w-6 h-6 rounded-full bg-[#e9e9e9] text-[#7a7a7a] flex items-center justify-center flex-shrink-0 mt-0.5">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
                       <circle cx="12" cy="7" r="4" />
@@ -484,18 +484,18 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
           <form
             onSubmit={handleSendChatMessage}
             onClick={(e) => e.stopPropagation()}
-            className="bg-[#FAFBFC] border border-[#D8DFEB] rounded-xl px-3 py-1.5 flex items-center justify-between gap-2 mt-4 focus-within:border-[#5B36E9] focus-within:bg-white transition-all shadow-xs"
+            className="bg-[#fbfbfb] border border-[#e0e0e0] rounded-xl px-3 py-1.5 flex items-center justify-between gap-2 mt-4 focus-within:border-[#0066cc] focus-within:bg-white transition-all shadow-xs"
           >
             <input
               type="text"
               value={chatStory}
               onChange={(e) => setChatStory(e.target.value)}
               placeholder="Type your story here..."
-              className="w-full bg-transparent text-[14px] text-[#0E1B38] placeholder-[#74819A] outline-none px-1"
+              className="w-full bg-transparent text-[14px] text-[#1d1d1f] placeholder-[#7a7a7a] outline-none px-1"
             />
             <button
               type="submit"
-              className="w-7 h-7 rounded-full bg-[#5B36E9] hover:bg-[#4826C9] text-white flex items-center justify-center cursor-pointer transition-colors shadow-sm flex-shrink-0"
+              className="w-7 h-7 rounded-full bg-[#0066cc] hover:bg-[#004fa3] text-white flex items-center justify-center cursor-pointer transition-colors shadow-sm flex-shrink-0"
               aria-label="Send message"
             >
               <svg
@@ -518,14 +518,14 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
 
       {/* Reassurance text */}
       <div className="text-center py-1">
-        <p className="text-[14.5px] text-[#52617D]">
+        <p className="text-[14.5px] text-[#333333]">
           You can{' '}
           <button
             type="button"
             onClick={() =>
               setSelectedMethod((prev) => (prev === 'resume' ? 'chat' : 'resume'))
             }
-            className="text-[#5B36E9] font-semibold hover:underline cursor-pointer focus:outline-none"
+            className="text-[#0066cc] font-semibold hover:underline cursor-pointer focus:outline-none"
           >
             add the other
           </button>{' '}
@@ -534,18 +534,18 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
       </div>
 
       {/* Bottom Profile-Understanding Panel */}
-      <div className="mx-6 sm:mx-10 bg-[#FAF9FF]/90 border border-[#E3DDFE] rounded-2xl p-4 sm:p-5 my-3">
+      <div className="mx-6 sm:mx-10 bg-[#f9fcff]/90 border border-[#ddedfe] rounded-2xl p-4 sm:p-5 my-3">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-center">
           
           {/* Left Column: 5 Compact Chips */}
           <div className="lg:col-span-7 xl:col-span-8">
-            <h3 className="font-bold text-[#0E1B38] text-[14.5px] mb-2.5">
+            <h3 className="font-bold text-[#1d1d1f] text-[14.5px] mb-2.5">
               What PathFinder will understand
             </h3>
             
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
-              <div className="h-[42px] bg-white border border-[#E6EAF2] rounded-xl px-2.5 flex items-center gap-1.5 text-[#0E1B38] text-[12.5px] font-semibold shadow-xs hover:border-[#5B36E9] transition-all">
-                <span className="text-[#5B36E9] flex-shrink-0">
+              <div className="h-[42px] bg-white border border-[#f0f0f0] rounded-xl px-2.5 flex items-center gap-1.5 text-[#1d1d1f] text-[12.5px] font-semibold shadow-xs hover:border-[#0066cc] transition-all">
+                <span className="text-[#0066cc] flex-shrink-0">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-2.04z" />
                     <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-2.04z" />
@@ -554,8 +554,8 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
                 <span className="truncate">Skills</span>
               </div>
 
-              <div className="h-[42px] bg-white border border-[#E6EAF2] rounded-xl px-2.5 flex items-center gap-1.5 text-[#0E1B38] text-[12.5px] font-semibold shadow-xs hover:border-[#5B36E9] transition-all">
-                <span className="text-[#5B36E9] flex-shrink-0">
+              <div className="h-[42px] bg-white border border-[#f0f0f0] rounded-xl px-2.5 flex items-center gap-1.5 text-[#1d1d1f] text-[12.5px] font-semibold shadow-xs hover:border-[#0066cc] transition-all">
+                <span className="text-[#0066cc] flex-shrink-0">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
                     <path d="M6 12v5c3 3 9 3 12 0v-5" />
@@ -564,8 +564,8 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
                 <span className="truncate">Education</span>
               </div>
 
-              <div className="h-[42px] bg-white border border-[#E6EAF2] rounded-xl px-2.5 flex items-center gap-1.5 text-[#0E1B38] text-[12.5px] font-semibold shadow-xs hover:border-[#5B36E9] transition-all">
-                <span className="text-[#5B36E9] flex-shrink-0">
+              <div className="h-[42px] bg-white border border-[#f0f0f0] rounded-xl px-2.5 flex items-center gap-1.5 text-[#1d1d1f] text-[12.5px] font-semibold shadow-xs hover:border-[#0066cc] transition-all">
+                <span className="text-[#0066cc] flex-shrink-0">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
                   </svg>
@@ -573,8 +573,8 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
                 <span className="truncate">Projects</span>
               </div>
 
-              <div className="h-[42px] bg-white border border-[#E6EAF2] rounded-xl px-2.5 flex items-center gap-1.5 text-[#0E1B38] text-[12.5px] font-semibold shadow-xs hover:border-[#5B36E9] transition-all">
-                <span className="text-[#5B36E9] flex-shrink-0">
+              <div className="h-[42px] bg-white border border-[#f0f0f0] rounded-xl px-2.5 flex items-center gap-1.5 text-[#1d1d1f] text-[12.5px] font-semibold shadow-xs hover:border-[#0066cc] transition-all">
+                <span className="text-[#0066cc] flex-shrink-0">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
                     <polyline points="17 6 23 6 23 12" />
@@ -583,8 +583,8 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
                 <span className="truncate">Confidence</span>
               </div>
 
-              <div className="h-[42px] bg-white border border-[#E6EAF2] rounded-xl px-2.5 flex items-center gap-1.5 text-[#0E1B38] text-[12.5px] font-semibold shadow-xs hover:border-[#5B36E9] transition-all">
-                <span className="text-[#5B36E9] flex-shrink-0">
+              <div className="h-[42px] bg-white border border-[#f0f0f0] rounded-xl px-2.5 flex items-center gap-1.5 text-[#1d1d1f] text-[12.5px] font-semibold shadow-xs hover:border-[#0066cc] transition-all">
+                <span className="text-[#0066cc] flex-shrink-0">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="12" cy="12" r="10" />
                     <circle cx="12" cy="12" r="6" />
@@ -597,9 +597,9 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
           </div>
 
           {/* Right Column: AI Profile Draft */}
-          <div className="lg:col-span-5 xl:col-span-4 lg:border-l lg:border-[#E6EAF2] lg:pl-5">
-            <div className="flex items-center gap-1.5 text-[#0E1B38] font-bold text-[14.5px]">
-              <span className="text-[#5B36E9]">
+          <div className="lg:col-span-5 xl:col-span-4 lg:border-l lg:border-[#f0f0f0] lg:pl-5">
+            <div className="flex items-center gap-1.5 text-[#1d1d1f] font-bold text-[14.5px]">
+              <span className="text-[#0066cc]">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 2L14.4 7.6L20 10L14.4 12.4L12 18L9.6 12.4L4 10L9.6 7.6L12 2Z" />
                 </svg>
@@ -607,7 +607,7 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
               <span>AI Profile Draft</span>
             </div>
 
-            <p className="text-[13px] text-[#52617D] leading-relaxed mt-1">
+            <p className="text-[13px] text-[#333333] leading-relaxed mt-1">
               {profileDraft?.summary
                 ? `"${profileDraft.summary}"`
                 : 'Upload a resume or start describing your background — your real profile draft will appear here.'}
@@ -620,7 +620,7 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
                 setEditFormData({ ...EMPTY_DRAFT, ...profileDraft })
                 setIsEditingDraft(true)
               }}
-              className="mt-2 text-[#5B36E9] text-[12.5px] font-bold inline-flex items-center gap-1.5 hover:underline cursor-pointer focus:outline-none disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:no-underline"
+              className="mt-2 text-[#0066cc] text-[12.5px] font-bold inline-flex items-center gap-1.5 hover:underline cursor-pointer focus:outline-none disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:no-underline"
             >
               <svg
                 width="13"
@@ -651,8 +651,8 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
       )}
 
       {/* Footer Controls */}
-      <div className="h-[76px] px-6 sm:px-10 border-t border-[#E6EAF2] flex items-center justify-between">
-        <div className="flex items-center gap-2 text-[13.5px] font-medium text-[#52617D]">
+      <div className="h-[76px] px-6 sm:px-10 border-t border-[#f0f0f0] flex items-center justify-between">
+        <div className="flex items-center gap-2 text-[13.5px] font-medium text-[#333333]">
           <span className="text-[#22A06B]">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
@@ -666,7 +666,7 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
           type="button"
           onClick={handleContinue}
           disabled={uploading}
-          className="w-[160px] h-[48px] bg-[#5B36E9] hover:bg-[#4826C9] active:scale-[0.99] text-white font-bold rounded-xl shadow-[0_4px_14px_rgba(91,54,233,0.35)] transition-all flex items-center justify-center text-[15px] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-[160px] h-[48px] bg-[#0066cc] hover:bg-[#004fa3] active:scale-[0.99] text-white font-bold rounded-xl shadow-[0_4px_14px_rgba(0,102,204,0.35)] transition-all flex items-center justify-center text-[15px] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {uploading ? (
             <span className="flex items-center gap-2">
@@ -685,19 +685,19 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
       {/* Edit Modal */}
       {isEditingDraft && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-[#D8DFEB] animate-in fade-in zoom-in duration-150">
-            <div className="flex items-center justify-between pb-4 border-b border-[#E6EAF2]">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-[#e0e0e0] animate-in fade-in zoom-in duration-150">
+            <div className="flex items-center justify-between pb-4 border-b border-[#f0f0f0]">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-[#EEE9FF] text-[#5B36E9] flex items-center justify-center">
+                <div className="w-8 h-8 rounded-lg bg-[#dbeafc] text-[#0066cc] flex items-center justify-center">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 2L14.4 7.6L20 10L14.4 12.4L12 18L9.6 12.4L4 10L9.6 7.6L12 2Z" />
                   </svg>
                 </div>
-                <h3 className="text-lg font-bold text-[#0E1B38]">Edit AI Profile Draft</h3>
+                <h3 className="text-lg font-bold text-[#1d1d1f]">Edit AI Profile Draft</h3>
               </div>
               <button
                 onClick={() => setIsEditingDraft(false)}
-                className="text-[#74819A] hover:text-[#0E1B38] text-xl font-bold p-1"
+                className="text-[#7a7a7a] hover:text-[#1d1d1f] text-xl font-bold p-1"
               >
                 ✕
               </button>
@@ -705,66 +705,66 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
 
             <div className="space-y-4 py-4 text-left">
               <div>
-                <label className="block text-xs font-bold text-[#0E1B38] uppercase tracking-wider mb-1">
+                <label className="block text-xs font-bold text-[#1d1d1f] uppercase tracking-wider mb-1">
                   Skills & Tools
                 </label>
                 <input
                   type="text"
                   value={editFormData.skills}
                   onChange={(e) => setEditFormData({ ...editFormData, skills: e.target.value })}
-                  className="w-full bg-[#FAFBFC] border border-[#D8DFEB] rounded-xl px-3.5 py-2.5 text-sm text-[#0E1B38] focus:border-[#5B36E9] outline-none"
+                  className="w-full bg-[#fbfbfb] border border-[#e0e0e0] rounded-xl px-3.5 py-2.5 text-sm text-[#1d1d1f] focus:border-[#0066cc] outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#0E1B38] uppercase tracking-wider mb-1">
+                <label className="block text-xs font-bold text-[#1d1d1f] uppercase tracking-wider mb-1">
                   Education & Background
                 </label>
                 <input
                   type="text"
                   value={editFormData.education}
                   onChange={(e) => setEditFormData({ ...editFormData, education: e.target.value })}
-                  className="w-full bg-[#FAFBFC] border border-[#D8DFEB] rounded-xl px-3.5 py-2.5 text-sm text-[#0E1B38] focus:border-[#5B36E9] outline-none"
+                  className="w-full bg-[#fbfbfb] border border-[#e0e0e0] rounded-xl px-3.5 py-2.5 text-sm text-[#1d1d1f] focus:border-[#0066cc] outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#0E1B38] uppercase tracking-wider mb-1">
+                <label className="block text-xs font-bold text-[#1d1d1f] uppercase tracking-wider mb-1">
                   Projects Mentioned
                 </label>
                 <input
                   type="text"
                   value={editFormData.projects}
                   onChange={(e) => setEditFormData({ ...editFormData, projects: e.target.value })}
-                  className="w-full bg-[#FAFBFC] border border-[#D8DFEB] rounded-xl px-3.5 py-2.5 text-sm text-[#0E1B38] focus:border-[#5B36E9] outline-none"
+                  className="w-full bg-[#fbfbfb] border border-[#e0e0e0] rounded-xl px-3.5 py-2.5 text-sm text-[#1d1d1f] focus:border-[#0066cc] outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#0E1B38] uppercase tracking-wider mb-1">
+                <label className="block text-xs font-bold text-[#1d1d1f] uppercase tracking-wider mb-1">
                   Career Goal & Target
                 </label>
                 <input
                   type="text"
                   value={editFormData.goal}
                   onChange={(e) => setEditFormData({ ...editFormData, goal: e.target.value })}
-                  className="w-full bg-[#FAFBFC] border border-[#D8DFEB] rounded-xl px-3.5 py-2.5 text-sm text-[#0E1B38] focus:border-[#5B36E9] outline-none"
+                  className="w-full bg-[#fbfbfb] border border-[#e0e0e0] rounded-xl px-3.5 py-2.5 text-sm text-[#1d1d1f] focus:border-[#0066cc] outline-none"
                 />
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#E6EAF2]">
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#f0f0f0]">
               <button
                 type="button"
                 onClick={() => setIsEditingDraft(false)}
-                className="px-4 py-2 text-sm font-semibold text-[#52617D] hover:text-[#0E1B38]"
+                className="px-4 py-2 text-sm font-semibold text-[#333333] hover:text-[#1d1d1f]"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleSaveDraft}
-                className="px-5 py-2 bg-[#5B36E9] hover:bg-[#4826C9] text-white text-sm font-bold rounded-xl shadow-sm"
+                className="px-5 py-2 bg-[#0066cc] hover:bg-[#004fa3] text-white text-sm font-bold rounded-xl shadow-sm"
               >
                 Save Draft
               </button>

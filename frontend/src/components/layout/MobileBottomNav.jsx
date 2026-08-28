@@ -2,7 +2,7 @@ import React from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { ICONS, NAV, activeKeyFor } from '../ui/AppSidebar'
 
-const V = '#5B36E9'
+const V = '#0066cc'
 
 /**
  * Mobile-only bottom navigation (<768px) — replaces the sidebar. Reuses the
@@ -25,7 +25,7 @@ export default function MobileBottomNav() {
             aria-current={on ? 'page' : undefined}
             onClick={() => navigate(item.path)}
             className="flex-1 flex flex-col items-center justify-center gap-0.5 border-none bg-transparent cursor-pointer"
-            style={{ color: on ? V : '#74819A' }}
+            style={{ color: on ? V : '#7a7a7a' }}
           >
             {ICONS[item.key]}
             <span style={{ fontSize: 10, fontWeight: on ? 700 : 500 }}>{item.label.replace('My roadmap', 'Roadmap').replace('Skill insights', 'Insights').replace('AI coach', 'Coach')}</span>
