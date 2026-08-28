@@ -57,15 +57,25 @@ const STYLES = `
 .pfa .field{ margin-bottom:20px; }
 .pfa .field > label{ display:block; font-size:16px; font-weight:600; margin-bottom:9px; }
 .pfa .input{ position:relative; display:flex; align-items:stretch; border:1.5px solid var(--input-bd);
-  border-radius:12px; background:#fff; min-height:58px; transition:border-color .15s,box-shadow .15s; }
+  border-radius:12px; background:#fff; min-height:58px; transition:border-color .15s,box-shadow .15s; overflow:hidden; }
 .pfa .input:focus-within{ border-color:var(--violet); box-shadow:0 0 0 4px rgba(91,54,233,.18); }
 /* Icon is a decorative overlay so it never steals click/focus from the field. */
 .pfa .input .lead{ position:absolute; left:14px; top:0; bottom:0; color:var(--muted); display:grid; place-items:center; pointer-events:none; z-index:1; }
 /* The input itself is the full interactive surface — clicking anywhere focuses it. */
-.pfa .input input{ border:none; outline:none; background:none; flex:1; width:100%; min-width:0; align-self:stretch;
-  padding:0 16px 0 44px; font:400 16.5px/1.2 "Inter",sans-serif; color:var(--navy); }
+.pfa .input input{ border:none; outline:none; background:transparent; flex:1; width:100%; min-width:0; align-self:stretch;
+  padding:0 16px 0 44px; font:400 16.5px/1.2 "Inter",sans-serif; color:var(--navy); border-radius:10px; }
 .pfa .input input::placeholder{ color:var(--muted); }
 .pfa .input:has(.toggle) input{ padding-right:50px; }
+.pfa .input input:-webkit-autofill,
+.pfa .input input:-webkit-autofill:hover, 
+.pfa .input input:-webkit-autofill:focus, 
+.pfa .input input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+  -webkit-text-fill-color: var(--navy) !important;
+  caret-color: var(--navy) !important;
+  border-radius: 10px !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
 .pfa .input .toggle{ position:absolute; right:8px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:var(--muted); padding:8px;
   display:grid; place-items:center; border-radius:8px; z-index:1; }
 .pfa .input .toggle:hover{ color:var(--slate); }

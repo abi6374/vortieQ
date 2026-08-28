@@ -27,6 +27,19 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Global Clean Autofill: prevents default browser blue rectangle from clipping or overlapping */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px #FFFFFF inset !important;
+  -webkit-text-fill-color: #0E1B38 !important;
+  caret-color: #0E1B38 !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
 /* ============================================================================
    PathFinder App Shell — ONE consistent shell for every authenticated page
    (Dashboard/Roadmap, Progress, Skill Insights, Resources, AI Coach).
