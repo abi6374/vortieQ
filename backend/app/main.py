@@ -40,9 +40,12 @@ async def _log_unhandled(request: Request, exc: Exception):
         f"  exc: {type(exc).__name__}: {exc}\n{tb}",
         flush=True,
     )
+    # Full exception type/message/traceback go to server logs only (above) -
+    # the client never sees raw exception internals (DB errors, stack frames,
+    # etc.), just a generic message it can show the user.
     return JSONResponse(
         status_code=500,
-        content={"detail": f"Internal error: {type(exc).__name__}: {exc}"},
+        content={"detail": "Internal server error. Please try again."},
     )
 
 

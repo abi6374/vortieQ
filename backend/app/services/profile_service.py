@@ -73,6 +73,14 @@ def upsert_profile(user_id: str, data: dict) -> dict:
         "interests": data.get("interests", []),
         "weekly_hours": data.get("weekly_hours", 10),
     }
+    # Only present when the onboarding wizard's resume/assessment steps fed
+    # them in via merge_topic_ratings() / the request body — don't stomp an
+    # existing value with an empty one on a plain goal_text-only update.
+    if "topic_ratings" in data:
+        payload["topic_ratings"] = data["topic_ratings"]
+    if "detected_years_experience" in data:
+        payload["detected_years_experience"] = data["detected_years_experience"]
+
     result = supabase_client.table("profiles").upsert(payload).execute()
     return result.data[0] if result.data else payload
 
