@@ -17,10 +17,51 @@ import UserProfileDropdown from '../ui/UserProfileDropdown'
 const LEVEL_TO_NUM = { basic: 35, intermediate: 60, advanced: 82, expert: 95 }
 const HOURS_PER_POINT = 1.2
 
+// Covers all 4 domains in the real course dataset (Data Science/ML, Web Dev,
+// Cloud/DevOps, Product/Business). Keys are natural-language skill names,
+// matching what the resume-extraction prompt actually outputs (e.g.
+// "Machine Learning", not a "machine-learning" slug) since these are
+// matched against topicRatings' real t.name values, not the course
+// dataset's internal tag vocabulary. "custom" has no req thresholds -
+// there's nothing real to benchmark an arbitrary typed-in role against, so
+// its meter degrades to a simpler honest state instead of inventing
+// requirement numbers.
 const ROLES = {
-  aiml: { name: 'AIML Engineer',    req: { python: 80, statistics: 70, 'machine learning': 75 } },
-  da:   { name: 'Data Analyst',     req: { python: 55, sql: 70, statistics: 70 } },
-  py:   { name: 'Python Developer', req: { python: 88, git: 55, 'data structures': 60 } },
+  aiml:    { name: 'AIML Engineer',        req: { python: 80, statistics: 70, 'machine learning': 75 } },
+  da:      { name: 'Data Analyst',         req: { python: 55, sql: 70, statistics: 70 } },
+  py:      { name: 'Python Developer',     req: { python: 88, git: 55, databases: 60 } },
+  web:     { name: 'Web Developer',        req: { javascript: 75, react: 65, html: 60 } },
+  cloud:   { name: 'Cloud/DevOps Engineer', req: { linux: 60, docker: 70, aws: 65 } },
+  product: { name: 'Product Manager',      req: { 'product management': 70, sql: 55, 'business intelligence': 60 } },
+  custom:  { name: 'Custom role', req: null },
+}
+const SELECTABLE_ROLE_IDS = ['aiml', 'da', 'py', 'web', 'cloud', 'product']
+
+// Auto-suggest the best-matching role from the learner's real detected
+// skills (topicRatings), rather than always defaulting to the same one.
+// Falls back to keyword-matching the learner's own goal text when there
+// are no resume skills yet (the chat-only lane), and only defaults to
+// 'aiml' when neither signal is available.
+function suggestRole(topicRatings, goalText) {
+  if (topicRatings && topicRatings.length) {
+    const current = {}
+    topicRatings.forEach((t) => { current[(t.name || '').toLowerCase()] = LEVEL_TO_NUM[(t.level || 'basic').toLowerCase()] || 35 })
+    let best = null, bestScore = -1
+    SELECTABLE_ROLE_IDS.forEach((id) => {
+      const req = ROLES[id].req
+      const keys = Object.keys(req)
+      const score = keys.reduce((sum, k) => sum + Math.min((current[k] || 0) / req[k], 1), 0) / keys.length
+      if (score > bestScore) { bestScore = score; best = id }
+    })
+    if (best && bestScore > 0) return best
+  }
+  const g = (goalText || '').toLowerCase()
+  if (/react|frontend|web dev|javascript|html|css/.test(g)) return 'web'
+  if (/devops|cloud|aws|docker|kubernetes|infrastructure/.test(g)) return 'cloud'
+  if (/product manager|product management|business analy|agile|scrum/.test(g)) return 'product'
+  if (/data analy/.test(g)) return 'da'
+  if (/python developer|backend developer/.test(g)) return 'py'
+  return 'aiml'
 }
 
 const cap = (s) => s.replace(/\b\w/g, (c) => c.toUpperCase())
@@ -44,6 +85,12 @@ const STYLES = `
 .gc textarea{ width:100%; resize:none; border:1.5px solid var(--input-bd); border-radius:12px; padding:16px; font-family:inherit; font-size:16px; line-height:1.5; color:var(--navy); min-height:104px; background:#fff; }
 .gc textarea:focus{ outline:none; border-color:var(--violet); box-shadow:0 0 0 3px rgba(91,54,233,.22); }
 .gc .roles{ display:grid; grid-template-columns:repeat(3,1fr); gap:11px; }
+.gc .role-custom{ border:1.5px dashed var(--card-bd); border-radius:12px; padding:14px 12px; cursor:pointer; display:flex; flex-direction:column; gap:9px; text-align:left; font:inherit; color:var(--navy); transition:border-color .15s,background .15s; background:#fff; }
+.gc .role-custom:hover{ border-color:#C0B6F0; }
+.gc .role-custom.sel{ border:2px solid var(--violet); padding:13px 11px; background:var(--lavender); border-style:solid; }
+.gc .role-suggested{ display:inline-flex; align-items:center; gap:5px; font-size:11.5px; font-weight:700; color:var(--violet); margin-top:8px; }
+.gc .custom-input{ width:100%; margin-top:9px; border:1.5px solid var(--input-bd); border-radius:10px; padding:10px 12px; font-size:14px; color:var(--navy); }
+.gc .custom-input:focus{ outline:none; border-color:var(--violet); box-shadow:0 0 0 3px rgba(91,54,233,.22); }
 .gc .role{ position:relative; border:1px solid var(--card-bd); border-radius:12px; background:#fff; padding:14px 12px; cursor:pointer; display:flex; flex-direction:column; gap:9px; text-align:left; font:inherit; color:var(--navy); transition:border-color .15s,background .15s; }
 .gc .role:hover{ border-color:#C0B6F0; }
 .gc .role.sel{ border:2px solid var(--violet); padding:13px 11px; background:var(--lavender); }
@@ -108,6 +155,7 @@ const STYLES = `
 .gc .btn-plan{ flex:none; display:inline-flex; align-items:center; justify-content:center; gap:8px; min-width:240px; height:58px; border-radius:12px; border:none; cursor:pointer; color:#fff; font-family:"Manrope",sans-serif; font-weight:700; font-size:17px; background:linear-gradient(180deg,var(--violet-2),var(--violet)); box-shadow:0 8px 20px rgba(91,54,233,.30); transition:background .15s,box-shadow .15s,transform .1s; }
 .gc .btn-plan:hover{ background:linear-gradient(180deg,var(--violet),var(--violet-dark)); box-shadow:0 10px 26px rgba(91,54,233,.38); }
 .gc .btn-plan:active{ transform:translateY(1px); }
+.gc .btn-plan:disabled{ opacity:.5; cursor:not-allowed; box-shadow:none; }
 .gc .back{ background:none; border:none; color:var(--muted); font:inherit; font-size:14.5px; cursor:pointer; margin-top:14px; }
 .gc .back:hover{ color:var(--slate); }
 @media (max-width:1000px){ .gc .cols{ grid-template-columns:1fr; } .gc .preview-top{ flex-direction:column; align-items:stretch; } .gc .btn-plan{ width:100%; } }
@@ -127,11 +175,19 @@ function defaultTargetMonth() {
 }
 
 export default function GoalCompass({ topicRatings = [], detectedYears = 0, initialGoal = '', onCreate, onBack }) {
-  const [role, setRole] = useState('aiml')
-  const [goal, setGoal] = useState(initialGoal || 'I want an AIML Engineer internship within 6 months.')
+  // Auto-suggested from the learner's real resume skills (or goal-text
+  // keywords when there's no resume yet) instead of always defaulting to
+  // the same role regardless of who they actually are.
+  const [role, setRole] = useState(() => suggestRole(topicRatings, initialGoal))
+  const [customRoleName, setCustomRoleName] = useState('')
+  const suggestedRoleName = ROLES[suggestRole(topicRatings, initialGoal)].name
+  const [goal, setGoal] = useState(initialGoal || `I want to become a ${suggestedRoleName} within 6 months.`)
   const [weekly, setWeekly] = useState(8)
   const [target, setTarget] = useState(defaultTargetMonth())
   const [priority, setPriority] = useState('intern')
+
+  const isCustomRole = role === 'custom'
+  const effectiveRoleName = isCustomRole ? (customRoleName.trim() || 'your custom role') : ROLES[role].name
 
   // current skills from the resume/assess step
   const current = useMemo(() => {
@@ -142,6 +198,18 @@ export default function GoalCompass({ topicRatings = [], detectedYears = 0, init
 
   const calc = useMemo(() => {
     const req = ROLES[role].req
+    // Custom roles have no stored requirement thresholds to benchmark
+    // against - nothing real to show a gauge/gap breakdown for, so this
+    // degrades to an honest "we can't measure readiness yet" state instead
+    // of inventing requirement numbers for an arbitrary typed-in role.
+    if (!req) {
+      return {
+        readiness: null, weeksNeeded: null, state: 'ok',
+        msg: `We'll build your path around "${effectiveRoleName}" using your goal description.`,
+        bars: [],
+        insight: `Readiness scoring isn't available for a custom role yet — describe your goal below and PathFinder will still tailor real courses to it.`,
+      }
+    }
     const skills = Object.keys(req)
     let attain = 0, gap = 0
     skills.forEach((s) => {
@@ -170,7 +238,7 @@ export default function GoalCompass({ topicRatings = [], detectedYears = 0, init
       : `You already meet the target levels for ${ROLES[role].name}. Polish with a portfolio project.`
 
     return { readiness, weeksNeeded, state, msg, bars, insight }
-  }, [role, weekly, target, current])
+  }, [role, weekly, target, current, effectiveRoleName])
 
   const RoleBtn = ({ id, icon }) => (
     <button type="button" className={`role ${role === id ? 'sel' : ''}`} onClick={() => setRole(id)}>
@@ -209,8 +277,38 @@ export default function GoalCompass({ topicRatings = [], detectedYears = 0, init
               <RoleBtn id="aiml" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="7" width="18" height="13" rx="2" /><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>} />
               <RoleBtn id="da" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18" /><path d="M7 15v-4" /><path d="M12 15V8" /><path d="M17 15v-6" /></svg>} />
               <RoleBtn id="py" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="16" rx="2" /><path d="m8 10-2 2 2 2M13 10l2 2-2 2" /></svg>} />
+              <RoleBtn id="web" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a13 13 0 0 1 0 18 13 13 0 0 1 0-18z" /></svg>} />
+              <RoleBtn id="cloud" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.5 19a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.6 1.5A4 4 0 0 0 6.5 19z" /></svg>} />
+              <RoleBtn id="product" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18" /><circle cx="9" cy="14" r="2" /><circle cx="15" cy="9" r="2" /><path d="M9 12 15 9" /></svg>} />
+              <button
+                type="button"
+                className={`role-custom ${isCustomRole ? 'sel' : ''}`}
+                onClick={() => setRole('custom')}
+              >
+                <span className="role-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg></span>
+                <span className="role-name">Custom role</span>
+              </button>
             </div>
-            {topicRatings.length > 0 && (
+
+            {isCustomRole && (
+              <input
+                type="text"
+                className="custom-input"
+                placeholder="Type your target role, e.g. Backend Engineer, UX Designer..."
+                value={customRoleName}
+                onChange={(e) => setCustomRoleName(e.target.value)}
+                autoFocus
+              />
+            )}
+
+            {!isCustomRole && role === suggestRole(topicRatings, initialGoal) && (
+              <p className="role-suggested">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+                Suggested based on {topicRatings.length > 0 ? 'your resume' : 'your goal'}
+              </p>
+            )}
+
+            {topicRatings.length > 0 && !isCustomRole && (
               <p className="insight"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M6 6l2 2M16 16l2 2M18 6l-2 2M8 16l-2 2" /></svg> Readiness is calculated from the {topicRatings.length} skill{topicRatings.length === 1 ? '' : 's'} in your resume.</p>
             )}
           </div>
@@ -233,39 +331,50 @@ export default function GoalCompass({ topicRatings = [], detectedYears = 0, init
         <div className="card meter">
           <div className="meter-h"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><polygon points="16 8 10.5 10.5 8 16 13.5 13.5" fill="currentColor" stroke="none" /></svg><h2>Ambition–Readiness Meter</h2></div>
 
-          <div className="gauge-row">
-            <div className="gauge">
-              <svg viewBox="0 0 220 124" aria-label={`Readiness ${calc.readiness}%`}>
-                <path d="M20 112 A 90 90 0 0 1 200 112" fill="none" stroke="#E8EAF4" strokeWidth="16" strokeLinecap="round" />
-                <path id="gcfill" d="M20 112 A 90 90 0 0 1 200 112" fill="none" stroke="url(#gcgv)" strokeWidth="16" strokeLinecap="round" pathLength="100" strokeDasharray={`${calc.readiness} 100`} />
-                <defs><linearGradient id="gcgv" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#8E74F2" /><stop offset="1" stopColor="#5B36E9" /></linearGradient></defs>
-              </svg>
-              <span className="gauge-star" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#5B36E9" strokeWidth="2" strokeLinejoin="round"><polygon points="12 3 14 10 21 12 14 14 12 21 10 14 3 12 10 10" fill="#EEE9FF" /></svg></span>
+          {calc.readiness === null ? (
+            // Custom role: no stored requirement thresholds to gauge against,
+            // so show an honest placeholder instead of a fake percentage.
+            <div className="feasible">
+              <span className="fc" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 8v5M12 16v.5" /></svg></span>
+              <span>{calc.msg}</span>
             </div>
-            <div style={{ flex: 1 }}>
-              <div className="r1"><div className="big">{calc.readiness}%</div><div className="r-label">Current readiness</div></div>
-              <div className="r-div" />
-              <div className="r2"><div className="big">{calc.weeksNeeded} {calc.weeksNeeded === 1 ? 'week' : 'weeks'}</div><div className="r-label">estimated path</div></div>
-            </div>
-          </div>
-
-          <div className={`feasible ${calc.state === 'warn' ? 'warn' : calc.state === 'bad' ? 'bad' : ''}`}>
-            <span className="fc" aria-hidden="true">
-              {calc.state === 'ok'
-                ? <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
-                : <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 8v5M12 16v.5" /></svg>}
-            </span>
-            <span>{calc.msg}</span>
-          </div>
-
-          <div className="bars">
-            {calc.bars.map((b) => (
-              <div key={b.name}>
-                <div className="bar-top"><span>{b.name}</span><span className="pct">{b.cur}%</span></div>
-                <div className="bar-track"><div className="bar-fill" style={{ width: b.cur + '%' }} /><div className="bar-target" style={{ left: b.req + '%' }} title={`Target ${b.req}%`} /></div>
+          ) : (
+            <>
+              <div className="gauge-row">
+                <div className="gauge">
+                  <svg viewBox="0 0 220 124" aria-label={`Readiness ${calc.readiness}%`}>
+                    <path d="M20 112 A 90 90 0 0 1 200 112" fill="none" stroke="#E8EAF4" strokeWidth="16" strokeLinecap="round" />
+                    <path id="gcfill" d="M20 112 A 90 90 0 0 1 200 112" fill="none" stroke="url(#gcgv)" strokeWidth="16" strokeLinecap="round" pathLength="100" strokeDasharray={`${calc.readiness} 100`} />
+                    <defs><linearGradient id="gcgv" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#8E74F2" /><stop offset="1" stopColor="#5B36E9" /></linearGradient></defs>
+                  </svg>
+                  <span className="gauge-star" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#5B36E9" strokeWidth="2" strokeLinejoin="round"><polygon points="12 3 14 10 21 12 14 14 12 21 10 14 3 12 10 10" fill="#EEE9FF" /></svg></span>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div className="r1"><div className="big">{calc.readiness}%</div><div className="r-label">Current readiness</div></div>
+                  <div className="r-div" />
+                  <div className="r2"><div className="big">{calc.weeksNeeded} {calc.weeksNeeded === 1 ? 'week' : 'weeks'}</div><div className="r-label">estimated path</div></div>
+                </div>
               </div>
-            ))}
-          </div>
+
+              <div className={`feasible ${calc.state === 'warn' ? 'warn' : calc.state === 'bad' ? 'bad' : ''}`}>
+                <span className="fc" aria-hidden="true">
+                  {calc.state === 'ok'
+                    ? <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+                    : <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 8v5M12 16v.5" /></svg>}
+                </span>
+                <span>{calc.msg}</span>
+              </div>
+
+              <div className="bars">
+                {calc.bars.map((b) => (
+                  <div key={b.name}>
+                    <div className="bar-top"><span>{b.name}</span><span className="pct">{b.cur}%</span></div>
+                    <div className="bar-track"><div className="bar-fill" style={{ width: b.cur + '%' }} /><div className="bar-target" style={{ left: b.req + '%' }} title={`Target ${b.req}%`} /></div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
 
           <div className="callout"><span className="ci" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.1h6c0-.8.4-1.6 1-2.1A7 7 0 0 0 12 2z" /></svg></span><p>{calc.insight}</p></div>
         </div>
@@ -289,7 +398,12 @@ export default function GoalCompass({ topicRatings = [], detectedYears = 0, init
               </span>
             ))}
           </div>
-          <button type="button" className="btn-plan" onClick={() => onCreate(goal.trim() || `I want to become a ${ROLES[role].name}.`, weekly)}>
+          <button
+            type="button"
+            className="btn-plan"
+            disabled={isCustomRole && !customRoleName.trim() && !goal.trim()}
+            onClick={() => onCreate(goal.trim() || `I want to become a ${effectiveRoleName}.`, weekly)}
+          >
             Create my learning plan
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
           </button>
