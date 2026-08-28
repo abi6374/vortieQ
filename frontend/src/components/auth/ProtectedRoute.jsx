@@ -3,15 +3,17 @@ import { Navigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 
 export default function ProtectedRoute({ children }) {
-  const { session, loading } = useAuth()
+  const { session, user, loading } = useAuth()
+  const isAuth = session?.user || user
+
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-slate-950 text-slate-300">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+      <div className="flex h-screen items-center justify-center bg-[#F5F7FC]">
+        <div className="animate-spin rounded-full h-9 w-9 border-3 border-[#5B36E9] border-t-transparent"></div>
       </div>
     )
   }
-  if (!session) {
+  if (!isAuth) {
     return <Navigate to="/" replace />
   }
   return children

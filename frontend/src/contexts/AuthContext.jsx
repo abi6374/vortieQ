@@ -22,19 +22,34 @@ export function AuthProvider({ children }) {
   }
 
   useEffect(() => {
+    let mounted = true
+
+    const isOAuthCallback =
+      typeof window !== 'undefined' &&
+      (window.location.hash.includes('access_token') ||
+        window.location.search.includes('code=') ||
+        window.location.search.includes('source=github'))
+
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return
       setSession(session)
       if (session?.user?.id) loadProfile(session.user.id)
-      setLoading(false)
+      if (session || !isOAuthCallback) {
+        setLoading(false)
+      }
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!mounted) return
       setSession(session)
       if (session?.user?.id) loadProfile(session.user.id)
       setLoading(false)
     })
 
-    return () => subscription.unsubscribe()
+    return () => {
+      mounted = false
+      subscription.unsubscribe()
+    }
   }, [])
 
   const signIn = async (email, password) => {
