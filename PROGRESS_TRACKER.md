@@ -1,5 +1,6 @@
 # PROGRESS TRACKER
-Last updated by: Abinivas (Member 2 — ML) at 2026-08-28 (/skills real-data rebuild COMPLETE — both /progress and /skills are now fully real, zero hardcoded datasets on either page)
+Last updated by: Abinivas (Member 2 — ML) at 2026-08-28 (GoalCompass role picker: resume-driven auto-suggest + custom role, was hardcoded to 3 roles always defaulting to AIML Engineer)
+Previously: Abinivas (Member 2 — ML) at 2026-08-28 (/skills real-data rebuild COMPLETE — both /progress and /skills are now fully real, zero hardcoded datasets on either page)
 Previously: Abinivas (Member 2 — ML) at 2026-08-28 (/progress real-data rebuild COMPLETE — all 9 datasets + hero card + 4 KPI cards + a fake fabricated modal removed)
 Previously: Abinivas (Member 2 — ML) at 2026-08-28 (real-data pass on /progress datasets #1-2 of 9, incremental — fixed a real 0-minutes logging bug along the way)
 Previously: Abinivas (Member 2 — ML) at 2026-08-28 (web search moved into the planner itself; removed 2 duplicate fake chatbots on /progress + /skills)
@@ -154,9 +155,15 @@ Was ~100% mock, and didn't even import `useRoadmap`/`useStreak` at all. Wired bo
 
 **Net result: zero remaining hardcoded datasets on `/skills` either.** Both pages from the original audit are now fully real.
 
+## Round 5 — GoalCompass role picker — COMPLETE
+Was 3 hardcoded roles all in one domain (AIML Engineer/Data Analyst/Python Developer), always defaulting to AIML Engineer no matter who the learner was. Now:
+- 6 roles spanning all 4 real course-dataset domains (added Web Developer, Cloud/DevOps Engineer, Product Manager)
+- Auto-suggests the best-matching role from the learner's real resume skills (topicRatings), scored against each role's real requirement thresholds — shown with a "Suggested based on your resume" badge. Falls back to keyword-matching the learner's own goal text when there's no resume yet, only defaulting to AIML Engineer when neither signal exists.
+- Added a free-text "Custom role" option. No stored requirement thresholds exist for an arbitrary typed-in role, so its readiness gauge honestly degrades to a simple message instead of inventing requirement numbers.
+- **Bug fixed along the way**: some requirement keys used the course dataset's hyphenated tag slugs (`machine-learning`) instead of the natural-language names the resume-extraction prompt actually outputs (`machine learning`) — would have silently never matched real topicRatings. Caught and fixed before commit.
+
 **Confirmed but NOT yet fixed — queued, roughly in priority order:**
-1. **GoalCompass target-role picker** — currently 3 hardcoded roles, all one domain (vs. the dataset's 4 domains). Per user direction: role should be inferred from the resume/profile, with an option for the learner to specify their own custom role instead of picking from a fixed list. Not yet implemented.
-2. **"AI Coach" as a real full page** — user wants the *full* feature: dedicated page (not just the floating icon), practice questions, tests, and project suggestions, tailored per individual, described as needing "2 separate bots sharing the API key." This is a substantial multi-file feature (new page, new backend prompts/endpoints/schemas), not a bugfix. Scoped but not started.
-3. **AWS Bedrock evaluation** — user wants to consider migrating the assistant's LLM calls from Groq to AWS Bedrock. Real infra change (new AWS service, model access enablement, IAM, region/model choice) on top of everything else. Not started — will need AWS console access again, similar to the EC2 setup. Confirmed by user as the intended scope.
+1. **"AI Coach" as a real full page** — user wants the *full* feature: dedicated page (not just the floating icon), practice questions, tests, and project suggestions, tailored per individual, described as needing "2 separate bots sharing the API key." This is a substantial multi-file feature (new page, new backend prompts/endpoints/schemas), not a bugfix. Scoped but not started.
+2. **AWS Bedrock evaluation** — user wants to consider migrating the assistant's LLM calls from Groq to AWS Bedrock. Real infra change (new AWS service, model access enablement, IAM, region/model choice) on top of everything else. Not started — will need AWS console access again, similar to the EC2 setup. Confirmed by user as the intended scope.
 
 ## Note for whoever picks up next: read this file's "Post-launch QA pass" and "Round 2" sections above before touching onboarding/resources/skills/progress/assistant code — several things that look broken from the outside were already fixed, and a couple that look fine were not.
