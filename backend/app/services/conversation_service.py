@@ -8,7 +8,8 @@ independent React-state chat implementations the frontend had.
 import json
 from pathlib import Path as _Path
 
-from app.config import groq_client, settings, supabase_client
+from app.config import supabase_client
+from app.llm_client import chat_completion
 
 MAX_HISTORY = 20  # messages of context sent to the LLM
 
@@ -150,16 +151,9 @@ def ask(user_id: str, question: str, page_context: str = "") -> dict:
     messages.append({"role": "user", "content": question.strip()})
 
     try:
-        response = groq_client.chat.completions.create(
-            model=settings.GROQ_MODEL,
-            messages=messages,
-            max_tokens=1500,
-            temperature=0.3,
-            reasoning_effort="low",
-        )
-        answer = (response.choices[0].message.content or "").strip()
+        answer = chat_completion(messages, max_tokens=1500, temperature=0.3)
     except Exception as e:
-        print(f"[assistant] Groq call failed: {type(e).__name__}: {e}", flush=True)
+        print(f"[assistant] LLM call failed: {type(e).__name__}: {e}", flush=True)
         raise RuntimeError("PathFinder is temporarily unavailable. Please try again.")
 
     if not answer:

@@ -1,7 +1,8 @@
 import json
 from pathlib import Path
 
-from app.config import groq_client, settings, supabase_client
+from app.config import supabase_client
+from app.llm_client import chat_completion
 
 FALLBACK_PROFILE = {
     "target_role": "Software Developer",
@@ -16,17 +17,9 @@ def _load_prompt(name: str) -> str:
 
 
 def _call_groq(messages: list) -> str:
-    # NOTE: the gpt-oss models are reasoning models — their chain-of-thought is
-    # billed against max_tokens before any answer is emitted. Keep the budget
-    # generous and reasoning_effort low, or `content` comes back empty.
-    response = groq_client.chat.completions.create(
-        model=settings.GROQ_MODEL,
-        messages=messages,
-        max_tokens=1200,
-        temperature=0.1,
-        reasoning_effort="low",
-    )
-    return (response.choices[0].message.content or "").strip()
+    # Name kept for minimal diff at call sites below; routes through
+    # app.llm_client, which picks Groq or Bedrock per settings.LLM_PROVIDER.
+    return chat_completion(messages, max_tokens=1200, temperature=0.1)
 
 
 def _strip_fences(raw: str) -> str:

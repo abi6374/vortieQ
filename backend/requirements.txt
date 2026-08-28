@@ -12,3 +12,4 @@ pypdf
 python-docx
 python-multipart
 ddgs
+boto3

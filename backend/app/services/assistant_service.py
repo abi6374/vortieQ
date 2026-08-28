@@ -7,7 +7,8 @@ and one path they own. It cannot fetch other users' data.
 import json
 from pathlib import Path as _Path
 
-from app.config import groq_client, settings, supabase_client
+from app.config import supabase_client
+from app.llm_client import chat_completion
 
 
 def _load_prompt(name: str) -> str:
@@ -76,14 +77,11 @@ ACTIVE LEARNING PATH (goal: {path_ctx['path'].get('goal_text', '')}):
 {json.dumps(path_ctx['steps'], indent=2, default=str)}
 """
 
-    response = groq_client.chat.completions.create(
-        model=settings.GROQ_MODEL,
-        messages=[
+    return chat_completion(
+        [
             {"role": "system", "content": _load_prompt("assistant.txt")},
             {"role": "user", "content": f"{context}\n\nLearner question: {question}"},
         ],
         max_tokens=1500,
         temperature=0.3,
-        reasoning_effort="low",
     )
-    return (response.choices[0].message.content or "").strip()

@@ -17,6 +17,15 @@ class Settings(BaseSettings):
     # (check available models with `groq_client.models.list()`).
     GROQ_MODEL: str = "openai/gpt-oss-120b"
 
+    # Which LLM backend app.llm_client routes every chat completion through.
+    # "groq" (default) needs nothing extra. "bedrock" uses AWS Bedrock's
+    # Converse API via the EC2 instance's IAM role - no AWS access keys are
+    # read from .env on purpose; boto3's default credential chain picks up
+    # the instance role automatically, so there's nothing secret to leak.
+    LLM_PROVIDER: str = "groq"  # "groq" | "bedrock"
+    AWS_REGION: str = "ap-south-1"
+    BEDROCK_MODEL_ID: str = "meta.llama3-70b-instruct-v1:0"
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 

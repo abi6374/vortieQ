@@ -17,7 +17,8 @@ continuing from the last kept step.
 import json
 from pathlib import Path as _Path
 
-from app.config import groq_client, settings, supabase_client
+from app.config import supabase_client
+from app.llm_client import chat_completion
 from app.ml.registry import get_recommender
 
 
@@ -30,14 +31,9 @@ def _load_prompt(name: str) -> str:
 
 
 def _call_groq(messages: list, max_tokens: int = 6000) -> str:
-    response = groq_client.chat.completions.create(
-        model=settings.GROQ_MODEL,
-        messages=messages,
-        max_tokens=max_tokens,
-        temperature=0.2,
-        reasoning_effort="low",
-    )
-    return (response.choices[0].message.content or "").strip()
+    # Name kept for minimal diff at call sites below; routes through
+    # app.llm_client, which picks Groq or Bedrock per settings.LLM_PROVIDER.
+    return chat_completion(messages, max_tokens=max_tokens, temperature=0.2)
 
 
 def _strip_fences(raw: str) -> str:

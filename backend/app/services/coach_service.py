@@ -12,7 +12,8 @@ is a natural follow-up once that's wanted.
 import json
 from pathlib import Path as _Path
 
-from app.config import groq_client, settings, supabase_client
+from app.config import supabase_client
+from app.llm_client import chat_completion
 
 MAX_QUESTIONS = 10
 
@@ -30,14 +31,9 @@ def _strip_fences(raw: str) -> str:
 
 
 def _call_groq(messages: list, max_tokens: int = 3000) -> str:
-    response = groq_client.chat.completions.create(
-        model=settings.GROQ_MODEL,
-        messages=messages,
-        max_tokens=max_tokens,
-        temperature=0.3,
-        reasoning_effort="low",
-    )
-    return (response.choices[0].message.content or "").strip()
+    # Name kept for minimal diff at call sites below; routes through
+    # app.llm_client, which picks Groq or Bedrock per settings.LLM_PROVIDER.
+    return chat_completion(messages, max_tokens=max_tokens, temperature=0.3)
 
 
 def _fetch_profile(user_id: str) -> dict:
