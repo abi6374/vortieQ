@@ -52,10 +52,9 @@ import {
   RotateCcw,
 } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
-import AppSidebar from '../ui/AppSidebar'
+import AppShell from '../layout/AppShell'
 import { useRoadmap } from '../../hooks/useRoadmap'
 import { useStreak } from '../../hooks/useStreak'
-import UserProfileDropdown from '../ui/UserProfileDropdown'
 
 /**
  * PathFinder High-Fidelity Progress Page
@@ -358,88 +357,75 @@ export default function ProgressScreen() {
   ].map((a) => ({ ...a, status: a.unlocked ? 'Unlocked' : 'Locked' }))
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex font-['Inter',sans-serif] text-[#172554]">
-      {/* =========================================================================
-          1. LEFT SIDEBAR (~220px wide, matching Resources reference)
-         ========================================================================= */}
-      <AppSidebar />
-
-      {/* =========================================================================
-          2. MAIN CONTENT AREA (Offset by sidebar width 220px, max-w-[1320px])
-         ========================================================================= */}
-      <main className="flex-1 min-w-0 p-6 lg:p-10 space-y-7 max-w-[1360px]">
-        
-        {/* -----------------------------------------------------------------------
-            HEADER ROW: Title + Subtitle on Left, Goal Selector & Roadmap on Right
-           ----------------------------------------------------------------------- */}
-        <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="font-['Inter'] font-extrabold text-2xl sm:text-[28px] text-[#172554] tracking-tight leading-tight">
-              Progress
-            </h1>
-            <p className="mt-1 text-xs sm:text-[13px] text-[#64748B]">
-              Track your learning momentum, skill growth, and roadmap readiness.
-            </p>
-          </div>
-
-          {/* Top-Right Controls matching Resources reference */}
-          <div className="flex items-center gap-3 flex-wrap">
-            {/* Roadmap Selector Pill */}
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => setIsGoalDropdownOpen((v) => !v)}
-                className="flex items-center gap-2.5 px-3.5 py-2 bg-white border border-[#E5E7EB] hover:border-[#DDD2FF] rounded-xl text-xs font-medium text-[#172554] shadow-sm transition-all"
-              >
-                <CalendarDays className="w-4 h-4 text-[#5B2FF3]" />
-                <div className="flex flex-col text-left">
-                  <span className="font-bold text-[#172554] leading-tight">{selectedGoal}</span>
-                  <span className="text-[10px] text-[#64748B] font-medium leading-tight">Target: February 2027</span>
-                </div>
-                <ChevronDown className={`w-3.5 h-3.5 text-[#94A3B8] ml-1 transition-transform ${isGoalDropdownOpen ? 'rotate-180' : ''}`} />
-              </button>
-
-              {isGoalDropdownOpen && (
-                <div className="absolute right-0 mt-1.5 w-60 bg-white rounded-xl border border-[#E5E7EB] shadow-xl p-1.5 z-30">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedGoal('AIML Engineer Internship')
-                      setIsGoalDropdownOpen(false)
-                    }}
-                    className="w-full text-left p-2 rounded-lg bg-[#F3EEFF] text-[#5B2FF3] font-bold text-xs mb-1"
-                  >
-                    AIML Engineer Internship (Target: Feb 2027)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedGoal('Data Scientist Track')
-                      setIsGoalDropdownOpen(false)
-                    }}
-                    className="w-full text-left p-2 rounded-lg hover:bg-gray-50 text-[#172554] font-semibold text-xs"
-                  >
-                    Data Scientist Track (Target: Summer 2027)
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Outlined Button: "View roadmap" */}
+    <AppShell
+      topBar={
+        <>
+          {/* Roadmap Selector Pill */}
+          <div className="relative">
             <button
               type="button"
-              onClick={() => navigate('/dashboard')}
-              className="flex items-center gap-2 px-4 py-2.5 border border-[#5B2FF3] text-[#5B2FF3] hover:bg-[#5B2FF3] hover:text-white rounded-xl text-xs font-bold transition-all shadow-sm active:scale-[0.98]"
+              onClick={() => setIsGoalDropdownOpen((v) => !v)}
+              className="flex items-center gap-2.5 px-3.5 py-2 bg-white border border-[#E5E7EB] hover:border-[#DDD2FF] rounded-xl text-xs font-medium text-[#172554] shadow-sm transition-all"
             >
-              <MapPinned className="w-4 h-4" />
-              <span>View roadmap</span>
+              <CalendarDays className="w-4 h-4 text-[#5B2FF3]" />
+              <div className="flex flex-col text-left">
+                <span className="font-bold text-[#172554] leading-tight">{selectedGoal}</span>
+                <span className="text-[10px] text-[#64748B] font-medium leading-tight">Target: February 2027</span>
+              </div>
+              <ChevronDown className={`w-3.5 h-3.5 text-[#94A3B8] ml-1 transition-transform ${isGoalDropdownOpen ? 'rotate-180' : ''}`} />
             </button>
 
-            {/* Primary profile control lives top-right on every section */}
-            <UserProfileDropdown />
+            {isGoalDropdownOpen && (
+              <div className="absolute left-0 mt-1.5 w-60 bg-white rounded-xl border border-[#E5E7EB] shadow-xl p-1.5 z-30">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedGoal('AIML Engineer Internship')
+                    setIsGoalDropdownOpen(false)
+                  }}
+                  className="w-full text-left p-2 rounded-lg bg-[#F3EEFF] text-[#5B2FF3] font-bold text-xs mb-1"
+                >
+                  AIML Engineer Internship (Target: Feb 2027)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedGoal('Data Scientist Track')
+                    setIsGoalDropdownOpen(false)
+                  }}
+                  className="w-full text-left p-2 rounded-lg hover:bg-gray-50 text-[#172554] font-semibold text-xs"
+                >
+                  Data Scientist Track (Target: Summer 2027)
+                </button>
+              </div>
+            )}
           </div>
+
+          {/* Outlined Button: "View roadmap" */}
+          <button
+            type="button"
+            onClick={() => navigate('/dashboard')}
+            className="flex items-center gap-2 px-4 py-2.5 border border-[#5B2FF3] text-[#5B2FF3] hover:bg-[#5B2FF3] hover:text-white rounded-xl text-xs font-bold transition-all shadow-sm active:scale-[0.98] flex-none"
+          >
+            <MapPinned className="w-4 h-4" />
+            <span className="hidden sm:inline">View roadmap</span>
+          </button>
+        </>
+      }
+    >
+        {/* -----------------------------------------------------------------------
+            HEADER ROW: Title + Subtitle
+           ----------------------------------------------------------------------- */}
+        <header className="mb-6">
+          <h1 className="font-['Inter'] font-extrabold text-2xl sm:text-[28px] text-[#172554] tracking-tight leading-tight">
+            Progress
+          </h1>
+          <p className="mt-1 text-xs sm:text-[13px] text-[#64748B]">
+            Track your learning momentum, skill growth, and roadmap readiness.
+          </p>
         </header>
 
+        <div className="space-y-7">
         {/* -----------------------------------------------------------------------
             HERO OVERVIEW PROGRESS CARD (68% Prominent Card)
            ----------------------------------------------------------------------- */}
@@ -612,12 +598,12 @@ export default function ProgressScreen() {
         {/* -----------------------------------------------------------------------
             MAIN PROGRESS ANALYTICS SECTION (65% Left Column, 35% Right Column)
            ----------------------------------------------------------------------- */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          
+        <div className="grid grid-cols-1 pf-progress-grid gap-5">
+
           {/* =====================================================================
-              LEFT COLUMN (approx 8 of 12 cols, ~65% width)
+              LEFT COLUMN (~1.7fr)
              ===================================================================== */}
-          <div className="lg:col-span-8 space-y-6">
+          <div className="space-y-6 min-w-0">
             
             {/* CARD A: Learning Progress Over Time (Line/Area Chart) */}
             <section className="bg-white border border-[#E5E7EB] rounded-[14px] p-6 shadow-[0_2px_8px_rgba(15,23,42,0.03)] hover:border-[#DDD2FF] transition-all">
@@ -994,7 +980,7 @@ export default function ProgressScreen() {
           {/* =====================================================================
               RIGHT COLUMN / CONTEXTUAL PANEL (approx 4 of 12 cols, ~35% width)
              ===================================================================== */}
-          <div className="lg:col-span-4 space-y-6">
+          <div className="space-y-6 min-w-0">
             
             {/* RIGHT CARD 1: Weekly Activity Bar Chart */}
             <section className="bg-white border border-[#E5E7EB] rounded-[14px] p-5 shadow-[0_2px_8px_rgba(15,23,42,0.03)] hover:border-[#DDD2FF] transition-all">
@@ -1207,10 +1193,7 @@ export default function ProgressScreen() {
           </div>
 
         </div>
-
-      </main>
-
-
-    </div>
+        </div>
+    </AppShell>
   )
 }

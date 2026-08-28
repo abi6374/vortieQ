@@ -4,18 +4,22 @@ import { useLocation, useNavigate } from 'react-router-dom'
 /**
  * The one PathFinder sidebar.
  *
- * Every page renders THIS — there is no page-local copy. That's what keeps the
- * icons from changing as you navigate: the mapping below is the only place
- * these icons are defined.
+ * Every page renders it through <AppShell> — there is no page-local copy.
+ * That's what keeps the icons from changing as you navigate: the mapping
+ * below is the only place these icons are defined.
  *
  * Labels are fixed product terminology and must not be renamed.
+ *
+ * Responsive: 240px with labels on desktop (>=1280px), a 72px icon-only rail
+ * on tablet (768-1279px, via CSS on .pf-shell), hidden entirely on mobile
+ * (<768px) in favor of <MobileBottomNav>.
  */
 
 const V = '#5B36E9'
 const V_SOFT = '#F5F1FF'
 
 // Fixed icon mapping. Do not redefine these per page.
-const ICONS = {
+export const ICONS = {
   roadmap: (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
       <path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z" /><path d="M9 3v15M15 6v15" />
@@ -44,7 +48,7 @@ const ICONS = {
 }
 
 // Terminology is fixed — see the brief. Do not rename these labels.
-const NAV = [
+export const NAV = [
   { key: 'roadmap',   label: 'My roadmap',     path: '/dashboard' },
   { key: 'progress',  label: 'Progress',       path: '/progress' },
   { key: 'skills',    label: 'Skill insights', path: '/skills' },
@@ -52,7 +56,7 @@ const NAV = [
   { key: 'coach',     label: 'AI coach',       path: '/coach' }, // dedicated full page: chat + practice + project ideas
 ]
 
-function activeKeyFor(pathname) {
+export function activeKeyFor(pathname) {
   if (pathname.startsWith('/progress')) return 'progress'
   if (pathname.startsWith('/skill')) return 'skills'
   if (pathname.startsWith('/resources')) return 'resources'
@@ -67,15 +71,13 @@ export default function AppSidebar() {
   const active = activeKeyFor(location.pathname)
 
   return (
-    <aside
-      className="hidden md:flex flex-col flex-none"
-      style={{ width: 220, background: '#fff', borderRight: '1px solid #EEF2F7', padding: '24px 16px' }}
-    >
+    <aside className="pf-sidebar" style={{ padding: '20px 12px' }}>
       <button
         type="button"
         onClick={() => navigate('/dashboard')}
-        className="flex items-center gap-2.5 mb-7 bg-transparent border-none cursor-pointer text-left"
-        style={{ padding: '4px 8px' }}
+        className="flex items-center gap-2.5 mb-6 bg-transparent border-none cursor-pointer text-left xl:justify-start justify-center"
+        style={{ padding: '4px 4px', height: 32 }}
+        aria-label="PathFinder Home"
       >
         <span
           className="grid place-items-center rounded-xl flex-none"
@@ -85,7 +87,7 @@ export default function AppSidebar() {
             <path d="M3 12h4l3 8 4-16 3 8h4" />
           </svg>
         </span>
-        <span className="font-['Manrope'] font-extrabold text-[#0E1B38]" style={{ fontSize: 17, letterSpacing: '-.02em' }}>
+        <span className="hidden xl:inline font-['Manrope'] font-extrabold text-[#0E1B38]" style={{ fontSize: 17, letterSpacing: '-.02em' }}>
           PathFinder
         </span>
       </button>
@@ -98,8 +100,9 @@ export default function AppSidebar() {
               key={item.key}
               type="button"
               aria-current={on ? 'page' : undefined}
+              title={item.label}
               onClick={() => navigate(item.path)}
-              className="flex items-center gap-3 rounded-[10px] border-none cursor-pointer text-left transition-colors"
+              className="flex items-center gap-3 rounded-[10px] border-none cursor-pointer text-left transition-colors xl:justify-start justify-center"
               style={{
                 padding: '9px 12px',
                 background: on ? V_SOFT : 'transparent',
@@ -111,7 +114,7 @@ export default function AppSidebar() {
               onMouseLeave={(e) => { if (!on) e.currentTarget.style.background = 'transparent' }}
             >
               <span style={{ color: on ? V : '#64748B', display: 'flex' }}>{ICONS[item.key]}</span>
-              <span>{item.label}</span>
+              <span className="hidden xl:inline">{item.label}</span>
             </button>
           )
         })}

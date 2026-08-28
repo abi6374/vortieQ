@@ -3,10 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { useAIChat } from '../../contexts/AIChatContext'
 import { useRoadmap } from '../../hooks/useRoadmap'
 import { useAuth } from '../../hooks/useAuth'
-import apiClient from '../../lib/apiClient'
 import { supabase } from '../../lib/supabaseClient'
-import UserProfileDropdown from '../ui/UserProfileDropdown'
-import AppSidebar from '../ui/AppSidebar'
+import AppShell from '../layout/AppShell'
 
 /**
  * PersonalizedRoadmap
@@ -46,19 +44,6 @@ export default function PersonalizedRoadmap({ pathData = null }) {
 
   // Notification toast for user actions
   const [toastMessage, setToastMessage] = useState(null)
-
-  // Floating AI Chat modal
-  const [isChatOpen, setIsChatOpen] = useState(false)
-  const [chatMessages, setChatMessages] = useState([
-    {
-      id: 1,
-      role: 'assistant',
-      text: 'Hi! Ask me anything about your personalized learning path — why a course is recommended, or how to tackle this week.',
-    },
-  ])
-  const [inputMessage, setInputMessage] = useState('')
-  const [isTyping, setIsTyping] = useState(false)
-  const chatEndRef = useRef(null)
 
   // Modals for other views (Resources, etc.)
   const [activeModal, setActiveModal] = useState(null)
@@ -369,55 +354,6 @@ export default function PersonalizedRoadmap({ pathData = null }) {
     return text || 'AIML Engineer Internship'
   }, [pathData?.goal_text])
 
-  // Handle AI send
-  const handleSendMessage = async (textToSend = null) => {
-    const text = (textToSend || inputMessage).trim()
-    if (!text || isTyping) return
-    setInputMessage('')
-    setChatMessages((prev) => [...prev, { id: Date.now(), role: 'user', text }])
-    setIsTyping(true)
-
-    try {
-      if (pathData?.id) {
-        const res = await apiClient.post('/api/assistant/ask', {
-          question: text,
-          path_id: pathData.id,
-        })
-        setChatMessages((prev) => [
-          ...prev,
-          { id: Date.now() + 1, role: 'assistant', text: res.data.answer },
-        ])
-      } else {
-        setTimeout(() => {
-          let answer = "I'm PathFinder AI Coach! I'm here to help you master Python, Statistics, and Machine Learning on your personalized path."
-          const lower = text.toLowerCase()
-          if (lower.includes('variance') || lower.includes('stat')) {
-            answer = "Variance measures the average squared deviation from the mean. It helps you understand how spread out your data points are!"
-          } else if (lower.includes('start') || lower.includes('week')) {
-            answer = `For ${selectedWeek}, your priority is ${currentWeekData.themeTitle}. Spend ${currentWeekData.totalHrs} focused hours to complete your checklist.`
-          }
-          setChatMessages((prev) => [
-            ...prev,
-            { id: Date.now() + 1, role: 'assistant', text: answer },
-          ])
-          setIsTyping(false)
-        }, 500)
-        return
-      }
-    } catch (err) {
-      setChatMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now() + 1,
-          role: 'assistant',
-          text: `Here's a study tip for ${selectedWeek}: Tackle one hands-on exercise daily and write unit tests for your code.`,
-        },
-      ])
-    } finally {
-      setIsTyping(false)
-    }
-  }
-
   const handleNavClick = (navId) => {
     setActiveNav(navId)
     if (navId === 'roadmap') {
@@ -434,69 +370,46 @@ export default function PersonalizedRoadmap({ pathData = null }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#F5F7FC] p-2 sm:p-4 md:p-6 lg:p-8 flex items-center justify-center font-['Inter',sans-serif]">
-      
-      {/* Main Container Shell */}
-      <div className="w-full max-w-[1440px] bg-white rounded-[20px] border border-[#E1E6F0] shadow-[0_14px_38px_rgba(25,40,75,0.08)] flex flex-col md:flex-row overflow-hidden min-h-[880px] relative">
-        
-        {/* =========================================================================
-            LEFT FIXED SIDEBAR (~255px wide)
-           ========================================================================= */}
-        <AppSidebar />
-
-        {/* =========================================================================
-            MAIN WORKSPACE CONTENT AREA
-           ========================================================================= */}
-        <main className="flex-1 bg-[#FAFBFD] p-5 sm:p-7 md:p-9 overflow-y-auto max-h-[960px]">
-          
-          {/* Top Header Row: Main Heading + Goal Card + User Profile on Top-Right */}
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-7 pb-2 border-b border-[#F0F3F8]">
-            <div>
-              <h1 className="font-['Manrope'] font-extrabold text-2xl sm:text-3xl text-[#0E1B38] tracking-tight">
-                Your path to: {cleanGoalTitle}
-              </h1>
-              <p className="text-sm sm:text-base text-[#52617D] mt-1 font-normal">
-                Personalized roadmap calibrated from your skills and weekly availability.
-              </p>
-            </div>
-
-            {/* Top-Right Action Controls: Goal Card & User Profile Dropdown */}
-            <div className="flex items-center gap-3 flex-wrap flex-none">
-              {/* Compact Goal Card */}
-              <div className="bg-white border border-[#D8DFEB] hover:border-[#CAD3E2] rounded-2xl px-3.5 py-2 flex items-center justify-between gap-3 shadow-2xs">
-                <div className="flex items-center gap-2.5">
-                  <span className="w-8 h-8 rounded-xl bg-[#F5F1FF] text-[#5B36E9] flex items-center justify-center flex-none">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="12" r="10" />
-                      <circle cx="12" cy="12" r="6" />
-                      <circle cx="12" cy="12" r="2" />
-                    </svg>
-                  </span>
-                  <div className="text-left">
-                    <h2 className="font-['Manrope'] font-bold text-xs sm:text-[13px] text-[#0E1B38] leading-tight max-w-[150px] truncate">
-                      {cleanGoalTitle}
-                    </h2>
-                    <p className="text-[10px] text-[#74819A] font-medium leading-tight mt-0.5">
-                      Target: Ongoing Pace
-                    </p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => navigate('/onboarding')}
-                  className="px-2.5 py-1 rounded-lg border border-[#D8DFEB] hover:border-[#5B36E9] hover:bg-[#F5F1FF] text-[#5B36E9] text-xs font-bold transition-colors cursor-pointer"
-                >
-                  Replan
-                </button>
-              </div>
-
-              {/* User Profile Dropdown Pill */}
-              <UserProfileDropdown />
-            </div>
+    <AppShell
+      topBar={
+        <div className="bg-white border border-[#D8DFEB] hover:border-[#CAD3E2] rounded-2xl px-3.5 py-2 flex items-center gap-3 shadow-2xs min-w-0">
+          <span className="w-8 h-8 rounded-xl bg-[#F5F1FF] text-[#5B36E9] flex items-center justify-center flex-none">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <circle cx="12" cy="12" r="6" />
+              <circle cx="12" cy="12" r="2" />
+            </svg>
+          </span>
+          <div className="text-left min-w-0">
+            <h2 className="font-['Manrope'] font-bold text-xs sm:text-[13px] text-[#0E1B38] leading-tight max-w-[220px] truncate">
+              {cleanGoalTitle}
+            </h2>
+            <p className="text-[10px] text-[#74819A] font-medium leading-tight mt-0.5">
+              Target: Ongoing Pace
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => navigate('/onboarding')}
+            className="px-2.5 py-1 rounded-lg border border-[#D8DFEB] hover:border-[#5B36E9] hover:bg-[#F5F1FF] text-[#5B36E9] text-xs font-bold transition-colors cursor-pointer flex-none"
+          >
+            Replan
+          </button>
+        </div>
+      }
+    >
+          {/* Page header */}
+          <div className="mb-6">
+            <h1 className="font-['Manrope'] font-extrabold text-2xl sm:text-3xl text-[#0E1B38] tracking-tight">
+              Your path to: {cleanGoalTitle}
+            </h1>
+            <p className="text-sm sm:text-base text-[#52617D] mt-1 font-normal">
+              Personalized roadmap calibrated from your skills and weekly availability.
+            </p>
           </div>
 
           {/* 3 Top Stats Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-7">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
             <div className="bg-white border border-[#D8DFEB] rounded-2xl p-4 sm:p-5 flex items-center gap-4 shadow-2xs">
               <span className="w-12 h-12 rounded-xl bg-[#F5F1FF] text-[#5B36E9] flex items-center justify-center flex-none">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -551,11 +464,11 @@ export default function PersonalizedRoadmap({ pathData = null }) {
             </div>
           </div>
 
-          {/* Main 2-Column Section: Left Roadmap (8 cols) + Right Widgets (4 cols) */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            
+          {/* Main 2-Column Section: roadmap timeline + 330px right rail */}
+          <div className="grid pf-roadmap-grid gap-6 items-start">
+
             {/* LEFT COLUMN: Your learning roadmap */}
-            <div className="lg:col-span-8 bg-white border border-[#D8DFEB] rounded-2xl p-6 sm:p-7 shadow-[0_4px_20px_rgba(25,40,75,0.03)] flex flex-col justify-between">
+            <div className="bg-white border border-[#D8DFEB] rounded-2xl p-6 sm:p-7 shadow-[0_4px_20px_rgba(25,40,75,0.03)] flex flex-col justify-between min-w-0">
               <div>
                 <h2 className="font-['Manrope'] font-bold text-lg text-[#0E1B38] mb-4">
                   Your learning roadmap
@@ -794,7 +707,7 @@ export default function PersonalizedRoadmap({ pathData = null }) {
             </div>
 
             {/* RIGHT COLUMN: 3 Stacked Widgets */}
-            <div className="lg:col-span-4 space-y-5">
+            <div className="space-y-5 min-w-0">
               
               {/* WIDGET 1: "This week's plan" */}
               <div className="bg-[#F5F1FF] border border-[#E7E0FF] rounded-2xl p-5 sm:p-6 shadow-sm">
@@ -940,102 +853,15 @@ export default function PersonalizedRoadmap({ pathData = null }) {
 
             </div>
           </div>
-        </main>
-      </div>
 
-      {/* Floating AI Coach Button & Drawer */}
-      <div className="fixed bottom-6 right-6 z-40">
-        {!isChatOpen && (
-          <button
-            type="button"
-            onClick={() => openAICoach()}
-            className="flex items-center gap-2.5 px-4 py-3 bg-[#5B36E9] hover:bg-[#4826C9] text-white font-bold rounded-2xl shadow-xl transition-all cursor-pointer"
-          >
-            <span className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
-              ✨
-            </span>
-            <span className="text-sm">Ask PathFinder</span>
-          </button>
-        )}
-
-        {isChatOpen && (
-          <div className="w-[360px] sm:w-[400px] h-[480px] bg-white rounded-2xl border border-[#E1E6F0] shadow-2xl flex flex-col justify-between overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-            {/* Header */}
-            <div className="p-4 bg-[#5B36E9] text-white flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span>✨</span>
-                <span className="font-bold text-sm">PathFinder AI Coach</span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsChatOpen(false)}
-                className="text-white/80 hover:text-white font-bold text-lg p-1"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Chat Body */}
-            <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-[#FAFBFD]">
-              {chatMessages.map((msg) => (
-                <div
-                  key={msg.id}
-                  className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div
-                    className={`max-w-[85%] p-3 rounded-2xl text-xs sm:text-sm leading-relaxed ${
-                      msg.role === 'user'
-                        ? 'bg-[#5B36E9] text-white rounded-tr-xs'
-                        : 'bg-white border border-[#D8DFEB] text-[#0E1B38] rounded-tl-xs shadow-2xs'
-                    }`}
-                  >
-                    {msg.text}
-                  </div>
-                </div>
-              ))}
-              {isTyping && (
-                <div className="flex justify-start">
-                  <div className="bg-white border border-[#D8DFEB] text-[#74819A] text-xs p-3 rounded-2xl shadow-2xs animate-pulse">
-                    AI is thinking...
-                  </div>
-                </div>
-              )}
-              <div ref={chatEndRef} />
-            </div>
-
-            {/* Input Bar */}
-            <form
-              onSubmit={(e) => {
-                e.preventDefault()
-                handleSendMessage()
-              }}
-              className="p-3 border-t border-[#E6EAF2] bg-white flex items-center gap-2"
-            >
-              <input
-                type="text"
-                value={inputMessage}
-                onChange={(e) => setInputMessage(e.target.value)}
-                placeholder="Ask about your roadmap..."
-                className="flex-1 bg-[#FAFBFC] border border-[#D8DFEB] rounded-xl px-3 py-2 text-xs sm:text-sm text-[#0E1B38] focus:border-[#5B36E9] outline-none"
-              />
-              <button
-                type="submit"
-                disabled={!inputMessage.trim()}
-                className="w-8 h-8 rounded-full bg-[#5B36E9] hover:bg-[#4826C9] disabled:opacity-40 text-white flex items-center justify-center cursor-pointer"
-              >
-                ↑
-              </button>
-            </form>
-          </div>
-        )}
-      </div>
-
-      {/* Toast Notification */}
+      {/* Toast Notification — the global "Ask PathFinder" FAB (AIChat, mounted
+          once in App.jsx) already covers the floating assistant; no per-page
+          duplicate here. */}
       {toastMessage && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#0E1B38] text-white px-5 py-2.5 rounded-xl shadow-xl text-xs sm:text-sm font-semibold animate-in fade-in slide-in-from-bottom duration-150 flex items-center gap-2">
           <span>{toastMessage}</span>
         </div>
       )}
-    </div>
+    </AppShell>
   )
 }

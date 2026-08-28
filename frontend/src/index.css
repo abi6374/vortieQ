@@ -27,6 +27,125 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* ============================================================================
+   PathFinder App Shell — ONE consistent shell for every authenticated page
+   (Dashboard/Roadmap, Progress, Skill Insights, Resources, AI Coach).
+   Breakpoints: desktop >=1280px (sidebar 240px), tablet 768-1279px (sidebar
+   collapses to a 72px icon rail), mobile <768px (sidebar hidden, bottom nav).
+   ============================================================================ */
+.pf-shell {
+  height: 100dvh;
+  min-height: 680px;
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  overflow: hidden;
+  background: var(--bg-main);
+}
+@media (max-width: 1279px) {
+  .pf-shell { grid-template-columns: 72px minmax(0, 1fr); }
+}
+@media (max-width: 767px) {
+  .pf-shell { grid-template-columns: minmax(0, 1fr); }
+}
+
+.pf-sidebar {
+  min-height: 0;
+  background: #fff;
+  border-right: 1px solid #E6EAF2;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+@media (max-width: 767px) {
+  .pf-sidebar { display: none; }
+}
+
+.pf-main {
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: 72px minmax(0, 1fr);
+  overflow: hidden;
+}
+@media (max-width: 767px) {
+  .pf-main { grid-template-rows: 64px minmax(0, 1fr); }
+}
+
+.pf-topbar {
+  min-width: 0;
+  background: #fff;
+  border-bottom: 1px solid #E6EAF2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 28px;
+}
+@media (max-width: 767px) {
+  .pf-topbar { padding: 0 16px; }
+}
+
+.pf-content {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  overflow-x: hidden;
+  padding: 28px 36px 32px;
+  max-width: 1560px;
+}
+@media (max-width: 1279px) {
+  .pf-content { padding: 24px; }
+}
+@media (max-width: 767px) {
+  .pf-content { padding: 16px 16px calc(16px + 64px); }
+}
+
+/* Dashboard main roadmap grid: fixed 330px right rail on desktop, stacks below lg. */
+.pf-roadmap-grid { grid-template-columns: minmax(0, 1fr) 330px; }
+@media (max-width: 1023px) {
+  .pf-roadmap-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Progress page: 1.7fr analytics column + narrower right rail on desktop. */
+.pf-progress-grid { grid-template-columns: minmax(0, 1.7fr) minmax(300px, 0.8fr); }
+@media (max-width: 1023px) {
+  .pf-progress-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* AI Coach page: full available content height, composer pinned at bottom. */
+.coach-page {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.coach-chat-card {
+  min-height: 0;
+  height: min(690px, calc(100dvh - 220px));
+  display: flex;
+  flex-direction: column;
+}
+
+/* Mobile bottom nav — replaces the sidebar under 768px. */
+.pf-bottom-nav {
+  display: none;
+}
+@media (max-width: 767px) {
+  .pf-bottom-nav {
+    display: flex;
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    z-index: 35;
+    height: 64px;
+    background: #fff;
+    border-top: 1px solid #E6EAF2;
+    align-items: stretch;
+    justify-content: space-around;
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;

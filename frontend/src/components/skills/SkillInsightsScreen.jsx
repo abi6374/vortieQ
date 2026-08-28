@@ -1,8 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAIChat } from '../../contexts/AIChatContext'
-import UserProfileDropdown from '../ui/UserProfileDropdown'
-import AppSidebar from '../ui/AppSidebar'
+import AppShell from '../layout/AppShell'
 import {
   BarChart,
   Bar,
@@ -330,53 +329,20 @@ export default function SkillInsightsScreen() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F5F7FC] p-2 sm:p-4 md:p-6 lg:p-7 flex items-center justify-center font-['Inter',sans-serif] text-[#0E1B38]">
-      {/* =========================================================================
-          MAIN APPLICATION CONTAINER (Desktop canvas 1536 x 1024 px styled)
-         ========================================================================= */}
-      <div className="w-full max-w-[1536px] min-h-[1024px] bg-white rounded-[18px] border border-[#E1E6F0] shadow-[0_8px_30px_rgba(20,30,60,0.06)] flex flex-col md:flex-row overflow-hidden relative">
-
-        {/* =========================================================================
-            FIXED LEFT SIDEBAR (~255px wide, thin border #E6EAF2)
-           ========================================================================= */}
-        <AppSidebar />
-
-        {/* =========================================================================
-            MAIN CONTENT AREA (Top Bar + Headers + KPI Summary + Analytics Grid)
-           ========================================================================= */}
-        <div className="flex-1 flex flex-col overflow-hidden bg-white">
-          
-          {/* -----------------------------------------------------------------------
-              TOP GLOBAL HEADER (Search Bar, Notification Bell, User Avatar)
-             ----------------------------------------------------------------------- */}
-          <header className="px-6 lg:px-9 py-3.5 border-b border-[#E6EAF2] flex items-center justify-between gap-4 select-none">
-            {/* Global Search Bar */}
-            <div className="relative flex-1 max-w-md">
-              <Search className="w-4 h-4 text-[#74819A] absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search courses, skills, resources..."
-                className="w-full pl-9 pr-4 py-2 bg-[#F5F7FC] border border-[#E6EAF2] rounded-full text-xs text-[#0E1B38] placeholder-[#74819A] focus:outline-none focus:border-[#5B36E9] focus:bg-white transition-colors"
-              />
-            </div>
-
-            {/* Right Controls: Notifications & Profile */}
-            <div className="flex items-center gap-4">
-              {/* Notification Bell with Badge */}
-
-
-              {/* User Profile Dropdown */}
-              <UserProfileDropdown />
-            </div>
-          </header>
-
-          {/* -----------------------------------------------------------------------
-              MAIN SCROLLABLE WORKSPACE
-             ----------------------------------------------------------------------- */}
-          <main className="flex-1 p-6 lg:p-8 overflow-y-auto space-y-6">
-            
+    <AppShell
+      topBar={
+        <div className="relative flex-1 max-w-md hidden sm:block">
+          <Search className="w-4 h-4 text-[#74819A] absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search courses, skills, resources..."
+            className="w-full pl-9 pr-4 py-2 bg-[#F5F7FC] border border-[#E6EAF2] rounded-full text-xs text-[#0E1B38] placeholder-[#74819A] focus:outline-none focus:border-[#5B36E9] focus:bg-white transition-colors"
+          />
+        </div>
+      }
+    >
             {/* ---------------------------------------------------------------------
                 PAGE TITLE ROW: Icon + Heading/Subtitle (Left) + Goal Selector & Timestamp (Right)
                --------------------------------------------------------------------- */}
@@ -1199,9 +1165,6 @@ export default function SkillInsightsScreen() {
 
             </div>
 
-          </main>
-        </div>
-
         {/* =========================================================================
             SKILL DRILL-DOWN MODAL
            ========================================================================= */}
@@ -1269,8 +1232,6 @@ export default function SkillInsightsScreen() {
             </div>
           </div>
         )}
-
-      </div>
-    </div>
+    </AppShell>
   )
 }

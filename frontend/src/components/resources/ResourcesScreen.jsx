@@ -4,8 +4,7 @@ import { useAuth } from '../../hooks/useAuth'
 import { useAIChat } from '../../contexts/AIChatContext'
 import { supabase } from '../../lib/supabaseClient'
 import api from '../../lib/apiClient'
-import UserProfileDropdown from '../ui/UserProfileDropdown'
-import AppSidebar from '../ui/AppSidebar'
+import AppShell from '../layout/AppShell'
 
 /**
  * ResourcesScreen — the "Resources" page from the PathFinder reference.
@@ -66,28 +65,12 @@ const STYLES = `
 .rx{ --v:#5B36E9; --vd:#4826C9; --vsoft:#F5F1FF; --vsoft-2:#F8F5FF; --vbd:#DDD2FF;
   --navy:#172554; --slate:#64748B; --muted:#94A3B8; --border:#E5E7EB; --border-l:#EEF2F7;
   --page:#F8FAFC; --card:#fff; --green:#16A34A; --green-bg:#ECFDF3; --amber:#F59E0B;
-  min-height:100vh; background:var(--page); color:var(--navy);
-  font-family:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
-  -webkit-font-smoothing:antialiased; display:flex; }
+  color:var(--navy); font-family:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  -webkit-font-smoothing:antialiased; }
 .rx *{ box-sizing:border-box; }
 
-/* ── Sidebar ─────────────────────────────────────────── */
-.rx-side{ width:220px; flex:none; background:#fff; border-right:1px solid var(--border-l);
-  padding:24px 16px; display:flex; flex-direction:column; }
-.rx-brand{ display:flex; align-items:center; gap:10px; padding:4px 8px; margin-bottom:26px; }
-.rx-brand-mark{ width:34px; height:34px; border-radius:10px; display:grid; place-items:center;
-  background:linear-gradient(160deg,#6B47F0,var(--v)); box-shadow:0 4px 10px rgba(91,54,233,.30); }
-.rx-brand-name{ font-family:"Manrope",sans-serif; font-weight:800; font-size:17px; letter-spacing:-.02em; }
-.rx-nav{ display:flex; flex-direction:column; gap:2px; flex:1; }
-.rx-nav a{ display:flex; align-items:center; gap:11px; padding:9px 12px; border-radius:10px;
-  color:#475569; font-size:14px; font-weight:500; text-decoration:none; cursor:pointer; transition:background .12s; }
-.rx-nav a:hover{ background:#FAF8FF; }
-.rx-nav a.on{ background:var(--vsoft); color:var(--v); font-weight:600; }
-.rx-nav a.on svg{ color:var(--v); }
-.rx-nav svg{ color:#64748B; flex:none; }
-
-/* ── Main column ─────────────────────────────────────── */
-.rx-main{ flex:1; min-width:0; padding:32px clamp(20px,3vw,40px); display:flex; flex-direction:column; gap:22px; }
+/* ── Main column (lives inside AppShell's .pf-content) ─── */
+.rx-main{ display:flex; flex-direction:column; gap:22px; min-width:0; }
 
 .rx-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:20px; flex-wrap:wrap; }
 .rx-head h1{ font-family:"Manrope",sans-serif; font-size:26px; font-weight:700; margin:0 0 4px; letter-spacing:-.02em; }
@@ -113,7 +96,7 @@ const STYLES = `
 .rx-picked a{ color:var(--v); font-size:13px; font-weight:600; text-decoration:none; }
 
 /* two-column body */
-.rx-body{ display:grid; grid-template-columns:1fr 340px; gap:22px; align-items:start; }
+.rx-body{ display:grid; grid-template-columns:minmax(0,1fr) 310px; gap:24px; align-items:start; min-height:0; }
 
 /* search + filters */
 .rx-search{ display:flex; gap:10px; align-items:center; }
@@ -144,7 +127,7 @@ const STYLES = `
 .rx-sec-h .sub{ font-size:12.5px; color:var(--muted); margin:2px 0 0; }
 .rx-sort{ background:#fff; border:1px solid var(--border); border-radius:10px; padding:6px 12px; font-size:12.5px; color:#475569; cursor:pointer; }
 
-.rx-list{ display:flex; flex-direction:column; gap:10px; }
+.rx-list{ display:flex; flex-direction:column; gap:10px; max-height:calc(100dvh - 300px); overflow-y:auto; padding-right:4px; }
 .rx-card{ display:grid; grid-template-columns:60px 1fr auto auto auto; gap:14px; align-items:center;
   background:#fff; border:1px solid var(--border); border-radius:14px; padding:14px 16px; transition:border-color .15s, box-shadow .15s; }
 .rx-card:hover{ border-color:var(--vbd); box-shadow:0 4px 14px rgba(91,54,233,.06); }
@@ -172,7 +155,7 @@ const STYLES = `
 .rx-load button{ background:none; border:none; color:var(--v); font-size:13px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:6px; }
 
 /* right rail */
-.rx-rail{ display:flex; flex-direction:column; gap:14px; position:sticky; top:20px; }
+.rx-rail{ display:flex; flex-direction:column; gap:14px; position:sticky; top:0; align-self:start; }
 .rx-panel{ background:#fff; border:1px solid var(--border); border-radius:14px; padding:16px 18px; }
 .rx-panel h3{ display:flex; align-items:center; gap:8px; font-family:"Manrope",sans-serif; font-size:14px; font-weight:700; margin:0 0 12px; letter-spacing:-.01em; }
 .rx-panel h3 svg{ color:var(--v); flex:none; }
@@ -210,24 +193,10 @@ const STYLES = `
 .rx-empty h4{ font-size:16px; color:var(--navy); margin:0 0 6px; }
 .rx-empty button{ margin-top:12px; background:var(--v); color:#fff; border:none; border-radius:10px; padding:9px 18px; font-weight:600; cursor:pointer; }
 
-/* floating chat */
-.rx-chat{ position:fixed; bottom:22px; right:22px; display:flex; align-items:center; gap:8px; background:#fff; border:1px solid var(--border); border-radius:999px; padding:8px 16px 8px 8px; box-shadow:0 8px 20px rgba(91,54,233,.15); cursor:pointer; z-index:60; }
-.rx-chat:hover{ box-shadow:0 12px 26px rgba(91,54,233,.22); }
-.rx-chat .b{ width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg,#6B47F0,var(--v)); color:#fff; display:grid; place-items:center; }
-.rx-chat span{ font-weight:600; font-size:13.5px; color:var(--navy); }
-
-@media (max-width:1080px){ .rx-body{ grid-template-columns:1fr; } .rx-rail{ position:static; } }
-@media (max-width:820px){ .rx-side{ display:none; } .rx-stats{ grid-template-columns:repeat(2,1fr); } .rx-card{ grid-template-columns:44px 1fr auto; } .rx-card .r-match{ display:none; } .rx-card .r-desc{ display:none; } }
+@media (max-width:1080px){ .rx-body{ grid-template-columns:1fr; } .rx-rail{ position:static; } .rx-list{ max-height:none; overflow-y:visible; } }
+@media (max-width:820px){ .rx-stats{ grid-template-columns:repeat(2,1fr); } .rx-card{ grid-template-columns:44px 1fr auto; } .rx-card .r-match{ display:none; } .rx-card .r-desc{ display:none; } }
 @media (prefers-reduced-motion:reduce){ .rx *{ transition:none !important; } }
 `
-
-const SIDEBAR = [
-  { key: 'roadmap',    label: 'My roadmap',     path: '/roadmap',  icon: 'map' },
-  { key: 'progress',   label: 'Progress',       path: '/progress', icon: 'trend' },
-  { key: 'skills',     label: 'Skill insights', path: '/skills',   icon: 'radar' },
-  { key: 'resources',  label: 'Resources',      path: '/resources', icon: 'book' },
-  { key: 'coach',      label: 'AI coach',       path: '#coach',    icon: 'chat' },
-]
 
 const CHIPS = ['All', 'Recommended', 'Videos', 'Articles', 'Courses', 'Practice', 'Projects', 'Documentation']
 const CHIP_TO_TYPE = { All: null, Recommended: null, Videos: 'VIDEO', Articles: 'ARTICLE', Courses: 'COURSE', Practice: 'PRACTICE', Projects: 'PROJECT', Documentation: 'DOC' }
@@ -387,6 +356,18 @@ export default function ResourcesScreen() {
   }
 
   return (
+    <AppShell
+      topBar={
+        // display:contents so this element scopes the .rx CSS variables (via
+        // inheritance) to the goal chip / view-roadmap button without adding
+        // a box of its own to TopBar's flex layout.
+        <div className="rx" style={{ display: 'contents' }}>
+          <div className="rx-goal">{I.cal}<div><div className="g-title">{(path?.goal_text || 'Your learning goal').slice(0, 40)}</div><div className="g-sub">Target: February 2027</div></div>{I.chev}</div>
+          <button className="rx-view-road" onClick={() => path && navigate(`/roadmap/${path.id}`)}>{I.map}<span className="hidden sm:inline">View roadmap</span></button>
+          <style>{STYLES}</style>
+        </div>
+      }
+    >
     <div className="rx">{whyOpen && (
         <div onClick={() => setWhyOpen(false)} style={{position:"fixed",inset:0,background:"rgba(23,37,84,.35)",display:"grid",placeItems:"center",zIndex:80,padding:20}}>
           <div onClick={(e)=>e.stopPropagation()} style={{background:"#fff",border:"1px solid var(--vbd)",borderRadius:16,padding:22,maxWidth:460,width:"100%",boxShadow:"0 20px 40px rgba(25,40,75,.2)"}}>
@@ -401,20 +382,12 @@ export default function ResourcesScreen() {
           </div>
         </div>
       )}
-      <style>{STYLES}</style>
-
-      <AppSidebar />
 
       <main className="rx-main">
         <header className="rx-head">
           <div>
             <h1>Resources</h1>
             <p className="sub">Personalized learning materials selected for your roadmap and skill goals.</p>
-          </div>
-          <div className="rx-head-actions">
-            <div className="rx-goal">{I.cal}<div><div className="g-title">{(path?.goal_text || 'Your learning goal').slice(0, 40)}</div><div className="g-sub">Target: February 2027</div></div>{I.chev}</div>
-            <button className="rx-view-road" onClick={() => path && navigate(`/roadmap/${path.id}`)}>{I.map}View roadmap</button>
-            <UserProfileDropdown />
           </div>
         </header>
 
@@ -659,7 +632,7 @@ export default function ResourcesScreen() {
           </aside>
         </div>
       </main>
-
     </div>
+    </AppShell>
   )
 }

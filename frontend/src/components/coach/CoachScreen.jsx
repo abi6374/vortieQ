@@ -1,8 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useAIChat } from '../../contexts/AIChatContext'
 import api from '../../lib/apiClient'
-import AppSidebar from '../ui/AppSidebar'
-import UserProfileDropdown from '../ui/UserProfileDropdown'
+import AppShell from '../layout/AppShell'
 
 /**
  * CoachScreen — the real, dedicated "AI Coach" full page.
@@ -27,6 +26,13 @@ const TABS = [
   { key: 'projects', label: 'Project ideas' },
 ]
 
+const STARTER_PROMPTS = [
+  'Explain my next roadmap task',
+  'Help me plan this week',
+  'Give me a Python practice question',
+  'Suggest a portfolio project',
+]
+
 function ChatTab() {
   const { messages, send, loading, hydrating, error, setError } = useAIChat()
   const [input, setInput] = useState('')
@@ -45,13 +51,25 @@ function ChatTab() {
   }
 
   return (
-    <div className="flex flex-col h-[70vh] bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden">
-      <div ref={bodyRef} className="flex-1 overflow-y-auto p-5 space-y-3 bg-[#FAFBFE]">
+    <div className="coach-chat-card bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden">
+      <div ref={bodyRef} className="flex-1 min-h-0 overflow-y-auto p-5 space-y-3 bg-[#FAFBFE]">
         {hydrating && <p className="text-xs text-[#74819A] text-center">Loading your conversation…</p>}
         {!hydrating && messages.length === 0 && (
-          <div className="m-auto text-center text-[#74819A] text-sm max-w-sm">
+          <div className="h-full flex flex-col items-center justify-center text-center text-[#74819A] text-sm max-w-md mx-auto">
             <b className="block text-[#0E1B38] text-base mb-1.5">Ask PathFinder anything</b>
-            Why a course is in your path, what to learn next, how you're tracking against your goal — this is the same real assistant everywhere in the app, just full-page here.
+            <p className="mb-4">Why a course is in your path, what to learn next, how you're tracking against your goal — this is the same real assistant everywhere in the app, just full-page here.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full">
+              {STARTER_PROMPTS.map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => send(p)}
+                  className="text-left px-3.5 py-2.5 bg-white border border-[#D8DFEB] rounded-xl text-xs sm:text-[13px] font-semibold text-[#0E1B38] hover:border-[#5B36E9] hover:bg-[#F5F1FF] transition-colors"
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
           </div>
         )}
         {messages.map((m) => (
@@ -300,15 +318,11 @@ export default function CoachScreen() {
   const [tab, setTab] = useState('chat')
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex font-['Inter',sans-serif] text-[#172554]">
-      <AppSidebar />
-      <main className="flex-1 min-w-0 p-6 lg:p-10 space-y-6 max-w-[1000px]">
-        <header className="flex items-center justify-between gap-4">
-          <div>
-            <h1 className="font-['Manrope'] font-extrabold text-2xl sm:text-[28px] text-[#0E1B38] tracking-tight">AI Coach</h1>
-            <p className="mt-0.5 text-sm text-[#52617D]">Chat, practice questions, and project ideas — all grounded in your real progress.</p>
-          </div>
-          <UserProfileDropdown />
+    <AppShell>
+      <div className="coach-page max-w-[1000px] font-['Inter',sans-serif] text-[#172554]">
+        <header>
+          <h1 className="font-['Manrope'] font-extrabold text-2xl sm:text-[28px] text-[#0E1B38] tracking-tight">AI Coach</h1>
+          <p className="mt-0.5 text-sm text-[#52617D]">Chat, practice questions, and project ideas — all grounded in your real progress.</p>
         </header>
 
         <div className="flex gap-1.5 bg-[#EEF2F7] rounded-xl p-1 w-fit">
@@ -329,7 +343,7 @@ export default function CoachScreen() {
         {tab === 'chat' && <ChatTab />}
         {tab === 'practice' && <PracticeTab />}
         {tab === 'projects' && <ProjectsTab />}
-      </main>
-    </div>
+      </div>
+    </AppShell>
   )
 }

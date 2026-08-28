@@ -1,16 +1,19 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useAIChat } from '../../contexts/AIChatContext'
 
 /**
  * The one and only "Ask PathFinder" assistant. Mounted once at app-shell level,
- * bottom-right, on every authenticated page. Reads the shared conversation from
- * AIChatContext so the thread is identical everywhere.
+ * bottom-right, on every authenticated page except AI Coach itself (that page
+ * IS the full conversation, so the floating trigger would be redundant).
+ * Reads the shared conversation from AIChatContext so the thread is identical
+ * everywhere.
  */
 
 const V = '#5B36E9'
 
 const STYLES = `
-.pfchat-fab{ position:fixed; bottom:22px; right:22px; z-index:70; display:flex; align-items:center; gap:9px;
+.pfchat-fab{ position:fixed; bottom:24px; right:28px; z-index:30; display:flex; align-items:center; gap:9px;
   background:#fff; border:1px solid #E5E7EB; border-radius:999px; padding:8px 16px 8px 8px;
   box-shadow:0 8px 22px rgba(91,54,233,.18); cursor:pointer; transition:box-shadow .15s, transform .12s;
   font-family:"Inter",system-ui,sans-serif; }
@@ -18,8 +21,15 @@ const STYLES = `
 .pfchat-fab .b{ width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg,#6B47F0,${V});
   color:#fff; display:grid; place-items:center; flex:none; }
 .pfchat-fab span{ font-weight:600; font-size:13.5px; color:#0E1B38; }
+/* Above the mobile bottom nav (64px) so it never overlaps it. */
+@media (max-width:767px){
+  .pfchat-fab{ bottom:calc(64px + 14px); right:16px; }
+  .pfchat-fab span{ display:none; }
+  .pfchat-fab{ padding:8px; }
+  .pfchat-panel{ bottom:calc(64px + 14px); right:16px; left:16px; width:auto; }
+}
 
-.pfchat-panel{ position:fixed; bottom:22px; right:22px; z-index:71; width:min(400px, calc(100vw - 32px));
+.pfchat-panel{ position:fixed; bottom:24px; right:28px; z-index:31; width:min(400px, calc(100vw - 32px));
   height:min(560px, calc(100vh - 44px)); background:#fff; border:1px solid #E5E7EB; border-radius:18px;
   box-shadow:0 18px 48px rgba(25,40,75,.20); display:flex; flex-direction:column; overflow:hidden;
   font-family:"Inter",system-ui,sans-serif; }
@@ -77,6 +87,7 @@ export default function AIChat() {
   const [input, setInput] = useState('')
   const bodyRef = useRef(null)
   const taRef = useRef(null)
+  const location = useLocation()
 
   // Scroll to latest whenever the thread changes or the panel opens.
   useEffect(() => {
@@ -97,6 +108,9 @@ export default function AIChat() {
   const onKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit() }
   }
+
+  // The AI Coach page IS the full conversation — no floating trigger there.
+  if (location.pathname.startsWith('/coach')) return null
 
   if (!isOpen) {
     return (
