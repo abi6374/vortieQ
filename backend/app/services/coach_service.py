@@ -39,7 +39,7 @@ def _call_groq(messages: list, max_tokens: int = 3000) -> str:
 def _fetch_profile(user_id: str) -> dict:
     r = (
         supabase_client.table("profiles")
-        .select("goal_text, target_role, current_level, interests, weekly_hours, completed_courses")
+        .select("goal_text, target_role, current_level, interests, weekly_hours, completed_courses, topic_ratings, detected_years_experience")
         .eq("id", user_id).execute()
     )
     return r.data[0] if r.data else {}
@@ -122,19 +122,29 @@ Generate the practice questions JSON now."""
 
 
 def generate_project_idea(user_id: str) -> dict:
-    """A real project suggestion using only skills the learner actually has."""
+    """A real project suggestion using skills the learner has, calibrated by their confidence score and GitHub portfolio depth."""
     profile = _fetch_profile(user_id)
     completed_skills, in_progress_skills = _fetch_skill_progress(user_id)
 
+    # If no path steps are completed yet, use their assessed topic_ratings from GitHub/resume
     if not completed_skills and not in_progress_skills:
-        raise ValueError("Complete a few roadmap steps first so there's something real to build a project around.")
+        ratings = profile.get("topic_ratings") or []
+        if ratings:
+            completed_skills = [r["name"] for r in ratings if r.get("suggested_level") in ("intermediate", "advanced", "expert")]
+            in_progress_skills = [r["name"] for r in ratings if r.get("suggested_level") == "basic"]
+
+    if not completed_skills and not in_progress_skills:
+        raise ValueError("Complete a few roadmap steps or calibrate your skills first so there's something real to build a project around.")
 
     user_msg = f"""LEARNER PROFILE:
 target_role: {profile.get('target_role', '')}
 current_level: {profile.get('current_level', '')}
+topic_ratings: {json.dumps(profile.get('topic_ratings', []), default=str)}
 
 REAL COMPLETED SKILLS: {json.dumps(completed_skills)}
 REAL IN-PROGRESS SKILLS: {json.dumps(in_progress_skills)}
+
+Note: If the learner has high confidence or advanced proficiency in ML/Python, do NOT suggest basic toy tutorials (e.g. Iris, Titanic). Suggest an advanced, production-grade or specialized capstone.
 
 Suggest one project now."""
 

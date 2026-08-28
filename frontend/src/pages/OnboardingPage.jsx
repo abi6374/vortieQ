@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../hooks/useAuth'
 import ChatInput from '../components/onboarding/ChatInput'
 import GoalConfirm from '../components/onboarding/GoalConfirm'
 import GeneratingOverlay from '../components/onboarding/GeneratingOverlay'
@@ -12,19 +13,20 @@ import NavBar from '../components/ui/NavBar'
 import api from '../lib/apiClient'
 
 /**
- * Onboarding is a wizard with two entry lanes:
- *   1. Skip resume / Chat → phase = 'intake' → 'topics' → 'goalcompass' → 'generating'
- *   2. Upload resume → phase = 'intake' → 'topics' → 'goalcompass' → 'generating'
- * At submit time, topic ratings (if any) ride along on the POST /api/profile/ call
- * as `topic_ratings`, which the backend merges into the learner profile.
+ * Onboarding is a wizard with multiple entry lanes:
+ *   1. GitHub OAuth → Repos & stack analyzed automatically; Step 1 optional
+ *   2. Skip resume / Chat → phase = 'intake' → 'topics' → 'goalcompass' → 'generating'
+ *   3. Upload resume → phase = 'intake' → 'topics' → 'goalcompass' → 'generating'
  */
 export default function OnboardingPage() {
   const [phase, setPhase] = useState('intake') // 'intake' | 'topics' | 'goalcompass' | 'chat' | 'confirm' | 'generating'
   const [goalText, setGoalText] = useState('')
   const [extractedProfile, setExtractedProfile] = useState(null)
-  const [resumeTopics, setResumeTopics] = useState([])       // from LLM extraction
+  const [resumeTopics, setResumeTopics] = useState([])       // from LLM/GitHub extraction
   const [detectedYears, setDetectedYears] = useState(0)
   const [topicRatings, setTopicRatings] = useState([])       // user-adjusted levels
+  const [githubData, setGithubData] = useState(null)
+  const [githubLoading, setGithubLoading] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
   const [genStatus, setGenStatus] = useState('loading') // 'loading' | 'success' | 'error'
@@ -32,30 +34,72 @@ export default function OnboardingPage() {
   const lastPlanArgs = useRef(null)
   const bgRef = useRef(null)
 
+  const { session, user } = useAuth()
   const navigate = useNavigate()
+
+  // Ingest GitHub data if the user authenticated via GitHub
+  useEffect(() => {
+    const isGithubUser =
+      session?.provider_token ||
+      user?.app_metadata?.provider === 'github' ||
+      user?.user_metadata?.user_name ||
+      window.location.search.includes('source=github')
+
+    if (isGithubUser && !githubData) {
+      setGithubLoading(true)
+      api.post('/api/profile/github', {
+        token: session?.provider_token,
+        username: user?.user_metadata?.user_name || user?.user_metadata?.preferred_username,
+      })
+        .then((res) => {
+          if (res?.data) {
+            setGithubData(res.data)
+            if (res.data.topics && res.data.topics.length > 0) {
+              setResumeTopics(res.data.topics)
+              setDetectedYears(res.data.detected_years_experience || 0)
+            }
+          }
+        })
+        .catch((err) => {
+          console.warn('[Onboarding] GitHub profile ingestion note:', err)
+        })
+        .finally(() => {
+          setGithubLoading(false)
+        })
+    }
+  }, [session, user])
 
   // Freeze the Goal Compass page (pointer + keyboard) while the overlay is open.
   useEffect(() => {
     if (bgRef.current) bgRef.current.inert = phase === 'generating'
   }, [phase])
 
-  // ------------- Step 1: Intake (Resume or Natural-language notes)
+  // ------------- Step 1: Intake (Resume, GitHub, or Natural-language notes)
   const handleResumeExtracted = (topics, years) => {
-    setResumeTopics(topics)
-    setDetectedYears(years)
-    setPhase(topics && topics.length > 0 ? 'topics' : 'goalcompass')
+    // If GitHub topics were already loaded, merge them cleanly
+    const existingNames = new Set((topics || []).map((t) => t.name.toLowerCase()))
+    const merged = [...(topics || [])]
+    if (githubData?.topics) {
+      for (const gt of githubData.topics) {
+        if (!existingNames.has(gt.name.toLowerCase())) {
+          merged.push(gt)
+        }
+      }
+    }
+    const finalYears = Math.max(years || 0, detectedYears || 0)
+    setResumeTopics(merged)
+    setDetectedYears(finalYears)
+    setPhase(merged && merged.length > 0 ? 'topics' : 'goalcompass')
   }
 
   const handleChatIntake = (storyText) => {
-    // Chat lane: no resume => no extracted skills. Do NOT fabricate topics
-    // (the old code hardcoded "Python" + "Data Analysis" which would then be
-    // asked about even if the user described, say, wanting to learn React).
-    // Skip the assessment step; carry the user's own words into Goal Compass
-    // so the goal textarea is pre-filled instead of thrown away.
     setGoalText(storyText || '')
-    setResumeTopics([])
-    setTopicRatings([])
-    setDetectedYears(0)
+    // Preserve GitHub topics if available, else empty
+    if (!githubData?.topics || githubData.topics.length === 0) {
+      setResumeTopics([])
+      setTopicRatings([])
+      setDetectedYears(0)
+    }
     setPhase('goalcompass')
   }
 
@@ -141,6 +185,8 @@ export default function OnboardingPage() {
         <SetupSidebar current={1} />
         <div className="flex-1 flex flex-col items-center justify-start px-4 py-8 lg:py-10 overflow-y-auto">
           <LearnerIntakeWorkspace
+            githubData={githubData}
+            githubLoading={githubLoading}
             onExtracted={handleResumeExtracted}
             onChatSubmit={handleChatIntake}
             onSkip={() => setPhase('topics')}

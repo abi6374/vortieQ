@@ -63,6 +63,18 @@ export function AuthProvider({ children }) {
     return data
   }
 
+  const signInWithGithub = async () => {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'github',
+      options: {
+        redirectTo: `${window.location.origin}/onboarding?source=github`,
+        scopes: 'read:user repo user:email',
+      },
+    })
+    if (error) throw error
+    return data
+  }
+
   const signOut = async () => {
     await supabase.auth.signOut()
     setSession(null)
@@ -102,6 +114,7 @@ export function AuthProvider({ children }) {
         signIn,
         signUp,
         signInWithGoogle,
+        signInWithGithub,
         signOut,
         user: effectiveUser
       }}

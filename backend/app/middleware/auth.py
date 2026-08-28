@@ -109,3 +109,19 @@ def verify_jwt(
         status_code=401,
         detail=f"Invalid token (all validators failed): {errors.get('supabase', errors.get('asymmetric', errors.get('hs256')))}",
     )
+
+
+security_optional = HTTPBearer(auto_error=False)
+
+
+def verify_jwt_optional(
+    credentials: HTTPAuthorizationCredentials = Depends(security_optional),
+) -> str | None:
+    """Optionally decode the Supabase JWT. Returns user_id if valid, else None."""
+    if not credentials or not credentials.credentials:
+        return None
+    try:
+        return verify_jwt(credentials)
+    except Exception:
+        return None
+
