@@ -28,7 +28,15 @@ class Settings(BaseSettings):
     # A boto3 client can call any AWS region regardless of where the calling
     # instance lives, so this is independent of EC2's own region.
     AWS_REGION: str = "us-east-1"
-    BEDROCK_MODEL_ID: str = "meta.llama3-70b-instruct-v1:0"
+    # amazon.nova-pro-v1:0, not meta.llama3-70b-instruct-v1:0: switched after a
+    # real incident (see PROGRESS_TRACKER.md Round 11/13) where Llama 3 70B's
+    # on-demand throughput quota on this account throttled 100% of real
+    # path-generation attempts. Live-tested both head to head on this exact
+    # account: Nova Pro survived 9/9 rapid sequential calls with zero
+    # throttling (Llama 3 70B fails under that exact load), supports at least
+    # 8192 output tokens (Llama 3 70B hard-caps at 2048), responds faster
+    # (~0.6-1.3s vs ~2.2s), and returns clean JSON with no markdown fences.
+    BEDROCK_MODEL_ID: str = "amazon.nova-pro-v1:0"
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

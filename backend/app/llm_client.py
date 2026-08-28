@@ -40,13 +40,13 @@ def _groq_chat(messages: list, max_tokens: int, temperature: float) -> str:
 
 _bedrock_runtime = None
 
-# Meta Llama 3 70B Instruct on Bedrock hard-caps output at 2048 tokens - found
-# live (a real ValidationException) when path_service's 6000-token request
-# for milestone-sequencing hit this. Clamping here means every caller keeps
-# working, but the tradeoff is real: prompts written assuming Groq's higher
-# ceiling (path generation especially) can come back truncated on this model.
-# Lighter prompts (coach practice/project, assistant replies) fit comfortably.
-BEDROCK_MAX_OUTPUT_TOKENS = 2048
+# Now amazon.nova-pro-v1:0 (see config.py), not meta.llama3-70b-instruct-v1:0
+# - Llama 3 70B hard-capped output at 2048 tokens (a real ValidationException
+# hit when path_service's 6000-token milestone-sequencing request exceeded
+# it). Live-tested Nova Pro up to 8192 with no error, so the clamp is raised
+# to match; re-verify this if BEDROCK_MODEL_ID is ever changed again - the cap
+# is genuinely model-specific, not a Bedrock-wide constant.
+BEDROCK_MAX_OUTPUT_TOKENS = 8192
 
 
 def _get_bedrock_runtime():
