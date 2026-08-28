@@ -121,17 +121,38 @@ export default function ProgressScreen() {
   // DATASETS
   // ---------------------------------------------------------------------------
 
-  // 1. Roadmap Progress Over 8 Weeks (Line/Area Chart)
-  const progressTimelineData = [
-    { week: 'Week 1', progress: 18, change: '+18%' },
-    { week: 'Week 2', progress: 24, change: '+6%' },
-    { week: 'Week 3', progress: 31, change: '+7%' },
-    { week: 'Week 4', progress: 39, change: '+8%' },
-    { week: 'Week 5', progress: 46, change: '+7%' },
-    { week: 'Week 6', progress: 55, change: '+9%' },
-    { week: 'Week 7', progress: 62, change: '+7%' },
-    { week: 'Week 8', progress: 68, change: '+6%' },
-  ]
+  // Real derived stats used by the hero card above the charts.
+  const weeksCompletedCount = roadmap.weeks.filter((w) => w.is_complete).length
+  const onTrack = (() => {
+    const totalWeeks = roadmap.weeks.length
+    if (!totalWeeks || !roadmap.currentWeek) return false
+    const expectedPercent = (roadmap.currentWeek / totalWeeks) * 100
+    return roadmap.percent >= expectedPercent * 0.85
+  })()
+
+  // 1. Roadmap Progress Over Time (Area Chart) — REAL, derived from roadmap.weeks.
+  // Each point is cumulative completion (steps done in weeks 1..N / total steps
+  // in the whole roadmap), so it's an honest reflection of the learner's real
+  // progress against their real week count — not a fixed "8 weeks" fiction.
+  // There's no historical snapshot table, so this can't show what completion
+  // looked like on a past calendar date; it shows real completion mapped onto
+  // the roadmap's own week axis, which is the closest real signal available.
+  const progressTimelineData = (() => {
+    const totalAll = roadmap.totalSteps || 0
+    let cumulativeDone = 0
+    let prevProgress = 0
+    return roadmap.weeks.map((w) => {
+      cumulativeDone += w.completed_steps || 0
+      const progress = totalAll ? Math.round((cumulativeDone / totalAll) * 100) : 0
+      const delta = progress - prevProgress
+      prevProgress = progress
+      return {
+        week: `Week ${w.week_number}`,
+        progress,
+        change: `${delta >= 0 ? '+' : ''}${delta}%`,
+      }
+    })
+  })()
 
   // 2. Weekly Learning Activity (Bar Chart - 17.4 hrs total)
   const weeklyActivityData = [
@@ -434,15 +455,19 @@ export default function ProgressScreen() {
             </span>
             <div className="flex items-baseline gap-3 pt-1">
               <span className="font-['Inter'] font-extrabold text-4xl sm:text-5xl text-[#172554] tracking-tight">
-                68%
+                {roadmap.percent}%
               </span>
-              <span className="inline-flex items-center gap-1 text-xs font-bold text-[#16A34A] bg-[#ECFDF3] px-2.5 py-0.5 rounded-full border border-[#D1FADF]">
-                <Check className="w-3.5 h-3.5" />
-                <span>On track</span>
-              </span>
+              {onTrack && (
+                <span className="inline-flex items-center gap-1 text-xs font-bold text-[#16A34A] bg-[#ECFDF3] px-2.5 py-0.5 rounded-full border border-[#D1FADF]">
+                  <Check className="w-3.5 h-3.5" />
+                  <span>On track</span>
+                </span>
+              )}
             </div>
             <p className="text-xs sm:text-sm text-[#64748B] font-medium leading-relaxed">
-              You're making strong progress toward your <strong>AIML Engineer Internship</strong> goal. At your current pace, you will complete the remaining modules by January 2027.
+              {roadmap.path?.goal_text
+                ? <>Working toward: <strong>{roadmap.path.goal_text.split('.')[0]}</strong>. {roadmap.completedSteps} of {roadmap.totalSteps} steps completed so far.</>
+                : 'Generate a learning path to start tracking real progress here.'}
             </p>
             <div className="pt-2 flex items-center gap-3">
               <button
@@ -450,7 +475,7 @@ export default function ProgressScreen() {
                 onClick={() => setActiveActionModal('checkpoint')}
                 className="px-4 py-2 bg-[#5B2FF3] hover:bg-[#4C1DCE] text-white text-xs font-bold rounded-lg shadow-sm transition-all"
               >
-                Continue Week 5
+                Continue Week {roadmap.currentWeek}
               </button>
               <button
                 type="button"
@@ -475,7 +500,7 @@ export default function ProgressScreen() {
                   strokeWidth="10"
                   fill="transparent"
                 />
-                {/* Active Purple Arc (68% of 2 * PI * 48 ~= 205.1) */}
+                {/* Active Purple Arc — real percent of 2 * PI * 48 */}
                 <circle
                   cx="60"
                   cy="60"
@@ -483,14 +508,14 @@ export default function ProgressScreen() {
                   stroke="#5B2FF3"
                   strokeWidth="10"
                   strokeDasharray={`${2 * Math.PI * 48}`}
-                  strokeDashoffset={`${2 * Math.PI * 48 * (1 - 0.68)}`}
+                  strokeDashoffset={`${2 * Math.PI * 48 * (1 - roadmap.percent / 100)}`}
                   strokeLinecap="round"
                   fill="transparent"
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <span className="font-['Inter'] font-extrabold text-2xl text-[#172554]">
-                  68%
+                  {roadmap.percent}%
                 </span>
                 <span className="text-[10px] font-semibold text-[#64748B]">
                   Overall
@@ -500,10 +525,10 @@ export default function ProgressScreen() {
 
             <div className="flex flex-col gap-1.5">
               <span className="text-xs font-bold text-[#172554]">Overall roadmap</span>
-              <span className="text-[11px] text-[#64748B]">11 of 16 weeks completed</span>
+              <span className="text-[11px] text-[#64748B]">{weeksCompletedCount} of {roadmap.weeks.length} weeks completed</span>
               <div className="inline-flex items-center gap-1 text-[11px] font-bold text-[#5B2FF3] bg-[#F3EEFF] px-2 py-0.5 rounded-full w-fit">
                 <TrendingUp className="w-3 h-3" />
-                <span>+8% this month</span>
+                <span>{roadmap.completedSteps} of {roadmap.totalSteps} steps done</span>
               </div>
             </div>
           </div>
@@ -524,11 +549,11 @@ export default function ProgressScreen() {
             </div>
             <div className="my-2">
               <span className="font-['Inter'] font-extrabold text-3xl text-[#172554] tracking-tight">
-                68%
+                {roadmap.percent}%
               </span>
             </div>
             <span className="text-xs font-bold text-[#16A34A] flex items-center gap-1">
-              <span>+8% this month</span>
+              <span>{roadmap.completedSteps} of {roadmap.totalSteps} steps done</span>
             </span>
           </div>
 
