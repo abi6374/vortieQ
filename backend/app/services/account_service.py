@@ -145,13 +145,19 @@ def get_streak(user_id: str) -> dict:
     )
     rows = r.data or []
     if not rows:
-        week_start = date.today() - timedelta(days=date.today().weekday())
+        today = date.today()
+        week_start = today - timedelta(days=today.weekday())
+        window_start = today - timedelta(days=34)
         return {
             "current_streak": 0, "best_streak": 0, "active_today": False,
-            "total_days": 0, "minutes_this_week": 0, "recent_days": [],
+            "total_days": 0, "minutes_this_week": 0, "minutes_total": 0, "recent_days": [],
             "daily_minutes_this_week": [
                 {"date": (week_start + timedelta(days=i)).isoformat(), "minutes": 0}
                 for i in range(7)
+            ],
+            "daily_minutes_35d": [
+                {"date": (window_start + timedelta(days=i)).isoformat(), "minutes": 0}
+                for i in range(35)
             ],
         }
 
@@ -186,6 +192,10 @@ def get_streak(user_id: str) -> dict:
         (row.get("minutes") or 0) for row in rows
         if _row_date(row) and _row_date(row) >= week_start
     )
+    # Total across the fetched history (capped at the same 400 most-recent
+    # sessions as the streak calculation above - in practice that's the
+    # learner's whole real history for any realistic usage span).
+    minutes_total = sum((row.get("minutes") or 0) for row in rows)
 
     # Real per-day breakdown for this calendar week (Mon..Sun), summed from
     # actual study_sessions rows - no fabricated hours, days with zero real
@@ -196,14 +206,29 @@ def get_streak(user_id: str) -> dict:
         if d and d.isoformat() in daily_minutes:
             daily_minutes[d.isoformat()] += row.get("minutes") or 0
 
+    # Real per-day minutes for the last 35 days (5 calendar weeks), for the
+    # activity heatmap. Same idea as daily_minutes_this_week but a longer
+    # window - every value is a real sum from study_sessions, zero where
+    # there was genuinely no activity that day.
+    window_start = today - timedelta(days=34)
+    daily_minutes_35d = {(window_start + timedelta(days=i)).isoformat(): 0 for i in range(35)}
+    for row in rows:
+        d = _row_date(row)
+        if d and d.isoformat() in daily_minutes_35d:
+            daily_minutes_35d[d.isoformat()] += row.get("minutes") or 0
+
     return {
         "current_streak": current,
         "best_streak": max(best, current),
         "active_today": active_today,
         "total_days": len(parsed),
         "minutes_this_week": minutes_week,
+        "minutes_total": minutes_total,
         "recent_days": [d.isoformat() for d in parsed[:35]],
         "daily_minutes_this_week": [
             {"date": iso, "minutes": mins} for iso, mins in daily_minutes.items()
+        ],
+        "daily_minutes_35d": [
+            {"date": iso, "minutes": mins} for iso, mins in daily_minutes_35d.items()
         ],
     }

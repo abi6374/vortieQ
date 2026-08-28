@@ -193,10 +193,14 @@ export default function ProgressScreen() {
       if (step.completed) skillTagStats[tag].done += 1
     })
   })
-  const rankedSkills = Object.entries(skillTagStats)
+  const allSkills = Object.entries(skillTagStats)
     .map(([tag, s]) => ({ tag, total: s.total, progress: Math.round((s.done / s.total) * 100) }))
-    .sort((a, b) => b.total - a.total)
-    .slice(0, 6)
+  const rankedSkills = [...allSkills].sort((a, b) => b.total - a.total).slice(0, 6)
+
+  // "Mastered" = a real skill tag where every real step referencing it is
+  // complete (100%), used by the "Skills mastered" KPI card below.
+  const masteredSkillCount = allSkills.filter((s) => s.progress >= 100).length
+  const totalSkillCount = allSkills.length
 
   const cap = (s) => s.replace(/[-_]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
 
@@ -215,15 +219,21 @@ export default function ProgressScreen() {
   // 4. Skill Profile Radar Data — same real per-skill progress, reshaped for the radar chart.
   const radarData = rankedSkills.map((s) => ({ skill: cap(s.tag), value: s.progress }))
 
-  // 5. 5-Week Mini Activity Heatmap Matrix (7 days x 5 weeks)
+  // 5. 5-Week Mini Activity Heatmap Matrix (7 days x 5 weeks) — REAL, from
+  // streak.daily_minutes_35d (real study_sessions minutes, chronological).
   // Intensity: 0 (gray), 1 (very light), 2 (light), 3 (medium), 4 (strong purple)
-  const heatmapWeeks = [
-    [1, 2, 2, 3, 2, 4, 1], // Week -4
-    [2, 3, 1, 4, 3, 4, 2], // Week -3
-    [3, 3, 2, 4, 4, 3, 2], // Week -2
-    [2, 4, 3, 3, 4, 4, 2], // Week -1
-    [2, 3, 2, 4, 3, 4, 2], // Current Week (Active 9 day streak)
-  ]
+  const minutesToIntensity = (mins) => {
+    if (mins <= 0) return 0
+    if (mins < 30) return 1
+    if (mins < 60) return 2
+    if (mins < 120) return 3
+    return 4
+  }
+  const heatmapDays = streak.daily_minutes_35d || []
+  const heatmapWeeks = []
+  for (let i = 0; i < heatmapDays.length; i += 7) {
+    heatmapWeeks.push(heatmapDays.slice(i, i + 7).map((d) => minutesToIntensity(d.minutes)))
+  }
 
   const getHeatmapColor = (intensity) => {
     switch (intensity) {
@@ -549,11 +559,11 @@ export default function ProgressScreen() {
             </div>
             <div className="my-2">
               <span className="font-['Inter'] font-extrabold text-3xl text-[#172554] tracking-tight">
-                12 / 18
+                {masteredSkillCount} / {totalSkillCount}
               </span>
             </div>
             <span className="text-xs font-semibold text-[#64748B]">
-              67% complete
+              {totalSkillCount ? Math.round((masteredSkillCount / totalSkillCount) * 100) : 0}% complete
             </span>
           </div>
 
@@ -567,11 +577,11 @@ export default function ProgressScreen() {
             </div>
             <div className="my-2">
               <span className="font-['Inter'] font-extrabold text-3xl text-[#172554] tracking-tight">
-                42.5 hrs
+                {Math.round(((streak.minutes_total || 0) / 60) * 10) / 10} hrs
               </span>
             </div>
             <span className="text-xs font-bold text-[#5B2FF3]">
-              +6.5 hrs this week
+              {weeklyHoursTotal} hrs this week
             </span>
           </div>
 
@@ -585,7 +595,7 @@ export default function ProgressScreen() {
             </div>
             <div className="my-2">
               <span className="font-['Inter'] font-extrabold text-3xl text-[#172554] tracking-tight">
-                9 days
+                {streak.current_streak} days
               </span>
             </div>
             <span className="text-xs font-semibold text-[#64748B]">
@@ -822,17 +832,19 @@ export default function ProgressScreen() {
                       <h2 className="font-['Inter'] font-bold text-base text-[#172554]">
                         Learning streak
                       </h2>
-                      <span className="font-extrabold text-sm text-[#5B2FF3]">9 days</span>
+                      <span className="font-extrabold text-sm text-[#5B2FF3]">{streak.current_streak} days</span>
                     </div>
                     <p className="text-xs text-[#64748B]">
-                      You're building a consistent learning habit.
+                      {streak.current_streak > 0
+                        ? "You're building a consistent learning habit."
+                        : 'Complete a roadmap task to start your streak.'}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-4 text-xs font-semibold text-[#64748B]">
-                  <span>9 day current streak</span>
-                  <span className="text-[#5B2FF3]">14 day best streak</span>
+                  <span>{streak.current_streak} day current streak</span>
+                  <span className="text-[#5B2FF3]">{streak.best_streak} day best streak</span>
                 </div>
               </div>
 
@@ -853,7 +865,13 @@ export default function ProgressScreen() {
                 </div>
 
                 <div className="p-3 bg-[#F8F5FF] border border-[#DDD2FF] rounded-xl text-xs text-[#4F2BC8] font-medium leading-relaxed max-w-xs">
-                  🔥 <strong>2 more days</strong> to reach your monthly milestone goal and surpass 11 consecutive days!
+                  {streak.current_streak > 0 && streak.current_streak >= streak.best_streak ? (
+                    <>🔥 You're on your <strong>best streak yet</strong> — keep it going!</>
+                  ) : streak.current_streak > 0 ? (
+                    <>🔥 <strong>{streak.best_streak - streak.current_streak} more day{streak.best_streak - streak.current_streak === 1 ? '' : 's'}</strong> to beat your personal best of {streak.best_streak} days!</>
+                  ) : (
+                    <>🔥 Complete a task today to start a new streak.</>
+                  )}
                 </div>
               </div>
             </section>
