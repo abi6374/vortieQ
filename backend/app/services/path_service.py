@@ -142,6 +142,14 @@ Generate the learning path JSON now."""
             "steps": steps,
         })
 
+    # Assign contiguous week numbers so the roadmap week strip and prerequisite
+    # locking work for freshly generated paths, not just backfilled ones.
+    try:
+        from app.services import roadmap_service
+        roadmap_service.assign_week_numbers(path_id, int(profile.get("weekly_hours") or 10))
+    except Exception as e:
+        print(f"[generate_path] week assignment failed: {type(e).__name__}: {e}", flush=True)
+
     return {"path_id": path_id, "milestones": response_milestones}
 
 
@@ -189,3 +197,171 @@ def get_path(path_id: str, user_id: str) -> dict:
         })
 
     return {"path_id": path_id, "milestones": list(milestones_dict.values())}
+
+
+# ---------------------------------------------------------------- SWAP
+# In-place single-step replacement — the sane alternative to nuking the whole
+# path tail on every "not for me" or "too easy" click. See the audit in the
+# team chat for why we moved away from tail-regeneration as the default.
+_LEVEL_TIERS = ["beginner", "intermediate", "advanced"]
+
+
+def _load_step_full(step_id: str, user_id: str) -> tuple[dict, dict]:
+    """Fetch step + owning path + course; enforce ownership. Raises ValueError."""
+    r = (
+        supabase_client.table("path_steps")
+        .select(
+            "*, learning_paths!inner(id, user_id, goal_text), "
+            "courses(id, title, description, provider, difficulty, "
+            "duration_hrs, resource_url, skill_tags, prerequisites)"
+        )
+        .eq("id", step_id)
+        .execute()
+    )
+    if not r.data:
+        raise ValueError("Step not found")
+    step = r.data[0]
+    if (step.get("learning_paths") or {}).get("user_id") != user_id:
+        raise ValueError("Step not found")
+    return step, step["learning_paths"]
+
+
+def _score_alternative(candidate: dict, skipped_course: dict, target_diff: str) -> float:
+    """Higher is better. Overlap on skill_tags + difficulty match beats similarity."""
+    cand_tags = {t.lower() for t in (candidate.get("skill_tags") or [])}
+    skipped_tags = {t.lower() for t in (skipped_course.get("skill_tags") or [])}
+    overlap = len(cand_tags & skipped_tags) / max(len(cand_tags | skipped_tags), 1)  # Jaccard
+    diff_match = 1.0 if (candidate.get("difficulty") == target_diff) else 0.0
+    similarity = float(candidate.get("similarity") or 0.0)
+    # Overlap dominates (weight 3), then diff match (2), then similarity (1).
+    return 3.0 * overlap + 2.0 * diff_match + similarity
+
+
+def swap_step(step_id: str, user_id: str, level_hint: int = 0) -> dict:
+    """Replace a single step with the best available alternative.
+
+    Args:
+      step_id:    the step being swapped out.
+      user_id:    caller (ownership-checked).
+      level_hint: +1 = "too easy" (find a harder replacement), 0 = plain swap.
+
+    Behavior:
+      1. Marks the skipped step as `skipped` in place (kept for history).
+      2. Bumps sequence_order of every later step in the path by +1.
+      3. Inserts the alternative right after the skipped step in the same
+         milestone, with a fresh grounded explanation.
+      4. Writes a feedback_event so the mutation is auditable.
+      5. Never touches the global profile.current_level - the too-easy signal
+         only shapes THIS replacement.
+    """
+    step, path = _load_step_full(step_id, user_id)
+    skipped_course = step.get("courses") or {}
+
+    if step.get("status") in ("skipped", "completed"):
+        return {"swapped": False, "reason": f"Step already {step['status']}"}
+
+    # Fetch profile
+    prof_r = supabase_client.table("profiles").select("*").eq("id", user_id).execute()
+    if not prof_r.data:
+        raise ValueError("Profile not found")
+    profile = prof_r.data[0]
+
+    # Target difficulty: current course level (+level_hint tiers).
+    cur_diff = skipped_course.get("difficulty") or profile.get("current_level") or "beginner"
+    cur_idx = _LEVEL_TIERS.index(cur_diff) if cur_diff in _LEVEL_TIERS else 0
+    target_diff = _LEVEL_TIERS[max(0, min(len(_LEVEL_TIERS) - 1, cur_idx + level_hint))]
+
+    # Recommender candidates
+    candidates = get_recommender().recommend(profile) or []
+
+    # Filter out anything already in this path (any status), completed elsewhere,
+    # and the skipped course itself.
+    in_path = {row["course_id"] for row in (supabase_client.table("path_steps")
+               .select("course_id").eq("path_id", path["id"]).execute().data or [])
+               if row.get("course_id")}
+    completed_ids = set(profile.get("completed_courses") or [])
+    excluded = in_path | completed_ids | {skipped_course.get("id")}
+
+    candidates = [c for c in candidates if c.get("id") not in excluded]
+    if not candidates:
+        # No alternative available — mark skipped anyway, don't insert anything.
+        _set_step_status_local(step_id, "skipped")
+        _log_swap_event(user_id, path["id"], step_id, note="no alternative available")
+        return {"swapped": False, "reason": "No alternative course available in the library"}
+
+    # Rank
+    candidates.sort(
+        key=lambda c: _score_alternative(c, skipped_course, target_diff),
+        reverse=True,
+    )
+    replacement = candidates[0]
+
+    # Bump sequence_orders of everything after the skipped step, then insert.
+    old_seq = int(step.get("sequence_order") or 0)
+    _bump_later_sequences(path["id"], after=old_seq)
+    _set_step_status_local(step_id, "skipped")
+
+    explanation = generate_explanation(profile, replacement)
+    inserted = supabase_client.table("path_steps").insert({
+        "path_id": path["id"],
+        "course_id": replacement["id"],
+        "sequence_order": old_seq + 1,
+        "milestone_label": step.get("milestone_label"),
+        "status": "not_started",
+        "explanation": explanation,
+    }).execute()
+    new_row = inserted.data[0] if inserted.data else None
+    _log_swap_event(
+        user_id, path["id"], step_id,
+        note=f"swapped for {replacement.get('title')} (level_hint={level_hint})",
+    )
+
+    return {
+        "swapped": True,
+        "old_step_id": step_id,
+        "new_step": {
+            "step_id": new_row["id"] if new_row else "",
+            "course_id": replacement["id"],
+            "title": replacement.get("title", ""),
+            "provider": replacement.get("provider", ""),
+            "duration_hrs": replacement.get("duration_hrs", 0),
+            "difficulty": replacement.get("difficulty", ""),
+            "skill_tags": replacement.get("skill_tags", []),
+            "resource_url": replacement.get("resource_url", ""),
+            "milestone_label": step.get("milestone_label"),
+            "explanation": explanation,
+            "status": "not_started",
+            "sequence_order": old_seq + 1,
+        },
+    }
+
+
+def _set_step_status_local(step_id: str, status: str) -> None:
+    supabase_client.table("path_steps").update({"status": status}).eq("id", step_id).execute()
+
+
+def _bump_later_sequences(path_id: str, after: int) -> None:
+    """Add +1 to sequence_order for every step in `path_id` with sequence_order > after."""
+    later = (
+        supabase_client.table("path_steps")
+        .select("id, sequence_order")
+        .eq("path_id", path_id)
+        .gt("sequence_order", after)
+        .execute()
+    )
+    # supabase-py has no bulk-update-with-expression; do individual updates in
+    # descending order to avoid transient unique conflicts if we ever add one.
+    for row in sorted(later.data or [], key=lambda r: r["sequence_order"], reverse=True):
+        supabase_client.table("path_steps").update(
+            {"sequence_order": row["sequence_order"] + 1}
+        ).eq("id", row["id"]).execute()
+
+
+def _log_swap_event(user_id: str, path_id: str, step_id: str, note: str) -> None:
+    supabase_client.table("feedback_events").insert({
+        "user_id": user_id,
+        "path_id": path_id,
+        "step_id": step_id,
+        "event_type": "not_interested",  # reuse existing enum; note carries the semantic
+        "note": note,
+    }).execute()

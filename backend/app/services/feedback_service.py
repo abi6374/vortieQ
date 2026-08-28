@@ -215,7 +215,14 @@ Generate the learning path JSON now."""
             "role": "user",
             "content": "Return ONLY the JSON object. No markdown fences.",
         })
-        milestones = json.loads(_strip_fences(_call_groq(messages)))["milestones"]
+        try:
+            milestones = json.loads(_strip_fences(_call_groq(messages)))["milestones"]
+        except Exception as e:
+            # LLM couldn't produce valid JSON on either attempt. Rather than
+            # 500 the user, leave the path as-is (tail already deleted, but
+            # the frontend will just render fewer steps).
+            print(f"[feedback regen] gave up after 2 bad JSON attempts: {e!r}", flush=True)
+            return []
 
     course_lookup = {c["id"]: c for c in candidates}
     seq = _last_sequence_order(path_id)
@@ -261,26 +268,60 @@ def handle_feedback(step_id: str, event_type: str, note: str, user_id: str) -> d
 
     step, path = _load_step_with_path(step_id, user_id)
     path_id = path["id"]
+
+    # Idempotency guard: refuse to re-process a step whose feedback has already
+    # landed. Prevents cascade re-runs from React StrictMode double-invoke,
+    # rapid double-clicks, or stale button state in the dashboard.
+    current_status = step.get("status")
+    if current_status in ("completed", "skipped"):
+        return {
+            "feedback_id": None,
+            "path_updated": False,
+            "updated_steps": [],
+            "note": f"Step is already {current_status}; feedback ignored.",
+        }
+
     feedback_id = _write_feedback_event(user_id, path_id, step_id, event_type, note)
 
     if event_type == "completed":
         _set_step_status(step_id, "completed")
+        # Track completions on the profile so the recommender can filter them
+        # out of future paths and swaps. (Schema had the column since day 1,
+        # nothing had been writing to it.)
+        course_id = (step.get("courses") or {}).get("id")
+        if course_id:
+            _append_completed_course(user_id, course_id)
         return {"feedback_id": feedback_id, "path_updated": False, "updated_steps": []}
 
-    # too_easy / not_interested: mark skipped, adjust profile, regenerate tail.
-    _set_step_status(step_id, "skipped")
-    profile = _fetch_profile(user_id)
+    # too_easy / not_interested: delegate to path_service.swap_step so we do a
+    # single-course in-place replacement instead of nuking the whole tail.
+    # Local imports to avoid circular imports at module load.
+    from app.services import path_service
 
-    if event_type == "too_easy":
-        _bump_level(profile)
-    else:  # not_interested
-        _drop_interests(profile, (step.get("courses") or {}).get("skill_tags") or [])
-
-    _persist_profile_change(user_id, profile)
-    updated_steps = _regenerate_tail(path_id, profile)
-
+    level_hint = 1 if event_type == "too_easy" else 0
+    swap_result = path_service.swap_step(step_id, user_id, level_hint=level_hint)
     return {
         "feedback_id": feedback_id,
-        "path_updated": True,
-        "updated_steps": updated_steps,
+        "path_updated": bool(swap_result.get("swapped")),
+        "updated_steps": [swap_result["new_step"]] if swap_result.get("new_step") else [],
+        "swap_result": swap_result,
     }
+
+
+# Kept for the explicit "rebuild remaining path" escape-hatch endpoint. Not
+# called from the normal feedback flow anymore.
+def rebuild_tail_full(step_id_or_none: str | None, user_id: str, path_id: str) -> dict:
+    """Old behavior: adjust profile, delete not_started tail, regen from scratch."""
+    profile = _fetch_profile(user_id)
+    updated_steps = _regenerate_tail(path_id, profile)
+    return {"path_updated": True, "updated_steps": updated_steps}
+
+
+def _append_completed_course(user_id: str, course_id: str) -> None:
+    existing = supabase_client.table("profiles").select("completed_courses").eq("id", user_id).execute()
+    ids = list((existing.data[0].get("completed_courses") if existing.data else None) or [])
+    if course_id not in ids:
+        ids.append(course_id)
+        supabase_client.table("profiles").update({"completed_courses": ids}).eq("id", user_id).execute()
+
+

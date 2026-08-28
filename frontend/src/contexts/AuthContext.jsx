@@ -37,13 +37,24 @@ export function AuthProvider({ children }) {
     return data
   }
 
+  const signInWithGoogle = async () => {
+    // Requires the Google provider to be enabled in Supabase → Authentication →
+    // Providers. If it isn't, Supabase returns an error which the caller shows.
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: `${window.location.origin}/dashboard` },
+    })
+    if (error) throw error
+    return data
+  }
+
   const signOut = async () => {
     await supabase.auth.signOut()
     setSession(null)
   }
 
   return (
-    <AuthContext.Provider value={{ session, loading, signIn, signUp, signOut, user: session?.user }}>
+    <AuthContext.Provider value={{ session, loading, signIn, signUp, signInWithGoogle, signOut, user: session?.user }}>
       {children}
     </AuthContext.Provider>
   )

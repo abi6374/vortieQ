@@ -4,19 +4,22 @@ import ChatInput from '../components/onboarding/ChatInput'
 import GoalConfirm from '../components/onboarding/GoalConfirm'
 import GeneratingLoader from '../components/onboarding/GeneratingLoader'
 import ResumeUpload from '../components/onboarding/ResumeUpload'
-import TopicRatingList from '../components/onboarding/TopicRatingList'
+import LearnerIntakeWorkspace from '../components/onboarding/LearnerIntakeWorkspace'
+import AssessSkills from '../components/onboarding/AssessSkills'
+import GoalCompass from '../components/onboarding/GoalCompass'
+import SetupSidebar from '../components/onboarding/SetupSidebar'
 import NavBar from '../components/ui/NavBar'
 import api from '../lib/apiClient'
 
 /**
  * Onboarding is a wizard with two entry lanes:
- *   1. Skip resume → phase = 'chat' → 'confirm' → 'generating' (the original flow)
- *   2. Upload resume → phase = 'resume' → 'topics' → 'chat' → 'confirm' → 'generating'
+ *   1. Skip resume / Chat → phase = 'intake' → 'topics' → 'goalcompass' → 'generating'
+ *   2. Upload resume → phase = 'intake' → 'topics' → 'goalcompass' → 'generating'
  * At submit time, topic ratings (if any) ride along on the POST /api/profile/ call
  * as `topic_ratings`, which the backend merges into the learner profile.
  */
 export default function OnboardingPage() {
-  const [phase, setPhase] = useState('resume') // 'resume' | 'topics' | 'chat' | 'confirm' | 'generating'
+  const [phase, setPhase] = useState('intake') // 'intake' | 'topics' | 'goalcompass' | 'chat' | 'confirm' | 'generating'
   const [goalText, setGoalText] = useState('')
   const [extractedProfile, setExtractedProfile] = useState(null)
   const [resumeTopics, setResumeTopics] = useState([])       // from LLM extraction
@@ -27,17 +30,52 @@ export default function OnboardingPage() {
 
   const navigate = useNavigate()
 
-  // ------------- resume step
+  // ------------- Step 1: Intake (Resume or Natural-language notes)
   const handleResumeExtracted = (topics, years) => {
     setResumeTopics(topics)
     setDetectedYears(years)
-    setPhase(topics.length > 0 ? 'topics' : 'chat')
+    setPhase(topics && topics.length > 0 ? 'topics' : 'goalcompass')
   }
 
-  // ------------- topic ratings step
+  const handleChatIntake = (storyText) => {
+    // Chat lane: no resume => no extracted skills. Do NOT fabricate topics
+    // (the old code hardcoded "Python" + "Data Analysis" which would then be
+    // asked about even if the user described, say, wanting to learn React).
+    // Skip the assessment step; carry the user's own words into Goal Compass
+    // so the goal textarea is pre-filled instead of thrown away.
+    setGoalText(storyText || '')
+    setResumeTopics([])
+    setTopicRatings([])
+    setDetectedYears(0)
+    setPhase('goalcompass')
+  }
+
+  // ------------- topic ratings step → Goal Compass (skills in hand)
   const handleTopicsContinue = (ratings) => {
     setTopicRatings(ratings)
-    setPhase('chat')
+    setPhase('goalcompass')
+  }
+
+  // ------------- Goal Compass "Create my learning plan"
+  const handleCreatePlan = async (goalTextInput, weeklyHours) => {
+    setError(null)
+    setPhase('generating')
+    try {
+      // Fold the weekly-hours choice into the goal text so extract_profile picks
+      // it up (backend derives weekly_hours from the free text).
+      const composed = weeklyHours
+        ? `${goalTextInput} I can study ${weeklyHours} hours per week.`
+        : goalTextInput
+      const body = { goal_text: composed }
+      if (topicRatings.length > 0) body.topic_ratings = topicRatings
+      if (detectedYears > 0) body.detected_years_experience = detectedYears
+      await api.post('/api/profile/', body)
+      const result = await api.post('/api/paths/generate', {})
+      navigate(`/roadmap/${result.data.path_id}`)
+    } catch (err) {
+      setError('Path generation failed. Please try again.')
+      setPhase('goalcompass')
+    }
   }
 
   // ------------- goal chat
@@ -77,6 +115,64 @@ export default function OnboardingPage() {
     setExtractedProfile(null)
   }
 
+  // Step 1: High-fidelity desktop learner intake screen with unified 5-step sidebar
+  if (phase === 'intake' || phase === 'resume') {
+    return (
+      <div className="min-h-screen flex" style={{ background: '#F5F7FC' }}>
+        <SetupSidebar current={1} />
+        <div className="flex-1 flex flex-col items-center justify-start px-4 py-8 lg:py-10 overflow-y-auto">
+          <LearnerIntakeWorkspace
+            onExtracted={handleResumeExtracted}
+            onChatSubmit={handleChatIntake}
+            onSkip={() => setPhase('topics')}
+          />
+        </div>
+      </div>
+    )
+  }
+
+  // The "Assess skills" step gets the full artifact chrome: pale-gray page,
+  // left 5-step sidebar, white container — matching the approved design.
+  if (phase === 'topics') {
+    return (
+      <div className="min-h-screen flex" style={{ background: '#F5F7FC' }}>
+        <SetupSidebar current={2} />
+        <div className="flex-1 flex flex-col items-center justify-start px-4 py-10 overflow-y-auto">
+          <AssessSkills
+            topics={resumeTopics}
+            detectedYears={detectedYears}
+            onContinue={handleTopicsContinue}
+            onBack={() => setPhase('intake')}
+            onSkip={() => { setTopicRatings([]); setPhase('goalcompass') }}
+          />
+        </div>
+      </div>
+    )
+  }
+
+  // The "Set your goal" step — Goal Compass with the live Ambition–Readiness Meter.
+  if (phase === 'goalcompass') {
+    return (
+      <div className="min-h-screen flex" style={{ background: '#F5F7FC' }}>
+        <SetupSidebar current={3} />
+        <div className="flex-1 flex flex-col items-center justify-start px-4 py-10 overflow-y-auto">
+          <GoalCompass
+            topicRatings={topicRatings}
+            detectedYears={detectedYears}
+            initialGoal={goalText}
+            onCreate={handleCreatePlan}
+            onBack={() => setPhase(resumeTopics.length > 0 ? 'topics' : 'intake')}
+          />
+          {error && (
+            <p className="mt-4 text-center text-sm text-red-700 bg-red-100 rounded-lg py-2 px-4 max-w-md">
+              {error}
+            </p>
+          )}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-indigo-900 to-blue-900">
       <NavBar />
@@ -86,16 +182,6 @@ export default function OnboardingPage() {
             <ResumeUpload
               onExtracted={handleResumeExtracted}
               onSkip={() => setPhase('chat')}
-            />
-          )}
-
-          {phase === 'topics' && (
-            <TopicRatingList
-              topics={resumeTopics}
-              detectedYears={detectedYears}
-              onContinue={handleTopicsContinue}
-              onBack={() => setPhase('resume')}
-              onSkip={() => { setTopicRatings([]); setPhase('chat') }}
             />
           )}
 

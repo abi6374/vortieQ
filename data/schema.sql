@@ -57,7 +57,7 @@ CREATE TABLE path_steps (
 -- Step 6: Learner feedback events
 CREATE TABLE feedback_events (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES auth.users(id),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   path_id UUID REFERENCES learning_paths(id),
   step_id UUID REFERENCES path_steps(id),
   event_type TEXT CHECK (event_type IN ('completed','too_easy','not_interested')),

@@ -93,9 +93,8 @@ def verify_jwt(
     # Fast path 2: JWKS asymmetric
     try:
         return _try_asymmetric(token)
-    except jwt.ExpiredSignatureError as e:
+    except jwt.ExpiredSignatureError:
         # Explicit expired result — no point trying the server, it'll say the same.
-        print(f"[AUTH 401 expired] {e}", flush=True)
         raise HTTPException(status_code=401, detail="Token expired")
     except Exception as e:
         errors["asymmetric"] = f"{type(e).__name__}: {e}"
@@ -106,7 +105,6 @@ def verify_jwt(
     except Exception as e:
         errors["supabase"] = f"{type(e).__name__}: {e}"
 
-    print(f"[AUTH 401] all validators failed: {errors}  token_head={token[:40]}...", flush=True)
     raise HTTPException(
         status_code=401,
         detail=f"Invalid token (all validators failed): {errors.get('supabase', errors.get('asymmetric', errors.get('hs256')))}",

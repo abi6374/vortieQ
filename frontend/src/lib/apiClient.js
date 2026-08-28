@@ -52,4 +52,27 @@ api.interceptors.request.use(async (config) => {
   return config
 }, (error) => Promise.reject(error))
 
+// 401 auto-handler. If the backend rejects a token as expired/invalid, sign the
+// user out of Supabase and bounce them to the landing page so they can sign in
+// again — otherwise stale sessions silently produce "failed to update" toasts
+// with no obvious remedy. Skip the redirect if we're already on landing to
+// avoid loops, and let the caller still see the error for their own logging.
+let _redirecting = false
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error?.response?.status === 401 && typeof window !== 'undefined' && !_redirecting) {
+      _redirecting = true
+      try { await supabase.auth.signOut() } catch {}
+      const path = window.location.pathname
+      if (path !== '/' && path !== '') {
+        window.location.assign('/')
+      } else {
+        _redirecting = false
+      }
+    }
+    return Promise.reject(error)
+  }
+)
+
 export default api

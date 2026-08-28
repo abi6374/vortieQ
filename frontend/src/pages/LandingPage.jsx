@@ -1,34 +1,37 @@
 import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import AuthCard from '../components/auth/AuthCard'
+import AuthScreen from '../components/auth/AuthScreen'
 import { useAuth } from '../hooks/useAuth'
+import { supabase } from '../lib/supabaseClient'
 
 export default function LandingPage() {
   const { session, loading } = useAuth()
   const navigate = useNavigate()
 
-  // If the user already has a session, send them straight to the dashboard
   useEffect(() => {
-    if (!loading && session) {
-      navigate('/dashboard', { replace: true })
+    async function handleAuthRedirect() {
+      if (!loading && session?.user) {
+        try {
+          // Check if user already completed onboarding and has an active path
+          const { data: paths } = await supabase
+            .from('learning_paths')
+            .select('id')
+            .eq('status', 'active')
+            .limit(1)
+
+          if (paths && paths.length > 0) {
+            navigate('/dashboard', { replace: true })
+          } else {
+            navigate('/onboarding', { replace: true })
+          }
+        } catch {
+          navigate('/onboarding', { replace: true })
+        }
+      }
     }
+
+    handleAuthRedirect()
   }, [session, loading, navigate])
 
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-indigo-900 to-blue-900 px-4 py-12">
-      <div className="flex flex-col items-center text-center mb-8">
-        <span className="text-5xl mb-4" role="img" aria-label="brain">
-          🧠
-        </span>
-        <h1 className="text-4xl sm:text-5xl font-bold text-white tracking-tight">
-          PathAI
-        </h1>
-        <p className="mt-3 text-indigo-200 text-sm sm:text-base max-w-md">
-          Your AI-powered career learning roadmap — personalized to your goals
-        </p>
-      </div>
-
-      <AuthCard />
-    </div>
-  )
+  return <AuthScreen />
 }

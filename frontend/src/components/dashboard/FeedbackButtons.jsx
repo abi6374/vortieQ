@@ -11,6 +11,8 @@ import apiClient from '../../lib/apiClient'
  *   stepId          - string, the path_step id to attach feedback to
  *   onFeedbackGiven - function(responseData), called after a successful post
  */
+// The two right-hand buttons now hit /api/steps/{id}/swap on the backend
+// instead of triggering a full-tail regen. Only THIS one step is replaced.
 const ACTIONS = [
   {
     type: 'completed',
@@ -28,10 +30,10 @@ const ACTIONS = [
   },
   {
     type: 'not_interested',
-    label: 'Not for Me',
-    icon: '🙅',
-    idle: 'bg-red-100 text-red-700 hover:bg-red-200 focus-visible:ring-red-400',
-    spinner: 'text-red-700',
+    label: 'Swap',
+    icon: '🔀',
+    idle: 'bg-blue-100 text-blue-700 hover:bg-blue-200 focus-visible:ring-blue-400',
+    spinner: 'text-blue-700',
   },
 ]
 
@@ -53,10 +55,12 @@ function Spinner({ className = '' }) {
   )
 }
 
-export default function FeedbackButtons({ stepId, onFeedbackGiven }) {
+export default function FeedbackButtons({ stepId, stepStatus, onFeedbackGiven }) {
   const [loadingType, setLoadingType] = useState(null)
   const [error, setError] = useState(null)
+  const [info, setInfo] = useState(null)
   const errorTimer = useRef(null)
+  const infoTimer = useRef(null)
   const mounted = useRef(true)
 
   useEffect(() => {
@@ -64,8 +68,17 @@ export default function FeedbackButtons({ stepId, onFeedbackGiven }) {
     return () => {
       mounted.current = false
       if (errorTimer.current) clearTimeout(errorTimer.current)
+      if (infoTimer.current) clearTimeout(infoTimer.current)
     }
   }, [])
+
+  // Auto-hide the info toast after 3s.
+  useEffect(() => {
+    if (!info) return
+    if (infoTimer.current) clearTimeout(infoTimer.current)
+    infoTimer.current = setTimeout(() => { if (mounted.current) setInfo(null) }, 3000)
+    return () => { if (infoTimer.current) clearTimeout(infoTimer.current) }
+  }, [info])
 
   // Auto-hide the error after 3s whenever it changes.
   useEffect(() => {
@@ -82,12 +95,27 @@ export default function FeedbackButtons({ stepId, onFeedbackGiven }) {
   const submit = async (buttonType) => {
     if (loadingType) return
     setError(null)
+    setInfo(null)
     setLoadingType(buttonType)
     try {
-      const response = await apiClient.post(`/api/steps/${stepId}/feedback`, {
-        event_type: buttonType,
-        note: '',
-      })
+      let response
+      if (buttonType === 'completed') {
+        response = await apiClient.post(`/api/steps/${stepId}/feedback`, {
+          event_type: 'completed', note: '',
+        })
+      } else {
+        // too_easy => level_hint=1 (harder replacement); Swap => level_hint=0.
+        const level_hint = buttonType === 'too_easy' ? 1 : 0
+        response = await apiClient.post(`/api/steps/${stepId}/swap`, { level_hint })
+        // Surface "no alternative available" as an info line.
+        if (response.data && response.data.swapped === false && response.data.reason) {
+          if (mounted.current) setInfo(response.data.reason)
+        }
+      }
+      // Idempotency guard on /feedback also returns a note.
+      if (response.data && response.data.note && response.data.path_updated === false) {
+        if (mounted.current) setInfo(response.data.note)
+      }
       if (typeof onFeedbackGiven === 'function') {
         onFeedbackGiven(response.data)
       }
@@ -99,6 +127,23 @@ export default function FeedbackButtons({ stepId, onFeedbackGiven }) {
   }
 
   const busy = loadingType !== null
+  const terminal = stepStatus === 'completed' || stepStatus === 'skipped'
+
+  // Once a step is terminal, replace the button row with a compact status pill.
+  if (terminal) {
+    return (
+      <div className="w-full">
+        <span
+          className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold
+            ${stepStatus === 'completed'
+              ? 'bg-green-100 text-green-700'
+              : 'bg-gray-100 text-gray-600'}`}
+        >
+          {stepStatus === 'completed' ? '✅ Completed' : '⏭ Skipped'}
+        </span>
+      </div>
+    )
+  }
 
   return (
     <div className="w-full">
@@ -136,6 +181,11 @@ export default function FeedbackButtons({ stepId, onFeedbackGiven }) {
       {error && (
         <p role="alert" className="mt-2 text-xs font-medium text-red-600">
           {error}
+        </p>
+      )}
+      {info && !error && (
+        <p role="status" className="mt-2 text-xs font-medium text-gray-500">
+          {info}
         </p>
       )}
     </div>
