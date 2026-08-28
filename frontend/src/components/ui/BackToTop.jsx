@@ -58,9 +58,9 @@ export default function BackToTop() {
       onClick={scrollToTop}
       aria-label="Back to top"
       title="Back to top"
-      className="fixed z-40 bottom-7 left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/95 text-[#0E1B38] hover:text-[#5B36E9] hover:bg-[#F5F1FF] border border-[#D8DFEB] hover:border-[#5B36E9] shadow-[0_8px_28px_rgba(14,27,56,0.18)] backdrop-blur-md transition-all duration-200 cursor-pointer group focus:outline-none focus:ring-2 focus:ring-[#5B36E9]/40 hover:-translate-y-0.5 animate-in fade-in slide-in-from-bottom-3 duration-200"
+      className="fixed z-40 bottom-7 left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/95 text-[#1d1d1f] hover:text-[#0066cc] hover:bg-[#eaf2fc] border border-[#e0e0e0] hover:border-[#0066cc] shadow-[0_8px_28px_rgba(29,29,31,0.18)] backdrop-blur-md transition-all duration-200 cursor-pointer group focus:outline-none focus:ring-2 focus:ring-[#0066cc]/40 hover:-translate-y-0.5 animate-in fade-in slide-in-from-bottom-3 duration-200"
     >
-      <span className="w-5 h-5 rounded-full bg-[#F5F1FF] text-[#5B36E9] flex items-center justify-center group-hover:bg-[#5B36E9] group-hover:text-white transition-colors">
+      <span className="w-5 h-5 rounded-full bg-[#eaf2fc] text-[#0066cc] flex items-center justify-center group-hover:bg-[#0066cc] group-hover:text-white transition-colors">
         <svg
           width="13"
           height="13"

@@ -10,17 +10,17 @@ import { useAIChat } from '../../contexts/AIChatContext'
  * everywhere.
  */
 
-const V = '#5B36E9'
+const V = '#0066cc'
 
 const STYLES = `
 .pfchat-fab{ position:fixed; bottom:24px; right:28px; z-index:30; display:flex; align-items:center; gap:9px;
-  background:#fff; border:1px solid #E5E7EB; border-radius:999px; padding:8px 16px 8px 8px;
-  box-shadow:0 8px 22px rgba(91,54,233,.18); cursor:pointer; transition:box-shadow .15s, transform .12s;
+  background:#fff; border:1px solid #e0e0e0; border-radius:999px; padding:8px 16px 8px 8px;
+  box-shadow:0 8px 22px rgba(0,102,204,.18); cursor:pointer; transition:box-shadow .15s, transform .12s;
   font-family:"Inter",system-ui,sans-serif; }
-.pfchat-fab:hover{ box-shadow:0 12px 28px rgba(91,54,233,.26); transform:translateY(-1px); }
-.pfchat-fab .b{ width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg,#6B47F0,${V});
+.pfchat-fab:hover{ box-shadow:0 12px 28px rgba(0,102,204,.26); transform:translateY(-1px); }
+.pfchat-fab .b{ width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg,#0071e3,${V});
   color:#fff; display:grid; place-items:center; flex:none; }
-.pfchat-fab span{ font-weight:600; font-size:13.5px; color:#0E1B38; }
+.pfchat-fab span{ font-weight:600; font-size:13.5px; color:#1d1d1f; }
 /* Above the mobile bottom nav (64px) so it never overlaps it. */
 @media (max-width:767px){
   .pfchat-fab{ bottom:calc(64px + 14px); right:16px; }
@@ -30,49 +30,49 @@ const STYLES = `
 }
 
 .pfchat-panel{ position:fixed; bottom:24px; right:28px; z-index:31; width:min(400px, calc(100vw - 32px));
-  height:min(560px, calc(100vh - 44px)); background:#fff; border:1px solid #E5E7EB; border-radius:18px;
-  box-shadow:0 18px 48px rgba(25,40,75,.20); display:flex; flex-direction:column; overflow:hidden;
+  height:min(560px, calc(100vh - 44px)); background:#fff; border:1px solid #e0e0e0; border-radius:18px;
+  box-shadow:0 18px 48px rgba(25,49,75,.20); display:flex; flex-direction:column; overflow:hidden;
   font-family:"Inter",system-ui,sans-serif; }
-.pfchat-head{ display:flex; align-items:center; gap:11px; padding:14px 16px; border-bottom:1px solid #EEF2F7; flex:none; }
-.pfchat-head .av{ width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg,#6B47F0,${V});
+.pfchat-head{ display:flex; align-items:center; gap:11px; padding:14px 16px; border-bottom:1px solid #f5f5f7; flex:none; }
+.pfchat-head .av{ width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg,#0071e3,${V});
   color:#fff; display:grid; place-items:center; flex:none; }
 .pfchat-head .t{ flex:1; min-width:0; }
-.pfchat-head .n{ font-weight:700; font-size:14.5px; color:#0E1B38; letter-spacing:-.01em; }
+.pfchat-head .n{ font-weight:700; font-size:14.5px; color:#1d1d1f; letter-spacing:-.01em; }
 .pfchat-head .s{ font-size:11.5px; color:#22A06B; display:flex; align-items:center; gap:5px; }
 .pfchat-head .s i{ width:6px; height:6px; border-radius:50%; background:#22A06B; display:block; }
-.pfchat-head button{ background:none; border:none; cursor:pointer; color:#74819A; padding:6px; border-radius:8px; display:grid; place-items:center; }
-.pfchat-head button:hover{ background:#F5F7FC; color:#0E1B38; }
+.pfchat-head button{ background:none; border:none; cursor:pointer; color:#7a7a7a; padding:6px; border-radius:8px; display:grid; place-items:center; }
+.pfchat-head button:hover{ background:#f5f5f7; color:#1d1d1f; }
 
-.pfchat-body{ flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:12px; background:#FAFBFE; }
-.pfchat-empty{ margin:auto; text-align:center; color:#74819A; font-size:13.5px; padding:20px; }
-.pfchat-empty b{ display:block; color:#0E1B38; font-size:15px; margin-bottom:6px; }
+.pfchat-body{ flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:12px; background:#fafcfe; }
+.pfchat-empty{ margin:auto; text-align:center; color:#7a7a7a; font-size:13.5px; padding:20px; }
+.pfchat-empty b{ display:block; color:#1d1d1f; font-size:15px; margin-bottom:6px; }
 .pfchat-sugg{ display:flex; flex-direction:column; gap:8px; margin-top:16px; }
-.pfchat-sugg button{ background:#fff; border:1px solid #E5E7EB; border-radius:10px; padding:9px 12px;
-  font-size:12.5px; color:#0E1B38; cursor:pointer; text-align:left; font-family:inherit; }
-.pfchat-sugg button:hover{ border-color:#DDD2FF; background:#F5F1FF; }
+.pfchat-sugg button{ background:#fff; border:1px solid #e0e0e0; border-radius:10px; padding:9px 12px;
+  font-size:12.5px; color:#1d1d1f; cursor:pointer; text-align:left; font-family:inherit; }
+.pfchat-sugg button:hover{ border-color:#cfe4fb; background:#eaf2fc; }
 
 .pfchat-msg{ max-width:86%; padding:10px 13px; border-radius:14px; font-size:13.5px; line-height:1.5; white-space:pre-wrap; word-wrap:break-word; }
 .pfchat-msg.user{ align-self:flex-end; background:${V}; color:#fff; border-bottom-right-radius:5px; }
-.pfchat-msg.assistant{ align-self:flex-start; background:#fff; color:#0E1B38; border:1px solid #E5E7EB; border-bottom-left-radius:5px; }
-.pfchat-typing{ align-self:flex-start; display:flex; gap:4px; padding:12px 14px; background:#fff; border:1px solid #E5E7EB; border-radius:14px; }
-.pfchat-typing i{ width:6px; height:6px; border-radius:50%; background:#B9C2D4; animation:pfbounce 1.2s infinite; }
+.pfchat-msg.assistant{ align-self:flex-start; background:#fff; color:#1d1d1f; border:1px solid #e0e0e0; border-bottom-left-radius:5px; }
+.pfchat-typing{ align-self:flex-start; display:flex; gap:4px; padding:12px 14px; background:#fff; border:1px solid #e0e0e0; border-radius:14px; }
+.pfchat-typing i{ width:6px; height:6px; border-radius:50%; background:#c6c6c7; animation:pfbounce 1.2s infinite; }
 .pfchat-typing i:nth-child(2){ animation-delay:.15s } .pfchat-typing i:nth-child(3){ animation-delay:.3s }
 @keyframes pfbounce{ 0%,60%,100%{ transform:translateY(0); opacity:.5 } 30%{ transform:translateY(-5px); opacity:1 } }
 
 .pfchat-err{ background:#FDECEC; border:1px solid #F3B9B9; color:#B42318; border-radius:10px; padding:10px 12px; font-size:12.5px; }
 .pfchat-err button{ background:none; border:none; color:#B42318; font-weight:700; cursor:pointer; text-decoration:underline; padding:0; margin-left:6px; font-size:12.5px; font-family:inherit; }
 
-.pfchat-foot{ padding:12px; border-top:1px solid #EEF2F7; flex:none; background:#fff; }
-.pfchat-in{ display:flex; align-items:flex-end; gap:8px; border:1.5px solid #D8DFEB; border-radius:12px; padding:8px 10px; background:#fff; }
-.pfchat-in:focus-within{ border-color:${V}; box-shadow:0 0 0 3px rgba(91,54,233,.15); }
+.pfchat-foot{ padding:12px; border-top:1px solid #f5f5f7; flex:none; background:#fff; }
+.pfchat-in{ display:flex; align-items:flex-end; gap:8px; border:1.5px solid #e0e0e0; border-radius:12px; padding:8px 10px; background:#fff; }
+.pfchat-in:focus-within{ border-color:${V}; box-shadow:0 0 0 3px rgba(0,102,204,.15); }
 .pfchat-in textarea{ flex:1; border:none; outline:none; resize:none; font-family:inherit; font-size:13.5px;
-  line-height:1.45; color:#0E1B38; max-height:96px; background:none; }
-.pfchat-in textarea::placeholder{ color:#94A3B8; }
+  line-height:1.45; color:#1d1d1f; max-height:96px; background:none; }
+.pfchat-in textarea::placeholder{ color:#86868b; }
 .pfchat-send{ width:34px; height:34px; border-radius:9px; border:none; background:${V}; color:#fff; cursor:pointer;
   display:grid; place-items:center; flex:none; }
 .pfchat-send:disabled{ opacity:.4; cursor:not-allowed; }
-.pfchat-send:hover:not(:disabled){ background:#4826C9; }
-.pfchat-ctx{ font-size:11px; color:#94A3B8; margin-top:7px; text-align:center; }
+.pfchat-send:hover:not(:disabled){ background:#004fa3; }
+.pfchat-ctx{ font-size:11px; color:#86868b; margin-top:7px; text-align:center; }
 @media (prefers-reduced-motion:reduce){ .pfchat-typing i{ animation:none } .pfchat-fab{ transition:none } }
 `
 

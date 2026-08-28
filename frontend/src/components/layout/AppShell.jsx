@@ -18,7 +18,7 @@ export default function AppShell({ topBar = null, children, contentClassName = '
       <div className="pf-main">
         <TopBar>{topBar}</TopBar>
         <div className={`pf-content ${contentClassName}`}>
-          <div className={`${isCollapsed ? 'max-w-7xl mx-auto w-full transition-all duration-300' : 'w-full'}`}>
+          <div className={`animate-fade-up ${isCollapsed ? 'max-w-7xl mx-auto w-full transition-all duration-300' : 'w-full'}`}>
             {children}
           </div>
         </div>

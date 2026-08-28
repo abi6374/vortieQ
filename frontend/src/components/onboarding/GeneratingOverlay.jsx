@@ -26,42 +26,42 @@ const ACTIVE_INDEX = 2
 const STYLES = `
 .genov{ position:fixed; inset:0; z-index:100; display:grid; place-items:center; padding:20px;
   font-family:'Inter','Manrope',system-ui,-apple-system,'Segoe UI',sans-serif; }
-.genov .scrim{ position:absolute; inset:0; background:rgba(14,27,56,.55);
+.genov .scrim{ position:absolute; inset:0; background:rgba(29,29,31,.55);
   -webkit-backdrop-filter:blur(5px); backdrop-filter:blur(5px); }
-.genov .modal{ position:relative; width:100%; max-width:500px; background:#fff; border:1px solid #E1E6F0;
-  border-radius:20px; padding:36px; box-shadow:0 24px 64px rgba(14,27,56,.28); text-align:center; }
+.genov .modal{ position:relative; width:100%; max-width:500px; background:#fff; border:1px solid #f0f0f0;
+  border-radius:20px; padding:36px; box-shadow:0 24px 64px rgba(29,29,31,.28); text-align:center; }
 .genov .art{ width:120px; height:120px; margin:0 auto 22px; }
 .genov h2{ font-family:'Manrope','Inter',sans-serif; font-weight:800; font-size:26px; line-height:1.2;
-  letter-spacing:-.02em; color:#0E1B38; margin:0 0 10px; }
-.genov .sub{ font-size:16.5px; line-height:1.55; color:#52617D; margin:0 auto 26px; max-width:40ch; }
+  letter-spacing:-.02em; color:#1d1d1f; margin:0 0 10px; }
+.genov .sub{ font-size:16.5px; line-height:1.55; color:#333333; margin:0 auto 26px; max-width:40ch; }
 .genov .checklist{ display:flex; flex-direction:column; gap:8px; text-align:left; }
 .genov .row{ display:flex; align-items:center; gap:12px; height:44px; padding:0 14px; border-radius:12px;
   font-size:15px; font-weight:600; }
-.genov .row.done{ background:#F7F4FF; color:#0E1B38; }
-.genov .row.active{ background:#F5F1FF; color:#5B36E9; }
-.genov .row.todo{ background:transparent; color:#74819A; font-weight:500; }
+.genov .row.done{ background:#f4f9ff; color:#1d1d1f; }
+.genov .row.active{ background:#eaf2fc; color:#0066cc; }
+.genov .row.todo{ background:transparent; color:#7a7a7a; font-weight:500; }
 .genov .ic{ width:22px; height:22px; flex:none; display:flex; align-items:center; justify-content:center; }
-.genov .ic .dot-done{ width:22px; height:22px; border-radius:50%; background:#5B36E9; display:flex; align-items:center; justify-content:center; }
-.genov .ic .dot-todo{ width:20px; height:20px; border-radius:50%; border:1.5px solid #D8DFEB; }
+.genov .ic .dot-done{ width:22px; height:22px; border-radius:50%; background:#0066cc; display:flex; align-items:center; justify-content:center; }
+.genov .ic .dot-todo{ width:20px; height:20px; border-radius:50%; border:1.5px solid #e0e0e0; }
 .genov .ic .step-ring{ width:22px; height:22px; display:block; box-shadow:none; outline:none; border:none; }
 .genov .progress-wrap{ margin-top:24px; }
-.genov .track{ width:100%; height:9px; background:#E8EAF4; border-radius:999px; overflow:hidden; }
-.genov .fill{ height:100%; background:#5B36E9; border-radius:999px; box-shadow:0 0 10px rgba(91,54,233,.45); }
-.genov .ptext{ margin:12px 0 0; font-size:14.5px; font-weight:600; color:#52617D; }
+.genov .track{ width:100%; height:9px; background:#e8eef4; border-radius:999px; overflow:hidden; }
+.genov .fill{ height:100%; background:#0066cc; border-radius:999px; box-shadow:0 0 10px rgba(0,102,204,.45); }
+.genov .ptext{ margin:12px 0 0; font-size:14.5px; font-weight:600; color:#333333; }
 .genov .foot{ display:flex; align-items:center; justify-content:center; gap:7px; margin-top:20px;
-  font-size:13px; color:#74819A; }
+  font-size:13px; color:#7a7a7a; }
 .genov .err{ margin-top:22px; }
 .genov .err p{ font-size:14.5px; color:#B4232A; background:#FDECEC; border:1px solid #F6D2D2;
   border-radius:12px; padding:12px 14px; margin:0 0 16px; }
 .genov .err-actions{ display:flex; gap:12px; }
 .genov .btn{ flex:1; height:48px; border-radius:12px; font:600 15px/1 'Inter',sans-serif; cursor:pointer;
   border:1px solid transparent; transition:background .18s,border-color .18s,transform .1s; }
-.genov .btn-primary{ background:#5B36E9; color:#fff; }
-.genov .btn-primary:hover{ background:#4826C9; }
+.genov .btn-primary{ background:#0066cc; color:#fff; }
+.genov .btn-primary:hover{ background:#004fa3; }
 .genov .btn-primary:active{ transform:translateY(1px); }
-.genov .btn-ghost{ background:#fff; color:#52617D; border-color:#D8DFEB; }
-.genov .btn-ghost:hover{ background:#F7F8FB; }
-.genov .btn:focus-visible{ outline:none; box-shadow:0 0 0 3px rgba(91,54,233,.35); }
+.genov .btn-ghost{ background:#fff; color:#333333; border-color:#e0e0e0; }
+.genov .btn-ghost:hover{ background:#f7f9fb; }
+.genov .btn:focus-visible{ outline:none; box-shadow:0 0 0 3px rgba(0,102,204,.35); }
 .genov .spin{ transform-origin:center; animation:genov-spin 1s linear infinite; }
 .genov .compass{ transform-origin:60px 60px; animation:genov-spin 14s linear infinite; }
 .genov .orbit{ transform-origin:60px 60px; animation:genov-spin 18s linear infinite; }
@@ -82,8 +82,8 @@ function CheckIcon() {
 function ActiveRing() {
   return (
     <svg className="step-ring spin" viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{ boxShadow: 'none', border: 'none', outline: 'none' }}>
-      <circle cx="12" cy="12" r="9.5" stroke="#DDD2FF" strokeWidth="2.5" />
-      <path d="M12 2.5a9.5 9.5 0 0 1 9.5 9.5" stroke="#5B36E9" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+      <circle cx="12" cy="12" r="9.5" stroke="#cfe4fb" strokeWidth="2.5" />
+      <path d="M12 2.5a9.5 9.5 0 0 1 9.5 9.5" stroke="#0066cc" strokeWidth="2.5" strokeLinecap="round" fill="none" />
     </svg>
   )
 }
@@ -91,21 +91,21 @@ function ActiveRing() {
 function Illustration() {
   return (
     <svg className="art" viewBox="0 0 120 120" fill="none" aria-hidden="true">
-      <circle cx="60" cy="60" r="58" fill="#F1EDFF" />
+      <circle cx="60" cy="60" r="58" fill="#eef6fe" />
       {/* dotted orbital path */}
-      <circle cx="60" cy="60" r="42" stroke="#C9B8F6" strokeWidth="1.4" strokeDasharray="2 7" strokeLinecap="round" opacity="0.9" />
+      <circle cx="60" cy="60" r="42" stroke="#b8d6f6" strokeWidth="1.4" strokeDasharray="2 7" strokeLinecap="round" opacity="0.9" />
       {/* three orbit dots, rotating as a group */}
       <g className="orbit">
-        <circle cx="60" cy="18" r="3.4" fill="#5B36E9" />
-        <circle cx="96.4" cy="81" r="3.4" fill="#7D5BF0" />
-        <circle cx="23.6" cy="81" r="3.4" fill="#9B80F4" />
+        <circle cx="60" cy="18" r="3.4" fill="#0066cc" />
+        <circle cx="96.4" cy="81" r="3.4" fill="#5ba3f0" />
+        <circle cx="23.6" cy="81" r="3.4" fill="#80b8f4" />
       </g>
       {/* compass */}
       <g className="compass">
-        <circle cx="60" cy="60" r="26" fill="#fff" stroke="#E1D8FB" strokeWidth="1.5" />
-        <polygon points="60,40 66,60 60,56 54,60" fill="#5B36E9" />
-        <polygon points="60,80 54,60 60,64 66,60" fill="#B9A6F2" />
-        <circle cx="60" cy="60" r="3" fill="#4826C9" />
+        <circle cx="60" cy="60" r="26" fill="#fff" stroke="#d8e9fb" strokeWidth="1.5" />
+        <polygon points="60,40 66,60 60,56 54,60" fill="#0066cc" />
+        <polygon points="60,80 54,60 60,64 66,60" fill="#a6cbf2" />
+        <circle cx="60" cy="60" r="3" fill="#004fa3" />
       </g>
     </svg>
   )

@@ -57,13 +57,13 @@ export default function TopBar({ children }) {
             >
               <span
                 className="grid place-items-center rounded-xl flex-none"
-                style={{ width: 34, height: 34, background: `linear-gradient(160deg,#6B47F0,#5B36E9)`, boxShadow: '0 4px 10px rgba(91,54,233,.30)' }}
+                style={{ width: 34, height: 34, background: `linear-gradient(160deg,#0071e3,#0066cc)`, boxShadow: '0 4px 10px rgba(0,102,204,.30)' }}
               >
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M3 12h4l3 8 4-16 3 8h4" />
                 </svg>
               </span>
-              <span className="font-['Manrope'] font-extrabold text-[#0E1B38]" style={{ fontSize: 17, letterSpacing: '-.02em' }}>
+              <span className="font-['Manrope'] font-extrabold text-[#1d1d1f]" style={{ fontSize: 17, letterSpacing: '-.02em' }}>
                 PathFinder
               </span>
             </button>
@@ -77,15 +77,15 @@ export default function TopBar({ children }) {
               }}
               title="Show sidebar"
               aria-label="Show sidebar"
-              className="relative group flex items-center justify-center w-8 h-8 rounded-lg text-[#74819A] hover:text-[#5B36E9] hover:bg-[#F5F1FF] border border-[#E6EAF2] hover:border-[#5B36E9] transition-all cursor-pointer shadow-2xs"
+              className="relative group flex items-center justify-center w-8 h-8 rounded-lg text-[#7a7a7a] hover:text-[#0066cc] hover:bg-[#eaf2fc] border border-[#f0f0f0] hover:border-[#0066cc] transition-all cursor-pointer shadow-2xs"
             >
               <SidebarIcon className="w-4 h-4" />
-              <span className="pointer-events-none absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2.5 py-1 bg-[#0E1B38] text-white text-[11px] font-bold rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg z-50">
+              <span className="pointer-events-none absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2.5 py-1 bg-[#1d1d1f] text-white text-[11px] font-bold rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg z-50">
                 Show sidebar
               </span>
             </button>
 
-            <span className="h-6 w-px bg-[#E6EAF2] mx-1 flex-none" />
+            <span className="h-6 w-px bg-[#f0f0f0] mx-1 flex-none" />
 
             {/* Hover Floating Navigation Dropdown with generous vertical hit area */}
             {isHoverOpen && (
@@ -95,7 +95,7 @@ export default function TopBar({ children }) {
                 onMouseLeave={handleMouseLeave}
               >
                 {/* Visual Card Container */}
-                <div className="bg-white/98 backdrop-blur-md rounded-2xl border border-[#E6EAF2] shadow-[0_18px_42px_rgba(14,27,56,0.18)] p-2">
+                <div className="bg-white/98 backdrop-blur-md rounded-2xl border border-[#f0f0f0] shadow-[0_18px_42px_rgba(29,29,31,0.18)] p-2">
                   <nav className="flex flex-col gap-0.5">
                     {NAV.map((item) => {
                       const on = active === item.key
@@ -110,15 +110,15 @@ export default function TopBar({ children }) {
                           className="flex items-center gap-3 rounded-[10px] border-none cursor-pointer text-left transition-colors w-full"
                           style={{
                             padding: '10px 12px',
-                            background: on ? '#F5F1FF' : 'transparent',
-                            color: on ? '#5B36E9' : '#475569',
+                            background: on ? '#eaf2fc' : 'transparent',
+                            color: on ? '#0066cc' : '#333333',
                             fontWeight: on ? 600 : 500,
                             fontSize: 14,
                           }}
-                          onMouseEnter={(e) => { if (!on) e.currentTarget.style.background = '#FAF8FF' }}
+                          onMouseEnter={(e) => { if (!on) e.currentTarget.style.background = '#fafbfc' }}
                           onMouseLeave={(e) => { if (!on) e.currentTarget.style.background = 'transparent' }}
                         >
-                          <span style={{ color: on ? '#5B36E9' : '#64748B', display: 'flex' }}>{ICONS[item.key]}</span>
+                          <span style={{ color: on ? '#0066cc' : '#6e6e73', display: 'flex' }}>{ICONS[item.key]}</span>
                           <span>{item.label}</span>
                         </button>
                       )

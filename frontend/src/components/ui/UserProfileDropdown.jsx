@@ -57,19 +57,19 @@ export default function UserProfileDropdown({ light = false }) {
         onClick={() => setIsOpen((prev) => !prev)}
         className={`flex items-center gap-2.5 px-3 py-1.5 rounded-xl border transition-all cursor-pointer focus:outline-none ${
           light
-            ? 'bg-white/90 border-[#D8DFEB] hover:border-[#5B36E9] hover:bg-white text-[#0E1B38] shadow-xs'
-            : 'bg-white border-[#D8DFEB] hover:border-[#5B36E9] hover:bg-[#F5F1FF] text-[#0E1B38] shadow-xs'
+            ? 'bg-white/90 border-[#e0e0e0] hover:border-[#0066cc] hover:bg-white text-[#1d1d1f] shadow-xs'
+            : 'bg-white border-[#e0e0e0] hover:border-[#0066cc] hover:bg-[#eaf2fc] text-[#1d1d1f] shadow-xs'
         }`}
         aria-expanded={isOpen}
         aria-haspopup="true"
       >
         {/* Avatar Circle with initials */}
-        <span className="w-8 h-8 rounded-lg bg-[#5B36E9] text-white font-bold text-xs flex items-center justify-center shadow-xs flex-shrink-0">
+        <span className="w-8 h-8 rounded-lg bg-[#0066cc] text-white font-bold text-xs flex items-center justify-center shadow-xs flex-shrink-0">
           {initials}
         </span>
 
         {/* User Name */}
-        <span className="font-['Manrope'] font-bold text-xs sm:text-sm text-[#0E1B38] max-w-[130px] truncate text-left hidden sm:inline">
+        <span className="font-['Manrope'] font-bold text-xs sm:text-sm text-[#1d1d1f] max-w-[130px] truncate text-left hidden sm:inline">
           {fullName}
         </span>
 
@@ -83,8 +83,8 @@ export default function UserProfileDropdown({ light = false }) {
           strokeWidth="2.4"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className={`text-[#74819A] transition-transform duration-150 ${
-            isOpen ? 'rotate-180 text-[#5B36E9]' : ''
+          className={`text-[#7a7a7a] transition-transform duration-150 ${
+            isOpen ? 'rotate-180 text-[#0066cc]' : ''
           }`}
         >
           <path d="m6 9 6 6 6-6" />
@@ -93,21 +93,21 @@ export default function UserProfileDropdown({ light = false }) {
 
       {/* Dropdown Menu Modal */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl border border-[#E1E6F0] shadow-[0_12px_32px_rgba(25,40,75,0.14)] py-2 z-50 animate-in fade-in zoom-in-95 duration-100">
+        <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl border border-[#f0f0f0] shadow-[0_12px_32px_rgba(25,49,75,0.14)] py-2 z-50 animate-in fade-in zoom-in-95 duration-100">
           {/* User Header Details */}
-          <div className="px-4 py-3 border-b border-[#E6EAF2]">
+          <div className="px-4 py-3 border-b border-[#f0f0f0]">
             <div className="flex items-center gap-3">
-              <span className="w-10 h-10 rounded-xl bg-[#5B36E9] text-white font-extrabold text-sm flex items-center justify-center shadow-xs">
+              <span className="w-10 h-10 rounded-xl bg-[#0066cc] text-white font-extrabold text-sm flex items-center justify-center shadow-xs">
                 {initials}
               </span>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-bold text-[#0E1B38] truncate">{fullName}</p>
-                <p className="text-xs text-[#74819A] truncate">{email}</p>
+                <p className="text-sm font-bold text-[#1d1d1f] truncate">{fullName}</p>
+                <p className="text-xs text-[#7a7a7a] truncate">{email}</p>
               </div>
             </div>
             <div className="mt-2.5 flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-[#22A06B]" />
-              <span className="text-[11px] font-semibold text-[#52617D]">
+              <span className="text-[11px] font-semibold text-[#333333]">
                 Active Learner
               </span>
             </div>
@@ -121,7 +121,7 @@ export default function UserProfileDropdown({ light = false }) {
                 setIsOpen(false)
                 navigate('/account')
               }}
-              className="w-full text-left px-4 py-2.5 text-xs sm:text-sm font-semibold text-[#52617D] hover:text-[#5B36E9] hover:bg-[#F5F1FF] flex items-center gap-3 transition-colors cursor-pointer"
+              className="w-full text-left px-4 py-2.5 text-xs sm:text-sm font-semibold text-[#333333] hover:text-[#0066cc] hover:bg-[#eaf2fc] flex items-center gap-3 transition-colors cursor-pointer"
             >
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
@@ -136,7 +136,7 @@ export default function UserProfileDropdown({ light = false }) {
                 setIsOpen(false)
                 navigate('/settings')
               }}
-              className="w-full text-left px-4 py-2.5 text-xs sm:text-sm font-semibold text-[#52617D] hover:text-[#5B36E9] hover:bg-[#F5F1FF] flex items-center gap-3 transition-colors cursor-pointer"
+              className="w-full text-left px-4 py-2.5 text-xs sm:text-sm font-semibold text-[#333333] hover:text-[#0066cc] hover:bg-[#eaf2fc] flex items-center gap-3 transition-colors cursor-pointer"
             >
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="3" />
@@ -151,7 +151,7 @@ export default function UserProfileDropdown({ light = false }) {
                 setIsOpen(false)
                 navigate('/onboarding')
               }}
-              className="w-full text-left px-4 py-2.5 text-xs sm:text-sm font-semibold text-[#52617D] hover:text-[#5B36E9] hover:bg-[#F5F1FF] flex items-center gap-3 transition-colors cursor-pointer"
+              className="w-full text-left px-4 py-2.5 text-xs sm:text-sm font-semibold text-[#333333] hover:text-[#0066cc] hover:bg-[#eaf2fc] flex items-center gap-3 transition-colors cursor-pointer"
             >
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10" />
@@ -162,7 +162,7 @@ export default function UserProfileDropdown({ light = false }) {
           </div>
 
           {/* Divider */}
-          <div className="border-t border-[#E6EAF2] my-1" />
+          <div className="border-t border-[#f0f0f0] my-1" />
 
           {/* Functional Sign Out */}
           <div className="px-2 py-1">
