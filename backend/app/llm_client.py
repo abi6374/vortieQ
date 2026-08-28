@@ -53,7 +53,22 @@ def _get_bedrock_runtime():
     global _bedrock_runtime
     if _bedrock_runtime is None:
         import boto3
-        _bedrock_runtime = boto3.client("bedrock-runtime", region_name=settings.AWS_REGION)
+        from botocore.config import Config
+
+        # 'adaptive' mode is AWS's own recommended fix for ThrottlingException:
+        # it client-side rate-limits based on observed throttling instead of
+        # just blindly retrying, and backs off further under sustained load.
+        # Bumped max_attempts well above boto3's default (3) - a real incident
+        # (see PROGRESS_TRACKER.md Round 11) showed the default gives up too
+        # fast for this account's on-demand Llama 3 70B throughput quota,
+        # failing 100% of real path-generation requests. This is a mitigation,
+        # not a fix for the underlying quota - see the tracker for the AWS
+        # Service Quotas increase request that's the durable fix.
+        _bedrock_runtime = boto3.client(
+            "bedrock-runtime",
+            region_name=settings.AWS_REGION,
+            config=Config(retries={"max_attempts": 8, "mode": "adaptive"}),
+        )
     return _bedrock_runtime
 
 

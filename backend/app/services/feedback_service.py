@@ -224,13 +224,24 @@ Generate the learning path JSON now."""
     seq = _last_sequence_order(path_id)
     inserted = []
 
+    # Batch every explanation into one call instead of one call per course -
+    # same fix, same reason, as path_service.generate_path() (see
+    # PROGRESS_TRACKER.md Round 11: N sequential calls was enough on its own
+    # to trip Bedrock's throughput quota and fail the whole request).
+    from app.services.path_service import generate_explanations_batch
+    ordered_ids = [
+        cid for milestone in milestones for cid in milestone.get("course_ids", [])
+        if cid in course_lookup
+    ]
+    explanations = generate_explanations_batch(profile, [course_lookup[cid] for cid in ordered_ids])
+
     for milestone in milestones:
         for course_id in milestone.get("course_ids", []):
             course = course_lookup.get(course_id)
             if not course:  # LLM hallucinated an id - skip
                 continue
             seq += 1
-            explanation = _generate_explanation(profile, course)
+            explanation = explanations.get(course_id) or _generate_explanation(profile, course)
             row = supabase_client.table("path_steps").insert({
                 "path_id": path_id,
                 "course_id": course_id,

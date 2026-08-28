@@ -42,6 +42,63 @@ def generate_explanation(profile: dict, course: dict) -> str:
     )
 
 
+def generate_explanations_batch(profile: dict, courses: list[dict]) -> dict[str, str]:
+    """All course explanations for one path generation in ONE call instead of
+    one call per course.
+
+    Real production incident this fixes (see PROGRESS_TRACKER.md Round 11):
+    a single path generation used to fire 1 sequencing call + N sequential
+    explain() calls back-to-back (N=8 for a typical path) - that rapid-fire
+    burst was enough to trip Bedrock's on-demand throughput quota on its own,
+    causing 100% of real path-generation attempts to fail with
+    ThrottlingException. Batching cuts this to 2 calls total regardless of N.
+
+    Never fabricates: any course id the batch response is missing or gives an
+    invalid value for falls back to a real individual generate_explanation()
+    call for just that course, so a partially-bad batch response still ends
+    in every step having a real, LLM-generated explanation - just slower for
+    the few that needed the fallback, never faked.
+    """
+    if not courses:
+        return {}
+
+    payload = [
+        {"id": c["id"], "title": c.get("title", ""), "description": c.get("description", "")}
+        for c in courses
+    ]
+    user_msg = (
+        f"Learner goal: {profile.get('goal_text', '')}. "
+        f"Target role: {profile.get('target_role', '')}. "
+        f"Level: {profile.get('current_level', '')}.\n\n"
+        f"Courses:\n{json.dumps(payload, indent=2)}"
+    )
+    messages = [
+        {"role": "system", "content": _load_prompt("explain_batch.txt")},
+        {"role": "user", "content": user_msg},
+    ]
+
+    raw = _call_groq(messages, max_tokens=2000)
+    try:
+        result = json.loads(_strip_fences(raw))
+    except Exception:
+        messages.append({"role": "assistant", "content": raw})
+        messages.append({"role": "user", "content": "Return ONLY the JSON object. No markdown fences."})
+        try:
+            result = json.loads(_strip_fences(_call_groq(messages, max_tokens=2000)))
+        except Exception:
+            result = {}
+
+    explanations = {
+        c["id"]: result[c["id"]].strip()
+        for c in courses
+        if isinstance(result.get(c["id"]), str) and result[c["id"]].strip()
+    }
+    for c in courses:
+        if c["id"] not in explanations:
+            explanations[c["id"]] = generate_explanation(profile, c)
+    return explanations
+
+
 def generate_path(user_id: str, profile: dict) -> dict:
     """Recommend courses, sequence them into milestones, persist, and return the path."""
     courses = get_recommender().recommend(profile)
@@ -93,6 +150,19 @@ Generate the learning path JSON now."""
 
     course_lookup = {c["id"]: c for c in courses}
 
+    # First pass: resolve every real (non-hallucinated) course id across all
+    # milestones, in order, WITHOUT calling the LLM yet - collecting them all
+    # first is what lets the next step batch every explanation into one call.
+    ordered_course_ids = [
+        course_id
+        for milestone in milestones
+        for course_id in milestone.get("course_ids", [])
+        if course_id in course_lookup
+    ]
+    explanations = generate_explanations_batch(
+        profile, [course_lookup[cid] for cid in ordered_course_ids]
+    )
+
     response_milestones = []
     sequence_order = 0
 
@@ -104,7 +174,7 @@ Generate the learning path JSON now."""
                 # LLM hallucinated an id that wasn't in the candidate list — skip it.
                 continue
             sequence_order += 1
-            explanation = generate_explanation(profile, course)
+            explanation = explanations.get(course_id) or generate_explanation(profile, course)
 
             step_result = supabase_client.table("path_steps").insert({
                 "path_id": path_id,
