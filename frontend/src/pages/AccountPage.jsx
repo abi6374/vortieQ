@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import AppSidebar from '../components/ui/AppSidebar'
 import UserProfileDropdown from '../components/ui/UserProfileDropdown'
+import { useAuth } from '../hooks/useAuth'
 import api from '../lib/apiClient'
 
 /**
@@ -14,6 +15,7 @@ const FIELD = 'w-full rounded-xl border border-[#D8DFEB] bg-white px-3.5 py-2.5 
 const LABEL = 'block text-[13.5px] font-semibold text-[#0E1B38] mb-1.5'
 
 export default function AccountPage() {
+  const { updateProfile } = useAuth()
   const [me, setMe] = useState(null)
   const [form, setForm] = useState({})
   const [loading, setLoading] = useState(true)
@@ -54,6 +56,7 @@ export default function AccountPage() {
       }
       const { data } = await api.patch('/api/me/profile', payload)
       setMe(data)
+      if (updateProfile) updateProfile(data)
       flash('Saved')
     } catch {
       setError('Unable to update. Try again.')

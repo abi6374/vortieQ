@@ -24,7 +24,7 @@ export default function PersonalizedRoadmap({ pathData = null }) {
   // Real roadmap state: weeks, current week, lock state and completion all
   // come from the backend (GET /api/roadmap). No client-side fabrication.
   const roadmap = useRoadmap()
-  const { user, signOut } = useAuth()
+  const { user, profile, signOut } = useAuth()
 
   // Navigation tab state
   const [activeNav, setActiveNav] = useState('roadmap') // 'roadmap' | 'progress' | 'skills' | 'resources' | 'coach'
@@ -232,7 +232,7 @@ export default function PersonalizedRoadmap({ pathData = null }) {
   // fetch. Never a role-specific hardcoded fallback (was "AIML Engineer
   // Internship" regardless of the learner's actual goal) - a neutral,
   // honest placeholder only, for the brief moment before either loads.
-  const rawGoalText = roadmap.path?.goal_text || pathData?.goal_text || ''
+  const rawGoalText = profile?.goal_text || roadmap.path?.goal_text || pathData?.goal_text || ''
   const cleanGoalTitle = useMemo(() => {
     if (!rawGoalText) return 'your learning goal'
     let text = rawGoalText.split('I can study')[0].trim()
