@@ -101,7 +101,6 @@ export default function ProgressScreen() {
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
 
   // Interactive Task / Action Modal state
-  const [activeActionModal, setActiveActionModal] = useState(null)
 
   // Navigation handler
   const handleNavClick = (navId) => {
@@ -306,33 +305,22 @@ export default function ProgressScreen() {
     })
   })()
 
-  // 7. Next Best Actions
-  const nextActions = [
-    {
-      id: '01',
-      title: 'Complete Statistics checkpoint',
-      duration: '15 min',
-      desc: 'Verify understanding of variance, standard deviation, and IQR.',
-      buttonLabel: 'Start',
-      icon: Target,
-    },
-    {
-      id: '02',
-      title: 'Practice descriptive statistics',
-      duration: '25 min',
-      desc: '10 interactive practice questions with step-by-step solutions.',
-      buttonLabel: 'Practice',
-      icon: BarChart3,
-    },
-    {
-      id: '03',
-      title: 'Finish Pandas mini project',
-      duration: '45 min',
-      desc: 'Apply exploratory data analysis on a real-world customer dataset.',
+  // 7. Next Best Actions — REAL, the learner's actual next not-started steps,
+  // in real sequence order. "desc" uses the step's real Groq-generated
+  // explanation instead of an invented practice-question description.
+  const nextActions = roadmap.allSteps
+    .filter((s) => s.status === 'not_started')
+    .sort((a, b) => (a.sequence_order || 0) - (b.sequence_order || 0))
+    .slice(0, 3)
+    .map((s, i) => ({
+      id: String(i + 1).padStart(2, '0'),
+      stepId: s.step_id,
+      title: s.title,
+      duration: s.duration_hrs ? `${s.duration_hrs}h` : '',
+      desc: s.explanation || s.description || '',
       buttonLabel: 'Continue',
-      icon: Layers,
-    },
-  ]
+      icon: iconFor((s.skill_tags || [])[0] || ''),
+    }))
 
   // 8. Recent Activity Timeline
   const recentActivities = [
@@ -486,7 +474,7 @@ export default function ProgressScreen() {
             <div className="pt-2 flex items-center gap-3">
               <button
                 type="button"
-                onClick={() => setActiveActionModal('checkpoint')}
+                onClick={() => navigate('/dashboard')}
                 className="px-4 py-2 bg-[#5B2FF3] hover:bg-[#4C1DCE] text-white text-xs font-bold rounded-lg shadow-sm transition-all"
               >
                 Continue Week {roadmap.currentWeek}
@@ -1109,6 +1097,11 @@ export default function ProgressScreen() {
               </div>
 
               <div className="space-y-3 mt-3">
+                {nextActions.length === 0 && (
+                  <p className="text-xs text-[#64748B] italic">
+                    {roadmap.weeks.length ? "You're all caught up!" : 'Generate a learning path to see your next actions.'}
+                  </p>
+                )}
                 {nextActions.map((act) => {
                   const IconComp = act.icon
                   return (
@@ -1128,7 +1121,7 @@ export default function ProgressScreen() {
 
                       <button
                         type="button"
-                        onClick={() => setActiveActionModal(act.id)}
+                        onClick={() => navigate('/dashboard')}
                         className="px-3 py-1 bg-[#5B2FF3] hover:bg-[#4C1DCE] text-white text-[11px] font-bold rounded-lg transition-colors flex-none"
                       >
                         {act.buttonLabel}
@@ -1223,73 +1216,6 @@ export default function ProgressScreen() {
 
       </main>
 
-
-      {/* =========================================================================
-          5. ACTION PRACTICE / CHECKPOINT MODAL
-         ========================================================================= */}
-      {activeActionModal && (
-        <div className="fixed inset-0 z-50 bg-[#172554]/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-2xl max-w-md w-full p-6 relative animate-in fade-in zoom-in duration-150">
-            <button
-              type="button"
-              onClick={() => setActiveActionModal(null)}
-              className="absolute top-4 right-4 text-[#64748B] hover:text-[#172554] text-sm font-bold w-6 h-6 flex items-center justify-center"
-            >
-              ✕
-            </button>
-
-            <div className="flex items-center gap-2 text-xs font-bold text-[#5B2FF3] bg-[#F3EEFF] px-2.5 py-1 rounded-md w-fit mb-3">
-              <span>Week 5 · Statistics Checkpoint</span>
-            </div>
-
-            <h3 className="font-['Inter'] font-bold text-xl text-[#172554]">
-              Descriptive Statistics & Variance
-            </h3>
-            <p className="text-xs text-[#64748B] mt-1 mb-4">
-              Complete this 15-minute checkpoint to lock in your Statistics foundations and unlock Machine Learning.
-            </p>
-
-            <div className="p-3 bg-[#F8FAFC] rounded-xl border border-[#EEF2F7] text-xs space-y-2 mb-4">
-              <div className="flex justify-between font-semibold">
-                <span className="text-[#64748B]">Questions:</span>
-                <span className="text-[#172554]">10 multiple-choice & code snippets</span>
-              </div>
-              <div className="flex justify-between font-semibold">
-                <span className="text-[#64748B]">Passing Score:</span>
-                <span className="text-[#16A34A]">80% or higher</span>
-              </div>
-              <div className="flex justify-between font-semibold">
-                <span className="text-[#64748B]">Reward:</span>
-                <span className="text-[#5B2FF3]">+6% overall roadmap completion</span>
-              </div>
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveActionModal(null)
-                  navigate('/dashboard')
-                }}
-                className="flex-1 py-2.5 bg-[#5B2FF3] hover:bg-[#4C1DCE] text-white font-bold text-xs rounded-xl shadow-sm transition-all"
-              >
-                Begin Checkpoint
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveActionModal(null)
-                  openAICoach()
-                  sendToAICoach('Give me a quick 1-minute summary of variance before the checkpoint.')
-                }}
-                className="px-4 py-2.5 border border-[#5B2FF3] text-[#5B2FF3] hover:bg-[#F3EEFF] font-bold text-xs rounded-xl transition-all"
-              >
-                Ask Coach ✨
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
     </div>
   )
