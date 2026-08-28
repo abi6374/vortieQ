@@ -251,38 +251,60 @@ export default function ProgressScreen() {
   }
 
   // 6. Roadmap Milestones Timeline
-  const milestones = [
-    {
-      title: 'Python Foundations',
-      status: 'completed',
-      date: 'July 12',
-      progress: 100,
-    },
-    {
-      title: 'Data Analysis',
-      status: 'completed',
-      date: 'August 2',
-      progress: 100,
-    },
-    {
-      title: 'Statistics Foundations',
-      status: 'in_progress',
-      date: 'In progress',
-      progress: 55,
-    },
-    {
-      title: 'Machine Learning Fundamentals',
-      status: 'locked',
-      date: 'Estimated: 2 weeks',
-      progress: 0,
-    },
-    {
-      title: 'ML Project Portfolio',
-      status: 'upcoming',
-      date: 'Estimated: 4 weeks',
-      progress: 0,
-    },
-  ]
+  // 6. Roadmap Milestones Timeline — REAL, grouped from roadmap.weeks by
+  // milestone_label (a milestone can span multiple weeks). Dates for
+  // completed milestones use the real latest completed_at among that
+  // milestone's steps; everything else shows its real week range instead of
+  // an invented "Estimated: N weeks".
+  const milestones = (() => {
+    const order = []
+    const byLabel = new Map()
+    roadmap.weeks.forEach((w) => {
+      const label = w.milestone_label || 'Milestone'
+      if (!byLabel.has(label)) {
+        const group = { title: label, weeks: [] }
+        byLabel.set(label, group)
+        order.push(group)
+      }
+      byLabel.get(label).weeks.push(w)
+    })
+
+    return order.map((g) => {
+      const totalSteps = g.weeks.reduce((a, w) => a + (w.total_steps || 0), 0)
+      const doneSteps = g.weeks.reduce((a, w) => a + (w.completed_steps || 0), 0)
+      const progress = totalSteps ? Math.round((doneSteps / totalSteps) * 100) : 0
+      const allComplete = g.weeks.every((w) => w.is_complete)
+      const anyCurrent = g.weeks.some((w) => w.is_current)
+      const allLocked = g.weeks.every((w) => w.is_locked)
+
+      let status = 'upcoming'
+      if (allComplete) status = 'completed'
+      else if (anyCurrent) status = 'in_progress'
+      else if (allLocked) status = 'locked'
+
+      const weekNums = g.weeks.map((w) => w.week_number)
+      const weekRange = weekNums.length > 1
+        ? `Weeks ${Math.min(...weekNums)}-${Math.max(...weekNums)}`
+        : `Week ${weekNums[0]}`
+
+      let date = weekRange
+      if (allComplete) {
+        const completedDates = roadmap.allSteps
+          .filter((s) => s.milestone_label === g.title && s.completed_at)
+          .map((s) => new Date(s.completed_at))
+        if (completedDates.length) {
+          const latest = new Date(Math.max(...completedDates))
+          date = latest.toLocaleDateString(undefined, { month: 'long', day: 'numeric' })
+        } else {
+          date = 'Completed'
+        }
+      } else if (anyCurrent) {
+        date = `In progress · ${weekRange}`
+      }
+
+      return { title: g.title, status, date, progress }
+    })
+  })()
 
   // 7. Next Best Actions
   const nextActions = [
@@ -883,7 +905,7 @@ export default function ProgressScreen() {
                   Roadmap milestones
                 </h2>
                 <p className="text-xs text-[#64748B] mt-0.5">
-                  Key achievements on your path to becoming an AIML Engineer
+                  Key achievements on your path{roadmap.path?.goal_text ? ` toward ${roadmap.path.goal_text.split('.')[0]}` : ''}
                 </p>
               </div>
 
@@ -927,7 +949,7 @@ export default function ProgressScreen() {
                           )}
                           {isInProgress && (
                             <span className="px-2.5 py-0.5 rounded-full bg-[#F3EEFF] text-[#5B2FF3] text-[10px] font-bold">
-                              In Progress (55%)
+                              In Progress ({m.progress}%)
                             </span>
                           )}
                           {isLocked && (
