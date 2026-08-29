@@ -14,17 +14,18 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 
 try:
-    from duckduckgo_search import DDGS
-except Exception:
+    from duckduckgo_search import DDGS  # type: ignore
+except (ImportError, Exception):
     DDGS = None
 
 try:
-    from duckduckgo_search.exceptions import DuckDuckGoSearchException as DDGSException
-except Exception:
+    from duckduckgo_search.exceptions import DuckDuckGoSearchException as DDGSException  # type: ignore
+except (ImportError, Exception):
     try:
-        from duckduckgo_search.exceptions import RatelimitException as DDGSException
-    except Exception:
+        from duckduckgo_search.exceptions import RatelimitException as DDGSException  # type: ignore
+    except (ImportError, Exception):
         DDGSException = Exception
+
 
 
 MAX_RESULTS = 8
