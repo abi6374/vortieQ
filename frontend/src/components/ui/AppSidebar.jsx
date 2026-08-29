@@ -49,6 +49,22 @@ export const ICONS = {
       <path d="M4 5a2 2 0 0 1 2-2h13v18H6a2 2 0 0 0-2 2z" /><path d="M4 5v14" />
     </svg>
   ),
+  hackathons: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+      <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+      <path d="M4 22h16" />
+      <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+      <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+      <path d="M18 2H6v7a6 6 0 0 0 12 0V2z" />
+    </svg>
+  ),
+  internships: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+      <rect width="20" height="14" x="2" y="7" rx="2" ry="2" />
+      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+    </svg>
+  ),
   interview: (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
       <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
@@ -67,15 +83,19 @@ export const ICONS = {
 
 // Terminology is fixed — see the brief. Do not rename these labels.
 export const NAV = [
-  { key: 'roadmap',   label: 'My roadmap',     path: '/dashboard' },
-  { key: 'progress',  label: 'Progress',       path: '/progress' },
-  { key: 'skills',    label: 'Skill insights', path: '/skills' },
-  { key: 'resources', label: 'Resources',      path: '/resources' },
-  { key: 'interview', label: 'AI Interview',   path: '/interview', badge: 'Beta' },
-  { key: 'coach',     label: 'AI coach',       path: '/coach' },
+  { key: 'roadmap',     label: 'My roadmap',     path: '/dashboard' },
+  { key: 'progress',   label: 'Progress',        path: '/progress' },
+  { key: 'skills',     label: 'Skill insights',  path: '/skills' },
+  { key: 'resources',  label: 'Resources',       path: '/resources' },
+  { key: 'hackathons', label: 'Hackathons',      path: '/hackathons', badge: 'New' },
+  { key: 'internships',label: 'Internships',     path: '/internships', badge: 'New' },
+  { key: 'interview',  label: 'AI Interview',    path: '/interview', badge: 'Beta' },
+  { key: 'coach',      label: 'AI coach',        path: '/coach' },
 ]
 
 export function activeKeyFor(pathname) {
+  if (pathname.startsWith('/hackathons')) return 'hackathons'
+  if (pathname.startsWith('/internships')) return 'internships'
   if (pathname.startsWith('/interview')) return 'interview'
   if (pathname.startsWith('/progress')) return 'progress'
   if (pathname.startsWith('/skill')) return 'skills'
