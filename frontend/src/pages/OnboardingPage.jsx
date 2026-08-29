@@ -59,7 +59,8 @@ export default function OnboardingPage() {
   }, [session, user])
 
   const handleSyncGithub = async (customUsername) => {
-    const targetUsername = (customUsername || user?.user_metadata?.user_name || user?.user_metadata?.preferred_username || '').trim()
+    const custom = typeof customUsername === 'string' ? customUsername.trim() : ''
+    const targetUsername = custom || (user?.user_metadata?.user_name || user?.user_metadata?.preferred_username || '').trim()
     if (!targetUsername && !session?.provider_token) return
     setGithubLoading(true)
     setGithubSyncError('')
@@ -114,7 +115,7 @@ export default function OnboardingPage() {
     // Pre-fill the goal box with the resume's own inferred goal - only if
     // the learner hasn't already typed a goal elsewhere (chat lane), never
     // overwrites something they wrote themselves.
-    if (suggestedGoal && !goalText.trim()) setGoalText(suggestedGoal)
+    if (suggestedGoal && !(goalText || '').trim()) setGoalText(suggestedGoal)
     setPhase(merged && merged.length > 0 ? 'topics' : 'goalcompass')
   }
 

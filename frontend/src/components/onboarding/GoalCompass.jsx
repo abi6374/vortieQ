@@ -333,16 +333,19 @@ export default function GoalCompass({ topicRatings = [], detectedYears = 0, init
   // Auto-suggested from the learner's real resume skills (or goal-text
   // keywords when there's no resume yet) instead of always defaulting to
   // the same role regardless of who they actually are.
-  const [role, setRole] = useState(() => suggestRole(topicRatings, initialGoal))
+  const defaultSuggestedRole = suggestRole(topicRatings, initialGoal)
+  const [role, setRole] = useState(() => defaultSuggestedRole)
   const [customRoleName, setCustomRoleName] = useState('')
-  const suggestedRoleName = ROLES[suggestRole(topicRatings, initialGoal)].name
-  const [goal, setGoal] = useState(initialGoal || `I want to become a ${suggestedRoleName} within 6 months.`)
+  const suggestedRoleName = ROLES[defaultSuggestedRole].name
+  const [goal, setGoal] = useState(
+    initialGoal || `I want to become a ${suggestedRoleName} within 6 months.`
+  )
   const [weekly, setWeekly] = useState(8)
   const [target, setTarget] = useState(defaultTargetMonth())
   const [priority, setPriority] = useState('intern')
 
   const isCustomRole = role === 'custom'
-  const effectiveRoleName = isCustomRole ? (customRoleName.trim() || 'your custom role') : ROLES[role].name
+  const effectiveRoleName = isCustomRole ? ((customRoleName || '').trim() || 'your custom role') : ROLES[role].name
 
   // current skills from the resume/assess step
   const current = useMemo(() => {
@@ -435,8 +438,21 @@ export default function GoalCompass({ topicRatings = [], detectedYears = 0, init
         {/* LEFT */}
         <div className="card">
           <div className="sec">
-            <h3 className="sec-h">Describe your goal</h3>
-            <textarea value={goal} onChange={(e) => setGoal(e.target.value)} spellCheck="false" />
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="sec-h" style={{ margin: 0 }}>Describe your goal <span className="text-xs font-bold text-[#0066cc] dark:text-[#38BDF8]">(Required)</span></h3>
+              <span className="text-xs text-[#7a7a7a] dark:text-[#94A3B8]">Extend or refine for richer recommendations</span>
+            </div>
+            <textarea
+              value={goal}
+              onChange={(e) => setGoal(e.target.value)}
+              placeholder={`e.g. I want to become a ${effectiveRoleName} in 6 months with hands-on projects...`}
+              spellCheck="false"
+            />
+            {!(goal || '').trim() && (
+              <p className="mt-1.5 text-xs text-red-600 dark:text-red-400 font-semibold">
+                Please describe your learning goal before creating your plan.
+              </p>
+            )}
           </div>
 
           <div className="sec">
@@ -469,15 +485,15 @@ export default function GoalCompass({ topicRatings = [], detectedYears = 0, init
               />
             )}
 
-            {!isCustomRole && role === suggestRole(topicRatings, initialGoal) && (
+            {!isCustomRole && role === defaultSuggestedRole && (
               <p className="role-suggested">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
-                Suggested based on {topicRatings.length > 0 ? 'your resume' : 'your goal'}
+                Suggested based on {topicRatings.length > 0 ? 'your background skills' : 'your goal'}
               </p>
             )}
 
             {topicRatings.length > 0 && !isCustomRole && (
-              <p className="insight"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M6 6l2 2M16 16l2 2M18 6l-2 2M8 16l-2 2" /></svg> Readiness is calculated from the {topicRatings.length} skill{topicRatings.length === 1 ? '' : 's'} in your resume.</p>
+              <p className="insight"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M6 6l2 2M16 16l2 2M18 6l-2 2M8 16l-2 2" /></svg> Readiness is calculated from the {topicRatings.length} skill{topicRatings.length === 1 ? '' : 's'} in your profile.</p>
             )}
           </div>
 
@@ -563,18 +579,19 @@ export default function GoalCompass({ topicRatings = [], detectedYears = 0, init
           <button
             type="button"
             className="btn-plan"
-            disabled={isCustomRole && !customRoleName.trim() && !goal.trim()}
+            disabled={!(goal || '').trim() || (isCustomRole && !(customRoleName || '').trim())}
+            title={
+              !(goal || '').trim()
+                ? 'Please describe your learning goal before creating your plan'
+                : isCustomRole && !(customRoleName || '').trim()
+                ? 'Please enter your custom target role'
+                : undefined
+            }
             onClick={() => {
-              // Real bug this fixes: previously, typing ANYTHING in the goal
-              // box silently dropped whatever role (custom or preset) the
-              // learner explicitly selected - only used as a fallback when
-              // the goal box was empty. The selected role is now always
-              // folded in, and also sent as an explicit target_role_override
-              // so the backend uses it directly instead of re-guessing it
-              // from text.
-              const hasRealRole = isCustomRole ? !!customRoleName.trim() : true
-              const composedGoal = goal.trim()
-                ? `${goal.trim()} (Target role: ${effectiveRoleName}.)`
+              const hasRealRole = isCustomRole ? !!(customRoleName || '').trim() : true
+              const trimmedGoal = (goal || '').trim()
+              const composedGoal = trimmedGoal
+                ? `${trimmedGoal} (Target role: ${effectiveRoleName}.)`
                 : `I want to become a ${effectiveRoleName}.`
               onCreate(composedGoal, weekly, hasRealRole ? effectiveRoleName : '')
             }}

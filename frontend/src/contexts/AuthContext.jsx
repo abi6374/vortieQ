@@ -124,7 +124,7 @@ export function AuthProvider({ children }) {
   const signInWithGoogle = async () => {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/dashboard` },
+      options: { redirectTo: `${window.location.origin}/onboarding?source=google` },
     })
     if (error) throw error
     if (data?.url) {
@@ -186,7 +186,8 @@ export function AuthProvider({ children }) {
       // username-sync path (already on this same screen/modal) still works
       // regardless of this project setting, so point there rather than
       // leaving the learner stuck on a cryptic OAuth failure.
-      if (err?.message?.toLowerCase().includes('manual linking is disabled')) {
+      const msg = err?.message?.toLowerCase() || ''
+      if (msg.includes('manual linking is disabled') || msg.includes('404') || err?.status === 404) {
         throw new Error(
           'GitHub OAuth linking is currently disabled in this project\'s settings. Please use the username sync option above instead.'
         )

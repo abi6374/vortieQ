@@ -39,11 +39,12 @@ export default function LearnerIntakeWorkspace({
   onSyncGithub,
 }) {
   // Selection mode: 'resume' (default selected) or 'chat'
-  const [selectedMethod, setSelectedMethod] = useState('resume')
+  const [selectedMethod, setSelectedMethod] = useState('chat')
 
   // Per-user GitHub username state
   const [customUsername, setCustomUsername] = useState(authenticatedUsername || '')
   const [showUsernameInput, setShowUsernameInput] = useState(false)
+  const [stackConfirmed, setStackConfirmed] = useState(false)
 
   // Resume upload state
   const [file, setFile] = useState(null)
@@ -51,6 +52,7 @@ export default function LearnerIntakeWorkspace({
   const [uploadError, setUploadError] = useState('')
   const [dragOver, setDragOver] = useState(false)
   const fileInputRef = useRef(null)
+  const chatInputRef = useRef(null)
 
   // Chat conversation state
   const [chatStory, setChatStory] = useState('')
@@ -71,12 +73,13 @@ export default function LearnerIntakeWorkspace({
     if (githubData?.topics && githubData.topics.length > 0 && !file && chatMessages.length <= 1) {
       const topics = githubData.topics
       const confStr = topics.length ? `${avgConfidence(topics)} (${levelLabel(topics)})` : ''
-      setProfileDraft({
+      setProfileDraft((prev) => ({
         ...EMPTY_DRAFT,
+        ...prev,
         skills: topics.map((t) => t.name).join(', '),
         confidence: confStr,
         summary: `Imported ${githubData.github_projects?.length || topics.length} repositories for ${customUsername || authenticatedUsername || 'your profile'} with ${githubData.top_languages?.join(', ') || 'modern stacks'}. Detected ${topics.length} skills (~${avgConfidence(topics)} confidence).`,
-      })
+      }))
     }
   }, [githubData, customUsername, authenticatedUsername])
 
@@ -85,6 +88,37 @@ export default function LearnerIntakeWorkspace({
     if (!customUsername.trim()) return
     onSyncGithub?.(customUsername.trim())
     setShowUsernameInput(false)
+  }
+
+  // Handle GitHub "Continue with this Stack" button confirmation
+  const handleConfirmStack = () => {
+    setStackConfirmed(true)
+    setContinueError('')
+
+    if (githubData?.topics && githubData.topics.length > 0) {
+      const topics = githubData.topics
+      const confStr = topics.length ? `${avgConfidence(topics)} (${levelLabel(topics)})` : ''
+      setProfileDraft((prev) => ({
+        ...EMPTY_DRAFT,
+        ...prev,
+        skills: topics.map((t) => t.name).join(', '),
+        confidence: confStr,
+        summary: prev?.summary && !prev.summary.includes('ready')
+          ? prev.summary
+          : `Imported ${githubData.github_projects?.length || topics.length} repositories for ${customUsername || authenticatedUsername || 'your profile'} with ${githubData.top_languages?.join(', ') || 'modern stacks'}. Detected ${topics.length} skills (~${avgConfidence(topics)} confidence).`,
+      }))
+    }
+
+    const hasUserStory = chatMessages.some((m) => m.sender === 'user') || !!file
+    if (!hasUserStory) {
+      setContinueError('GitHub stack confirmed! Please describe your background and learning goals in the chat box below to complete your AI Profile Draft.')
+      setSelectedMethod('chat')
+      setTimeout(() => {
+        chatInputRef.current?.focus()
+      }, 100)
+    } else {
+      handleContinue()
+    }
   }
 
   // Review & Edit Modal state
@@ -109,10 +143,11 @@ export default function LearnerIntakeWorkspace({
     setContinueError('')
     setFile(f)
     setSelectedMethod('resume')
-    setProfileDraft({
+    setProfileDraft((prev) => ({
       ...EMPTY_DRAFT,
-      summary: `"${f.name}" is ready. Click Continue to analyze and merge with your profile.`,
-    })
+      ...prev,
+      summary: `"${f.name}" is ready. Click Continue to analyze and merge with your profile draft.`,
+    }))
   }
 
   // Handle chat submission
@@ -137,26 +172,46 @@ export default function LearnerIntakeWorkspace({
       .map((m) => m.text)
       .join(' ')
 
-    setProfileDraft({
-      ...EMPTY_DRAFT,
-      summary: `In your own words: "${userNotes.slice(0, 220)}${userNotes.length > 220 ? '…' : ''}"`,
-    })
+    const existingSkills = profileDraft?.skills || (githubData?.topics ? githubData.topics.map((t) => t.name).join(', ') : '')
+    const existingConfidence = profileDraft?.confidence || (githubData?.topics?.length ? `${avgConfidence(githubData.topics)} (${levelLabel(githubData.topics)})` : '')
 
-    // Deliberately does NOT call onChatSubmit here. It used to fire on every
-    // single message send, which silently advanced the WHOLE onboarding
-    // wizard straight past this screen (skipping Assess Skills too) the
-    // instant a learner sent their first message - bypassing the AI Profile
-    // Draft entirely along with the visible "Continue" button and its
-    // validation. Sending a message now only updates the draft preview;
-    // onChatSubmit only fires from handleContinue below, once the learner
-    // has actually reviewed the draft and clicked Continue.
+    setProfileDraft((prev) => ({
+      ...EMPTY_DRAFT,
+      ...prev,
+      skills: existingSkills || prev?.skills || '',
+      confidence: existingConfidence || prev?.confidence || '',
+      goal: userNotes,
+      summary: existingSkills
+        ? `We noted your skills in ${existingSkills}. In your own words: "${userNotes.slice(0, 180)}${userNotes.length > 180 ? '…' : ''}"`
+        : `In your own words: "${userNotes.slice(0, 220)}${userNotes.length > 220 ? '…' : ''}"`,
+    }))
   }
 
   // Handle Continue button action
   const handleContinue = async () => {
     setContinueError('')
 
-    if (selectedMethod === 'resume' && file) {
+    const hasUserStory = chatMessages.some((m) => m.sender === 'user')
+    const userStory = chatMessages
+      .filter((m) => m.sender === 'user')
+      .map((m) => m.text)
+      .join(' ')
+      .trim()
+
+    // Saying in natural language is mandatory; resume is optional
+    if (!hasUserStory && !file) {
+      setContinueError('Describing your background or goals in the chat box is required before continuing (resume upload is optional).')
+      setSelectedMethod('chat')
+      chatInputRef.current?.focus()
+      return
+    }
+
+    if (!profileDraft) {
+      setContinueError('AI Profile Draft is required. Please add your background in the chat box or upload a resume.')
+      return
+    }
+
+    if (file) {
       setUploading(true)
       setUploadError('')
       try {
@@ -167,23 +222,28 @@ export default function LearnerIntakeWorkspace({
         })
         const topics = data.topics || []
         const confStr = topics.length ? `${avgConfidence(topics)} (${levelLabel(topics)})` : ''
-        setProfileDraft({
+        const updatedDraft = {
           ...EMPTY_DRAFT,
-          skills: topics.map((t) => t.name).join(', '),
-          confidence: confStr,
-          // Real resume context beyond just skills - previously these 3
-          // fields stayed blank forever even though the edit modal already
-          // had inputs for them; the backend just never extracted them.
-          education: data.education || '',
-          projects: data.projects || '',
-          goal: data.suggested_goal || '',
+          ...profileDraft,
+          skills: topics.map((t) => t.name).join(', ') || profileDraft?.skills || '',
+          confidence: confStr || profileDraft?.confidence || '',
+          education: data.education || profileDraft?.education || '',
+          projects: data.projects || profileDraft?.projects || '',
+          goal: userStory || data.suggested_goal || profileDraft?.goal || '',
           summary: topics.length
             ? `Identified ${topics.length} skill${topics.length === 1 ? '' : 's'} (~${avgConfidence(topics)} confidence)${
                 data.detected_years_experience ? ` and ~${data.detected_years_experience} years experience` : ''
               }: ${topics.map((t) => t.name).join(', ')}.`
-            : 'No specific technical topics were detected in this resume — you can still continue and describe your background.',
-        })
-        onExtracted(topics, data.detected_years_experience || 0, data.education || '', data.projects || '', data.suggested_goal || '')
+            : profileDraft?.summary || 'Resume analyzed and profile draft updated.',
+        }
+        setProfileDraft(updatedDraft)
+        onExtracted(
+          topics,
+          data.detected_years_experience || 0,
+          updatedDraft.education,
+          updatedDraft.projects,
+          updatedDraft.goal || data.suggested_goal || userStory || ''
+        )
       } catch (err) {
         console.error('Resume extraction failed:', err)
         setUploadError(
@@ -193,35 +253,17 @@ export default function LearnerIntakeWorkspace({
       } finally {
         setUploading(false)
       }
-    } else if (selectedMethod === 'chat') {
-      const userNotes = chatMessages
-        .filter((m) => m.sender === 'user')
-        .map((m) => m.text)
-        .join(' ')
-        .trim()
-      if (userNotes) {
-        onChatSubmit?.(userNotes)
-      } else if (githubData?.topics && githubData.topics.length > 0) {
-        // GitHub data present - resume/chat is optional! Pass through any
-        // edits the learner made in "Review and edit" (education/projects/
-        // goal) too - previously only (topics, years) were forwarded here,
-        // so anything typed into the edit modal for a GitHub-only learner
-        // was silently discarded the moment they clicked Continue.
-        onExtracted(
-          githubData.topics, githubData.detected_years_experience || 0,
-          profileDraft?.education || '', profileDraft?.projects || '', profileDraft?.goal || ''
-        )
-      } else {
-        setContinueError('Tell PathFinder a bit about yourself in the chat box before continuing.')
-      }
     } else if (githubData?.topics && githubData.topics.length > 0) {
-      // Direct pass-through for GitHub users without mandatory resume
+      // GitHub topics + natural language story
       onExtracted(
-        githubData.topics, githubData.detected_years_experience || 0,
-        profileDraft?.education || '', profileDraft?.projects || '', profileDraft?.goal || ''
+        githubData.topics,
+        githubData.detected_years_experience || 0,
+        profileDraft?.education || '',
+        profileDraft?.projects || '',
+        userStory || profileDraft?.goal || ''
       )
-    } else {
-      setContinueError('Upload a resume or describe your background in the chat box before continuing.')
+    } else if (userStory) {
+      onChatSubmit?.(userStory)
     }
   }
 
@@ -317,10 +359,23 @@ export default function LearnerIntakeWorkspace({
                 </button>
                 <button
                   type="button"
-                  onClick={handleContinue}
-                  className="px-3.5 py-1.5 bg-[#0066CC] hover:bg-[#0052A3] text-white text-xs font-bold rounded-lg shadow-xs transition-colors cursor-pointer flex-none"
+                  onClick={handleConfirmStack}
+                  className={`px-3.5 py-1.5 text-xs font-bold rounded-lg shadow-xs transition-all cursor-pointer flex-none flex items-center gap-1.5 ${
+                    stackConfirmed
+                      ? 'bg-[#ECFDF3] dark:bg-emerald-950/40 text-[#22A06B] dark:text-emerald-400 border border-[#B7E7C9] dark:border-emerald-800/60'
+                      : 'bg-[#0066CC] hover:bg-[#0052A3] text-white'
+                  }`}
                 >
-                  Continue with this Stack →
+                  {stackConfirmed ? (
+                    <>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M20 6 9 17l-5-5" />
+                      </svg>
+                      <span>Stack Confirmed</span>
+                    </>
+                  ) : (
+                    <span>Continue with this Stack →</span>
+                  )}
                 </button>
               </div>
             </div>
@@ -428,10 +483,10 @@ export default function LearnerIntakeWorkspace({
             </div>
 
             <h2 className="text-[22px] font-bold text-[#1d1d1f] dark:text-[#F8FAFC] mb-1">
-              Upload my resume
+              Upload my resume <span className="text-xs font-semibold text-[#7a7a7a] dark:text-[#94A3B8]">(Optional)</span>
             </h2>
             <p className="text-[14.5px] text-[#333333] dark:text-[#94A3B8] leading-snug mb-4">
-              Upload a PDF or DOCX and we’ll identify your skills, projects and experience.
+              Upload a PDF or DOCX to auto-extract your skills and past project keywords.
             </p>
           </div>
 
@@ -571,10 +626,10 @@ export default function LearnerIntakeWorkspace({
             </div>
 
             <h2 className="text-[22px] font-bold text-[#1d1d1f] dark:text-[#F8FAFC] mb-1">
-              Tell PathFinder in a chat
+              Tell PathFinder in a chat <span className="text-xs font-bold text-[#0066cc] dark:text-[#38BDF8]">(Required)</span>
             </h2>
             <p className="text-[14.5px] text-[#333333] dark:text-[#94A3B8] leading-snug mb-4">
-              Describe your background naturally. We’ll build your learner profile together.
+              Describe your background naturally. We’ll build your learner profile and draft together.
             </p>
           </div>
 
@@ -618,10 +673,11 @@ export default function LearnerIntakeWorkspace({
             className="bg-[#fbfbfb] dark:bg-[#121927] border border-[#e0e0e0] dark:border-[#263750] rounded-xl px-3 py-1.5 flex items-center justify-between gap-2 mt-4 focus-within:border-[#0066cc] dark:focus-within:border-[#38BDF8] focus-within:bg-white dark:focus-within:bg-[#162133] focus-within:ring-2 focus-within:ring-[#0066cc]/15 transition-all shadow-xs"
           >
             <input
+              ref={chatInputRef}
               type="text"
               value={chatStory}
               onChange={(e) => setChatStory(e.target.value)}
-              placeholder="Type your story here..."
+              placeholder="Type your background, skills & goals here..."
               className="w-full bg-transparent border-0 border-none outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 ring-0 shadow-none text-[14px] text-[#1d1d1f] dark:text-[#F8FAFC] placeholder-[#7a7a7a] dark:placeholder-[#64748B] px-1"
               style={{ border: 'none', outline: 'none', boxShadow: 'none' }}
             />
@@ -797,8 +853,14 @@ export default function LearnerIntakeWorkspace({
         <button
           type="button"
           onClick={handleContinue}
-          disabled={uploading || !profileDraft}
-          title={!profileDraft ? 'Upload a resume, connect GitHub, or describe your background first' : undefined}
+          disabled={uploading || !profileDraft || (!chatMessages.some((m) => m.sender === 'user') && !file)}
+          title={
+            !chatMessages.some((m) => m.sender === 'user') && !file
+              ? 'Please describe your background in the chat box (or upload a resume) to complete your AI Profile Draft'
+              : !profileDraft
+              ? 'AI Profile Draft is required before continuing'
+              : undefined
+          }
           className="w-[160px] h-[48px] bg-[#0066cc] hover:bg-[#004fa3] active:scale-[0.99] text-white font-bold rounded-xl shadow-[0_4px_14px_rgba(0,102,204,0.35)] transition-all flex items-center justify-center text-[15px] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {uploading ? (
