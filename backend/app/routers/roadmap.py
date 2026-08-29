@@ -1,6 +1,8 @@
-from fastapi import APIRouter, Body, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
 from app.middleware.auth import verify_jwt
+from app.middleware.rate_limit import rate_limit
+from app.schemas.roadmap import RerecommendSchema, TaskCompletionSchema
 from app.services import roadmap_service
 
 router = APIRouter()
@@ -25,22 +27,16 @@ def get_week(week_number: int, user_id: str = Depends(verify_jwt)):
 @router.patch("/tasks/{step_id}")
 def set_task(
     step_id: str,
-    payload: dict = Body(...),
+    payload: TaskCompletionSchema,
     user_id: str = Depends(verify_jwt),
 ):
-    """Toggle a task complete/incomplete. Body: {"completed": true|false, "note": str?, "rating": int?, "tag": str?}.
-
-    `note`, `rating`, `tag`: the learner's real feedback on this task.
-    Returns the full recomputed roadmap.
-    """
-    if "completed" not in payload:
-        raise HTTPException(400, "Body must include 'completed' (true or false)")
+    """Toggle a task complete/incomplete. `note`, `rating`, `tag`: the
+    learner's real feedback on this task. Returns the full recomputed
+    roadmap."""
     try:
         return roadmap_service.set_task_completion(
-            step_id=step_id, user_id=user_id, completed=bool(payload["completed"]),
-            note=str(payload.get("note") or ""),
-            rating=payload.get("rating"),
-            tag=str(payload.get("tag") or ""),
+            step_id=step_id, user_id=user_id, completed=payload.completed,
+            note=payload.note, rating=payload.rating, tag=payload.tag,
         )
     except PermissionError as e:
         # Prerequisite violation — 409 so the UI can show the lock message.
@@ -51,19 +47,21 @@ def set_task(
 
 @router.post("/rerecommend")
 def rerecommend_step(
-    payload: dict = Body(...),
-    user_id: str = Depends(verify_jwt),
+    payload: RerecommendSchema,
+    # Real gap this closes: every other LLM-backed mutation route (paths.generate,
+    # steps.swap, steps.feedback) is rate-limited (see middleware/rate_limit.py's
+    # own docstring on why) but this one wasn't, despite doing up to 3 live web
+    # searches PLUS an LLM call per request - an authenticated user could script
+    # unbounded cost/load against it with no cap at all.
+    user_id: str = Depends(rate_limit("roadmap.rerecommend", max_calls=10)),
 ):
-    """Re-recommends a single week course based on learner preferences. Body: {"step_id": str, "preference": str?, "note": str?}."""
-    step_id = payload.get("step_id")
-    if not step_id:
-        raise HTTPException(400, "Body must include 'step_id'")
+    """Re-recommends a single week course based on learner preferences."""
     try:
         return roadmap_service.rerecommend_task(
-            step_id=step_id,
+            step_id=payload.step_id,
             user_id=user_id,
-            preference=str(payload.get("preference") or "custom"),
-            note=str(payload.get("note") or ""),
+            preference=payload.preference,
+            note=payload.note,
         )
     except ValueError as e:
         raise HTTPException(400, str(e))

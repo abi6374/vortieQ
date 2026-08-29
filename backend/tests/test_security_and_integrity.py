@@ -5,11 +5,14 @@ services/github_service.py, main.py — plus two follow-up rounds:
 profile_service.py (prompt-injection hardening, section 6) and
 path_service.py/conversation_service.py/routers/assistant.py (prompt-injection
 boundary-wrapping for profile fields re-interpolated into further LLM calls,
-section 8), and GitHub 404 handling + disconnect endpoint (section 9 — real
+section 8), GitHub 404 handling + disconnect endpoint (section 9 — real
 404 vs. rate-limit vs. generic error, and the DELETE /api/profile/github
-unlink route). No live network calls (GitHub API is mocked) and no live
-Supabase writes — these test the code paths in isolation so they run in CI
-without secrets or network access.
+unlink route), and resource-URL validation before any dynamic course reaches
+the shared catalog (section 10 — the "https://google.com" catalog-poisoning
+fallback removal). No live network calls (GitHub API and resource-URL
+reachability checks are both mocked) and no live Supabase writes — these
+test the code paths in isolation so they run in CI without secrets or
+network access.
 
 Run: cd backend && pytest tests/test_security_and_integrity.py -v
 """
@@ -460,3 +463,147 @@ class TestPromptInjectionBoundaries:
             headers={"Authorization": "Bearer not-a-jwt"},
         )
         assert r.status_code in (401, 422)
+
+
+# ── 10. Catalog-poisoning fix: no unverified URL ever reaches `courses` ─────
+class TestResourceURLValidation:
+    """Real production bug: path_service._ensure_course_in_catalog() and
+    swap_step_with_preference() both fell back to a literal
+    "https://google.com" resource_url whenever the LLM or web search came up
+    empty, and INSERTed that fabricated row directly into the shared, global
+    `courses` table (not scoped to one user) with a real pgvector embedding -
+    a permanent cross-user catalog-poisoning entry. No live network calls
+    here - the live-reachability half of _validate_resource_url is mocked."""
+
+    def test_rejects_non_https(self):
+        from app.services.path_service import _validate_resource_url
+        assert _validate_resource_url("http://example.com/course") is False
+
+    def test_rejects_empty(self):
+        from app.services.path_service import _validate_resource_url
+        assert _validate_resource_url("") is False
+
+    def test_rejects_bare_google_homepage(self):
+        from app.services.path_service import _validate_resource_url
+        assert _validate_resource_url("https://google.com") is False
+        assert _validate_resource_url("https://www.google.com/") is False
+
+    def test_accepts_google_with_a_real_path(self):
+        # A genuine google.com-hosted resource (e.g. a Google course/doc
+        # page, not the bare homepage) should not be blanket-rejected just
+        # for sharing a domain with the blocked homepage case.
+        from app.services.path_service import _validate_resource_url
+        with patch("app.services.path_service.httpx.Client") as mock_client_cls:
+            mock_client = MagicMock()
+            mock_client.head.return_value = MagicMock(status_code=200)
+            mock_client_cls.return_value.__enter__.return_value = mock_client
+            assert _validate_resource_url("https://google.com/learn/course-x") is True
+
+    def test_rejects_unreachable_url(self):
+        from app.services.path_service import _validate_resource_url
+        with patch("app.services.path_service.httpx.Client") as mock_client_cls:
+            mock_client = MagicMock()
+            mock_client.head.return_value = MagicMock(status_code=404)
+            mock_client.get.return_value = MagicMock(status_code=404)
+            mock_client_cls.return_value.__enter__.return_value = mock_client
+            assert _validate_resource_url("https://example.com/dead-link") is False
+
+    def test_falls_back_to_get_when_head_rejected(self):
+        # Some sites 405/403 HEAD requests but serve GET fine.
+        from app.services.path_service import _validate_resource_url
+        with patch("app.services.path_service.httpx.Client") as mock_client_cls:
+            mock_client = MagicMock()
+            mock_client.head.return_value = MagicMock(status_code=405)
+            mock_client.get.return_value = MagicMock(status_code=200)
+            mock_client_cls.return_value.__enter__.return_value = mock_client
+            assert _validate_resource_url("https://example.com/head-blocked") is True
+
+    def test_ensure_course_in_catalog_never_inserts_an_unverified_url(self):
+        from app.services.path_service import _ensure_course_in_catalog, ResourceValidationError
+
+        mock_supabase = MagicMock()
+        mock_table = MagicMock()
+        mock_supabase.table.return_value = mock_table
+        # No existing row by URL or title.
+        mock_table.select.return_value.eq.return_value.execute.return_value = MagicMock(data=[])
+        mock_table.select.return_value.ilike.return_value.execute.return_value = MagicMock(data=[])
+
+        with patch("app.services.path_service.supabase_client", mock_supabase), \
+             patch("app.services.path_service._validate_resource_url", return_value=False):
+            with pytest.raises(ResourceValidationError):
+                _ensure_course_in_catalog({
+                    "title": "Suspicious Course",
+                    "resource_url": "https://not-a-real-resource.example",
+                    "description": "x", "skill_tags": [],
+                })
+
+        # The critical assertion: insert() must NEVER be called when the URL
+        # fails validation - no fabricated row reaches the shared catalog.
+        mock_table.insert.assert_not_called()
+
+    def test_task_completion_schema_string_false_is_really_false(self):
+        # Real production bug: roadmap.py used to do
+        # completed=bool(payload["completed"]) - Python's bool("false") is
+        # True (any non-empty string is truthy), so a client sending
+        # {"completed": "false"} would have recorded a task as COMPLETED.
+        # TaskCompletionSchema's real `completed: bool` field does semantic
+        # parsing instead - "false" correctly becomes False.
+        from app.schemas.roadmap import TaskCompletionSchema
+        assert TaskCompletionSchema(completed="false").completed is False
+        assert TaskCompletionSchema(completed="False").completed is False
+        assert TaskCompletionSchema(completed="true").completed is True
+        assert TaskCompletionSchema(completed=False).completed is False
+
+    def test_task_completion_schema_rejects_garbage_completed_value(self):
+        from pydantic import ValidationError
+        from app.schemas.roadmap import TaskCompletionSchema
+        with pytest.raises(ValidationError):
+            TaskCompletionSchema(completed="banana")
+
+    def test_task_completion_schema_caps_note_length(self):
+        from pydantic import ValidationError
+        from app.schemas.roadmap import TaskCompletionSchema
+        with pytest.raises(ValidationError):
+            TaskCompletionSchema(completed=True, note="x" * 10_000)
+
+    def test_feedback_schema_rejects_invalid_event_type(self):
+        from pydantic import ValidationError
+        from app.schemas.feedback import FeedbackCreateSchema
+        with pytest.raises(ValidationError):
+            FeedbackCreateSchema(event_type="definitely_not_a_real_type")
+
+    def test_feedback_schema_accepts_real_event_types(self):
+        from app.schemas.feedback import FeedbackCreateSchema
+        for et in ("completed", "too_easy", "not_interested"):
+            assert FeedbackCreateSchema(event_type=et).event_type == et
+
+    def test_rerecommend_route_rate_limited(self):
+        # Real gap this closes: /api/roadmap/rerecommend does up to 3 live
+        # web searches PLUS an LLM call per request but had NO rate limiter
+        # at all, unlike every sibling mutation route. Confirms the
+        # rate_limit(...) dependency is actually wired (not just that the
+        # limiter logic works in isolation, which other rate-limited routes
+        # already cover) - a regression here (dropping the Depends()) is
+        # exactly the kind of one-line change that's easy to silently
+        # reintroduce.
+        import fastapi
+        from app.routers import roadmap as roadmap_router
+        sig = __import__("inspect").signature(roadmap_router.rerecommend_step)
+        default = sig.parameters["user_id"].default
+        assert isinstance(default, fastapi.params.Depends)
+        closure_values = [c.cell_contents for c in (default.dependency.__closure__ or [])]
+        assert "roadmap.rerecommend" in closure_values
+
+    def test_no_google_com_fallback_string_survives_in_source(self):
+        # Regression guard: the exact buggy CODE PATTERN (`or "https://
+        # google.com"` / `or 'https://google.com'`, a Python `or` expression
+        # defaulting to the placeholder) must not reappear. Deliberately
+        # narrow (not a blunt "google.com" substring search) so this doesn't
+        # trip on this file's own docstrings describing the bug in prose.
+        import inspect
+        import re
+        from app.services import path_service
+        source = inspect.getsource(path_service)
+        assert not re.search(r'or\s+["\']https://google\.com', source), (
+            "the removed 'or \"https://google.com\"' fallback pattern has been reintroduced"
+        )

@@ -239,6 +239,7 @@ def test_swap_step_with_preference_realtime_flow():
     with patch("app.services.path_service.supabase_client", mock_supabase), \
          patch("app.services.web_search_service.search_learning_resources", return_value=mock_search), \
          patch("app.services.path_service._call_groq", return_value=mock_llm_json), \
+         patch("app.services.path_service._validate_resource_url", return_value=True), \
          patch("app.ml.embedder.embed_text", return_value=[0.1] * 384):
 
         res = swap_step_with_preference("step-1", "u-1", preference="too_advanced", note="Need a gentler intro")
