@@ -22,7 +22,7 @@ async function runRealAuthTest() {
   await page.waitForTimeout(500);
 
   // Fill sign up fields
-  const nameInput = page.locator('input[placeholder*="HCL Tech" i], input[type="text"]').first();
+  const nameInput = page.locator('input[placeholder*="HackerEarth" i], input[type="text"]').first();
   if (await nameInput.isVisible()) {
     await nameInput.fill('HCL Tech');
   }
