@@ -167,19 +167,32 @@ export function AuthProvider({ children }) {
   // auth.identities, so it's on; if this ever starts failing with a
   // "manual linking is disabled" error, that's the toggle to check).
   const linkGithub = async () => {
-    const { data, error } = await supabase.auth.linkIdentity({
-      provider: 'github',
-      options: {
-        redirectTo: `${window.location.origin}/account?github_linked=true`,
-        scopes: 'read:user repo user:email',
-        queryParams: { prompt: 'consent' },
-      },
-    })
-    if (error) throw error
-    if (data?.url) {
-      window.location.assign(data.url)
+    try {
+      const { data, error } = await supabase.auth.linkIdentity({
+        provider: 'github',
+        options: {
+          redirectTo: `${window.location.origin}/account?github_linked=true`,
+          scopes: 'read:user repo user:email',
+          queryParams: { prompt: 'consent' },
+        },
+      })
+      if (error) throw error
+      if (data?.url) {
+        window.location.assign(data.url)
+      }
+      return data
+    } catch (err) {
+      // Real, actionable message instead of Supabase's raw error - the
+      // username-sync path (already on this same screen/modal) still works
+      // regardless of this project setting, so point there rather than
+      // leaving the learner stuck on a cryptic OAuth failure.
+      if (err?.message?.toLowerCase().includes('manual linking is disabled')) {
+        throw new Error(
+          'GitHub OAuth linking is currently disabled in this project\'s settings. Please use the username sync option above instead.'
+        )
+      }
+      throw err
     }
-    return data
   }
 
   const signOut = async () => {

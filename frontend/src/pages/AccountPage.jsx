@@ -15,7 +15,7 @@ const FIELD = 'w-full rounded-xl border border-[#e0e0e0] dark:border-[#242E40] b
 const LABEL = 'block text-[13.5px] font-semibold text-[#1d1d1f] dark:text-[#CBD5E1] mb-1.5'
 
 export default function AccountPage() {
-  const { user, profile, updateProfile, linkGithub } = useAuth()
+  const { user, profile, updateProfile, linkGithub, refreshProfile } = useAuth()
   const [me, setMe] = useState(null)
   const [form, setForm] = useState({})
   const [loading, setLoading] = useState(true)
@@ -67,11 +67,22 @@ export default function AccountPage() {
   const [ghSyncing, setGhSyncing] = useState(false)
   const [ghFeedback, setGhFeedback] = useState(null)
 
+  // profiles.github_username (migration 004_github_profile_link.sql) is the
+  // single source of truth - it's set atomically on every successful sync,
+  // whichever handle was actually just analyzed. Checked BEFORE the native
+  // OAuth identity fields: a learner who logged in via GitHub natively but
+  // then re-synced a DIFFERENT handle (e.g. previewing another profile's
+  // stack) should see THAT handle reflected here, not silently snap back to
+  // their login identity - that mismatch (re-sync "Dharsan6" but the badge
+  // keeps showing the native "@Login-39t") was the actual reported bug.
+  // user_metadata falls back for a native GitHub user who hasn't synced yet
+  // this session (onboarding auto-syncs on first login, but this covers the
+  // gap before that profile row exists).
   const githubHandle =
-    user?.user_metadata?.user_name ||
-    user?.user_metadata?.preferred_username ||
     profile?.github_username ||
     me?.github_username ||
+    user?.user_metadata?.user_name ||
+    user?.user_metadata?.preferred_username ||
     (typeof window !== 'undefined' && localStorage.getItem(`pf_github_user_${user?.id}`)) ||
     ''
 
@@ -94,12 +105,17 @@ export default function AccountPage() {
           message: `Successfully synced ${res.data.github_projects?.length || 0} repositories for @${target}! Detected ${res.data.topics?.length || 0} skills.`,
         })
         if (updateProfile) {
+          // Optimistic local merge for an instant badge update...
           updateProfile({
             topic_ratings: res.data.topics,
             detected_years_experience: res.data.detected_years_experience,
             github_username: target,
           })
         }
+        // ...then re-fetch the real row from Supabase so `profile` (and
+        // every component reading it - the roadmap popup, onboarding) is
+        // authoritative, not just this page's optimistic guess.
+        await refreshProfile?.()
         flash('GitHub profile synchronized')
       }
     } catch (err) {
@@ -179,6 +195,45 @@ export default function AccountPage() {
     // handleSyncGithubAccount (recreated every render) to avoid re-firing.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // A native GitHub login has provider === 'github' as their PRIMARY
+  // identity (app_metadata.provider, not the plural .providers array which
+  // lists every linked identity) - GitHub isn't an optional add-on for
+  // them, it's how they sign in, so there's nothing to "disconnect" without
+  // locking them out. Google/email users who separately connected GitHub
+  // (sync or OAuth link) can freely remove it.
+  const isNativeGithubLogin = user?.app_metadata?.provider === 'github'
+
+  const [ghDisconnecting, setGhDisconnecting] = useState(false)
+
+  const handleDisconnectGithub = async () => {
+    if (!window.confirm('Disconnect GitHub? Your roadmap will no longer calibrate against your public repos.')) {
+      return
+    }
+    setGhDisconnecting(true)
+    setGhFeedback(null)
+    try {
+      await api.delete('/api/profile/github')
+      if (user?.id) {
+        localStorage.removeItem(`pf_github_user_${user.id}`)
+        localStorage.removeItem(`pf_github_preference_${user.id}`)
+      }
+      setGhInput('')
+      if (updateProfile) {
+        updateProfile({ github_username: null, github_repos_summary: null })
+      }
+      await refreshProfile?.()
+      flash('GitHub disconnected')
+    } catch (err) {
+      console.warn('GitHub disconnect error:', err)
+      setGhFeedback({
+        type: 'error',
+        message: err?.response?.data?.detail || 'Could not disconnect GitHub. Please try again.',
+      })
+    } finally {
+      setGhDisconnecting(false)
+    }
+  }
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }))
 
@@ -368,7 +423,9 @@ export default function AccountPage() {
                   {githubHandle && (
                     <span className="inline-flex items-center gap-1.5 bg-[#ECFDF3] dark:bg-emerald-950/40 text-[#22A06B] dark:text-emerald-400 text-xs px-3 py-1 rounded-full font-bold">
                       <span className="w-2 h-2 rounded-full bg-[#22A06B]"></span>
-                      Connected: @{githubHandle}
+                      {isNativeGithubLogin
+                        ? `Primary Login Identity: GitHub (@${githubHandle})`
+                        : `Connected: @${githubHandle}`}
                     </span>
                   )}
                 </div>
@@ -418,6 +475,24 @@ export default function AccountPage() {
                     </svg>
                     <span>{ghLinking ? 'Redirecting to GitHub…' : 'Or Authorize with GitHub OAuth'}</span>
                   </button>
+
+                  {/* Native GitHub logins can't disconnect - GitHub IS their
+                      sign-in identity, not an optional add-on, and removing
+                      it here has no effect on that (see routers/github.py's
+                      DELETE endpoint, which only ever clears the profile
+                      row's github_username/github_repos_summary, never an
+                      auth identity). Only Google/email users who separately
+                      connected GitHub get this. */}
+                  {!isNativeGithubLogin && githubHandle && (
+                    <button
+                      type="button"
+                      onClick={handleDisconnectGithub}
+                      disabled={ghDisconnecting}
+                      className="w-full text-center py-1.5 text-xs font-bold text-[#B42318] dark:text-red-400 hover:underline disabled:opacity-50 cursor-pointer"
+                    >
+                      {ghDisconnecting ? 'Disconnecting…' : 'Disconnect GitHub'}
+                    </button>
+                  )}
 
                   {ghFeedback && (
                     <p className={`text-xs font-semibold px-3 py-2 rounded-lg ${ghFeedback.type === 'error'
