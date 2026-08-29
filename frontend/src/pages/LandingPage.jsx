@@ -77,38 +77,35 @@ export default function LandingPage() {
 
   return (
     <div className="relative min-h-screen bg-[#F5F5F7] dark:bg-[#0B0F17] text-[#1D1D1F] dark:text-[#F8FAFC] overflow-x-hidden selection:bg-[#0066CC] selection:text-white transition-colors duration-300">
-      {/* 1. Dynamic Interactive Background: WebThreads (Light Theme) & Molten Metal (Dark Theme) */}
-      {!isDark ? (
-        <div className="fixed inset-0 w-full h-full pointer-events-none z-0 overflow-hidden">
-          <WebThreads
-            color1="#0066CC"
-            color2="#38BDF8"
-            color3="#6366F1"
-            speed={0.2}
-            threadCount={4}
-            frequency={4.5}
-            spread={0.22}
-            taper={1.0}
-            position={0.48}
-            fanMode="center"
-            glow={0.018}
-            falloff={0.6}
-            thickness={1.1}
-            brightness={0.82}
-            opacity={1.0}
-            mirror={true}
-            shimmer={false}
-            grain={true}
-            grainIntensity={0.015}
-            mouseInteraction={true}
-            mouseStrength={0.3}
-            lightMode={true}
-            backgroundColor="#F5F5F7"
-          />
-        </div>
-      ) : (
-        <LiquidMetalBackground isDark={true} />
-      )}
+      {/* 1. Dynamic Interactive Background: WebThreads (Light & Dark Theme Calibrated) */}
+      <div className="fixed inset-0 w-full h-full pointer-events-none z-0 overflow-hidden">
+        <WebThreads
+          key={isDark ? 'threads-dark' : 'threads-light'}
+          color1={isDark ? '#0066CC' : '#0066CC'}
+          color2={isDark ? '#38BDF8' : '#38BDF8'}
+          color3={isDark ? '#FFFFFF' : '#6366F1'}
+          speed={0.2}
+          threadCount={isDark ? 5 : 4}
+          frequency={4.5}
+          spread={0.22}
+          taper={1.0}
+          position={0.48}
+          fanMode="center"
+          glow={isDark ? 0.024 : 0.018}
+          falloff={0.6}
+          thickness={isDark ? 1.15 : 1.1}
+          brightness={isDark ? 0.92 : 0.82}
+          opacity={1.0}
+          mirror={true}
+          shimmer={isDark}
+          grain={true}
+          grainIntensity={0.015}
+          mouseInteraction={true}
+          mouseStrength={0.32}
+          lightMode={!isDark}
+          backgroundColor={isDark ? '#0B0F17' : '#F5F5F7'}
+        />
+      </div>
 
       {/* 2. Floating Glass Navbar */}
       <LandingNavbar />
