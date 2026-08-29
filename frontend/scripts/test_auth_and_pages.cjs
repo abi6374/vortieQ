@@ -43,7 +43,7 @@ async function testAllPages() {
     for (const r of routes) {
       console.log(`Navigating to ${r.title} (${r.path})...`);
       await page.goto(`http://localhost:5173${r.path}`, { waitUntil: 'domcontentloaded' });
-      await page.waitForTimeout(1500);
+      await page.waitForTimeout(r.path === '/dashboard' ? 2200 : 1500);
       console.log(`Page URL for ${r.name}:`, page.url());
 
       const imgPath = path.join(SCREENSHOT_DIR, `${r.name}.png`);
