@@ -126,7 +126,7 @@ export default function LandingNavbar() {
                 Sign In
               </Link>
               <Link
-                to="/onboarding"
+                to="/auth"
                 className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0066CC] hover:bg-[#0052A3] text-white font-semibold text-sm shadow-md shadow-[#0066CC]/25 hover:shadow-lg transition-all active:scale-95 group"
               >
                 <span>Get Started</span>

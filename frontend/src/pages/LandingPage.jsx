@@ -41,6 +41,11 @@ export default function LandingPage() {
   const { user, session } = useAuth()
   const navigate = useNavigate()
   const isDark = theme === 'dark'
+  const isAuthed = Boolean(user || session)
+
+  const handleStartRoadmap = () => {
+    navigate(isAuthed ? '/onboarding' : '/auth')
+  }
 
   const techStackRow1 = [
     { name: 'Python', badge: 'Core', icon: <Cpu className="w-4 h-4" /> },
@@ -106,7 +111,7 @@ export default function LandingPage() {
         <div className="mt-10 flex flex-col sm:flex-row items-center gap-4 sm:gap-5 w-full justify-center">
           <MagneticButton
             strength={25}
-            onClick={() => navigate('/onboarding')}
+            onClick={handleStartRoadmap}
             className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-[#0066CC] to-[#004FA3] hover:from-[#0052A3] hover:to-[#003D80] text-white font-bold text-base sm:text-lg shadow-xl shadow-[#0066CC]/30 hover:shadow-2xl hover:shadow-[#0066CC]/40 transition-all flex items-center justify-center gap-3 group"
           >
             <Sparkles className="w-5 h-5 group-hover:rotate-12 transition-transform" />
@@ -331,7 +336,7 @@ export default function LandingPage() {
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
             <MagneticButton
               strength={30}
-              onClick={() => navigate('/onboarding')}
+              onClick={handleStartRoadmap}
               className="w-full sm:w-auto px-9 py-4 rounded-2xl bg-gradient-to-r from-[#0066CC] to-[#004FA3] hover:from-[#0052A3] hover:to-[#003D80] text-white font-bold text-lg shadow-xl shadow-[#0066CC]/35 hover:shadow-2xl hover:shadow-[#0066CC]/50 transition-all flex items-center justify-center gap-3 group"
             >
               <Sparkles className="w-5 h-5 group-hover:rotate-12 transition-transform" />
