@@ -7,9 +7,18 @@ portfolio project complexity (e.g. beginner script vs. production ML pipeline).
 
 import httpx
 import re
+from datetime import datetime, timezone
 from typing import Dict, List, Any, Optional
 
 GITHUB_API_BASE = "https://api.github.com"
+
+
+class GitHubRateLimitedError(Exception):
+    """Raised when GitHub returns 403/429. Callers must surface this
+    distinctly (see routers/github.py) rather than treat it the same as a
+    genuinely empty account — the two mean very different things, and
+    reporting the latter when the former is true fabricates data about the
+    learner."""
 
 # Map common language names and repository topics to normalized skill taxonomies
 LANGUAGE_SKILL_MAP = {
@@ -88,8 +97,18 @@ async def fetch_github_repos(token: Optional[str] = None, username: Optional[str
             resp = await client.get(url, headers=headers)
             if resp.status_code == 200:
                 return resp.json()
+            if resp.status_code in (403, 429):
+                # Secondary rate limit or abuse-detection response. Distinct
+                # from "this account genuinely has no public repos" — must
+                # not be silently coerced into an empty list, or the caller
+                # ends up presenting a rate-limit as a real (and wrong)
+                # finding about the learner's experience level.
+                print(f"[github_service] rate limited ({url}): {resp.status_code}", flush=True)
+                raise GitHubRateLimitedError(f"GitHub returned {resp.status_code}")
             print(f"[github_service] API error ({url}): {resp.status_code} {resp.text}", flush=True)
             return []
+        except GitHubRateLimitedError:
+            raise
         except Exception as exc:
             print(f"[github_service] Failed to fetch repos for {username or 'authenticated user'}: {exc}", flush=True)
             return []
@@ -110,7 +129,9 @@ def analyze_github_repositories(repos: List[Dict[str, Any]]) -> Dict[str, Any]:
     skill_evidence: Dict[str, Dict[str, Any]] = {}
     projects_analyzed = []
     earliest_year = 9999
-    current_year = 2026
+    # Was hardcoded to 2026 — silently wrong the moment the calendar year
+    # changes, and wrong today for any server clock in a different year.
+    current_year = datetime.now(timezone.utc).year
 
     for repo in repos:
         if repo.get("fork"):

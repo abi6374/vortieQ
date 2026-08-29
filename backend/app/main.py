@@ -9,9 +9,25 @@ from app.routers import profile, paths, feedback, assistant, roadmap, account, r
 
 app = FastAPI(title="AI Learning Path Recommender", version="1.0.0")
 
+# SECURITY: allow_origins=["*"] + allow_credentials=True used to be set here.
+# Starlette cannot literally send "Access-Control-Allow-Origin: *" alongside
+# credentials (the fetch spec forbids it), so it falls back to reflecting
+# whatever Origin header the caller sent — meaning ANY website could make a
+# credentialed request and have the browser hand its JS the response. This
+# app authenticates with a Bearer token (not cookies), which limits practical
+# exploitability today — an attacker's page can't forge a token it doesn't
+# have — but it's still a spec violation with no upside, and it would become
+# a real cross-site issue the moment any cookie-based flow is added. Locked
+# to an explicit allowlist: production Vercel domain + local dev ports.
+ALLOWED_ORIGINS = [
+    "https://vortie-q.vercel.app",
+    "http://localhost:5173",
+    "http://localhost:5174",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
