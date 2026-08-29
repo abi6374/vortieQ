@@ -80,10 +80,14 @@ class TestJWTRejection:
 class TestCrossUserIsolation:
     """
     Full IDOR verification needs two real Supabase users and RLS-enforced
-    reads, which requires live credentials — see the Supabase MCP-driven
-    manual verification in the audit report for that. What's testable here
-    without live infra: the auth layer never trusts a user_id from the
-    request itself, only from the verified JWT.
+    reads, which requires live credentials — see docs/security_audit.md
+    ("Round 4 — Cross-user isolation") for that: a direct-SQL RLS proof
+    (impersonating a real user via request.jwt.claim.sub under the
+    non-bypassing `authenticated` role) plus a live-API proof with two real
+    minted JWTs against production, both run against real user accounts and
+    real data, with before/after checks confirming zero mutation. What's
+    testable here without live infra: the auth layer never trusts a user_id
+    from the request itself, only from the verified JWT.
     """
 
     def test_generate_path_ignores_body_user_id(self):
