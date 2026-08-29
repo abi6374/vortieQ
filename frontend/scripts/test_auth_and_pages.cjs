@@ -115,7 +115,26 @@ async function testAllPages() {
       }
     }
 
-    console.log('🎉 Playwright Dark Mode Audit Completed!');
+    // Test Unauthenticated Auth Screen (Light & Dark)
+    console.log('Testing Unauthenticated Auth Screen (Light & Dark)...');
+    const authContextLight = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    const authPageLight = await authContextLight.newPage();
+    await authPageLight.goto('http://localhost:5173/', { waitUntil: 'domcontentloaded' });
+    await authPageLight.waitForTimeout(1000);
+    await authPageLight.screenshot({ path: path.join(SCREENSHOT_DIR, '09_auth_light.png') });
+    console.log('📸 Captured screenshot: 09_auth_light.png');
+
+    const authContextDark = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    await authContextDark.addInitScript(() => {
+      document.documentElement.classList.add('dark');
+    });
+    const authPageDark = await authContextDark.newPage();
+    await authPageDark.goto('http://localhost:5173/', { waitUntil: 'domcontentloaded' });
+    await authPageDark.waitForTimeout(1000);
+    await authPageDark.screenshot({ path: path.join(SCREENSHOT_DIR, '09_auth_dark.png') });
+    console.log('📸 Captured screenshot: 09_auth_dark.png');
+
+    console.log('🎉 Playwright Dark Mode & Auth Audit Completed!');
 
   } catch (err) {
     console.error('Error during test:', err);

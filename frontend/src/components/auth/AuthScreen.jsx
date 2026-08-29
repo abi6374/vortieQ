@@ -14,7 +14,7 @@ const STYLES = `
   --slate:#333333; --muted:#7a7a7a; --input-bd:#d3d4d5; --divider:#f0f0f0;
   --app-bd:#f0f0f0; --lav-circle:#dbeafc;
   min-height:100vh; position:relative; overflow:hidden; display:flex; align-items:center;
-  justify-content:center; padding:clamp(16px,3vw,48px);
+  justify-content:center; padding:clamp(16px,2.5vw,36px);
   background:
     radial-gradient(1100px 680px at 8% -8%, #e1edff 0%, rgba(225,237,255,0) 55%),
     radial-gradient(900px 560px at 112% 112%, #e8f1ff 0%, rgba(232,241,255,0) 52%),
@@ -24,65 +24,65 @@ const STYLES = `
 /* Ambient drifting orbs for depth (disabled under reduced motion). */
 .pfa::before, .pfa::after{ content:""; position:absolute; border-radius:50%; z-index:0;
   pointer-events:none; filter:blur(64px); opacity:.5; }
-.pfa::before{ width:520px; height:520px; left:-130px; top:-170px;
+.pfa::before{ width:420px; height:420px; left:-100px; top:-140px;
   background:radial-gradient(circle,#b9d6ff 0%,rgba(185,214,255,0) 70%); animation:pfa-drift 22s ease-in-out infinite; }
-.pfa::after{ width:460px; height:460px; right:-130px; bottom:-160px;
+.pfa::after{ width:380px; height:380px; right:-100px; bottom:-130px;
   background:radial-gradient(circle,#cbe1ff 0%,rgba(203,225,255,0) 70%); animation:pfa-drift 27s ease-in-out infinite reverse; }
 @keyframes pfa-drift{ 0%,100%{ transform:translate(0,0); } 50%{ transform:translate(30px,-24px); } }
-.pfa .app{ position:relative; z-index:1; width:100%; max-width:1400px;
-  background:rgba(255,255,255,0.86); border:1px solid rgba(255,255,255,0.7);
-  border-radius:24px;
-  box-shadow:0 30px 80px -28px rgba(20,40,80,.36), 0 2px 6px rgba(20,40,80,.06), inset 0 1px 0 rgba(255,255,255,.7);
+.pfa .app{ position:relative; z-index:1; width:100%; max-width:1040px;
+  background:rgba(255,255,255,0.88); border:1px solid rgba(255,255,255,0.7);
+  border-radius:20px;
+  box-shadow:0 24px 60px -20px rgba(20,40,80,.28), 0 2px 6px rgba(20,40,80,.04), inset 0 1px 0 rgba(255,255,255,.7);
   -webkit-backdrop-filter:blur(30px) saturate(1.5); backdrop-filter:blur(30px) saturate(1.5);
-  display:grid; grid-template-columns:43% 57%; overflow:hidden; min-height:760px; }
-.pfa .brand-panel{ position:relative; overflow:hidden; padding:clamp(36px,4vw,60px);
+  display:grid; grid-template-columns:44% 56%; overflow:hidden; min-height:580px; }
+.pfa .brand-panel{ position:relative; overflow:hidden; padding:clamp(28px,3.5vw,44px);
   background:linear-gradient(160deg,rgba(255,255,255,0.6) 0%,rgba(234,242,252,0.5) 100%);
   border-right:1px solid rgba(255,255,255,0.55); display:flex; flex-direction:column; }
 .pfa .path-deco{ position:absolute; inset:0; z-index:0; pointer-events:none; }
 .pfa .brand-inner{ position:relative; z-index:1; display:flex; flex-direction:column; height:100%; }
-.pfa .logo-row{ display:flex; align-items:center; gap:16px; margin-bottom:clamp(28px,5vh,56px); }
-.pfa .logo-mark{ width:60px; height:60px; border-radius:16px; flex:none;
+.pfa .logo-row{ display:flex; align-items:center; gap:12px; margin-bottom:clamp(20px,3vh,36px); }
+.pfa .logo-mark{ width:44px; height:44px; border-radius:12px; flex:none;
   background:linear-gradient(160deg,var(--violet-2),var(--violet)); display:grid; place-items:center;
-  box-shadow:0 8px 20px rgba(0,102,204,.32); }
-.pfa .logo-name{ font-family:"Manrope",sans-serif; font-weight:800; font-size:clamp(26px,2.4vw,36px); letter-spacing:-.02em; }
+  box-shadow:0 6px 16px rgba(0,102,204,.28); }
+.pfa .logo-name{ font-family:"Manrope",sans-serif; font-weight:800; font-size:clamp(22px,2vw,28px); letter-spacing:-.02em; }
 .pfa .hero{ margin-top:auto; }
-.pfa .hero h1{ font-family:"Manrope",sans-serif; font-weight:800; font-size:clamp(32px,3.6vw,50px);
-  line-height:1.08; letter-spacing:-.03em; margin:0 0 22px; text-wrap:balance; }
-.pfa .hero p{ font-size:clamp(16px,1.5vw,21px); line-height:1.55; color:var(--slate); margin:0 0 clamp(28px,4vh,44px); max-width:30ch; }
-.pfa .journey{ display:flex; flex-direction:column; gap:clamp(18px,3vh,30px); margin-bottom:auto; }
-.pfa .j-item{ display:flex; align-items:center; gap:18px; }
-.pfa .j-icon{ width:64px; height:64px; border-radius:50%; flex:none; background:var(--lav-circle);
+.pfa .hero h1{ font-family:"Manrope",sans-serif; font-weight:800; font-size:clamp(24px,2.4vw,34px);
+  line-height:1.15; letter-spacing:-.025em; margin:0 0 12px; text-wrap:balance; }
+.pfa .hero p{ font-size:clamp(13.5px,1.2vw,15px); line-height:1.5; color:var(--slate); margin:0 0 clamp(18px,2.5vh,28px); max-width:32ch; }
+.pfa .journey{ display:flex; flex-direction:column; gap:clamp(12px,1.8vh,18px); margin-bottom:auto; }
+.pfa .j-item{ display:flex; align-items:center; gap:14px; }
+.pfa .j-icon{ width:44px; height:44px; border-radius:50%; flex:none; background:var(--lav-circle);
   color:var(--violet); display:grid; place-items:center; }
-.pfa .j-text{ font-size:clamp(16px,1.5vw,20px); font-weight:600; line-height:1.3; }
-.pfa .privacy{ display:flex; align-items:center; gap:11px; margin-top:clamp(28px,4vh,44px); color:var(--slate); font-size:17px; }
+.pfa .j-text{ font-size:clamp(13.5px,1.2vw,15px); font-weight:600; line-height:1.3; }
+.pfa .privacy{ display:flex; align-items:center; gap:9px; margin-top:clamp(20px,2.5vh,32px); color:var(--slate); font-size:13px; }
 .pfa .privacy svg{ color:var(--violet); flex:none; }
 .pfa .form-panel{ background:rgba(255,255,255,0.55); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
-  padding:clamp(40px,5vw,72px) clamp(28px,5vw,80px);
-  display:flex; flex-direction:column; align-items:center; }
-.pfa .form{ width:100%; max-width:500px; }
-.pfa .tabs{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:6px; }
-.pfa .tab{ background:none; border:none; cursor:pointer; padding:8px 4px 14px;
-  font:600 clamp(18px,1.6vw,21px)/1 "Inter",sans-serif; color:var(--navy); position:relative; text-align:center; }
+  padding:clamp(28px,3.5vw,44px) clamp(24px,3.5vw,44px);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.pfa .form{ width:100%; max-width:400px; }
+.pfa .tabs{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:4px; }
+.pfa .tab{ background:none; border:none; cursor:pointer; padding:6px 4px 10px;
+  font:600 clamp(15px,1.4vw,17px)/1 "Inter",sans-serif; color:var(--navy); position:relative; text-align:center; }
 .pfa .tab.active{ color:var(--violet); }
 .pfa .tab.active::after{ content:""; position:absolute; left:50%; transform:translateX(-50%); bottom:0;
-  height:4px; width:100%; max-width:235px; border-radius:999px; background:var(--violet); }
-.pfa .tab-help{ text-align:center; font-size:13px; color:var(--muted); line-height:1.4; margin:2px 0 0; min-height:2.6em; }
+  height:3px; width:100%; max-width:180px; border-radius:999px; background:var(--violet); }
+.pfa .tab-help{ text-align:center; font-size:12px; color:var(--muted); line-height:1.35; margin:2px 0 0; min-height:2em; }
 .pfa .tab-help.left{ visibility:hidden; }
-.pfa .welcome{ text-align:center; margin:clamp(18px,3vh,26px) 0 clamp(28px,4vh,40px); }
-.pfa .welcome h2{ font-family:"Manrope",sans-serif; font-weight:800; font-size:clamp(30px,3.2vw,44px); letter-spacing:-.025em; margin:0 0 10px; }
-.pfa .welcome p{ font-size:clamp(16px,1.5vw,20px); color:var(--slate); margin:0; }
-.pfa .field{ margin-bottom:20px; }
-.pfa .field > label{ display:block; font-size:16px; font-weight:600; margin-bottom:9px; }
+.pfa .welcome{ text-align:center; margin:clamp(10px,1.6vh,16px) 0 clamp(16px,2.2vh,22px); }
+.pfa .welcome h2{ font-family:"Manrope",sans-serif; font-weight:800; font-size:clamp(22px,2.2vw,28px); letter-spacing:-.02em; margin:0 0 5px; }
+.pfa .welcome p{ font-size:clamp(13.5px,1.2vw,15px); color:var(--slate); margin:0; }
+.pfa .field{ margin-bottom:14px; }
+.pfa .field > label{ display:block; font-size:13.5px; font-weight:600; margin-bottom:6px; }
 .pfa .input{ position:relative; display:flex; align-items:stretch; border:1.5px solid var(--input-bd);
-  border-radius:12px; background:#fff; min-height:58px; transition:border-color .15s,box-shadow .15s; overflow:hidden; }
-.pfa .input:focus-within{ border-color:var(--violet); box-shadow:0 0 0 4px rgba(0,102,204,.18); }
+  border-radius:10px; background:#fff; min-height:48px; transition:border-color .15s,box-shadow .15s; overflow:hidden; }
+.pfa .input:focus-within{ border-color:var(--violet); box-shadow:0 0 0 3px rgba(0,102,204,.15); }
 /* Icon is a decorative overlay so it never steals click/focus from the field. */
-.pfa .input .lead{ position:absolute; left:14px; top:0; bottom:0; color:var(--muted); display:grid; place-items:center; pointer-events:none; z-index:1; }
+.pfa .input .lead{ position:absolute; left:12px; top:0; bottom:0; color:var(--muted); display:grid; place-items:center; pointer-events:none; z-index:1; }
 /* The input itself is the full interactive surface — clicking anywhere focuses it. */
 .pfa .input input{ border:none; outline:none; background:transparent; flex:1; width:100%; min-width:0; align-self:stretch;
-  padding:0 16px 0 44px; font:400 16.5px/1.2 "Inter",sans-serif; color:var(--navy); border-radius:10px; }
+  padding:0 14px 0 38px; font:400 14.5px/1.2 "Inter",sans-serif; color:var(--navy); border-radius:8px; }
 .pfa .input input::placeholder{ color:var(--muted); }
-.pfa .input:has(.toggle) input{ padding-right:50px; }
+.pfa .input:has(.toggle) input{ padding-right:44px; }
 .pfa .input input:-webkit-autofill,
 .pfa .input input:-webkit-autofill:hover, 
 .pfa .input input:-webkit-autofill:focus, 
@@ -90,39 +90,39 @@ const STYLES = `
   -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
   -webkit-text-fill-color: var(--navy) !important;
   caret-color: var(--navy) !important;
-  border-radius: 10px !important;
+  border-radius: 8px !important;
   transition: background-color 5000s ease-in-out 0s;
 }
-.pfa .input .toggle{ position:absolute; right:8px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:var(--muted); padding:8px;
-  display:grid; place-items:center; border-radius:8px; z-index:1; }
+.pfa .input .toggle{ position:absolute; right:6px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:var(--muted); padding:6px;
+  display:grid; place-items:center; border-radius:6px; z-index:1; }
 .pfa .input .toggle:hover{ color:var(--slate); }
-.pfa .utility{ display:flex; align-items:center; justify-content:space-between; margin:4px 0 26px; }
-.pfa .remember{ display:flex; align-items:center; gap:10px; cursor:pointer; user-select:none; font-size:15.5px; color:var(--slate); position:relative; }
-.pfa .checkbox{ width:20px; height:20px; border-radius:6px; border:1.5px solid var(--input-bd); background:#fff;
+.pfa .utility{ display:flex; align-items:center; justify-content:space-between; margin:2px 0 18px; }
+.pfa .remember{ display:flex; align-items:center; gap:8px; cursor:pointer; user-select:none; font-size:13px; color:var(--slate); position:relative; }
+.pfa .checkbox{ width:18px; height:18px; border-radius:5px; border:1.5px solid var(--input-bd); background:#fff;
   display:grid; place-items:center; color:#fff; transition:background .15s,border-color .15s; }
 .pfa .remember input{ position:absolute; opacity:0; pointer-events:none; }
 .pfa .remember input:checked + .checkbox{ background:var(--violet); border-color:var(--violet); }
-.pfa .forgot{ color:var(--violet); font-size:15.5px; font-weight:600; text-decoration:none; background:none; border:none; cursor:pointer; }
+.pfa .forgot{ color:var(--violet); font-size:13px; font-weight:600; text-decoration:none; background:none; border:none; cursor:pointer; }
 .pfa .forgot:hover{ color:var(--violet-dark); text-decoration:underline; }
-.pfa .btn{ width:100%; height:62px; border-radius:12px; border:none; cursor:pointer;
-  font:700 19px/1 "Inter",sans-serif; display:inline-flex; align-items:center; justify-content:center; gap:11px;
+.pfa .btn{ width:100%; height:48px; border-radius:10px; border:none; cursor:pointer;
+  font:700 15px/1 "Inter",sans-serif; display:inline-flex; align-items:center; justify-content:center; gap:9px;
   transition:background .15s,box-shadow .15s,transform .1s; }
 .pfa .btn:disabled{ opacity:.6; cursor:not-allowed; }
-.pfa .btn-primary{ background:linear-gradient(180deg,var(--violet-2),var(--violet)); color:#fff; box-shadow:0 10px 24px rgba(0,102,204,.30); }
-.pfa .btn-primary:hover:not(:disabled){ background:linear-gradient(180deg,var(--violet),var(--violet-dark)); box-shadow:0 12px 28px rgba(0,102,204,.38); }
+.pfa .btn-primary{ background:linear-gradient(180deg,var(--violet-2),var(--violet)); color:#fff; box-shadow:0 8px 18px rgba(0,102,204,.24); }
+.pfa .btn-primary:hover:not(:disabled){ background:linear-gradient(180deg,var(--violet),var(--violet-dark)); box-shadow:0 10px 22px rgba(0,102,204,.32); }
 .pfa .btn-primary:active:not(:disabled){ transform:translateY(1px); }
-.pfa .divider-row{ display:flex; align-items:center; gap:16px; margin:26px 0; }
+.pfa .divider-row{ display:flex; align-items:center; gap:12px; margin:18px 0; }
 .pfa .divider-row .line{ flex:1; height:1px; background:var(--divider); }
-.pfa .divider-row .or{ font-size:12.5px; font-weight:600; letter-spacing:.1em; color:var(--muted); }
-.pfa .btn-google{ background:#fff; color:var(--navy); border:1.5px solid var(--input-bd); font-weight:600; }
+.pfa .divider-row .or{ font-size:11.5px; font-weight:600; letter-spacing:.1em; color:var(--muted); }
+.pfa .btn-google{ background:#fff; color:var(--navy); border:1.5px solid var(--input-bd); font-weight:600; height:44px; font-size:13.5px; }
 .pfa .btn-google:hover:not(:disabled){ background:#FBFCFE; border-color:#c6c6c7; }
-.pfa .btn-github{ background:#181717; color:#fff; font-weight:600; margin-bottom:12px; box-shadow:0 4px 14px rgba(24,23,23,0.15); }
+.pfa .btn-github{ background:#181717; color:#fff; font-weight:600; margin-bottom:10px; height:44px; font-size:13.5px; box-shadow:0 3px 10px rgba(24,23,23,0.12); }
 .pfa .btn-github:hover:not(:disabled){ background:#000000; }
-.pfa .signup-foot{ text-align:center; margin-top:26px; font-size:17px; color:var(--slate); }
-.pfa .signup-foot button{ color:var(--violet); font-weight:600; background:none; border:none; cursor:pointer; font-size:17px; }
+.pfa .signup-foot{ text-align:center; margin-top:18px; font-size:13.5px; color:var(--slate); }
+.pfa .signup-foot button{ color:var(--violet); font-weight:600; background:none; border:none; cursor:pointer; font-size:13.5px; }
 .pfa .signup-foot button:hover{ color:var(--violet-dark); text-decoration:underline; }
-.pfa .err{ margin-top:16px; text-align:center; color:#DC2626; font-size:14.5px; font-weight:500; }
-.pfa .spin{ width:18px; height:18px; border:2px solid rgba(255,255,255,.5); border-top-color:#fff; border-radius:50%; animation:pfaspin .7s linear infinite; }
+.pfa .err{ margin-top:12px; text-align:center; color:#DC2626; font-size:13px; font-weight:500; }
+.pfa .spin{ width:16px; height:16px; border:2px solid rgba(255,255,255,.5); border-top-color:#fff; border-radius:50%; animation:pfaspin .7s linear infinite; }
 @keyframes pfaspin{ to{ transform:rotate(360deg); } }
 
 /* Dark mode styles for AuthScreen */
@@ -142,7 +142,7 @@ html.dark .pfa {
 html.dark .pfa .app {
   background: rgba(20, 26, 38, 0.94);
   border: 1px solid rgba(45, 56, 78, 0.85);
-  box-shadow: 0 30px 80px -28px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.08);
+  box-shadow: 0 24px 60px -20px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.08);
 }
 html.dark .pfa .brand-panel {
   background: linear-gradient(160deg, rgba(22, 28, 42, 0.9) 0%, rgba(16, 21, 32, 0.85) 100%);
@@ -203,7 +203,7 @@ html.dark .pfa .path-deco circle {
   stroke: #334155;
 }
 
-@media (max-width:900px){ .pfa .app{ grid-template-columns:1fr; min-height:0; } .pfa .brand-panel{ border-right:none; border-bottom:1px solid var(--divider); } .pfa .hero{ margin-top:28px; } }
+@media (max-width:900px){ .pfa .app{ grid-template-columns:1fr; min-height:0; } .pfa .brand-panel{ border-right:none; border-bottom:1px solid var(--divider); } .pfa .hero{ margin-top:20px; } }
 @media (prefers-reduced-motion:reduce){ .pfa *{ transition:none !important; } .pfa .spin{ animation:none; } }
 `
 
@@ -310,7 +310,7 @@ export default function AuthScreen({ initialMode = 'signin' }) {
           <div className="brand-inner">
             <div className="logo-row">
               <span className="logo-mark" aria-hidden="true">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><polygon points="16 8 10.5 10.5 8 16 13.5 13.5" fill="#fff" stroke="none" /></svg>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><polygon points="16 8 10.5 10.5 8 16 13.5 13.5" fill="#fff" stroke="none" /></svg>
               </span>
               <span className="logo-name">PathFinder</span>
             </div>
@@ -320,20 +320,20 @@ export default function AuthScreen({ initialMode = 'signin' }) {
             </div>
             <div className="journey">
               <div className="j-item">
-                <span className="j-icon" aria-hidden="true"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6" /><path d="M9 13h6M9 17h6" /></svg></span>
+                <span className="j-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6" /><path d="M9 13h6M9 17h6" /></svg></span>
                 <span className="j-text">Upload your resume</span>
               </div>
               <div className="j-item">
-                <span className="j-icon" aria-hidden="true"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18" /><path d="M7 16v-5" /><path d="M12 16V8" /><path d="M17 16v-9" /></svg></span>
+                <span className="j-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18" /><path d="M7 16v-5" /><path d="M12 16V8" /><path d="M17 16v-9" /></svg></span>
                 <span className="j-text">Assess your skills</span>
               </div>
               <div className="j-item">
-                <span className="j-icon" aria-hidden="true"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="6" cy="19" r="2.4" /><circle cx="18" cy="6" r="2.4" /><path d="M8.4 18C14 17 15.6 8 16.5 8" /><path d="M18 3v3M16.5 4.5h3" /></svg></span>
+                <span className="j-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="6" cy="19" r="2.4" /><circle cx="18" cy="6" r="2.4" /><path d="M8.4 18C14 17 15.6 8 16.5 8" /><path d="M18 3v3M16.5 4.5h3" /></svg></span>
                 <span className="j-text">Get your personal<br />learning path</span>
               </div>
             </div>
             <div className="privacy">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><path d="m9 12 2 2 4-4" /></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><path d="m9 12 2 2 4-4" /></svg>
               Your profile and learning data stay private.
             </div>
           </div>
@@ -361,7 +361,7 @@ export default function AuthScreen({ initialMode = 'signin' }) {
                 <div className="field">
                   <label htmlFor="pfa-name">Full name</label>
                   <div className="input">
-                    <span className="lead" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg></span>
+                    <span className="lead" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg></span>
                     <input id="pfa-name" type="text" required value={fullName} onChange={onField(setFullName)} placeholder="Alex Smith" autoComplete="name" />
                   </div>
                 </div>
@@ -370,7 +370,7 @@ export default function AuthScreen({ initialMode = 'signin' }) {
               <div className="field">
                 <label htmlFor="pfa-email">Email address</label>
                 <div className="input">
-                  <span className="lead" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="3" /><path d="m3 6 9 7 9-7" /></svg></span>
+                  <span className="lead" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="3" /><path d="m3 6 9 7 9-7" /></svg></span>
                   <input id="pfa-email" type="email" required value={email} onChange={onField(setEmail)} placeholder="you@example.com" autoComplete="email" />
                 </div>
               </div>
@@ -378,12 +378,12 @@ export default function AuthScreen({ initialMode = 'signin' }) {
               <div className="field">
                 <label htmlFor="pfa-pw">Password</label>
                 <div className="input">
-                  <span className="lead" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg></span>
+                  <span className="lead" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg></span>
                   <input id="pfa-pw" type={showPw ? 'text' : 'password'} required minLength={6} value={password} onChange={onField(setPassword)} placeholder="Enter your password" autoComplete={isCreate ? 'new-password' : 'current-password'} />
                   <button type="button" className="toggle" onClick={() => setShowPw((s) => !s)} aria-label={showPw ? 'Hide password' : 'Show password'}>
                     {showPw
-                      ? <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.9 4.24A9.1 9.1 0 0 1 12 4c6.5 0 10 7 10 7a13.2 13.2 0 0 1-2.16 3.19" /><path d="M6.6 6.6A13.3 13.3 0 0 0 2 11s3.5 7 10 7a9 9 0 0 0 4.3-1.1" /><path d="m2 2 20 20" /></svg>
-                      : <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" /><circle cx="12" cy="12" r="3" /></svg>}
+                      ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.9 4.24A9.1 9.1 0 0 1 12 4c6.5 0 10 7 10 7a13.2 13.2 0 0 1-2.16 3.19" /><path d="M6.6 6.6A13.3 13.3 0 0 0 2 11s3.5 7 10 7a9 9 0 0 0 4.3-1.1" /><path d="m2 2 20 20" /></svg>
+                      : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" /><circle cx="12" cy="12" r="3" /></svg>}
                   </button>
                 </div>
               </div>
@@ -391,7 +391,7 @@ export default function AuthScreen({ initialMode = 'signin' }) {
               <div className="utility">
                 <label className="remember">
                   <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
-                  <span className="checkbox" aria-hidden="true"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg></span>
+                  <span className="checkbox" aria-hidden="true"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg></span>
                   Remember me
                 </label>
                 <button type="button" className="forgot">Forgot password?</button>
@@ -405,14 +405,14 @@ export default function AuthScreen({ initialMode = 'signin' }) {
               <div className="divider-row"><span className="line" /><span className="or">OR</span><span className="line" /></div>
 
               <button type="button" className="btn btn-github" onClick={handleGithub} disabled={isLoading}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                   <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
                 </svg>
                 Continue with GitHub
               </button>
 
               <button type="button" className="btn btn-google" onClick={handleGoogle} disabled={isLoading}>
-                <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true">
+                <svg width="17" height="17" viewBox="0 0 48 48" aria-hidden="true">
                   <path fill="#4285F4" d="M45.1 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h11.8c-.5 2.7-2 5-4.4 6.6v5.5h7.1c4.2-3.8 6.6-9.5 6.6-16.1z" />
                   <path fill="#34A853" d="M24 46c6 0 11-2 14.6-5.4l-7.1-5.5c-2 1.3-4.5 2.1-7.5 2.1-5.8 0-10.6-3.9-12.4-9.1H4.3v5.7C7.9 41.1 15.4 46 24 46z" />
                   <path fill="#FBBC05" d="M11.6 28.1c-.5-1.3-.7-2.7-.7-4.1s.3-2.8.7-4.1v-5.7H4.3C2.8 17.1 2 20.4 2 24s.8 6.9 2.3 9.8l7.3-5.7z" />
