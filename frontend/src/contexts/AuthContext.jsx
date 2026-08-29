@@ -7,6 +7,7 @@ export function AuthProvider({ children }) {
   const [session, setSession] = useState(null)
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [oauthError, setOauthError] = useState(null)
 
   const loadProfile = async (userId) => {
     if (!userId) {
@@ -24,11 +25,31 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     let mounted = true
 
+    const hash = typeof window !== 'undefined' ? window.location.hash : ''
+    const search = typeof window !== 'undefined' ? window.location.search : ''
     const isOAuthCallback =
-      typeof window !== 'undefined' &&
-      (window.location.hash.includes('access_token') ||
-        window.location.search.includes('code=') ||
-        window.location.search.includes('source=github'))
+      hash.includes('access_token') ||
+      search.includes('code=') ||
+      search.includes('source=github') ||
+      hash.includes('error=')
+
+    // Check for OAuth error in URL params
+    const rawParams = search || (hash.startsWith('#') ? '?' + hash.slice(1) : hash)
+    if (rawParams) {
+      try {
+        const params = new URLSearchParams(rawParams)
+        const errDesc = params.get('error_description') || params.get('error')
+        if (errDesc) {
+          const formatted = decodeURIComponent(errDesc.replace(/\+/g, ' '))
+          console.warn('[AuthContext] OAuth provider error:', formatted)
+          setOauthError(formatted)
+          setLoading(false)
+          return
+        }
+      } catch (e) {
+        console.warn('[AuthContext] Could not parse URL params:', e)
+      }
+    }
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!mounted) return
@@ -39,15 +60,26 @@ export function AuthProvider({ children }) {
       }
     })
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!mounted) return
       setSession(session)
-      if (session?.user?.id) loadProfile(session.user.id)
-      setLoading(false)
+      if (session?.user?.id) await loadProfile(session.user.id)
+      if (session || event === 'SIGNED_IN' || event === 'USER_UPDATED' || !isOAuthCallback) {
+        setLoading(false)
+      }
     })
+
+    // 6-second safety timeout so we never hang indefinitely on broken OAuth
+    let timeoutId
+    if (isOAuthCallback) {
+      timeoutId = setTimeout(() => {
+        if (mounted) setLoading(false)
+      }, 6000)
+    }
 
     return () => {
       mounted = false
+      if (timeoutId) clearTimeout(timeoutId)
       subscription.unsubscribe()
     }
   }, [])
@@ -140,7 +172,8 @@ export function AuthProvider({ children }) {
         signInWithGoogle,
         signInWithGithub,
         signOut,
-        user: effectiveUser
+        user: effectiveUser,
+        oauthError,
       }}
     >
       {children}

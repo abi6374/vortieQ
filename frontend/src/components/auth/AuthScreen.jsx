@@ -138,7 +138,7 @@ export default function AuthScreen({ initialMode = 'signin' }) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
 
-  const { signIn, signUp, signInWithGoogle, signInWithGithub } = useAuth()
+  const { signIn, signUp, signInWithGoogle, signInWithGithub, oauthError } = useAuth()
   const navigate = useNavigate()
   const reduce = useReducedMotion()
 
@@ -349,7 +349,7 @@ export default function AuthScreen({ initialMode = 'signin' }) {
                 </button>
               </p>
 
-              {error && <p className="err">{error}</p>}
+              {(oauthError || error) && <p className="err">{oauthError || error}</p>}
             </form>
           </div>
         </section>
