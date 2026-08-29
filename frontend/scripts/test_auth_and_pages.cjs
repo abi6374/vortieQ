@@ -47,8 +47,32 @@ async function testAllPages() {
       console.log(`Page URL for ${r.name}:`, page.url());
 
       const imgPath = path.join(SCREENSHOT_DIR, `${r.name}.png`);
-      await page.screenshot({ path: imgPath, fullPage: true });
+      await page.screenshot({ path: imgPath });
       console.log(`📸 Captured screenshot: ${r.name}.png`);
+
+      if (r.path === '/progress') {
+        try {
+          await page.evaluate(() => {
+            const el = document.querySelector('.pf-content');
+            if (el) el.scrollTop = 750;
+          });
+          await page.waitForTimeout(500);
+          const lowerImgPath = path.join(SCREENSHOT_DIR, '02_progress_lower_dark.png');
+          await page.screenshot({ path: lowerImgPath });
+          console.log(`📸 Captured screenshot: 02_progress_lower_dark.png`);
+
+          await page.evaluate(() => {
+            const el = document.querySelector('.pf-content');
+            if (el) el.scrollTop = 1600;
+          });
+          await page.waitForTimeout(500);
+          const bottomImgPath = path.join(SCREENSHOT_DIR, '02_progress_bottom_dark.png');
+          await page.screenshot({ path: bottomImgPath });
+          console.log(`📸 Captured screenshot: 02_progress_bottom_dark.png`);
+        } catch (e) {
+          console.error('Failed to scroll progress:', e);
+        }
+      }
 
       if (r.path === '/skills') {
         try {
