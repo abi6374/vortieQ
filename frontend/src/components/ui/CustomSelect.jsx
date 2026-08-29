@@ -60,8 +60,8 @@ export default function CustomSelect({
         aria-label={ariaLabel}
         aria-expanded={isOpen}
         aria-haspopup="listbox"
-        className={`flex items-center justify-between gap-2.5 px-3.5 py-2.5 bg-white border border-[#e0e0e0] hover:border-[#0066cc] rounded-xl text-sm font-semibold text-[#1d1d1f] shadow-2xs transition-all cursor-pointer focus:outline-none focus:border-[#0066cc] focus:ring-2 focus:ring-[#0066cc]/15 ${
-          isOpen ? 'border-[#0066cc] ring-2 ring-[#0066cc]/15' : ''
+        className={`flex items-center justify-between gap-2.5 px-3.5 py-2.5 bg-white dark:bg-[#181E2C] border border-[#e0e0e0] dark:border-[#2D3748] hover:border-[#0066cc] dark:hover:border-[#38BDF8] rounded-xl text-sm font-semibold text-[#1d1d1f] dark:text-[#F3F4F6] shadow-2xs transition-all cursor-pointer focus:outline-none focus:border-[#0066cc] focus:ring-2 focus:ring-[#0066cc]/15 ${
+          isOpen ? 'border-[#0066cc] dark:border-[#38BDF8] ring-2 ring-[#0066cc]/15' : ''
         } ${buttonClassName}`}
       >
         <span className="truncate">
@@ -77,8 +77,8 @@ export default function CustomSelect({
           strokeWidth="2.4"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className={`text-[#7a7a7a] transition-transform duration-200 flex-shrink-0 ${
-            isOpen ? 'rotate-180 text-[#0066cc]' : ''
+          className={`text-[#7a7a7a] dark:text-[#9CA3AF] transition-transform duration-200 flex-shrink-0 ${
+            isOpen ? 'rotate-180 text-[#0066cc] dark:text-[#38BDF8]' : ''
           }`}
         >
           <path d="m6 9 6 6 6-6" />
@@ -94,7 +94,7 @@ export default function CustomSelect({
             exit={reduce ? { opacity: 0 } : { opacity: 0, y: -4, scale: 0.96 }}
             transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
             style={{ transformOrigin: 'top left' }}
-            className={`absolute left-0 top-full mt-1.5 z-50 min-w-full w-max bg-white border border-[#E6EAF2] shadow-[0_20px_48px_rgba(14,27,56,0.18),0_4px_12px_rgba(14,27,56,0.06)] rounded-xl py-1.5 overflow-hidden ${menuClassName}`}
+            className={`absolute left-0 top-full mt-1.5 z-50 min-w-full w-max bg-white dark:bg-[#181E2C] border border-[#E6EAF2] dark:border-[#2D3748] shadow-[0_20px_48px_rgba(14,27,56,0.18),0_4px_12px_rgba(14,27,56,0.06)] dark:shadow-[0_20px_48px_rgba(0,0,0,0.6)] rounded-xl py-1.5 overflow-hidden ${menuClassName}`}
             role="listbox"
           >
             {normalizedOptions.map((opt) => {
@@ -111,14 +111,14 @@ export default function CustomSelect({
                   }}
                   className={`w-full text-left px-3.5 py-2 text-xs sm:text-sm font-semibold flex items-center justify-between gap-3 transition-colors cursor-pointer ${
                     isSelected
-                      ? 'bg-[#eaf2fc] text-[#0066cc] font-bold'
-                      : 'text-[#333333] hover:bg-[#fafbfc] hover:text-[#1d1d1f]'
+                      ? 'bg-[#eaf2fc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] font-bold'
+                      : 'text-[#333333] dark:text-[#E5E7EB] hover:bg-[#fafbfc] dark:hover:bg-[#1A2234] hover:text-[#1d1d1f] dark:hover:text-[#F3F4F6]'
                   }`}
                 >
                   <div className="min-w-0 flex-1">
                     <div>{opt.label}</div>
                     {opt.subtitle && (
-                      <div className="text-[11px] font-normal text-[#7a7a7a] mt-0.5">
+                      <div className="text-[11px] font-normal text-[#7a7a7a] dark:text-[#9CA3AF] mt-0.5">
                         {opt.subtitle}
                       </div>
                     )}

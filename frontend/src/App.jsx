@@ -1,6 +1,7 @@
 import React from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
+import { ThemeProvider } from './contexts/ThemeContext'
 import { AIChatProvider } from './contexts/AIChatContext'
 import { SidebarProvider } from './contexts/SidebarContext'
 import AIChat from './components/ui/AIChat'
@@ -20,10 +21,11 @@ import BackToTop from './components/ui/BackToTop'
 
 export default function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <SidebarProvider>
-          <AIChatProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <SidebarProvider>
+            <AIChatProvider>
             <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route
@@ -133,5 +135,6 @@ export default function App() {
         </SidebarProvider>
       </BrowserRouter>
     </AuthProvider>
+  </ThemeProvider>
   )
 }

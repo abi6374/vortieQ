@@ -2,6 +2,7 @@ import React, { useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import UserProfileDropdown from '../ui/UserProfileDropdown'
+import ThemeToggle from '../ui/ThemeToggle'
 import { useSidebar } from '../../contexts/SidebarContext'
 import { SidebarIcon, NAV, ICONS, activeKeyFor } from '../ui/AppSidebar'
 
@@ -140,7 +141,8 @@ export default function TopBar({ children }) {
         {children}
       </div>
 
-      <div className="flex items-center gap-3 flex-none">
+      <div className="flex items-center gap-2.5 sm:gap-3 flex-none">
+        <ThemeToggle />
         <UserProfileDropdown />
       </div>
     </header>

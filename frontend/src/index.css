@@ -29,6 +29,29 @@
   --amber-surface: #FFF7E6;
 }
 
+/* Dark Mode Tokens & Variables */
+:root.dark,
+html.dark,
+[data-theme="dark"] {
+  --violet: #2997FF;
+  --violet-dark: #0071E3;
+  --violet-focus: #38bdf8;
+  --navy: #F5F5F7;
+  --slate: #E5E5EA;
+  --muted: #9CA3AF;
+  --lavender: rgba(41, 151, 255, 0.16);
+  --lav-icon: rgba(41, 151, 255, 0.24);
+  --card-bd: #28303F;
+  --divider: #202734;
+  --bg-main: #0B0E14;
+  --canvas: #121722;
+  --pearl: #171D2B;
+  --green: #34D399;
+  --green-surface: rgba(52, 211, 153, 0.16);
+  --amber: #FBBF24;
+  --amber-surface: rgba(251, 191, 36, 0.16);
+}
+
 html {
   scroll-behavior: smooth;
 }
@@ -390,9 +413,358 @@ html {
   animation: pf-menu-in 0.18s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+/* ============================================================================
+   DARK THEME LAYER (Comprehensive System-Wide Dark Engine)
+   ============================================================================ */
+
+/* Global Body & Shell */
+html.dark body,
+[data-theme="dark"] body {
+  background:
+    radial-gradient(1200px 700px at 12% -8%, rgba(20, 50, 100, 0.45) 0%, rgba(20, 50, 100, 0) 55%),
+    radial-gradient(1000px 600px at 92% 112%, rgba(25, 40, 80, 0.35) 0%, rgba(25, 40, 80, 0) 50%),
+    #0B0E14 !important;
+  color: #F9FAFB !important;
+}
+
+html.dark .pf-shell,
+[data-theme="dark"] .pf-shell {
+  background:
+    radial-gradient(1100px 650px at 10% -5%, rgba(20, 50, 100, 0.4) 0%, rgba(20, 50, 100, 0) 55%),
+    radial-gradient(900px 550px at 95% 105%, rgba(25, 40, 80, 0.3) 0%, rgba(25, 40, 80, 0) 50%),
+    #0B0E14 !important;
+}
+
+/* Chrome (TopBar & Sidebar) */
+html.dark .pf-topbar,
+[data-theme="dark"] .pf-topbar {
+  background: rgba(16, 21, 30, 0.88) !important;
+  border-bottom: 1px solid rgba(40, 48, 64, 0.85) !important;
+}
+
+html.dark .pf-sidebar,
+[data-theme="dark"] .pf-sidebar {
+  background: rgba(16, 21, 30, 0.85) !important;
+  border-right: 1px solid rgba(40, 48, 64, 0.85) !important;
+}
+
+/* 1. Global High-Contrast Typography in Dark Mode */
+html.dark h1,
+html.dark h2,
+html.dark h3,
+html.dark h4,
+html.dark h5,
+html.dark h6,
+html.dark [class*="text-[#1d1d1f]"],
+html.dark [class*="text-[#0e1b38]"],
+html.dark [class*="text-[#0E1B38]"],
+html.dark [class*="text-[#111827]"],
+html.dark [class*="text-slate-900"],
+html.dark [class*="text-gray-900"] {
+  color: #F9FAFB !important;
+}
+
+html.dark p,
+html.dark span:not([class*="text-[#0066cc]"]):not([class*="text-[#22A06B]"]):not([class*="text-red-"]):not([class*="text-emerald-"]):not([class*="text-amber-"]):not([class*="text-blue-"]):not([class*="text-white"]):not([class*="text-[#FBBF24]"]),
+html.dark label,
+html.dark [class*="text-[#333333]"],
+html.dark [class*="text-[#444444]"],
+html.dark [class*="text-[#555555]"],
+html.dark [class*="text-slate-700"],
+html.dark [class*="text-gray-700"] {
+  color: #E2E8F0 !important;
+}
+
+html.dark [class*="text-[#7a7a7a]"],
+html.dark [class*="text-[#86868b]"],
+html.dark [class*="text-[#6e6e73]"],
+html.dark [class*="text-[#52617D]"],
+html.dark [class*="text-[#74819A]"],
+html.dark [class*="text-[#94A3B8]"],
+html.dark [class*="text-slate-500"],
+html.dark [class*="text-gray-500"] {
+  color: #94A3B8 !important;
+}
+
+/* 2. Global Dark Surfaces & Cards */
+html.dark .bg-white,
+html.dark [class*="bg-white/"],
+html.dark .bg-\[\#ffffff\],
+html.dark [class*="bg-[#ffffff]"] {
+  background-color: #141A26 !important;
+}
+
+html.dark [class*="bg-[#fafafa]"],
+html.dark [class*="bg-[#fafbfc]"],
+html.dark [class*="bg-[#f8fafd]"],
+html.dark [class*="bg-[#fafcfe]"],
+html.dark [class*="bg-[#fbfbfb]"],
+html.dark [class*="bg-[#fbfdff]"],
+html.dark [class*="bg-[#f5f5f7]"],
+html.dark [class*="bg-[#f5f5f5]"],
+html.dark [class*="bg-slate-50"],
+html.dark [class*="bg-gray-50"] {
+  background-color: #0E131E !important;
+}
+
+/* 3. Global Dark Glass Cards */
+html.dark .pf-glass-card,
+[data-theme="dark"] .pf-glass-card {
+  background: linear-gradient(145deg, rgba(20, 26, 38, 0.95) 0%, rgba(14, 19, 28, 0.88) 100%) !important;
+  border-color: rgba(45, 56, 78, 0.85) !important;
+  box-shadow: 0 10px 30px -8px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+html.dark .pf-glass-card:hover,
+[data-theme="dark"] .pf-glass-card:hover {
+  border-color: rgba(56, 189, 248, 0.45) !important;
+  box-shadow: 0 18px 42px -12px rgba(0, 102, 204, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+}
+
+html.dark .pf-glass,
+[data-theme="dark"] .pf-glass {
+  background: rgba(18, 24, 34, 0.85) !important;
+  border-color: rgba(45, 56, 78, 0.7) !important;
+  box-shadow: 0 12px 40px -12px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
+}
+
+html.dark .pf-glass-strong,
+[data-theme="dark"] .pf-glass-strong {
+  background: rgba(20, 26, 38, 0.94) !important;
+  border-color: rgba(45, 56, 78, 0.85) !important;
+  box-shadow: 0 24px 64px -20px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.09) !important;
+}
+
+/* 4. Global Dark Borders & Dividers */
+html.dark [class*="border-[#e0e0e0]"],
+html.dark [class*="border-[#d0d7e2]"],
+html.dark [class*="border-[#e6eaf2]"],
+html.dark [class*="border-[#d8dfeb]"],
+html.dark [class*="border-[#e1e6f0]"],
+html.dark [class*="border-[#f0f0f0]"],
+html.dark [class*="border-[#f5f5f7]"],
+html.dark [class*="border-[#E6EAF2]"],
+html.dark [class*="border-[#E1E6F0]"],
+html.dark [class*="border-[#D0D7E2]"],
+html.dark [class*="border-[#D8DFEB]"],
+html.dark [class*="border-slate-200"],
+html.dark [class*="border-gray-200"] {
+  border-color: #242E40 !important;
+}
+
+/* 5. Accent Badges & Highlights */
+html.dark [class*="bg-[#eaf2fc]"],
+html.dark [class*="bg-[#dbeafc]"],
+html.dark [class*="bg-[#e3f0fe]"] {
+  background-color: rgba(41, 151, 255, 0.16) !important;
+  color: #38BDF8 !important;
+}
+html.dark [class*="border-[#cfe4fb]"],
+html.dark [class*="border-[#bfdbfe]"],
+html.dark [class*="border-[#abd2fb]"],
+html.dark [class*="border-[#dbeafc]"],
+html.dark [class*="border-[#BFDBFE]"] {
+  border-color: rgba(56, 189, 248, 0.35) !important;
+}
+
+/* 6. Form Controls, Text Inputs & Dropdowns */
+html.dark input:not([type="checkbox"]):not([type="radio"]),
+html.dark textarea,
+html.dark select {
+  background-color: #101520 !important;
+  color: #F9FAFB !important;
+  border-color: #242E40 !important;
+}
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #64748B !important;
+}
+
+/* 7. Resources Screen (.rx) Comprehensive Theming */
+html.dark .rx {
+  --navy: #F9FAFB !important;
+  --slate: #D1D5DB !important;
+  --muted: #94A3B8 !important;
+  --border: #242E40 !important;
+  --border-l: #1A2232 !important;
+  --page: #0B0E14 !important;
+  --card: #141A26 !important;
+  --vsoft: rgba(41, 151, 255, 0.16) !important;
+  --vsoft-2: rgba(41, 151, 255, 0.08) !important;
+  --vbd: rgba(56, 189, 248, 0.3) !important;
+  color: #F9FAFB !important;
+}
+html.dark .rx-card,
+html.dark .rx-panel,
+html.dark .rx-stat,
+html.dark .rx-goal,
+html.dark .rx-view-road,
+html.dark .rx-filter,
+html.dark .rx-sort {
+  background-color: #141A26 !important;
+  border-color: #242E40 !important;
+  color: #F9FAFB !important;
+}
+html.dark .rx-chip {
+  background-color: #141A26 !important;
+  border-color: #242E40 !important;
+  color: #D1D5DB !important;
+}
+html.dark .rx-chip.on {
+  background-color: #0066CC !important;
+  border-color: #0066CC !important;
+  color: #FFFFFF !important;
+}
+html.dark .rx-search .s-in {
+  background-color: #101520 !important;
+  border-color: #242E40 !important;
+}
+html.dark .rx-search input {
+  color: #F9FAFB !important;
+}
+html.dark .rx-search .kbd {
+  background-color: #1A2232 !important;
+  border-color: #2D3A50 !important;
+  color: #94A3B8 !important;
+}
+html.dark .rx-card .r-tag {
+  background-color: #1A2232 !important;
+  color: #D1D5DB !important;
+}
+html.dark .rx-card .r-save {
+  background-color: #141A26 !important;
+  border-color: #242E40 !important;
+  color: #94A3B8 !important;
+}
+html.dark .rx-card .r-save.on {
+  background-color: rgba(41, 151, 255, 0.2) !important;
+  border-color: #38BDF8 !important;
+  color: #38BDF8 !important;
+}
+html.dark .rx-btn.ghost {
+  background-color: #141A26 !important;
+  color: #38BDF8 !important;
+  border-color: #242E40 !important;
+}
+html.dark .rx-bar {
+  background-color: #1A2232 !important;
+}
+html.dark .rx-picked {
+  background: linear-gradient(160deg, #141A26, rgba(41, 151, 255, 0.12)) !important;
+  border-color: rgba(56, 189, 248, 0.3) !important;
+}
+html.dark .rx-insight {
+  background: linear-gradient(160deg, rgba(41, 151, 255, 0.12), rgba(16, 21, 30, 0.9)) !important;
+  border-color: rgba(56, 189, 248, 0.3) !important;
+}
+
+/* 8. AIChat Floating Assistant (.pfchat) Comprehensive Theming */
+html.dark .pfchat-fab {
+  background-color: #141A26 !important;
+  border-color: #242E40 !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
+}
+html.dark .pfchat-fab span {
+  color: #F9FAFB !important;
+}
+html.dark .pfchat-panel {
+  background-color: #141A26 !important;
+  border-color: #242E40 !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7) !important;
+}
+html.dark .pfchat-head {
+  border-bottom-color: #242E40 !important;
+}
+html.dark .pfchat-head .n {
+  color: #F9FAFB !important;
+}
+html.dark .pfchat-body {
+  background-color: #0E131E !important;
+}
+html.dark .pfchat-msg.assistant {
+  background-color: #141A26 !important;
+  border-color: #242E40 !important;
+  color: #F9FAFB !important;
+}
+html.dark .pfchat-sugg button {
+  background-color: #141A26 !important;
+  border-color: #242E40 !important;
+  color: #F9FAFB !important;
+}
+html.dark .pfchat-typing {
+  background-color: #141A26 !important;
+  border-color: #242E40 !important;
+}
+
+/* 9. Recharts SVG Charts & Data Visuals in Dark Mode */
+html.dark .recharts-cartesian-grid line,
+html.dark .recharts-polar-grid-concentric path,
+html.dark .recharts-polar-grid-angle line {
+  stroke: #242E40 !important;
+}
+html.dark .recharts-text,
+html.dark .recharts-polar-angle-axis-tick-value {
+  fill: #94A3B8 !important;
+}
+html.dark .recharts-default-tooltip {
+  background-color: #141A26 !important;
+  border-color: #242E40 !important;
+  color: #F9FAFB !important;
+}
+
+/* 10. Dark Mode Navigation & Sidebar Links */
+html.dark .pf-sidebar nav button[aria-current="page"] {
+  background-color: rgba(41, 151, 255, 0.18) !important;
+  color: #38BDF8 !important;
+}
+html.dark .pf-sidebar nav button:not([aria-current="page"]) {
+  background-color: transparent !important;
+  color: #D1D5DB !important;
+}
+html.dark .pf-sidebar nav button:not([aria-current="page"]):hover {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+  color: #FFFFFF !important;
+}
+html.dark .pf-sidebar nav button:not([aria-current="page"]) span:first-child {
+  color: #94A3B8 !important;
+}
+html.dark .pf-sidebar nav button[aria-current="page"] span:first-child {
+  color: #38BDF8 !important;
+}
+
+html.dark .pf-topbar nav button {
+  color: #D1D5DB !important;
+}
+html.dark .pf-topbar nav button:hover {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+  color: #FFFFFF !important;
+}
+
+/* 11. AI Coach Chat Card & Workspace Theming */
+html.dark .coach-chat-card {
+  background-color: #141A26 !important;
+  border-color: #242E40 !important;
+}
+html.dark .coach-chat-card > div:first-child {
+  background-color: #0E131E !important;
+}
+
+/* 12. Dark Mode Scrollbars */
+html.dark ::-webkit-scrollbar-track {
+  background: #0B0E14 !important;
+}
+html.dark ::-webkit-scrollbar-thumb {
+  background: #242E40 !important;
+  border-color: #0B0E14 !important;
+}
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #3B4860 !important;
+}
+
 /* When a browser can't do backdrop-filter, fall back to near-opaque surfaces. */
 @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
   .pf-glass { background: rgba(255, 255, 255, 0.96); }
   .pf-glass-strong { background: rgba(255, 255, 255, 0.98); }
   .pf-topbar, .pf-sidebar { background: #ffffff; }
+  html.dark .pf-glass, [data-theme="dark"] .pf-glass { background: #141A26 !important; }
+  html.dark .pf-topbar, html.dark .pf-sidebar { background: #141A26 !important; }
 }
