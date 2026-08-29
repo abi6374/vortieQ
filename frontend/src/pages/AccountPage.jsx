@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import AppShell from '../components/layout/AppShell'
+import CustomSelect from '../components/ui/CustomSelect'
 import { useAuth } from '../hooks/useAuth'
 import api from '../lib/apiClient'
 
@@ -182,17 +183,20 @@ export default function AccountPage() {
                       />
                     </div>
                     <div>
-                      <label className={LABEL} htmlFor="current_level">Current Level</label>
-                      <select
-                        id="current_level"
-                        className={FIELD}
+                      <label className={LABEL}>Current Level</label>
+                      <CustomSelect
                         value={form.current_level || 'beginner'}
-                        onChange={set('current_level')}
-                      >
-                        <option value="beginner">Beginner</option>
-                        <option value="intermediate">Intermediate</option>
-                        <option value="advanced">Advanced</option>
-                      </select>
+                        onChange={(val) => setForm((prev) => ({ ...prev, current_level: val }))}
+                        options={[
+                          { value: 'beginner', label: 'Beginner', subtitle: 'New to the subject / foundational' },
+                          { value: 'intermediate', label: 'Intermediate', subtitle: 'Hands-on experience / solid foundation' },
+                          { value: 'advanced', label: 'Advanced', subtitle: 'Deep domain expertise / complex architectures' },
+                        ]}
+                        className="w-full"
+                        buttonClassName="w-full py-2.5 bg-white border-[#e0e0e0] text-[#1d1d1f]"
+                        menuClassName="w-full"
+                        ariaLabel="Current level"
+                      />
                     </div>
                     <div>
                       <label className={LABEL} htmlFor="weekly_hours">Weekly Study Hours</label>

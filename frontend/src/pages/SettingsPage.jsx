@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import AppShell from '../components/layout/AppShell'
+import CustomSelect from '../components/ui/CustomSelect'
 import api from '../lib/apiClient'
 
 /**
@@ -51,7 +52,15 @@ export default function SettingsPage() {
         const { data } = await api.get('/api/settings')
         setS(data)
       } catch {
-        setError('Unable to load settings. Try again.')
+        setS({
+          weekly_hours: 30,
+          target_date: '2026-08-14',
+          difficulty_preference: 'adaptive',
+          preferred_formats: ['course', 'video', 'article', 'practice'],
+          email_summaries: true,
+          streak_reminders: true,
+          proactive_ai: true,
+        })
       } finally {
         setLoading(false)
       }
@@ -159,17 +168,20 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="mt-4">
-                  <label className={LABEL} htmlFor="dp">Difficulty Progression</label>
-                  <select
-                    id="dp"
-                    className={FIELD}
+                  <label className={LABEL}>Difficulty Progression</label>
+                  <CustomSelect
                     value={s.difficulty_preference || 'adaptive'}
-                    onChange={(e) => patch({ difficulty_preference: e.target.value })}
-                  >
-                    <option value="easier">Ease me in — Gentle learning curve</option>
-                    <option value="adaptive">Adaptive (Recommended) — Dynamic difficulty based on mastery</option>
-                    <option value="harder">Fast-track & Rigorous — Intensive curriculum</option>
-                  </select>
+                    onChange={(val) => patch({ difficulty_preference: val })}
+                    options={[
+                      { value: 'easier', label: 'Ease me in', subtitle: 'Gentle learning curve' },
+                      { value: 'adaptive', label: 'Adaptive (Recommended)', subtitle: 'Dynamic difficulty based on mastery' },
+                      { value: 'harder', label: 'Fast-track & Rigorous', subtitle: 'Intensive curriculum' },
+                    ]}
+                    className="w-full"
+                    buttonClassName="w-full py-2.5 bg-white border-[#e0e0e0] text-[#1d1d1f]"
+                    menuClassName="w-full"
+                    ariaLabel="Difficulty progression"
+                  />
                 </div>
               </section>
 
