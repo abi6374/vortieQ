@@ -34,13 +34,13 @@ const STYLES = `
   border-radius:22px;
   box-shadow:0 28px 70px -24px rgba(20,40,80,.30), 0 2px 6px rgba(20,40,80,.04), inset 0 1px 0 rgba(255,255,255,.7);
   -webkit-backdrop-filter:blur(30px) saturate(1.5); backdrop-filter:blur(30px) saturate(1.5);
-  display:grid; grid-template-columns:44% 56%; overflow:hidden; min-height:720px; height:720px; }
+  display:grid; grid-template-columns:44% 56%; overflow:hidden; height:740px; min-height:740px; max-height:740px; }
 .pfa .brand-panel{ position:relative; overflow:hidden; padding:36px 44px;
   background:linear-gradient(160deg,rgba(255,255,255,0.6) 0%,rgba(234,242,252,0.5) 100%);
   border-right:1px solid rgba(255,255,255,0.55); display:flex; flex-direction:column; height:100%; }
-.pfa .path-deco{ position:absolute; inset:0; z-index:0; pointer-events:none; }
+.pfa .path-deco{ position:absolute; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; }
 .pfa .brand-inner{ position:relative; z-index:1; display:flex; flex-direction:column; height:100%; }
-.pfa .logo-row{ display:flex; align-items:center; gap:14px; margin-bottom:32px; }
+.pfa .logo-row{ display:flex; align-items:center; gap:14px; margin-bottom:28px; }
 .pfa .logo-mark{ width:48px; height:48px; border-radius:14px; flex:none;
   background:linear-gradient(160deg,var(--violet-2),var(--violet)); display:grid; place-items:center;
   box-shadow:0 6px 18px rgba(0,102,204,.28); }
@@ -54,7 +54,7 @@ const STYLES = `
 .pfa .j-icon{ width:44px; height:44px; border-radius:50%; flex:none; background:var(--lav-circle);
   color:var(--violet); display:grid; place-items:center; }
 .pfa .j-text{ font-size:14px; font-weight:600; line-height:1.3; }
-.pfa .privacy{ display:flex; align-items:center; gap:10px; margin-top:auto; color:var(--slate); font-size:13px; padding-top:16px; }
+.pfa .privacy{ position:absolute; bottom:36px; left:44px; right:44px; display:flex; align-items:center; gap:10px; color:var(--slate); font-size:13px; }
 .pfa .privacy svg{ color:var(--violet); flex:none; }
 .pfa .form-panel{ background:rgba(255,255,255,0.55); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
   padding:36px 48px;
