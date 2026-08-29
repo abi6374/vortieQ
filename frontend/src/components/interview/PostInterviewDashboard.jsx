@@ -91,23 +91,23 @@ ${recommended_learning_topics.map(t => `- ${t}`).join('\n')}
   }
 
   return (
-    <div className="min-h-screen bg-[#F5F5F7] dark:bg-[#0B0E14] text-[#1d1d1f] dark:text-[#F5F5F7] p-4 sm:p-8 transition-colors">
-      <div className="max-w-6xl mx-auto flex flex-col gap-6">
+    <div className="w-full font-['Inter',sans-serif] text-[#1d1d1f] dark:text-[#F5F5F7] select-none">
+      <div className="flex flex-col gap-6">
         {/* Top Header & Navigation Banner */}
-        <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#121722] p-6 rounded-3xl border border-[#E0E0E0] dark:border-[#28303F] shadow-xs">
+        <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#141A26] p-6 rounded-2xl border border-[#e0e0e0] dark:border-[#242E40] shadow-sm">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="px-2.5 py-0.5 text-xs font-extrabold uppercase tracking-wider rounded-md bg-[#0066cc]/10 text-[#0066cc] dark:bg-[#38BDF8]/20 dark:text-[#38BDF8]">
                 Session Results
               </span>
-              <span className="text-xs text-[#7a7a7a] dark:text-[#9CA3AF] font-medium">
+              <span className="text-xs text-[#6e6e73] dark:text-[#94A3B8] font-medium">
                 {new Date().toLocaleDateString()} • {formatDuration(totalDurationSec)}
               </span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold font-['Manrope'] tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-extrabold font-['Manrope'] tracking-tight text-[#1d1d1f] dark:text-white">
               AI Interview Evaluation
             </h1>
-            <p className="text-sm text-[#7a7a7a] dark:text-[#9CA3AF]">
+            <p className="text-sm text-[#6e6e73] dark:text-[#94A3B8]">
               Performance diagnosis and targeted learning pathways for <strong className="text-[#1d1d1f] dark:text-white capitalize">{topic || trackId}</strong>
             </p>
           </div>
@@ -117,7 +117,7 @@ ${recommended_learning_topics.map(t => `- ${t}`).join('\n')}
             <button
               type="button"
               onClick={handleDownloadReport}
-              className="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold border border-[#E0E0E0] dark:border-[#28303F] bg-[#fafafc] dark:bg-[#171D2B] hover:bg-[#eaf2fc] dark:hover:bg-white/5 transition-all flex items-center gap-2 cursor-pointer"
+              className="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold border border-[#e0e0e0] dark:border-[#242E40] bg-white dark:bg-[#1E2638] text-[#1d1d1f] dark:text-white hover:bg-[#f5f5f7] dark:hover:bg-[#20293D] transition-all flex items-center gap-2 cursor-pointer shadow-xs"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -142,10 +142,10 @@ ${recommended_learning_topics.map(t => `- ${t}`).join('\n')}
             <button
               type="button"
               onClick={() => navigate('/dashboard')}
-              className="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-gradient-to-r from-[#0071e3] to-[#0066cc] hover:from-[#0077ed] hover:to-[#005bb5] transition-all shadow-md cursor-pointer flex items-center gap-2"
+              className="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-[#0066cc] dark:bg-[#38BDF8] dark:text-[#090D16] hover:bg-[#0052a3] dark:hover:bg-[#0284c7] transition-all shadow-sm cursor-pointer flex items-center gap-2"
             >
               <span>Return to Roadmap</span>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="9 18 15 12 9 6" />
               </svg>
             </button>
@@ -155,29 +155,31 @@ ${recommended_learning_topics.map(t => `- ${t}`).join('\n')}
         {/* Hero Performance Overview & Score Matrix */}
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Main Score & Verdict Card (4 cols) */}
-          <div className="lg:col-span-4 bg-white dark:bg-[#121722] p-6 sm:p-8 rounded-3xl border border-[#E0E0E0] dark:border-[#28303F] shadow-xs flex flex-col justify-between">
+          <div className="lg:col-span-4 bg-white dark:bg-[#141A26] p-6 sm:p-7 rounded-2xl border border-[#e0e0e0] dark:border-[#242E40] shadow-sm flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-4">
-                <span className="text-xs font-bold uppercase tracking-wider text-[#7a7a7a] dark:text-[#9CA3AF]">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#6e6e73] dark:text-[#94A3B8]">
                   Overall Assessment
                 </span>
                 <span className={`px-2.5 py-1 rounded-full text-xs font-extrabold ${
                   overall_score >= 85
                     ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
-                    : overall_score >= 75
+                    : overall_score >= 70
                     ? 'bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300'
-                    : 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300'
+                    : overall_score >= 50
+                    ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300'
+                    : 'bg-red-100 text-red-800 dark:bg-red-950/60 dark:text-red-300'
                 }`}>
                   {verdict}
                 </span>
               </div>
 
-              {/* Huge Radial / Number Score */}
+              {/* Score Display */}
               <div className="flex items-baseline gap-2 mb-3">
                 <span className="text-6xl font-extrabold font-['Manrope'] text-[#0066cc] dark:text-[#38BDF8] tracking-tight">
                   {overall_score}
                 </span>
-                <span className="text-xl text-[#7a7a7a] dark:text-[#9CA3AF] font-bold">
+                <span className="text-xl text-[#6e6e73] dark:text-[#94A3B8] font-bold">
                   / 100
                 </span>
               </div>
@@ -188,27 +190,27 @@ ${recommended_learning_topics.map(t => `- ${t}`).join('\n')}
             </div>
 
             {/* Speaking Flow Metrics */}
-            <div className="mt-6 pt-4 border-t border-[#f0f0f0] dark:border-[#28303F] grid grid-cols-2 gap-3">
-              <div className="p-3 rounded-2xl bg-[#fafafc] dark:bg-[#171D2B] border border-[#f0f0f0] dark:border-[#202734]">
-                <span className="text-[11px] text-[#7a7a7a] dark:text-[#9CA3AF] font-bold uppercase block mb-1">
+            <div className="mt-6 pt-4 border-t border-[#f0f0f0] dark:border-[#242E40] grid grid-cols-2 gap-3">
+              <div className="p-3 rounded-xl bg-[#f5f5f7] dark:bg-[#1E2638] border border-[#e0e0e0] dark:border-[#242E40]">
+                <span className="text-[11px] text-[#6e6e73] dark:text-[#94A3B8] font-bold uppercase block mb-1">
                   Pacing (Speed)
                 </span>
                 <span className="text-base font-extrabold text-[#1d1d1f] dark:text-white">
-                  {metrics?.wpm || 135} <span className="text-xs font-normal text-[#7a7a7a]">WPM</span>
+                  {metrics?.wpm ?? 0} <span className="text-xs font-normal text-[#6e6e73]">WPM</span>
                 </span>
                 <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold block mt-0.5">
-                  {metrics?.pacing_status || 'Optimal Speed'}
+                  {metrics?.pacing_status || (overall_score === 0 ? 'No Speech' : 'Optimal Speed')}
                 </span>
               </div>
 
-              <div className="p-3 rounded-2xl bg-[#fafafc] dark:bg-[#171D2B] border border-[#f0f0f0] dark:border-[#202734]">
-                <span className="text-[11px] text-[#7a7a7a] dark:text-[#9CA3AF] font-bold uppercase block mb-1">
+              <div className="p-3 rounded-xl bg-[#f5f5f7] dark:bg-[#1E2638] border border-[#e0e0e0] dark:border-[#242E40]">
+                <span className="text-[11px] text-[#6e6e73] dark:text-[#94A3B8] font-bold uppercase block mb-1">
                   Filler Words
                 </span>
                 <span className="text-base font-extrabold text-[#1d1d1f] dark:text-white">
-                  {fillerData.count} <span className="text-xs font-normal text-[#7a7a7a]">used</span>
+                  {fillerData.count} <span className="text-xs font-normal text-[#6e6e73]">used</span>
                 </span>
-                <span className="text-[10px] text-[#7a7a7a] dark:text-[#9CA3AF] font-semibold block mt-0.5">
+                <span className="text-[10px] text-[#6e6e73] dark:text-[#94A3B8] font-semibold block mt-0.5">
                   {fillerData.impact}
                 </span>
               </div>
@@ -216,12 +218,12 @@ ${recommended_learning_topics.map(t => `- ${t}`).join('\n')}
           </div>
 
           {/* 4 Core Competency Pillars (8 cols) */}
-          <div className="lg:col-span-8 bg-white dark:bg-[#121722] p-6 sm:p-8 rounded-3xl border border-[#E0E0E0] dark:border-[#28303F] shadow-xs flex flex-col justify-between gap-6">
+          <div className="lg:col-span-8 bg-white dark:bg-[#141A26] p-6 sm:p-7 rounded-2xl border border-[#e0e0e0] dark:border-[#242E40] shadow-sm flex flex-col justify-between gap-6">
             <div>
               <h2 className="text-lg font-bold font-['Manrope'] mb-1 text-[#1d1d1f] dark:text-white">
                 Core Competency Diagnostic
               </h2>
-              <p className="text-xs text-[#7a7a7a] dark:text-[#9CA3AF]">
+              <p className="text-xs text-[#6e6e73] dark:text-[#94A3B8]">
                 Quantitative evaluation across technical precision, articulation, and problem framing.
               </p>
             </div>
@@ -229,12 +231,12 @@ ${recommended_learning_topics.map(t => `- ${t}`).join('\n')}
             {/* Score Progress Bars */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[
-                { label: 'Technical Depth & Accuracy', value: scores.technical_depth || 84, icon: 'code', desc: 'Understanding of core APIs, patterns, and trade-offs' },
-                { label: 'Communication & Articulation', value: scores.communication_clarity || 88, icon: 'message', desc: 'Concise explanation, natural pacing, and minimal fillers' },
-                { label: 'Problem Solving & System Design', value: scores.problem_solving || 82, icon: 'cpu', desc: 'Requirements analysis, bottleneck detection, and scaling' },
-                { label: 'Structure & STAR Delivery', value: scores.confidence_structure || 86, icon: 'check', desc: 'Context setting, actions taken, and measurable results' },
+                { label: 'Technical Depth & Accuracy', value: scores?.technical_depth ?? (overall_score === 0 ? 0 : 75), icon: 'code', desc: 'Understanding of core APIs, patterns, and trade-offs' },
+                { label: 'Communication & Articulation', value: scores?.communication_clarity ?? (overall_score === 0 ? 0 : 80), icon: 'message', desc: 'Concise explanation, natural pacing, and minimal fillers' },
+                { label: 'Problem Solving & System Design', value: scores?.problem_solving ?? (overall_score === 0 ? 0 : 70), icon: 'cpu', desc: 'Requirements analysis, bottleneck detection, and scaling' },
+                { label: 'Structure & STAR Delivery', value: scores?.confidence_structure ?? (overall_score === 0 ? 0 : 72), icon: 'check', desc: 'Context setting, actions taken, and measurable results' },
               ].map((pillar, idx) => (
-                <div key={idx} className="p-4 rounded-2xl bg-[#fafafc] dark:bg-[#171D2B] border border-[#f0f0f0] dark:border-[#202734] flex flex-col justify-between">
+                <div key={idx} className="p-4 rounded-xl bg-[#f5f5f7] dark:bg-[#1E2638] border border-[#e0e0e0] dark:border-[#242E40] flex flex-col justify-between">
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
                       <span className="text-xs font-bold text-[#1d1d1f] dark:text-white">
@@ -244,14 +246,14 @@ ${recommended_learning_topics.map(t => `- ${t}`).join('\n')}
                         {pillar.value}%
                       </span>
                     </div>
-                    <p className="text-[11px] text-[#7a7a7a] dark:text-[#9CA3AF] mb-3">
+                    <p className="text-[11px] text-[#6e6e73] dark:text-[#94A3B8] mb-3">
                       {pillar.desc}
                     </p>
                   </div>
                   {/* Progress Bar */}
                   <div className="w-full h-2.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
                     <div
-                      className="h-full rounded-full bg-gradient-to-r from-[#0071e3] to-[#0066cc]"
+                      className="h-full rounded-full bg-[#0066cc] dark:bg-[#38BDF8]"
                       style={{ width: `${pillar.value}%` }}
                     />
                   </div>

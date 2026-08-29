@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import AppShell from '../layout/AppShell'
 import CalibrationModal from './CalibrationModal'
 import LiveInterviewView from './LiveInterviewView'
 import PostInterviewDashboard from './PostInterviewDashboard'
@@ -13,10 +14,10 @@ import {
  * InterviewScreen — The top-level orchestrator for the AI Interview workflow.
  *
  * Coordinates:
- * 1. Stage 1: Calibration (Camera/Mic test, track selection, consent)
+ * 1. Stage 1: Calibration (Camera/Mic test, track selection, consent inside AppShell)
  * 2. Stage 2: Live Video Call Interview with Amazon Bedrock Adaptive Questioning & Polly TTS
  * 3. Loading Stage: AI Evaluation & Diagnosis
- * 4. Stage 3: Post-Session Dashboard (Metrics, video playback, personalized roadmap actions)
+ * 4. Stage 3: Post-Session Dashboard (Metrics, video playback, roadmap actions inside AppShell)
  */
 export default function InterviewScreen() {
   const navigate = useNavigate()
@@ -163,7 +164,7 @@ export default function InterviewScreen() {
     navigate('/dashboard')
   }
 
-  // Live stage takes over full screen video call format
+  // Stage 2: Live stage takes over full screen video call format
   if (stage === 'live') {
     return (
       <LiveInterviewView
@@ -186,7 +187,7 @@ export default function InterviewScreen() {
   // Evaluating / Processing Interstitial
   if (stage === 'evaluating') {
     return (
-      <div className="fixed inset-0 z-50 bg-[#090d16] text-white flex flex-col items-center justify-center p-6 text-center select-none">
+      <div className="fixed inset-0 z-50 bg-[#090d16] text-white flex flex-col items-center justify-center p-6 text-center select-none font-['Inter',sans-serif]">
         <div className="relative mb-6">
           <div className="w-20 h-20 rounded-full border-4 border-white/10 border-t-[#0071e3] animate-spin flex items-center justify-center shadow-xl shadow-[#0071e3]/30">
             <div className="w-10 h-10 rounded-full bg-[#0071e3]/20 flex items-center justify-center">
@@ -208,26 +209,30 @@ export default function InterviewScreen() {
     )
   }
 
-  // Stage 3: Results Dashboard
+  // Stage 3: Results Dashboard (Inside AppShell)
   if (stage === 'dashboard') {
     return (
-      <PostInterviewDashboard
-        evaluation={evaluation}
-        recordedBlob={recordedBlob}
-        trackId={sessionConfig?.trackId}
-        topic={sessionConfig?.customTopic || sessionConfig?.targetRole}
-        totalDurationSec={totalDurationSec}
-        onRestart={handleRestart}
-      />
+      <AppShell>
+        <PostInterviewDashboard
+          evaluation={evaluation}
+          recordedBlob={recordedBlob}
+          trackId={sessionConfig?.trackId}
+          topic={sessionConfig?.customTopic || sessionConfig?.targetRole}
+          totalDurationSec={totalDurationSec}
+          onRestart={handleRestart}
+        />
+      </AppShell>
     )
   }
 
-  // Stage 1: Calibration View — full-screen standalone (no AppShell wrapper)
+  // Stage 1: Calibration View (Inside AppShell)
   return (
-    <CalibrationModal
-      initialTrack="fullstack"
-      onStart={handleStartSession}
-      onClose={() => navigate('/dashboard')}
-    />
+    <AppShell>
+      <CalibrationModal
+        initialTrack="fullstack"
+        onStart={handleStartSession}
+        onClose={() => navigate('/dashboard')}
+      />
+    </AppShell>
   )
 }
