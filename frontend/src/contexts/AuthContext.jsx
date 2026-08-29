@@ -131,6 +131,37 @@ export function AuthProvider({ children }) {
     return data
   }
 
+  // Link GitHub to the CURRENTLY signed-in user (Google, email, whatever they
+  // used originally) - this is the "Connect GitHub" action from the roadmap
+  // popup and the Account page, always used on an already-authenticated
+  // learner. Deliberately NOT signInWithOAuth: that starts a brand-new
+  // top-level sign-in and, if this GitHub account has never been seen by
+  // Supabase before, GoTrue creates a SEPARATE auth.users row and the
+  // browser's session silently switches to that new, empty account -
+  // exactly the "does this create a separate user?" risk this feature must
+  // avoid. supabase.auth.linkIdentity() is the purpose-built API for adding
+  // a second provider to the CURRENT session's user (see
+  // docs/security_audit.md and Supabase's identity-linking guide) - it
+  // requires "Manual linking" enabled in the project's Auth > Providers
+  // settings (this project already has at least one real linked identity in
+  // auth.identities, so it's on; if this ever starts failing with a
+  // "manual linking is disabled" error, that's the toggle to check).
+  const linkGithub = async () => {
+    const { data, error } = await supabase.auth.linkIdentity({
+      provider: 'github',
+      options: {
+        redirectTo: `${window.location.origin}/account?github_linked=true`,
+        scopes: 'read:user repo user:email',
+        queryParams: { prompt: 'consent' },
+      },
+    })
+    if (error) throw error
+    if (data?.url) {
+      window.location.assign(data.url)
+    }
+    return data
+  }
+
   const signOut = async () => {
     await supabase.auth.signOut()
     setSession(null)
@@ -171,6 +202,7 @@ export function AuthProvider({ children }) {
         signUp,
         signInWithGoogle,
         signInWithGithub,
+        linkGithub,
         signOut,
         user: effectiveUser,
         oauthError,

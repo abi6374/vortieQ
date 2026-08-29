@@ -2,8 +2,8 @@ import React, { useState } from 'react'
 import api from '../../lib/apiClient'
 import { useAuth } from '../../hooks/useAuth'
 
-export default function ConnectGitHubModal({ isOpen, onClose, onConnected }) {
-  const { user, signInWithGithub } = useAuth()
+export default function ConnectGitHubModal({ isOpen, onClose, onConnected, onRemindLater }) {
+  const { user, linkGithub } = useAuth()
   const [username, setUsername] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -45,7 +45,12 @@ export default function ConnectGitHubModal({ isOpen, onClose, onConnected }) {
     setError('')
     setLoading(true)
     try {
-      const res = await signInWithGithub()
+      // The learner is already signed in here (this modal only ever shows to
+      // an authenticated user) - linkGithub() adds GitHub to THIS account.
+      // Never signInWithGithub() here: that starts a fresh top-level sign-in
+      // and, for a GitHub account Supabase hasn't seen before, would create
+      // a separate user and silently swap the session to it instead.
+      const res = await linkGithub()
       if (res?.url) {
         window.location.assign(res.url)
       }
@@ -56,8 +61,15 @@ export default function ConnectGitHubModal({ isOpen, onClose, onConnected }) {
   }
 
   const handleRemindLater = () => {
-    // Dismiss for this session only (will prompt again next session in roadmap)
-    sessionStorage.setItem(`pf_github_remind_dismissed_${userId}`, 'true')
+    // Deliberately does NOT persist anywhere (no localStorage/sessionStorage
+    // write) - "remind me later" means exactly that: close it for now, ask
+    // again the next time the learner lands on the roadmap. The parent
+    // (PersonalizedRoadmap) tracks a mount-scoped ref so it won't immediately
+    // re-open in the same page view, but a fresh visit (reload or
+    // navigating back to /roadmap or /dashboard) will show it again - unlike
+    // "Don't have a GitHub" / a successful connect, which persist
+    // permanently in localStorage.
+    onRemindLater?.()
     onClose()
   }
 

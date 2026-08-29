@@ -3,6 +3,7 @@ import AppShell from '../components/layout/AppShell'
 import CustomSelect from '../components/ui/CustomSelect'
 import { useAuth } from '../hooks/useAuth'
 import api from '../lib/apiClient'
+import { supabase } from '../lib/supabaseClient'
 
 /**
  * Account — real profile editing backed by PATCH /api/me/profile.
@@ -14,7 +15,7 @@ const FIELD = 'w-full rounded-xl border border-[#e0e0e0] bg-white px-3.5 py-2.5 
 const LABEL = 'block text-[13.5px] font-semibold text-[#1d1d1f] mb-1.5'
 
 export default function AccountPage() {
-  const { user, profile, updateProfile } = useAuth()
+  const { user, profile, updateProfile, linkGithub } = useAuth()
   const [me, setMe] = useState(null)
   const [form, setForm] = useState({})
   const [loading, setLoading] = useState(true)
@@ -74,8 +75,8 @@ export default function AccountPage() {
     (typeof window !== 'undefined' && localStorage.getItem(`pf_github_user_${user?.id}`)) ||
     ''
 
-  const handleSyncGithubAccount = async () => {
-    const target = (ghInput || githubHandle).trim()
+  const handleSyncGithubAccount = async (overrideUsername) => {
+    const target = (overrideUsername || ghInput || githubHandle).trim()
     if (!target) return
     setGhSyncing(true)
     setGhFeedback(null)
@@ -111,6 +112,73 @@ export default function AccountPage() {
       setGhSyncing(false)
     }
   }
+
+  const [ghLinking, setGhLinking] = useState(false)
+
+  const handleLinkGithubOAuth = async () => {
+    setGhFeedback(null)
+    setGhLinking(true)
+    try {
+      // Adds GitHub to THIS account via linkIdentity (see AuthContext.linkGithub) -
+      // never a plain sign-in here, which would risk switching the session to a
+      // brand-new, separate account instead of enriching the current one.
+      await linkGithub()
+      // linkGithub() redirects the whole page to GitHub; if we're still here,
+      // something prevented the redirect - surface it rather than leaving the
+      // button stuck on "Connecting...".
+    } catch (err) {
+      setGhFeedback({
+        type: 'error',
+        message: err?.message || 'Could not start GitHub authorization.',
+      })
+      setGhLinking(false)
+    }
+  }
+
+  // Completes the OAuth-link loop: after GitHub redirects back here
+  // (?github_linked=true), the identity is linked to this account but
+  // nothing has analyzed the learner's real repos yet - look up the GitHub
+  // username Supabase just linked and run the same real sync the manual
+  // username field triggers, so authorizing via OAuth isn't a dead end.
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('github_linked') !== 'true') return
+
+    // Strip the query param immediately so a reload doesn't re-trigger this.
+    window.history.replaceState({}, '', '/account')
+
+    ;(async () => {
+      try {
+        const { data, error } = await supabase.auth.getUserIdentities()
+        if (error) throw error
+        const ghIdentity = data?.identities?.find((i) => i.provider === 'github')
+        const detectedUsername =
+          ghIdentity?.identity_data?.user_name ||
+          ghIdentity?.identity_data?.preferred_username ||
+          ''
+        if (detectedUsername) {
+          setGhInput(detectedUsername)
+          await handleSyncGithubAccount(detectedUsername)
+          flash('GitHub connected and repositories synced')
+        } else {
+          setGhFeedback({
+            type: 'error',
+            message: 'GitHub was authorized, but we could not read your username back from it. Enter it manually below.',
+          })
+        }
+      } catch (err) {
+        console.warn('Post-link GitHub sync error:', err)
+        setGhFeedback({
+          type: 'error',
+          message: 'GitHub was authorized, but syncing your repositories failed. Try entering your username manually below.',
+        })
+      }
+    })()
+    // Runs once on mount only - deliberately not depending on
+    // handleSyncGithubAccount (recreated every render) to avoid re-firing.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }))
 
@@ -338,6 +406,18 @@ export default function AccountPage() {
                       )}
                     </button>
                   </div>
+
+                  <button
+                    type="button"
+                    onClick={handleLinkGithubOAuth}
+                    disabled={ghLinking}
+                    className="w-full flex items-center justify-center gap-2 py-2 bg-[#181717] hover:bg-black text-white text-xs font-semibold rounded-xl transition-colors cursor-pointer disabled:opacity-50"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+                    </svg>
+                    <span>{ghLinking ? 'Redirecting to GitHub…' : 'Or Authorize with GitHub OAuth'}</span>
+                  </button>
 
                   {ghFeedback && (
                     <p className={`text-xs font-semibold px-3 py-2 rounded-lg ${

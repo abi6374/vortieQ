@@ -50,18 +50,27 @@ export default function PersonalizedRoadmap({ pathData = null }) {
   const [activeModal, setActiveModal] = useState(null)
   const [showGitHubModal, setShowGitHubModal] = useState(false)
 
+  // "Remind me later" dismissal, scoped to THIS mount only (a ref, not
+  // storage) - see ConnectGitHubModal's handleRemindLater for why. Resets to
+  // false every time this component mounts fresh (a real page load, or
+  // navigating away and back), which is what makes "remind me later" show
+  // the popup again "whenever the learner lands on the roadmap page" per the
+  // feature's actual spec, instead of silently staying dismissed for the
+  // rest of the browser tab's life the way sessionStorage did before.
+  const remindLaterDismissedRef = useRef(false)
+
   // Prompt Google / Email users to link GitHub if not yet linked and not permanently dismissed
   useEffect(() => {
     if (!user) return
+    if (remindLaterDismissedRef.current) return
     const userId = user.id
     const hasGitHub =
       user.app_metadata?.provider?.includes('github') ||
       user.user_metadata?.user_name ||
       profile?.github_username
     const preference = localStorage.getItem(`pf_github_preference_${userId}`)
-    const sessionDismissed = sessionStorage.getItem(`pf_github_remind_dismissed_${userId}`)
 
-    if (!hasGitHub && preference !== 'no_github' && preference !== 'connected' && sessionDismissed !== 'true') {
+    if (!hasGitHub && preference !== 'no_github' && preference !== 'connected') {
       const timer = setTimeout(() => {
         setShowGitHubModal(true)
       }, 1500)
@@ -859,6 +868,7 @@ export default function PersonalizedRoadmap({ pathData = null }) {
       <ConnectGitHubModal
         isOpen={showGitHubModal}
         onClose={() => setShowGitHubModal(false)}
+        onRemindLater={() => { remindLaterDismissedRef.current = true }}
         onConnected={(ghData) => {
           setToastMessage(`GitHub synced! Calibrated ${ghData.topics?.length || 0} skills & portfolio depth.`)
           setTimeout(() => setToastMessage(null), 3500)
