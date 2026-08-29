@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import AppShell from '../layout/AppShell'
 import CalibrationModal from './CalibrationModal'
 import LiveInterviewView from './LiveInterviewView'
 import PostInterviewDashboard from './PostInterviewDashboard'
@@ -212,16 +211,12 @@ export default function InterviewScreen() {
     )
   }
 
-  // Stage 1: Calibration View (default inside AppShell)
+  // Stage 1: Calibration View — full-screen standalone (no AppShell wrapper)
   return (
-    <AppShell>
-      <div className="flex-1 flex flex-col h-full bg-[#F5F5F7] dark:bg-[#0B0E14] overflow-y-auto">
-        <CalibrationModal
-          initialTrack="fullstack"
-          onStart={handleStartSession}
-          onClose={() => navigate('/dashboard')}
-        />
-      </div>
-    </AppShell>
+    <CalibrationModal
+      initialTrack="fullstack"
+      onStart={handleStartSession}
+      onClose={() => navigate('/dashboard')}
+    />
   )
 }
