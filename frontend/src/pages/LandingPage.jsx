@@ -77,31 +77,31 @@ export default function LandingPage() {
 
   return (
     <div className="relative min-h-screen bg-[#F5F5F7] dark:bg-[#0B0F17] text-[#1D1D1F] dark:text-[#F8FAFC] overflow-x-hidden selection:bg-[#0066CC] selection:text-white transition-colors duration-300">
-      {/* 1. Dynamic Interactive Background: WebThreads (Light & Dark Theme Calibrated) */}
+      {/* 1. Dynamic Interactive Background: WebThreads (Unified Dual-Theme Optical Physics) */}
       <div className="fixed inset-0 w-full h-full pointer-events-none z-0 overflow-hidden">
         <WebThreads
           key={isDark ? 'threads-dark' : 'threads-light'}
-          color1={isDark ? '#0066CC' : '#0066CC'}
-          color2={isDark ? '#38BDF8' : '#38BDF8'}
+          color1="#0066CC"
+          color2="#38BDF8"
           color3={isDark ? '#E0F2FE' : '#6366F1'}
           speed={0.2}
-          threadCount={isDark ? 4 : 4}
+          threadCount={4}
           frequency={4.5}
           spread={0.22}
           taper={1.0}
           position={0.48}
           fanMode="center"
-          glow={isDark ? 0.010 : 0.018}
-          falloff={isDark ? 0.68 : 0.6}
-          thickness={isDark ? 0.95 : 1.1}
-          brightness={isDark ? 0.62 : 0.82}
-          opacity={isDark ? 0.85 : 1.0}
+          glow={0.015}
+          falloff={0.62}
+          thickness={1.05}
+          brightness={0.78}
+          opacity={0.95}
           mirror={true}
           shimmer={false}
           grain={true}
           grainIntensity={0.015}
           mouseInteraction={true}
-          mouseStrength={isDark ? 0.2 : 0.3}
+          mouseStrength={0.28}
           lightMode={!isDark}
           backgroundColor={isDark ? '#0B0F17' : '#F5F5F7'}
         />
