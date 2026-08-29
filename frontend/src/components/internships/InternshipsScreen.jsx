@@ -289,7 +289,7 @@ export default function InternshipsScreen() {
 
   return (
     <AppShell>
-      <div className="w-full min-h-screen bg-[#F5F5F7] dark:bg-[#0B0E14] font-['Inter',sans-serif]">
+      <div className="font-['Inter',sans-serif] flex flex-col gap-8 pb-12">
         {/* Toast */}
         {toast && (
           <div className={`fixed top-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl shadow-2xl text-sm font-semibold flex items-center gap-2 transition-all ${
@@ -299,8 +299,7 @@ export default function InternshipsScreen() {
           </div>
         )}
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-8">
-          {/* Hero Banner */}
+        {/* Hero Banner */}
           <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0066cc] via-[#0052a3] to-[#003d7a] p-8 sm:p-10 text-white shadow-[0_20px_60px_rgba(0,102,204,0.25)]">
             <div className="absolute inset-0 opacity-10">
               <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-white transform translate-x-32 -translate-y-32" />
@@ -528,7 +527,6 @@ export default function InternshipsScreen() {
             </div>
           )}
         </div>
-      </div>
 
       {/* Modal View */}
       {activeDetail && (
