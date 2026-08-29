@@ -7,8 +7,8 @@ export function AuthProvider({ children }) {
   const isDevBypass = typeof window !== 'undefined' && (localStorage.getItem('pf_dev_bypass') === 'true' || localStorage.getItem('e2e_mock_auth') === 'true')
   const defaultUser = isDevBypass ? {
     id: 'demo-user-1',
-    email: 'demo@pathfinder.io',
-    user_metadata: { full_name: 'Alex Rivera', name: 'Alex Rivera' }
+    email: 'hcltech@pathfinder.io',
+    user_metadata: { full_name: 'HCL Tech', name: 'HCL Tech' }
   } : null
   const [session, setSession] = useState(defaultUser ? { user: defaultUser, access_token: 'demo-token' } : null)
   const [profile, setProfile] = useState(defaultUser ? { id: 'demo-user-1', target_role: 'Data Analyst', weekly_hours: 10 } : null)
@@ -62,8 +62,8 @@ export function AuthProvider({ children }) {
       if (!session && typeof window !== 'undefined' && (localStorage.getItem('pf_dev_bypass') === 'true' || localStorage.getItem('e2e_mock_auth') === 'true')) {
         const mockUser = {
           id: 'demo-user-1',
-          email: 'demo@pathfinder.io',
-          user_metadata: { full_name: 'Alex Rivera', name: 'Alex Rivera' }
+          email: 'hcltech@pathfinder.io',
+          user_metadata: { full_name: 'HCL Tech', name: 'HCL Tech' }
         }
         setSession({ user: mockUser, access_token: 'demo-token' })
         setProfile({ id: 'demo-user-1', target_role: 'Data Analyst', weekly_hours: 10 })
@@ -204,8 +204,8 @@ export function AuthProvider({ children }) {
 
   const mockUser = typeof window !== 'undefined' && (window.localStorage.getItem('e2e_mock_auth') || window.localStorage.getItem('pf_dev_bypass')) ? {
     id: "11111111-1111-1111-1111-111111111111",
-    email: "alex.chen@pathfinder.ai",
-    user_metadata: { full_name: "Alex Chen", name: "Alex Chen" }
+    email: "hcltech@pathfinder.ai",
+    user_metadata: { full_name: "HCL Tech", name: "HCL Tech" }
   } : null
   const effectiveSession = session || (mockUser ? { user: mockUser } : null)
   const effectiveUser = session?.user || mockUser

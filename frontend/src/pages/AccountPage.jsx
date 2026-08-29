@@ -148,33 +148,33 @@ export default function AccountPage() {
     // Strip the query param immediately so a reload doesn't re-trigger this.
     window.history.replaceState({}, '', '/account')
 
-    ;(async () => {
-      try {
-        const { data, error } = await supabase.auth.getUserIdentities()
-        if (error) throw error
-        const ghIdentity = data?.identities?.find((i) => i.provider === 'github')
-        const detectedUsername =
-          ghIdentity?.identity_data?.user_name ||
-          ghIdentity?.identity_data?.preferred_username ||
-          ''
-        if (detectedUsername) {
-          setGhInput(detectedUsername)
-          await handleSyncGithubAccount(detectedUsername)
-          flash('GitHub connected and repositories synced')
-        } else {
+      ; (async () => {
+        try {
+          const { data, error } = await supabase.auth.getUserIdentities()
+          if (error) throw error
+          const ghIdentity = data?.identities?.find((i) => i.provider === 'github')
+          const detectedUsername =
+            ghIdentity?.identity_data?.user_name ||
+            ghIdentity?.identity_data?.preferred_username ||
+            ''
+          if (detectedUsername) {
+            setGhInput(detectedUsername)
+            await handleSyncGithubAccount(detectedUsername)
+            flash('GitHub connected and repositories synced')
+          } else {
+            setGhFeedback({
+              type: 'error',
+              message: 'GitHub was authorized, but we could not read your username back from it. Enter it manually below.',
+            })
+          }
+        } catch (err) {
+          console.warn('Post-link GitHub sync error:', err)
           setGhFeedback({
             type: 'error',
-            message: 'GitHub was authorized, but we could not read your username back from it. Enter it manually below.',
+            message: 'GitHub was authorized, but syncing your repositories failed. Try entering your username manually below.',
           })
         }
-      } catch (err) {
-        console.warn('Post-link GitHub sync error:', err)
-        setGhFeedback({
-          type: 'error',
-          message: 'GitHub was authorized, but syncing your repositories failed. Try entering your username manually below.',
-        })
-      }
-    })()
+      })()
     // Runs once on mount only - deliberately not depending on
     // handleSyncGithubAccount (recreated every render) to avoid re-firing.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -241,7 +241,7 @@ export default function AccountPage() {
                       className={FIELD}
                       value={form.full_name || ''}
                       onChange={set('full_name')}
-                      placeholder="e.g. Alex Chen"
+                      placeholder="e.g. HCL Tech"
                     />
                   </div>
                   <div>
@@ -420,11 +420,10 @@ export default function AccountPage() {
                   </button>
 
                   {ghFeedback && (
-                    <p className={`text-xs font-semibold px-3 py-2 rounded-lg ${
-                      ghFeedback.type === 'error'
+                    <p className={`text-xs font-semibold px-3 py-2 rounded-lg ${ghFeedback.type === 'error'
                         ? 'bg-[#FDECEC] dark:bg-red-950/40 text-[#B42318] dark:text-red-400'
                         : 'bg-[#ECFDF3] dark:bg-emerald-950/40 text-[#22A06B] dark:text-emerald-400'
-                    }`}>
+                      }`}>
                       {ghFeedback.message}
                     </p>
                   )}
