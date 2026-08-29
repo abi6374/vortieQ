@@ -150,27 +150,30 @@ export default function ConnectGitHubModal({ isOpen, onClose, onConnected, onRem
 
       </div>
 
-      {/* Sub-actions line */}
-      <div className="mt-3 pt-2.5 border-t border-[#1E293B] flex items-center justify-between text-[11px] text-[#64748B]">
-        <div className="flex items-center gap-4">
+      {/* Sub-actions line with Glass Buttons */}
+      <div className="mt-3.5 pt-3 border-t border-white/10 dark:border-[#1E293B] flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div className="flex items-center gap-2.5">
           <button
             type="button"
             onClick={handleRemindLater}
-            className="hover:text-[#94A3B8] transition-colors cursor-pointer"
+            className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 active:scale-95 border border-white/10 hover:border-white/20 text-[#CBD5E1] hover:text-white text-xs font-semibold backdrop-blur-md transition-all duration-150 cursor-pointer flex items-center gap-1.5 shadow-2xs group"
           >
-            ⏰ Remind me later
+            <span className="text-xs group-hover:rotate-12 transition-transform">⏰</span>
+            <span>Remind me later</span>
           </button>
+
           <button
             type="button"
             onClick={handleDontHaveGithub}
-            className="hover:text-red-400 transition-colors cursor-pointer"
+            className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-rose-500/10 active:scale-95 border border-white/10 hover:border-rose-500/30 text-[#94A3B8] hover:text-rose-300 text-xs font-semibold backdrop-blur-md transition-all duration-150 cursor-pointer flex items-center gap-1.5 shadow-2xs"
           >
-            Don't have a GitHub
+            <span className="text-[11px] opacity-75">✕</span>
+            <span>I don't have a GitHub</span>
           </button>
         </div>
 
         {error && (
-          <span className="text-red-400 font-semibold">{error}</span>
+          <span className="text-rose-400 font-semibold text-xs">{error}</span>
         )}
       </div>
 
