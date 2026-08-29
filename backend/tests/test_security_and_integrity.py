@@ -492,31 +492,36 @@ class TestResourceURLValidation:
         # A genuine google.com-hosted resource (e.g. a Google course/doc
         # page, not the bare homepage) should not be blanket-rejected just
         # for sharing a domain with the blocked homepage case.
-        from app.services.path_service import _validate_resource_url
-        with patch("app.services.path_service.httpx.Client") as mock_client_cls:
+        # Real implementation lives in catalog_service.py (shared by both
+        # this swap/rerecommend flow and the dynamic-catalog ingestion
+        # pipeline) - path_service._validate_resource_url is a name-bound
+        # re-export of it, so the httpx client actually used is
+        # catalog_service's, not path_service's.
+        from app.services.catalog_service import validate_resource_url
+        with patch("app.services.catalog_service.httpx.Client") as mock_client_cls:
             mock_client = MagicMock()
             mock_client.head.return_value = MagicMock(status_code=200)
             mock_client_cls.return_value.__enter__.return_value = mock_client
-            assert _validate_resource_url("https://google.com/learn/course-x") is True
+            assert validate_resource_url("https://google.com/learn/course-x") is True
 
     def test_rejects_unreachable_url(self):
-        from app.services.path_service import _validate_resource_url
-        with patch("app.services.path_service.httpx.Client") as mock_client_cls:
+        from app.services.catalog_service import validate_resource_url
+        with patch("app.services.catalog_service.httpx.Client") as mock_client_cls:
             mock_client = MagicMock()
             mock_client.head.return_value = MagicMock(status_code=404)
             mock_client.get.return_value = MagicMock(status_code=404)
             mock_client_cls.return_value.__enter__.return_value = mock_client
-            assert _validate_resource_url("https://example.com/dead-link") is False
+            assert validate_resource_url("https://example.com/dead-link") is False
 
     def test_falls_back_to_get_when_head_rejected(self):
         # Some sites 405/403 HEAD requests but serve GET fine.
-        from app.services.path_service import _validate_resource_url
-        with patch("app.services.path_service.httpx.Client") as mock_client_cls:
+        from app.services.catalog_service import validate_resource_url
+        with patch("app.services.catalog_service.httpx.Client") as mock_client_cls:
             mock_client = MagicMock()
             mock_client.head.return_value = MagicMock(status_code=405)
             mock_client.get.return_value = MagicMock(status_code=200)
             mock_client_cls.return_value.__enter__.return_value = mock_client
-            assert _validate_resource_url("https://example.com/head-blocked") is True
+            assert validate_resource_url("https://example.com/head-blocked") is True
 
     def test_ensure_course_in_catalog_never_inserts_an_unverified_url(self):
         from app.services.path_service import _ensure_course_in_catalog, ResourceValidationError

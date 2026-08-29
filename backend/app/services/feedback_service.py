@@ -290,15 +290,34 @@ def handle_feedback(step_id: str, event_type: str, note: str, user_id: str) -> d
 
     feedback_id = _write_feedback_event(user_id, path_id, step_id, event_type, note)
 
+    course = step.get("courses") or {}
+    from app.services import mastery_service  # local import: avoid a module-load cycle
+
     if event_type == "completed":
         _set_step_status(step_id, "completed")
         # Track completions on the profile so the recommender can filter them
         # out of future paths and swaps. (Schema had the column since day 1,
         # nothing had been writing to it.)
-        course_id = (step.get("courses") or {}).get("id")
+        course_id = course.get("id")
         if course_id:
             _append_completed_course(user_id, course_id)
+        # Real (weak) positive mastery evidence - see mastery_service for why
+        # this only ever raises a floor, never claims expert-level mastery
+        # from one completion.
+        try:
+            mastery_service.update_mastery_from_completion(user_id, course.get("skill_tags") or [])
+        except Exception as e:
+            print(f"[feedback_service] mastery update from completion failed: {type(e).__name__}: {e}", flush=True)
         return {"feedback_id": feedback_id, "path_updated": False, "updated_steps": []}
+
+    # too_easy: real signal the recommender UNDERESTIMATED this skill -
+    # update mastery BEFORE swapping, so the replacement course (and every
+    # future recommendation) reflects it, not just this one substitution.
+    if event_type == "too_easy":
+        try:
+            mastery_service.update_mastery_from_feedback(user_id, course.get("skill_tags") or [], "too_easy")
+        except Exception as e:
+            print(f"[feedback_service] mastery update from feedback failed: {type(e).__name__}: {e}", flush=True)
 
     # too_easy / not_interested: delegate to path_service.swap_step so we do a
     # single-course in-place replacement instead of nuking the whole tail.

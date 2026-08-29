@@ -12,6 +12,7 @@ from app.services.github_service import (
     GitHubUserNotFoundError,
 )
 from app.services.profile_service import upsert_profile
+from app.services import mastery_service
 
 router = APIRouter(prefix="/api/profile/github", tags=["github"])
 
@@ -104,6 +105,14 @@ async def ingest_github_profile(
             upsert_profile(user_id, update)
         except Exception as exc:
             print(f"[github router] Note on profile persistence: {exc}", flush=True)
+
+        # Real GitHub repo evidence -> per-skill mastery, not just
+        # profiles.topic_ratings - this is what actually lets ranking_engine
+        # use it.
+        try:
+            mastery_service.update_mastery_from_github(user_id, analysis["topics"])
+        except Exception as exc:
+            print(f"[github router] mastery update from github failed: {type(exc).__name__}: {exc}", flush=True)
 
     return analysis
 

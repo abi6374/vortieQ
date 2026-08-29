@@ -6,7 +6,7 @@ from app.config import supabase_client
 from app.middleware.auth import verify_jwt
 from app.middleware.rate_limit import rate_limit
 from app.schemas.profile import ProfileCreateSchema, ResumeExtractResponse
-from app.services import profile_service, resume_service
+from app.services import mastery_service, profile_service, resume_service
 
 router = APIRouter()
 
@@ -46,9 +46,16 @@ def create_or_update_profile(
     # supplied per-topic ratings, merge them into the profile so the recommender
     # weights those topics.
     if payload.topic_ratings:
-        extracted = profile_service.merge_topic_ratings(
-            extracted, [t.model_dump() for t in payload.topic_ratings]
-        )
+        ratings = [t.model_dump() for t in payload.topic_ratings]
+        extracted = profile_service.merge_topic_ratings(extracted, ratings)
+        # Real self-reported evidence -> the per-skill mastery model
+        # (learner_skill_mastery), not just the profile blob - this is what
+        # actually lets ranking_engine use it (see "confidence stored but
+        # never ranked" in docs/security_audit.md).
+        try:
+            mastery_service.update_mastery_from_self_assessment(user_id, ratings)
+        except Exception as e:
+            print(f"[profile router] mastery update from self-assessment failed: {type(e).__name__}: {e}", flush=True)
     if payload.detected_years_experience is not None:
         extracted["detected_years_experience"] = payload.detected_years_experience
 
@@ -117,6 +124,15 @@ async def upload_resume(
         result = resume_service.extract_topics(text)
     except ValueError as e:
         raise HTTPException(400, str(e))
+
+    # Real resume evidence -> per-skill mastery (learner_skill_mastery),
+    # immediately on upload - not just displayed in the "AI Profile Draft"
+    # and then discarded until/unless onboarding's self-assessment step also
+    # happens to run.
+    try:
+        mastery_service.update_mastery_from_resume(user_id, result.get("topics") or [])
+    except Exception as e:
+        print(f"[profile router] mastery update from resume failed: {type(e).__name__}: {e}", flush=True)
 
     # ── Persist (best-effort) ─────────────────────────────────────────────
     ext = _ext_for(file.filename or "", file.content_type or "")

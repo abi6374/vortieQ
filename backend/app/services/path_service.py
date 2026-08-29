@@ -1,76 +1,16 @@
 import json
 from pathlib import Path
-from urllib.parse import urlparse
-
-import httpx
 
 from app.config import supabase_client
 from app.llm_client import chat_completion
 from app.ml.registry import get_recommender
 from app.services import web_search_service
-
-
-class ResourceValidationError(Exception):
-    """Raised when no dynamically-sourced (LLM-synthesized or web-searched)
-    course has a real, verifiable resource URL. Callers MUST surface this as
-    an honest "couldn't find a verified alternative" failure — never
-    persist a placeholder/guessed URL into the shared courses catalog.
-    Real production bug this replaces: swap_step_with_preference and
-    _ensure_course_in_catalog both fell back to a literal
-    "https://google.com" resource_url whenever the LLM or web search came up
-    empty, and that fabricated row got INSERTed directly into the shared,
-    global `courses` table (not scoped to one user) with a real pgvector
-    embedding — a permanent, cross-user catalog-poisoning entry that could
-    later be matched again by URL-based dedup and re-served to other
-    learners."""
-
-
-# Bare search-engine/portal homepages the LLM sometimes hallucinates as a
-# "resource" when it has nothing real to point at - these are never
-# themselves a course/tutorial, regardless of whether they're reachable.
-_BLOCKED_BARE_DOMAINS = {
-    "google.com", "www.google.com",
-    "bing.com", "www.bing.com",
-    "duckduckgo.com", "www.duckduckgo.com",
-    "yahoo.com", "www.yahoo.com",
-}
-
-
-def _validate_resource_url(url: str) -> bool:
-    """Structural + live-reachability check before a dynamically-sourced URL
-    is ever allowed into the shared courses catalog. Never trusts an LLM- or
-    search-supplied URL on its say-so alone (see ResourceValidationError).
-
-    Deliberately bounded (3s timeout, HEAD-then-GET, no redirect loops
-    beyond httpx's default) - this runs synchronously inside a live
-    swap/rerecommend request, so it must fail fast rather than let one bad
-    URL stall the whole request.
-    """
-    if not url:
-        return False
-    try:
-        parsed = urlparse(url)
-    except ValueError:
-        return False
-    if parsed.scheme != "https" or not parsed.netloc:
-        return False
-    host = parsed.netloc.lower().split(":")[0]
-    if host in _BLOCKED_BARE_DOMAINS and not parsed.path.strip("/"):
-        # A bare search-engine homepage with no real path is never a course.
-        return False
-
-    headers = {"User-Agent": "PathFinder-AI-App"}
-    try:
-        with httpx.Client(timeout=3.0, follow_redirects=True) as client:
-            resp = client.head(url, headers=headers)
-            if resp.status_code >= 400:
-                # Some sites reject HEAD outright (405/403) - retry with GET
-                # before concluding the resource is really unreachable.
-                resp = client.get(url, headers=headers)
-            return resp.status_code < 400
-    except Exception as e:
-        print(f"[path_service] resource URL validation failed for {url}: {type(e).__name__}: {e}", flush=True)
-        return False
+# Real resource-URL validation and the ResourceValidationError it raises now
+# live in catalog_service.py, shared by both this swap/rerecommend flow and
+# the dynamic-catalog ingestion pipeline (provider_resources) - imported and
+# rebound under the old names here so this module's own call sites (and the
+# existing test suite's patch targets) don't need to change.
+from app.services.catalog_service import ResourceValidationError, validate_resource_url as _validate_resource_url
 
 
 def _load_prompt(name: str) -> str:

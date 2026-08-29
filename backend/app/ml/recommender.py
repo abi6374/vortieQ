@@ -1,5 +1,7 @@
 from app.ml.embedder import embed_text
 from app.ml.retriever import retrieve_candidates
+from app.ml import ranking_engine
+from app.services import mastery_service
 
 LEVEL_ORDER = {"beginner": 0, "intermediate": 1, "advanced": 2}
 
@@ -7,76 +9,58 @@ LEVEL_ORDER = {"beginner": 0, "intermediate": 1, "advanced": 2}
 class Recommender:
     """
     Given a learner profile, returns an ordered and filtered list of courses.
+
     Strategy:
-      1. Build a composite query from goal + interests + target role.
-      2. Embed and retrieve top 20 candidates via pgvector.
-      3. Re-rank: beginner learners see beginner/intermediate first,
-         advanced learners see advanced first.
-      4. Boost courses where all prerequisite tags are in the learner's
-         interests (a good fit for their current knowledge).
-      5. Deprioritize courses more than one level above the learner.
-      6. Return the top 15.
+      1. Build a composite query from goal + interests + target role, embed
+         it, and retrieve candidates via pgvector (this stage IS a real
+         relevance signal - kept as-is).
+      2. Hard-filter out anything already completed or explicitly disliked
+         (see ranking_engine.hard_filter).
+      3. Score every eligible candidate with ranking_engine's deterministic,
+         explainable, versioned formula - using the learner's REAL per-skill
+         mastery (learner_skill_mastery, built from resume/GitHub/
+         self-assessment/feedback evidence) instead of one global
+         current_level, and REAL skill_prerequisites edges instead of
+         treating "interested in X" as "has X's prerequisites" (both real,
+         confirmed fixes - see ranking_engine.py's module docstring).
     """
 
     def recommend(self, profile: dict) -> list[dict]:
         goal_text = profile.get("goal_text", "")
         target_role = profile.get("target_role", "")
         interests = profile.get("interests", [])
-        current_level = profile.get("current_level", "beginner")
         completed = set(profile.get("completed_courses") or [])
+        user_id = profile.get("id")
 
         query = f"{goal_text} {target_role} {' '.join(interests)}"
         embedding = embed_text(query)
         candidates = retrieve_candidates(embedding, n=30)
 
-        # Filter out courses the learner has already completed so we don't
-        # recommend the same thing twice across paths.
-        if completed:
-            candidates = [c for c in candidates if c.get("id") not in completed]
+        eligible, filter_reasons = ranking_engine.hard_filter(candidates, completed)
 
-        ranked = self._rerank(candidates, current_level, interests)
+        mastery_by_name = mastery_service.get_mastery_by_name(user_id) if user_id else {}
+        mastery_by_id = mastery_service.get_mastery_map(user_id) if user_id else {}
+
+        weekly_hours = profile.get("weekly_hours")
+        scored = ranking_engine.score_candidates(
+            eligible, profile, mastery_by_name, mastery_by_id,
+            weekly_hours_remaining=float(weekly_hours) if weekly_hours else None,
+        )
+        ranked = [item["course"] for item in scored]
+
         # 20, not 15: a real learner request ("more courses recommended")
         # showed the LLM sequencer tends to pick close to the low end of its
         # allowed range - handing it more real, well-ranked candidates gives
         # a fuller path even when it doesn't use every single one.
-        return ranked[:20]
+        top = ranked[:20]
 
-    def _rerank(self, candidates: list[dict], current_level: str, interests: list[str]) -> list[dict]:
-        learner_level = LEVEL_ORDER.get(current_level, 0)
-        interests_set = set(tag.lower() for tag in interests)
-
-        scored = []
-        for course in candidates:
-            course_level = LEVEL_ORDER.get(course.get("difficulty", "beginner"), 0)
-            level_diff = course_level - learner_level
-
-            # Priority score: lower is better (sorted ascending)
-            priority = 0.0
-
-            # Penalize courses more than 1 level above the learner
-            if level_diff > 1:
-                priority += 10
-
-            # Boost courses at the learner's level or one level above
-            if level_diff == 0:
-                priority -= 2
-            elif level_diff == 1:
-                priority -= 1
-
-            # Boost if the course's prerequisites are a subset of the learner's interests
-            prereqs = set(p.lower() for p in course.get("prerequisites", []))
-            if prereqs and prereqs.issubset(interests_set):
-                priority -= 2  # Good fit - learner already has the prerequisites
-
-            # Boost by similarity score (higher similarity -> lower priority number)
-            similarity = course.get("similarity", 0.0)
-            priority -= similarity  # similarity is 0.0-1.0
-
-            scored.append((priority, course))
-
-        # Sort by priority score ascending (lowest = most relevant)
-        scored.sort(key=lambda x: x[0])
-        return [course for _, course in scored]
+        if user_id:
+            ranking_engine.persist_recommendation_run(
+                user_id=user_id, path_id=None, trigger="path_generate",
+                profile=profile, candidates=candidates, hard_filter_reasons=filter_reasons,
+                scored=scored, final_course_ids=[c["id"] for c in top if c.get("id")],
+            )
+        return top
 
 
 if __name__ == "__main__":

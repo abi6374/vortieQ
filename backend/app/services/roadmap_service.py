@@ -227,7 +227,7 @@ def get_week(user_id: str, week_number: int) -> dict:
 def _owned_step(step_id: str, user_id: str) -> dict:
     fields = (
         "id, path_id, week_number, status, course_id, "
-        "learning_paths!inner(id, user_id), courses(duration_hrs)"
+        "learning_paths!inner(id, user_id), courses(duration_hrs, skill_tags)"
     )
     if _has_parts_schema():
         fields = fields.replace("course_id,", "course_id, part_hours,")
@@ -279,6 +279,21 @@ def set_task_completion(
 
     new_status = "completed" if completed else "not_started"
     supabase_client.table("path_steps").update({"status": new_status}).eq("id", step_id).execute()
+
+    if completed:
+        # Real (weak) positive mastery evidence - this is the actual
+        # frontend completion path (PersonalizedRoadmap's checkbox ->
+        # useRoadmap.toggleTask -> here), so this is where real completion
+        # evidence needs to land, not just in the separate
+        # feedback_service.handle_feedback route. See mastery_service for
+        # why this only ever raises a floor, never claims expert mastery
+        # from one completion.
+        try:
+            from app.services import mastery_service
+            skill_tags = (step.get("courses") or {}).get("skill_tags") or []
+            mastery_service.update_mastery_from_completion(user_id, skill_tags)
+        except Exception as e:
+            print(f"[roadmap] mastery update from completion failed: {type(e).__name__}: {e}", flush=True)
 
     if completed and (note or rating or tag):
         feedback_content = []
