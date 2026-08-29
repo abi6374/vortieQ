@@ -27,7 +27,7 @@ class Recommender:
 
         query = f"{goal_text} {target_role} {' '.join(interests)}"
         embedding = embed_text(query)
-        candidates = retrieve_candidates(embedding, n=25)
+        candidates = retrieve_candidates(embedding, n=30)
 
         # Filter out courses the learner has already completed so we don't
         # recommend the same thing twice across paths.
@@ -35,7 +35,11 @@ class Recommender:
             candidates = [c for c in candidates if c.get("id") not in completed]
 
         ranked = self._rerank(candidates, current_level, interests)
-        return ranked[:15]
+        # 20, not 15: a real learner request ("more courses recommended")
+        # showed the LLM sequencer tends to pick close to the low end of its
+        # allowed range - handing it more real, well-ranked candidates gives
+        # a fuller path even when it doesn't use every single one.
+        return ranked[:20]
 
     def _rerank(self, candidates: list[dict], current_level: str, interests: list[str]) -> list[dict]:
         learner_level = LEVEL_ORDER.get(current_level, 0)

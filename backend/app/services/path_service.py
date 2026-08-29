@@ -77,14 +77,14 @@ def generate_explanations_batch(profile: dict, courses: list[dict]) -> dict[str,
         {"role": "user", "content": user_msg},
     ]
 
-    raw = _call_groq(messages, max_tokens=2000)
+    raw = _call_groq(messages, max_tokens=3500)
     try:
         result = json.loads(_strip_fences(raw))
     except Exception:
         messages.append({"role": "assistant", "content": raw})
         messages.append({"role": "user", "content": "Return ONLY the JSON object. No markdown fences."})
         try:
-            result = json.loads(_strip_fences(_call_groq(messages, max_tokens=2000)))
+            result = json.loads(_strip_fences(_call_groq(messages, max_tokens=3500)))
         except Exception:
             result = {}
 
@@ -207,12 +207,21 @@ Generate the learning path JSON now."""
         })
 
     # Assign contiguous week numbers so the roadmap week strip and prerequisite
-    # locking work for freshly generated paths, not just backfilled ones.
+    # locking work for freshly generated paths, not just backfilled ones. This
+    # can SPLIT a course across weeks (extra path_steps rows inserted for
+    # "Part 2", "Part 3", ...) - which means response_milestones above, built
+    # from the rows as originally inserted, is now stale relative to the DB.
     try:
         from app.services import roadmap_service
         roadmap_service.assign_week_numbers(path_id, int(profile.get("weekly_hours") or 10))
+        # Re-fetch so the response actually matches the DB (real split parts,
+        # if any) instead of returning the pre-split in-memory structure. The
+        # frontend only ever reads path_id off this response today (it
+        # navigates and re-fetches fresh anyway), but the API contract should
+        # still be accurate for any other consumer.
+        return get_path(path_id, user_id)
     except Exception as e:
-        print(f"[generate_path] week assignment failed: {type(e).__name__}: {e}", flush=True)
+        print(f"[generate_path] week assignment/re-fetch failed: {type(e).__name__}: {e}", flush=True)
 
     web_search_service.enrich_with_web_resources(response_milestones, target_role=profile.get("target_role", ""))
     return {"path_id": path_id, "milestones": response_milestones}
@@ -248,12 +257,20 @@ def get_path(path_id: str, user_id: str) -> dict:
                 "steps": [],
             }
         course = step.get("courses") or {}
+        full_hrs = course.get("duration_hrs", 0)
+        # part_hours (this part's real hours, if the course was split across
+        # weeks) when present, else the whole course's real duration - see
+        # roadmap_service.plan_weeks_with_splits / PROGRESS_TRACKER Round 14.
+        part_hours = step.get("part_hours")
         milestones_dict[label]["steps"].append({
             "step_id": step["id"],
             "course_id": step.get("course_id", ""),
             "title": course.get("title", ""),
             "provider": course.get("provider", ""),
-            "duration_hrs": course.get("duration_hrs", 0),
+            "duration_hrs": part_hours if part_hours is not None else full_hrs,
+            "full_duration_hrs": full_hrs,
+            "part_number": step.get("part_number") or 1,
+            "part_total": step.get("part_total") or 1,
             "difficulty": course.get("difficulty", ""),
             "skill_tags": course.get("skill_tags", []),
             "resource_url": course.get("resource_url", ""),

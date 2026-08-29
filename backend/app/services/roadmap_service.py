@@ -17,6 +17,74 @@ from app.services import web_search_service
 
 TERMINAL = ("completed", "skipped")
 
+# ── part-splitting schema support ───────────────────────────────────────────
+# migration 002_course_parts.sql adds part_number/part_total/part_hours to
+# path_steps so a course longer than a week's real hour budget can span
+# multiple weeks as separate trackable parts ("Part 1 of 2", etc.) instead of
+# silently overshooting that week's hour total. This check lets the app
+# degrade gracefully (no splitting, identical to pre-migration behavior)
+# instead of hard-breaking the live roadmap endpoint if that migration hasn't
+# been run against this DB yet - cached after the first check per process.
+_parts_schema_checked = None
+
+
+def _has_parts_schema() -> bool:
+    global _parts_schema_checked
+    if _parts_schema_checked is None:
+        try:
+            supabase_client.table("path_steps").select("part_number").limit(1).execute()
+            _parts_schema_checked = True
+        except Exception:
+            _parts_schema_checked = False
+    return _parts_schema_checked
+
+
+def _split_course_into_parts(duration_hrs: float, weekly_hours: float, week: int, used: float):
+    """Walk a running per-week hour cursor, splitting `duration_hrs` worth of
+    work into as many parts as needed so no single week gets more than
+    `weekly_hours` of new work. Returns (parts, new_week, new_used) where each
+    part is {"week_number": int, "part_hours": float}."""
+    parts = []
+    remaining = max(0.25, float(duration_hrs or 3))
+    while remaining > 1e-9:
+        if used >= weekly_hours:
+            week += 1
+            used = 0.0
+        available = weekly_hours - used
+        if available <= 0:
+            available = remaining  # weekly_hours misconfigured (<=0) - avoid an infinite loop
+        take = min(available, remaining)
+        parts.append({"week_number": week, "part_hours": round(take, 2)})
+        remaining -= take
+        used += take
+    return parts, week, used
+
+
+def plan_weeks_with_splits(course_specs: list[dict], weekly_hours: float = 10) -> list[list[dict]]:
+    """course_specs: ordered [{course_id, duration_hrs}, ...], one entry per
+    logical (not-yet-split) course. Returns a list of the SAME length, where
+    result[i] is the list of {week_number, part_number, part_total, part_hours}
+    parts for course_specs[i] - exactly 1 part when the course fits in the
+    remaining budget of a single week, more when it has to spill into
+    subsequent weeks.
+
+    Real hour-based bin-packing: walks a running per-week hour budget and only
+    advances to the next week once the current week's real hours are used up.
+    The previous approach (dividing course count by an average duration) could
+    not represent a course spanning multiple weeks at all - long courses just
+    silently made a week's real total overshoot the learner's stated budget.
+    """
+    weekly_hours = float(weekly_hours or 10)
+    if weekly_hours <= 0:
+        weekly_hours = 10
+    week, used = 1, 0.0
+    result = []
+    for spec in course_specs:
+        parts, week, used = _split_course_into_parts(spec.get("duration_hrs"), weekly_hours, week, used)
+        total = len(parts)
+        result.append([{**p, "part_number": i, "part_total": total} for i, p in enumerate(parts, start=1)])
+    return result
+
 
 # ── loading ──────────────────────────────────────────────────────────────────
 def _active_path(user_id: str) -> dict | None:
@@ -30,16 +98,25 @@ def _active_path(user_id: str) -> dict | None:
 
 
 def _steps_for(path_id: str) -> list:
+    fields = ("id, sequence_order, week_number, milestone_label, status, explanation, "
+              "completed_at, course_id, "
+              "courses(id, title, description, provider, difficulty, duration_hrs, resource_url, skill_tags)")
+    if _has_parts_schema():
+        fields = fields.replace("completed_at, course_id,", "completed_at, course_id, part_number, part_total, part_hours,")
+
     r = (
         supabase_client.table("path_steps")
-        .select("id, sequence_order, week_number, milestone_label, status, explanation, "
-                "completed_at, course_id, "
-                "courses(id, title, description, provider, difficulty, duration_hrs, resource_url, skill_tags)")
+        .select(fields)
         .eq("path_id", path_id).order("sequence_order").execute()
     )
     out = []
     for s in r.data or []:
         c = s.get("courses") or {}
+        full_hrs = c.get("duration_hrs", 0)
+        # part_hours (this part's real hours) when the course was split, else
+        # the whole course's real duration - either way this is the number
+        # that should count toward a week's real hour total.
+        part_hours = s.get("part_hours")
         out.append({
             "step_id": s["id"],
             "course_id": s.get("course_id"),
@@ -54,7 +131,10 @@ def _steps_for(path_id: str) -> list:
             "description": c.get("description", ""),
             "provider": c.get("provider", ""),
             "difficulty": c.get("difficulty", ""),
-            "duration_hrs": c.get("duration_hrs", 0),
+            "duration_hrs": part_hours if part_hours is not None else full_hrs,
+            "full_duration_hrs": full_hrs,
+            "part_number": s.get("part_number") or 1,
+            "part_total": s.get("part_total") or 1,
             "resource_url": c.get("resource_url", ""),
             "skill_tags": c.get("skill_tags") or [],
         })
@@ -139,12 +219,15 @@ def get_week(user_id: str, week_number: int) -> dict:
 
 # ── mutation ─────────────────────────────────────────────────────────────────
 def _owned_step(step_id: str, user_id: str) -> dict:
+    fields = (
+        "id, path_id, week_number, status, course_id, "
+        "learning_paths!inner(id, user_id), courses(duration_hrs)"
+    )
+    if _has_parts_schema():
+        fields = fields.replace("course_id,", "course_id, part_hours,")
     r = (
         supabase_client.table("path_steps")
-        .select(
-            "id, path_id, week_number, status, course_id, "
-            "learning_paths!inner(id, user_id), courses(duration_hrs)"
-        )
+        .select(fields)
         .eq("id", step_id).execute()
     )
     if not r.data:
@@ -185,14 +268,29 @@ def set_task_completion(step_id: str, user_id: str, completed: bool) -> dict:
     # Keep profiles.completed_courses in step with the toggle, both directions,
     # so the recommender never re-suggests something the learner just finished
     # (and does re-suggest it if they un-complete it).
+    #
+    # A split course has multiple path_steps rows sharing one course_id (Part
+    # 1, Part 2, ...) - it only counts as done once EVERY part is terminal, so
+    # this checks the other rows for the same course_id before touching
+    # completed_courses. Un-completing always removes it (the course is no
+    # longer 100% done as soon as any one part isn't), which is correct
+    # whether or not it was ever split.
     course_id = step.get("course_id")
     if course_id:
+        # Re-fetch after the update above: every row's *current* status for
+        # this course_id tells us directly whether the whole course is done.
+        current_statuses = (
+            supabase_client.table("path_steps")
+            .select("status").eq("path_id", path_id).eq("course_id", course_id).execute()
+        ).data or []
+        course_fully_done = bool(current_statuses) and all(s.get("status") in TERMINAL for s in current_statuses)
+
         prof = supabase_client.table("profiles").select("completed_courses").eq("id", user_id).execute()
         ids = list((prof.data[0].get("completed_courses") if prof.data else None) or [])
         changed = False
-        if completed and course_id not in ids:
+        if course_fully_done and course_id not in ids:
             ids.append(course_id); changed = True
-        elif not completed and course_id in ids:
+        elif not course_fully_done and course_id in ids:
             ids = [i for i in ids if i != course_id]; changed = True
         if changed:
             supabase_client.table("profiles").update({"completed_courses": ids}).eq("id", user_id).execute()
@@ -200,13 +298,16 @@ def set_task_completion(step_id: str, user_id: str, completed: bool) -> dict:
     # Completing a task is qualifying learning activity — log it so the streak
     # AND the weekly-activity hours on Progress are derived from what the
     # learner actually did. We don't track live session duration (no timer),
-    # so the course's own real duration_hrs is used as the time-investment
-    # estimate for that session — a real, grounded number, not a guess like
-    # the fixed 0 this used to log unconditionally.
+    # so the REAL hours for what was just completed is used as the
+    # time-investment estimate — this part's own hours if the course was
+    # split (so completing "Part 1 of 2" doesn't log the whole course's
+    # duration twice), else the whole course's real duration_hrs.
     if completed:
         try:
             from app.services import account_service
-            duration_hrs = (step.get("courses") or {}).get("duration_hrs") or 0
+            part_hours = step.get("part_hours")
+            full_hours = (step.get("courses") or {}).get("duration_hrs") or 0
+            duration_hrs = part_hours if part_hours is not None else full_hours
             account_service.log_session(
                 user_id, activity="task_completed", step_id=step_id,
                 minutes=round(duration_hrs * 60),
@@ -220,23 +321,97 @@ def set_task_completion(step_id: str, user_id: str, completed: bool) -> dict:
 
 
 def assign_week_numbers(path_id: str, weekly_hours: int = 10) -> None:
-    """Assign contiguous week numbers to a freshly generated path.
+    """(Re)plan week numbers for a path's NOT-YET-STARTED steps, splitting a
+    course across multiple weeks (multiple path_steps rows sharing one
+    course_id, "Part 1 of 2" etc.) if its real duration doesn't fit the
+    learner's weekly hour budget in one week.
 
-    Packs steps per week based on the learner's weekly budget vs typical course
-    length, so a 10 h/week learner doesn't get a 1-step-per-week roadmap.
+    Completed/skipped steps are never touched - their week already happened
+    for them - which is what makes this safe to call again later when
+    weekly_hours changes (see account_service.update_settings) without
+    disturbing history. Pending work is re-planned to start the week right
+    after whatever's already done, so it never conflicts with it.
+
+    Falls back to the old simple "average duration -> steps per week"
+    behavior (no splitting) if migration 002_course_parts.sql hasn't been run
+    against this DB yet - never hard-fails path generation over this.
     """
-    r = (
-        supabase_client.table("path_steps")
-        .select("id, sequence_order, courses(duration_hrs)")
+    has_parts = _has_parts_schema()
+    fields = "id, sequence_order, course_id, milestone_label, explanation, status, week_number, courses(duration_hrs)"
+    rows = (
+        supabase_client.table("path_steps").select(fields)
         .eq("path_id", path_id).order("sequence_order").execute()
-    )
-    rows = r.data or []
+    ).data or []
     if not rows:
         return
-    durations = [((s.get("courses") or {}).get("duration_hrs") or 5) for s in rows]
-    avg = sum(durations) / len(durations) if durations else 5
-    per_week = max(1, round((weekly_hours or 10) / avg)) if avg else 1
 
-    for idx, s in enumerate(rows):
-        week = (idx // per_week) + 1
-        supabase_client.table("path_steps").update({"week_number": week}).eq("id", s["id"]).execute()
+    if not has_parts:
+        # Pre-migration fallback: identical to the original behavior.
+        durations = [((s.get("courses") or {}).get("duration_hrs") or 5) for s in rows]
+        avg = sum(durations) / len(durations) if durations else 5
+        per_week = max(1, round((weekly_hours or 10) / avg)) if avg else 1
+        for idx, s in enumerate(rows):
+            supabase_client.table("path_steps").update(
+                {"week_number": (idx // per_week) + 1}
+            ).eq("id", s["id"]).execute()
+        return
+
+    done_rows = [r for r in rows if r.get("status") in TERMINAL]
+    pending_rows = [r for r in rows if r.get("status") not in TERMINAL]
+    if not pending_rows:
+        return  # nothing left to (re)plan
+
+    start_week = (max((r.get("week_number") or 1) for r in done_rows) + 1) if done_rows else 1
+
+    # Collapse pending rows back to one logical course entry per distinct
+    # course_id run (in sequence order) - a previously-split course is
+    # re-split fresh against the current weekly_hours rather than compounding
+    # whatever split it had before.
+    course_specs = []
+    pending_by_course: dict[str, list[dict]] = {}
+    for row in pending_rows:
+        cid = row["course_id"]
+        pending_by_course.setdefault(cid, []).append(row)
+        if len(pending_by_course[cid]) == 1:
+            duration = (row.get("courses") or {}).get("duration_hrs") or 3
+            course_specs.append({"course_id": cid, "duration_hrs": duration})
+
+    split_plan = plan_weeks_with_splits(course_specs, weekly_hours)
+    for parts in split_plan:  # plan_weeks_with_splits always starts at week 1
+        for p in parts:
+            p["week_number"] += start_week - 1
+
+    next_seq = max((r.get("sequence_order") or 0) for r in rows) + 1
+    for spec, parts in zip(course_specs, split_plan):
+        existing = pending_by_course[spec["course_id"]]
+        for i, part in enumerate(parts):
+            if i < len(existing):
+                supabase_client.table("path_steps").update({
+                    "week_number": part["week_number"],
+                    "part_number": part["part_number"],
+                    "part_total": part["part_total"],
+                    "part_hours": part["part_hours"],
+                }).eq("id", existing[i]["id"]).execute()
+            else:
+                # Now needs MORE parts than before (weekly_hours went down) -
+                # clone a new row from this course's first existing row
+                # (same explanation/milestone_label/course_id).
+                base = existing[0]
+                supabase_client.table("path_steps").insert({
+                    "path_id": path_id,
+                    "course_id": spec["course_id"],
+                    "sequence_order": next_seq,
+                    "milestone_label": base.get("milestone_label"),
+                    "status": "not_started",
+                    "explanation": base.get("explanation"),
+                    "week_number": part["week_number"],
+                    "part_number": part["part_number"],
+                    "part_total": part["part_total"],
+                    "part_hours": part["part_hours"],
+                }).execute()
+                next_seq += 1
+        # Now needs FEWER parts than before (weekly_hours went up) - drop the
+        # extra not_started rows for this course.
+        if len(parts) < len(existing):
+            for extra in existing[len(parts):]:
+                supabase_client.table("path_steps").delete().eq("id", extra["id"]).execute()

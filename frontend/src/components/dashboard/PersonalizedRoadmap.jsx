@@ -87,6 +87,14 @@ export default function PersonalizedRoadmap({ pathData = null }) {
         explanation: st.explanation,
         status: st.status,
         milestone_label: st.milestone_label,
+        // A course longer than the learner's weekly budget can now span
+        // multiple weeks as separate parts (real, not synthesized here -
+        // roadmap_service.plan_weeks_with_splits does the actual splitting).
+        // duration_hrs above is already this PART's real hours, not the
+        // whole course's, when partTotal > 1.
+        partNumber: st.part_number || 1,
+        partTotal: st.part_total || 1,
+        fullDurationHrs: st.full_duration_hrs ?? st.duration_hrs,
       }))
       groups[`Week ${w.week_number}`] = {
         tasks,
@@ -479,8 +487,13 @@ export default function PersonalizedRoadmap({ pathData = null }) {
 
                             {/* Title & Subtitle */}
                             <div className="min-w-0">
-                              <h4 className={`font-bold text-sm text-[#0E1B38] truncate ${isCompleted ? 'line-through opacity-60' : ''}`}>
-                                {task.title}
+                              <h4 className={`font-bold text-sm text-[#0E1B38] truncate flex items-center gap-1.5 ${isCompleted ? 'line-through opacity-60' : ''}`}>
+                                <span className="truncate">{task.title}</span>
+                                {task.partTotal > 1 && (
+                                  <span className="flex-none text-[10px] font-bold text-[#5B36E9] bg-[#F5F1FF] px-1.5 py-0.5 rounded-full no-underline">
+                                    Part {task.partNumber}/{task.partTotal}
+                                  </span>
+                                )}
                               </h4>
                               <p className="text-xs text-[#74819A] mt-0.5 truncate">
                                 {task.subtitle}
@@ -490,7 +503,10 @@ export default function PersonalizedRoadmap({ pathData = null }) {
 
                           {/* Right Controls */}
                           <div className="flex items-center gap-3 flex-shrink-0">
-                            <span className="text-xs font-semibold text-[#5B36E9] bg-[#F5F1FF] px-2.5 py-1 rounded-lg">
+                            <span
+                              className="text-xs font-semibold text-[#5B36E9] bg-[#F5F1FF] px-2.5 py-1 rounded-lg"
+                              title={task.partTotal > 1 ? `${task.duration_hrs}h this week of ${task.fullDurationHrs}h total` : undefined}
+                            >
                               {task.duration_hrs} hrs
                             </span>
                             <button

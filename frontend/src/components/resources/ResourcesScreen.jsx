@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import { useAIChat } from '../../contexts/AIChatContext'
+import { useRoadmap } from '../../hooks/useRoadmap'
 import { supabase } from '../../lib/supabaseClient'
 import api from '../../lib/apiClient'
 import AppShell from '../layout/AppShell'
@@ -231,6 +232,10 @@ export default function ResourcesScreen() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const { open: openAICoach } = useAIChat()
+  // Real current week + real per-week NPTEL/web-search resources - same
+  // single source of truth the dashboard uses (GET /api/roadmap), so "this
+  // week" here actually means the same week as everywhere else in the app.
+  const roadmap = useRoadmap()
 
   const [loading, setLoading] = useState(true)
   const [path, setPath] = useState(null)
@@ -268,13 +273,14 @@ export default function ResourcesScreen() {
         if (!p) { if (!cancelled) { setPath(null); setLoading(false) } return }
         const { data: rows } = await supabase
           .from('path_steps')
-          .select('id, sequence_order, status, milestone_label, explanation, courses(id, title, description, provider, difficulty, duration_hrs, resource_url, skill_tags)')
+          .select('id, sequence_order, status, milestone_label, explanation, week_number, courses(id, title, description, provider, difficulty, duration_hrs, resource_url, skill_tags)')
           .eq('path_id', p.id).order('sequence_order')
         if (cancelled) return
         setPath(p)
         setSteps(
           (rows || []).map((r) => ({
             id: r.id, status: r.status, milestone_label: r.milestone_label, explanation: r.explanation, seq: r.sequence_order,
+            weekNumber: r.week_number || 1,
             title: r.courses?.title || 'Course', description: r.courses?.description || '',
             provider: r.courses?.provider || '', difficulty: r.courses?.difficulty || 'beginner',
             duration_hrs: r.courses?.duration_hrs || 0, resource_url: r.courses?.resource_url || '',
@@ -344,7 +350,14 @@ export default function ResourcesScreen() {
 
   useEffect(() => { setVisibleCount(8) }, [chip, query, difficultyFilter, durationFilter])
 
-  const nextThree = activeSteps.slice(0, 4)
+  // Real "this week" filtering (was just the first 4 non-completed steps
+  // overall, mislabeled "This week" regardless of which week they were
+  // actually in). Falls back to the old behavior only if the roadmap hook
+  // hasn't resolved a current week yet.
+  const thisWeekActive = roadmap.currentWeek
+    ? activeSteps.filter((s) => s.weekNumber === roadmap.currentWeek)
+    : []
+  const nextThree = (thisWeekActive.length ? thisWeekActive : activeSteps).slice(0, 4)
   const savedItems = steps.filter((s) => saved.has(s.id)).slice(0, 3)
   const recent = steps.filter((s) => s.status === 'completed').slice(-3).reverse()
 
@@ -398,7 +411,7 @@ export default function ResourcesScreen() {
               <h3>Picked for you</h3>
               <p>These resources match your current roadmap, skill gaps, and learning progress.</p>
             </div>
-            <span className="p-meta">Week {Math.min(steps.length, 5)} · {(steps.find((s)=>s.status!=='completed')?.milestone_label) || 'Foundations'}</span>
+            <span className="p-meta">Week {roadmap.currentWeek || 1} · {(steps.find((s)=>s.status!=='completed')?.milestone_label) || 'Foundations'}</span>
             <button type="button" onClick={() => setWhyOpen(true)} style={{background:"none",border:"none",padding:0,color:"var(--v)",fontSize:13,fontWeight:600,cursor:"pointer"}}>Why these resources? →</button>
           </section>
         )}
@@ -541,6 +554,44 @@ export default function ResourcesScreen() {
               <p style={{ fontSize: 13, color: 'var(--slate, #52617D)', margin: '0 0 10px', lineHeight: 1.5 }}>
                 Live web search (incl. NPTEL) to supplement the courses above.
               </p>
+
+              {/* Real, automatic, week-scoped resources - the backend already
+                  computes these per week (roadmap_service.get_roadmap() ->
+                  web_search_service), shown here by default before the
+                  learner even searches manually. */}
+              {!webSearched && (() => {
+                const wk = roadmap.weeks.find((w) => w.week_number === roadmap.currentWeek)
+                const weekResources = wk?.web_resources || []
+                if (!weekResources.length) return null
+                return (
+                  <div style={{ marginBottom: 12 }}>
+                    <p style={{ fontSize: 11.5, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '.03em', margin: '0 0 6px' }}>
+                      For Week {roadmap.currentWeek}
+                    </p>
+                    <div className="rx-saved-list">
+                      {weekResources.map((r) => (
+                        <a
+                          key={r.url}
+                          href={r.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="rx-saved-item"
+                          style={{ textDecoration: 'none', cursor: 'pointer' }}
+                        >
+                          <span className="s-ic">{I.grad}</span>
+                          <div className="s-body">
+                            <div className="s-t">{r.title || r.url}</div>
+                            <div className="s-m" style={{ whiteSpace: 'normal' }}>
+                              {(() => { try { return new URL(r.url).hostname.replace('www.', '') } catch { return r.url } })()}
+                            </div>
+                          </div>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )
+              })()}
+
               <form onSubmit={handleWebSearch} style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
                 <input
                   type="text"
