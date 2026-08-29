@@ -107,22 +107,33 @@ def extract_profile(goal_text: str) -> dict:
 
 
 def upsert_profile(user_id: str, data: dict) -> dict:
-    """Upsert a profile row in Supabase. Returns the saved row dict."""
-    payload = {
-        "id": user_id,
-        "goal_text": data.get("goal_text", ""),
-        "target_role": data.get("target_role", ""),
-        "current_level": data.get("current_level", "beginner"),
-        "interests": data.get("interests", []),
-        "weekly_hours": data.get("weekly_hours", 10),
-    }
-    # Only present when the onboarding wizard's resume/assessment steps fed
-    # them in via merge_topic_ratings() / the request body — don't stomp an
-    # existing value with an empty one on a plain goal_text-only update.
-    if "topic_ratings" in data:
-        payload["topic_ratings"] = data["topic_ratings"]
-    if "detected_years_experience" in data:
-        payload["detected_years_experience"] = data["detected_years_experience"]
+    """Upsert a profile row in Supabase. Returns the saved row dict.
+
+    Real bug this fixes: this function is called both by the full
+    goal-extraction flow (routers/profile.py, which always has all of
+    goal_text/target_role/current_level/interests/weekly_hours) AND by the
+    GitHub-sync flow (routers/github.py's ingest_github_profile, which ONLY
+    ever supplies topic_ratings/detected_years_experience). The payload used
+    to unconditionally include goal_text/target_role/current_level/
+    interests/weekly_hours with hardcoded fallbacks ("", "", "beginner", [],
+    10) whenever a caller didn't supply them — and since Supabase's upsert
+    SETs every column present in the submitted JSON, every GitHub sync
+    silently overwrote an existing learner's real goal/role/level/interests/
+    hours back to blank defaults, whether that sync happened from the
+    roadmap popup, the Account page, or onboarding's own GitHub step.
+    Only build keys the caller actually supplied — a true partial update,
+    the same pattern already used below for topic_ratings/
+    detected_years_experience. All these columns are nullable with the
+    database's own sane defaults (see the profiles table schema), so a
+    genuinely new profile from a GitHub-only call correctly gets goal_text
+    etc. left NULL (honestly "not set yet") rather than fabricated empty
+    strings — never fabricate values that weren't actually provided.
+    """
+    payload = {"id": user_id}
+    for key in ("goal_text", "target_role", "current_level", "interests", "weekly_hours",
+                "topic_ratings", "detected_years_experience"):
+        if key in data:
+            payload[key] = data[key]
 
     result = supabase_client.table("profiles").upsert(payload).execute()
     return result.data[0] if result.data else payload

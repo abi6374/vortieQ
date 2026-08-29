@@ -73,6 +73,44 @@ def test_profile_upsert_preserves_topic_ratings():
         assert called_payload["detected_years_experience"] == 3
 
 
+def test_partial_upsert_never_wipes_untouched_fields():
+    """Real production bug: routers/github.py's GitHub-sync flow calls
+    upsert_profile(user_id, {"topic_ratings": ..., "detected_years_experience": ...})
+    ONLY - it never has goal_text/target_role/current_level/interests/
+    weekly_hours. upsert_profile used to unconditionally build those 5 keys
+    with hardcoded fallbacks ("", "", "beginner", [], 10) whenever the caller
+    didn't supply them, and since Supabase's upsert SETs every column present
+    in the submitted JSON, every GitHub sync silently blanked an existing
+    learner's real goal/role/level/interests/hours. This must be a true
+    partial update: a GitHub-only call's payload must contain ONLY the keys
+    it actually supplied, so Supabase's upsert leaves every other column on
+    the existing row untouched."""
+    mock_supabase = MagicMock()
+    mock_table = MagicMock()
+    mock_supabase.table.return_value = mock_table
+    mock_table.upsert.return_value.execute.return_value = MagicMock(data=[{"id": "user-123"}])
+
+    with patch("app.services.profile_service.supabase_client", mock_supabase):
+        github_sync_data = {
+            "topic_ratings": [{"name": "Rust", "suggested_level": "advanced"}],
+            "detected_years_experience": 5,
+        }
+        upsert_profile("user-123", github_sync_data)
+
+        called_payload = mock_table.upsert.call_args[0][0]
+        assert called_payload == {
+            "id": "user-123",
+            "topic_ratings": [{"name": "Rust", "suggested_level": "advanced"}],
+            "detected_years_experience": 5,
+        }
+        for untouched in ("goal_text", "target_role", "current_level", "interests", "weekly_hours"):
+            assert untouched not in called_payload, (
+                f"upsert payload must not include {untouched!r} when the caller "
+                "never supplied it - including it (even as a fallback default) "
+                "would overwrite the learner's real existing value with that default."
+            )
+
+
 def test_web_search_ranking_and_graceful_fallback():
     """Verify search ranking prioritizes preferred course domains."""
     sample_results = [
