@@ -79,7 +79,7 @@ export default function GoalConfirm({ profile, onConfirm, onEdit }) {
       <div className="mt-8 flex flex-col sm:flex-row gap-3">
         <button
           onClick={onConfirm}
-          className="flex-1 bg-[#0066cc] hover:bg-[#004fa3] text-white font-bold py-3.5 px-6 rounded-xl shadow-[0_4px_14px_rgba(0,102,204,0.35)] transition-all cursor-pointer flex items-center justify-center gap-2"
+          className="flex-1 bg-[#2DB1F9] hover:bg-[#0EA5E9] text-white font-bold py-3.5 px-6 rounded-xl shadow-[0_4px_14px_rgba(45,177,249,0.35)] transition-all cursor-pointer flex items-center justify-center gap-2"
         >
           <span>✨ Generate My Learning Path</span>
         </button>

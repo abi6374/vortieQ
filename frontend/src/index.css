@@ -10,14 +10,14 @@
    component that already reads them re-themes automatically.
    ============================================================================ */
 :root {
-  --violet: #0066cc;
-  --violet-dark: #004fa3;
-  --violet-focus: #0071e3;
+  --violet: #2DB1F9;
+  --violet-dark: #0EA5E9;
+  --violet-focus: #38BDF8;
   --navy: #1d1d1f;
   --slate: #333333;
   --muted: #7a7a7a;
-  --lavender: #eaf2fc;
-  --lav-icon: #dbeafc;
+  --lavender: #EAF6FD;
+  --lav-icon: #D0EBFB;
   --card-bd: #e0e0e0;
   --divider: #f0f0f0;
   --bg-main: #f5f5f7;
@@ -33,14 +33,14 @@
 :root.dark,
 html.dark,
 [data-theme="dark"] {
-  --violet: #2997FF;
-  --violet-dark: #0071E3;
-  --violet-focus: #38bdf8;
+  --violet: #2DB1F9;
+  --violet-dark: #0EA5E9;
+  --violet-focus: #38BDF8;
   --navy: #F5F5F7;
   --slate: #E5E5EA;
   --muted: #9CA3AF;
-  --lavender: rgba(41, 151, 255, 0.16);
-  --lav-icon: rgba(41, 151, 255, 0.24);
+  --lavender: rgba(45, 177, 249, 0.16);
+  --lav-icon: rgba(45, 177, 249, 0.24);
   --card-bd: #28303F;
   --divider: #202734;
   --bg-main: #0B0E14;

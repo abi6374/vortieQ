@@ -8,16 +8,14 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Action Blue — the single interactive accent for the whole app.
-        // Old violet (#5B36E9) keys are kept so any surviving reference
-        // resolves to the new palette instead of breaking.
+        // Electric Sky Blue (#2DB1F9) — the primary interactive accent for the whole app.
         violet: {
-          DEFAULT: '#0066CC',
-          50: '#EAF2FC',
-          100: '#DBEAFC',
-          600: '#0066CC',
-          700: '#004FA3',
-          800: '#003D80',
+          DEFAULT: '#2DB1F9',
+          50: '#EAF6FD',
+          100: '#D0EBFB',
+          600: '#2DB1F9',
+          700: '#0EA5E9',
+          800: '#0284C7',
         },
         pf: {
           navy: '#1D1D1F',
@@ -25,19 +23,19 @@ export default {
           muted: '#7A7A7A',
           bg: '#F5F5F7',
           border: '#E0E0E0',
-          lavender: '#EAF2FC',
-          lavenderCircle: '#DBEAFC',
+          lavender: '#EAF6FD',
+          lavenderCircle: '#D0EBFB',
           green: '#22A06B',
           greenSurface: '#ECFDF3',
           amber: '#D88700',
           amberSurface: '#FFF7E6',
         },
         brand: {
-          50: '#EAF2FC',
-          100: '#DBEAFC',
-          500: '#0066CC',
-          600: '#0066CC',
-          700: '#004FA3',
+          50: '#EAF6FD',
+          100: '#D0EBFB',
+          500: '#2DB1F9',
+          600: '#2DB1F9',
+          700: '#0EA5E9',
           900: '#1D1D1F',
         },
         // DESIGN.md tokens, named directly, for new/updated markup.
@@ -54,10 +52,10 @@ export default {
         hairline: '#E0E0E0',
         divider: '#F0F0F0',
         action: {
-          DEFAULT: '#0066CC',
-          focus: '#0071E3',
-          dark: '#2997FF',
-          pressed: '#004FA3',
+          DEFAULT: '#2DB1F9',
+          focus: '#38BDF8',
+          dark: '#2DB1F9',
+          pressed: '#0EA5E9',
         },
       },
       fontFamily: {

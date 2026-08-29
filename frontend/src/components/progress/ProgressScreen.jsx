@@ -445,7 +445,7 @@ export default function ProgressScreen() {
               <button
                 type="button"
                 onClick={() => navigate('/dashboard')}
-                className="px-4 py-2 bg-[#0066cc] hover:bg-[#004fa3] text-white text-xs font-bold rounded-lg shadow-sm transition-all"
+                className="px-4 py-2 bg-[#2DB1F9] hover:bg-[#0EA5E9] text-white text-xs font-bold rounded-lg shadow-sm transition-all"
               >
                 Continue Week {roadmap.currentWeek}
               </button>
@@ -1048,7 +1048,7 @@ export default function ProgressScreen() {
                       <button
                         type="button"
                         onClick={() => navigate('/dashboard')}
-                        className="px-3 py-1 bg-[#0066cc] hover:bg-[#004fa3] text-white text-[11px] font-bold rounded-lg transition-colors flex-none"
+                        className="px-3 py-1 bg-[#2DB1F9] hover:bg-[#0EA5E9] text-white text-[11px] font-bold rounded-lg transition-colors flex-none"
                       >
                         {act.buttonLabel}
                       </button>
@@ -1064,10 +1064,10 @@ export default function ProgressScreen() {
               <div>
                 <div className="flex items-center justify-between text-xs font-bold mb-1">
                   <span className="text-[#1d1d1f] dark:text-[#F9FAFB]">Roadmap status</span>
-                  <span className="text-[#0066cc] dark:text-[#38BDF8]">{roadmap.percent}% complete</span>
+                  <span className="text-[#2DB1F9] dark:text-[#38BDF8]">{roadmap.percent}% complete</span>
                 </div>
                 <div className="w-full bg-[#f5f5f7] dark:bg-[#1E2638] h-2 rounded-full overflow-hidden">
-                  <div className="bg-[#0066cc] dark:bg-[#38BDF8] h-full rounded-full" style={{ width: roadmap.percent + '%' }} />
+                  <div className="bg-[#2DB1F9] dark:bg-[#38BDF8] h-full rounded-full" style={{ width: roadmap.percent + '%' }} />
                 </div>
                 <p className="text-[11px] text-[#6e6e73] dark:text-[#94A3B8] mt-1">You're on track for your February 2027 target.</p>
               </div>
@@ -1086,7 +1086,7 @@ export default function ProgressScreen() {
                 <button
                   type="button"
                   onClick={() => navigate('/dashboard')}
-                  className="mt-2 w-full py-1.5 bg-[#eaf2fc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] hover:bg-[#0066cc] hover:text-white text-xs font-bold rounded-lg transition-colors"
+                  className="mt-2 w-full py-1.5 bg-[#EAF6FD] dark:bg-[#1E293B] text-[#2DB1F9] dark:text-[#38BDF8] hover:bg-[#2DB1F9] hover:text-white text-xs font-bold rounded-lg transition-colors"
                 >
                   Continue learning
                 </button>

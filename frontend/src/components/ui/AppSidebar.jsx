@@ -9,7 +9,7 @@ import { useSidebar } from '../../contexts/SidebarContext'
  * - Navigation links in vertical rhythm.
  */
 
-const V = '#0066cc'
+const V = '#2DB1F9'
 const V_SOFT = '#eaf2fc'
 
 export const SidebarIcon = ({ className = "w-4 h-4" }) => (

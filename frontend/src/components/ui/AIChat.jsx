@@ -9,7 +9,7 @@ import { useAuth } from '../../hooks/useAuth'
  * Never appears on the Signup/Landing/Onboarding pages or full AI Coach page.
  */
 
-const V = '#0066cc'
+const V = '#2DB1F9'
 
 const STYLES = `
 .pfchat-fab{ position:fixed; bottom:24px; right:28px; z-index:30; display:flex; align-items:center; gap:9px;
