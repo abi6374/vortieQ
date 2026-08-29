@@ -15,10 +15,17 @@ from concurrent.futures import ThreadPoolExecutor
 
 try:
     from duckduckgo_search import DDGS
-    from duckduckgo_search.exceptions import DuckDuckGoSearchException as DDGSException
-except ImportError:
+except Exception:
     DDGS = None
-    DDGSException = Exception
+
+try:
+    from duckduckgo_search.exceptions import DuckDuckGoSearchException as DDGSException
+except Exception:
+    try:
+        from duckduckgo_search.exceptions import RatelimitException as DDGSException
+    except Exception:
+        DDGSException = Exception
+
 
 MAX_RESULTS = 8
 CACHE_TTL_SECONDS = 1800  # 30 min - identical queries reuse results instead of re-searching
