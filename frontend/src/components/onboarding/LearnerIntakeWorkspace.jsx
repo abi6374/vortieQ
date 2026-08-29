@@ -457,10 +457,10 @@ export default function LearnerIntakeWorkspace({
         {/* Left Card: Resume Upload */}
         <div
           onClick={() => setSelectedMethod('resume')}
-          className={`rounded-2xl p-6 sm:p-7 flex flex-col justify-between transition-all cursor-pointer ${
+          className={`rounded-2xl p-6 sm:p-7 flex flex-col justify-between transition-all cursor-pointer border-2 ${
             selectedMethod === 'resume'
-              ? 'bg-[#fbfdff] dark:bg-[#131D2E] border-2 border-[#0066cc] dark:border-[#38BDF8] shadow-[0_6px_24px_rgba(0,102,204,0.08)] ring-1 ring-[#0066cc]/20'
-              : 'bg-white dark:bg-[#101726] border border-[#e0e0e0] dark:border-[#202C3E] hover:border-[#abd2fb] dark:hover:border-[#38BDF8] shadow-xs'
+              ? 'bg-[#fbfdff] dark:bg-[#131D2E] border-[#0066cc] dark:border-[#38BDF8] shadow-[0_6px_24px_rgba(0,102,204,0.08)] ring-1 ring-[#0066cc]/20'
+              : 'bg-white dark:bg-[#101726] border-[#e0e0e0] dark:border-[#202C3E] hover:border-[#abd2fb] dark:hover:border-[#38BDF8] shadow-xs'
           }`}
         >
           <div>
@@ -485,7 +485,7 @@ export default function LearnerIntakeWorkspace({
             <h2 className="text-[22px] font-bold text-[#1d1d1f] dark:text-[#F8FAFC] mb-1">
               Upload my resume <span className="text-xs font-semibold text-[#7a7a7a] dark:text-[#94A3B8]">(Optional)</span>
             </h2>
-            <p className="text-[14.5px] text-[#333333] dark:text-[#94A3B8] leading-snug mb-4">
+            <p className="text-[14.5px] text-[#333333] dark:text-[#94A3B8] leading-snug mb-4 text-balance">
               Upload a PDF or DOCX to auto-extract your skills and past project keywords.
             </p>
           </div>
@@ -602,10 +602,10 @@ export default function LearnerIntakeWorkspace({
         {/* Right Card: Natural Language Chat */}
         <div
           onClick={() => setSelectedMethod('chat')}
-          className={`rounded-2xl p-6 sm:p-7 flex flex-col justify-between transition-all cursor-pointer ${
+          className={`rounded-2xl p-6 sm:p-7 flex flex-col justify-between transition-all cursor-pointer border-2 ${
             selectedMethod === 'chat'
-              ? 'bg-[#fbfdff] dark:bg-[#131D2E] border-2 border-[#0066cc] dark:border-[#38BDF8] shadow-[0_6px_24px_rgba(0,102,204,0.08)] ring-1 ring-[#0066cc]/20'
-              : 'bg-white dark:bg-[#101726] border border-[#e0e0e0] dark:border-[#202C3E] hover:border-[#abd2fb] dark:hover:border-[#38BDF8] shadow-xs'
+              ? 'bg-[#fbfdff] dark:bg-[#131D2E] border-[#0066cc] dark:border-[#38BDF8] shadow-[0_6px_24px_rgba(0,102,204,0.08)] ring-1 ring-[#0066cc]/20'
+              : 'bg-white dark:bg-[#101726] border-[#e0e0e0] dark:border-[#202C3E] hover:border-[#abd2fb] dark:hover:border-[#38BDF8] shadow-xs'
           }`}
         >
           <div>
@@ -628,8 +628,8 @@ export default function LearnerIntakeWorkspace({
             <h2 className="text-[22px] font-bold text-[#1d1d1f] dark:text-[#F8FAFC] mb-1">
               Tell PathFinder in a chat <span className="text-xs font-bold text-[#0066cc] dark:text-[#38BDF8]">(Required)</span>
             </h2>
-            <p className="text-[14.5px] text-[#333333] dark:text-[#94A3B8] leading-snug mb-4">
-              Describe your background naturally. We’ll build your learner profile and draft together.
+            <p className="text-[14.5px] text-[#333333] dark:text-[#94A3B8] leading-snug mb-4 text-balance">
+              Describe your background naturally. We’ll build your learner profile together.
             </p>
           </div>
 
