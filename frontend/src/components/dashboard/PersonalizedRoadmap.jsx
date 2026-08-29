@@ -6,6 +6,7 @@ import { useAuth } from '../../hooks/useAuth'
 import { supabase } from '../../lib/supabaseClient'
 import AppShell from '../layout/AppShell'
 import ConnectGitHubModal from '../ui/ConnectGitHubModal'
+import WindingRoadmap from './WindingRoadmap'
 
 /**
  * PersonalizedRoadmap
@@ -606,63 +607,14 @@ export default function PersonalizedRoadmap({ pathData = null }) {
                 </div>
               </div>
 
-              {/* ROADMAP MILESTONE STRIP (Bottom Nodes with Arrows) */}
+              {/* INTERACTIVE HIGHWAY ROADMAP (Winding S-Curve Canvas) */}
               <div className="mt-8 pt-6 border-t border-[#f5f5f7] dark:border-[#1E2638]">
-                <div className="flex items-center gap-2 overflow-x-auto pb-2.5 pf-custom-scrollbar">
-                  {milestoneNodes.map((node, i) => {
-                    const isSelected = activeMilestone === node.id
-                    return (
-                      <React.Fragment key={node.id}>
-                        {i > 0 && (
-                          <span className="text-[#d2d2d7] dark:text-[#4B5563] font-bold text-sm flex-none">
-                            →
-                          </span>
-                        )}
-                        <div
-                          onClick={() => handleMilestoneClick(node)}
-                          className={`flex-none rounded-xl p-2.5 sm:p-3 flex flex-col items-center justify-center text-center cursor-pointer transition-all min-w-[95px] sm:min-w-[110px] border ${
-                            isSelected
-                              ? 'border-2 border-[#0066cc] dark:border-[#38BDF8] bg-[#eaf2fc] dark:bg-blue-950/40 shadow-xs ring-2 ring-[#0066cc]/10'
-                              : node.isComplete
-                              ? 'border-[#22A06B]/40 bg-[#F6FEF9] dark:bg-emerald-950/30 shadow-2xs hover:border-[#22A06B]'
-                              : 'border-[#e0e0e0] dark:border-[#242E40] bg-white dark:bg-[#101520] hover:border-[#d2d2d7] dark:hover:border-[#3B4860]'
-                          }`}
-                        >
-                          {/* Consistent Clean Circle Number */}
-                          <span
-                            className={`w-6 h-6 rounded-full font-bold text-xs flex items-center justify-center mb-1 ${
-                              isSelected
-                                ? 'bg-[#0066cc] dark:bg-[#38BDF8] text-white dark:text-slate-900 shadow-xs'
-                                : 'bg-[#333333] dark:bg-[#242E40] text-white'
-                            }`}
-                          >
-                            {node.id}
-                          </span>
-
-                          {/* Milestone Label */}
-                          <span className="text-[11px] sm:text-xs font-bold text-[#1d1d1f] dark:text-[#F9FAFB] leading-tight truncate max-w-[95px]">
-                            {node.label}
-                          </span>
-
-                          {/* Real state badge: locked / complete / real step number */}
-                          {node.isLocked ? (
-                            <span className="inline-flex items-center gap-0.5 text-[9.5px] font-bold text-[#86868b] dark:text-[#94A3B8] bg-[#f5f5f5] dark:bg-[#1A2232] border border-[#e9e9e9] dark:border-[#242E40] px-1.5 py-0.5 rounded-full mt-1 shadow-2xs">
-                              🔒 Locked
-                            </span>
-                          ) : node.isComplete ? (
-                            <span className="inline-flex items-center gap-0.5 text-[9.5px] font-bold text-[#22A06B] dark:text-emerald-400 bg-[#ECFDF3] dark:bg-emerald-950/50 border border-[#D1FADF] dark:border-emerald-800/60 px-1.5 py-0.5 rounded-full mt-1 shadow-2xs">
-                              ✓ Complete
-                            </span>
-                          ) : (
-                            <span className="text-[10px] text-[#7a7a7a] dark:text-[#94A3B8] mt-1">
-                              Step {node.id}
-                            </span>
-                          )}
-                        </div>
-                      </React.Fragment>
-                    )
-                  })}
-                </div>
+                <WindingRoadmap
+                  milestones={milestoneNodes}
+                  activeMilestoneId={activeMilestone}
+                  onSelectMilestone={handleMilestoneClick}
+                  weekGroups={weekGroups}
+                />
               </div>
             </div>
 
