@@ -35,42 +35,42 @@ const STYLES = `
   box-shadow:0 28px 70px -24px rgba(20,40,80,.30), 0 2px 6px rgba(20,40,80,.04), inset 0 1px 0 rgba(255,255,255,.7);
   -webkit-backdrop-filter:blur(30px) saturate(1.5); backdrop-filter:blur(30px) saturate(1.5);
   display:grid; grid-template-columns:44% 56%; overflow:hidden; min-height:720px; height:720px; }
-.pfa .brand-panel{ position:relative; overflow:hidden; padding:clamp(28px,3.5vw,44px);
+.pfa .brand-panel{ position:relative; overflow:hidden; padding:36px 44px;
   background:linear-gradient(160deg,rgba(255,255,255,0.6) 0%,rgba(234,242,252,0.5) 100%);
   border-right:1px solid rgba(255,255,255,0.55); display:flex; flex-direction:column; height:100%; }
 .pfa .path-deco{ position:absolute; inset:0; z-index:0; pointer-events:none; }
-.pfa .brand-inner{ position:relative; z-index:1; display:flex; flex-direction:column; height:100%; justify-content:space-between; }
-.pfa .logo-row{ display:flex; align-items:center; gap:14px; margin-bottom:16px; }
+.pfa .brand-inner{ position:relative; z-index:1; display:flex; flex-direction:column; height:100%; }
+.pfa .logo-row{ display:flex; align-items:center; gap:14px; margin-bottom:32px; }
 .pfa .logo-mark{ width:48px; height:48px; border-radius:14px; flex:none;
   background:linear-gradient(160deg,var(--violet-2),var(--violet)); display:grid; place-items:center;
   box-shadow:0 6px 18px rgba(0,102,204,.28); }
 .pfa .logo-name{ font-family:"Manrope",sans-serif; font-weight:800; font-size:clamp(24px,2.2vw,30px); letter-spacing:-.02em; }
-.pfa .hero{ margin:auto 0; padding:12px 0; }
-.pfa .hero h1{ font-family:"Manrope",sans-serif; font-weight:800; font-size:clamp(26px,2.6vw,38px);
+.pfa .hero{ margin:0 0 24px; padding:0; }
+.pfa .hero h1{ font-family:"Manrope",sans-serif; font-weight:800; font-size:clamp(26px,2.6vw,36px);
   line-height:1.14; letter-spacing:-.025em; margin:0 0 12px; text-wrap:balance; }
-.pfa .hero p{ font-size:clamp(14px,1.25vw,15.5px); line-height:1.5; color:var(--slate); margin:0 0 20px; max-width:32ch; }
-.pfa .journey{ display:flex; flex-direction:column; gap:12px; }
+.pfa .hero p{ font-size:14.5px; line-height:1.5; color:var(--slate); margin:0 0 24px; max-width:32ch; }
+.pfa .journey{ display:flex; flex-direction:column; gap:14px; }
 .pfa .j-item{ display:flex; align-items:center; gap:14px; }
 .pfa .j-icon{ width:44px; height:44px; border-radius:50%; flex:none; background:var(--lav-circle);
   color:var(--violet); display:grid; place-items:center; }
-.pfa .j-text{ font-size:clamp(13.5px,1.2vw,15px); font-weight:600; line-height:1.3; }
-.pfa .privacy{ display:flex; align-items:center; gap:10px; margin-top:20px; color:var(--slate); font-size:13px; }
+.pfa .j-text{ font-size:14px; font-weight:600; line-height:1.3; }
+.pfa .privacy{ display:flex; align-items:center; gap:10px; margin-top:auto; color:var(--slate); font-size:13px; padding-top:16px; }
 .pfa .privacy svg{ color:var(--violet); flex:none; }
 .pfa .form-panel{ background:rgba(255,255,255,0.55); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
-  padding:clamp(24px,3vw,36px) clamp(28px,4vw,48px);
-  display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; }
+  padding:36px 48px;
+  display:flex; flex-direction:column; align-items:center; justify-content:flex-start; height:100%; }
 .pfa .form{ width:100%; max-width:400px; }
 .pfa .tabs{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:2px; }
 .pfa .tab{ background:none; border:none; cursor:pointer; padding:6px 4px 10px;
-  font:600 clamp(15px,1.4vw,17px)/1 "Inter",sans-serif; color:var(--navy); position:relative; text-align:center; }
+  font:600 16px/1 "Inter",sans-serif; color:var(--navy); position:relative; text-align:center; }
 .pfa .tab.active{ color:var(--violet); }
 .pfa .tab.active::after{ content:""; position:absolute; left:50%; transform:translateX(-50%); bottom:0;
   height:3px; width:100%; max-width:180px; border-radius:999px; background:var(--violet); }
 .pfa .tab-help{ text-align:center; font-size:12px; color:var(--muted); line-height:1.3; margin:2px 0 0; min-height:1.8em; }
 .pfa .tab-help.left{ visibility:hidden; }
-.pfa .welcome{ text-align:center; margin:10px 0 14px; }
-.pfa .welcome h2{ font-family:"Manrope",sans-serif; font-weight:800; font-size:clamp(22px,2.2vw,26px); letter-spacing:-.02em; margin:0 0 4px; }
-.pfa .welcome p{ font-size:clamp(13px,1.2vw,14.5px); color:var(--slate); margin:0; }
+.pfa .welcome{ text-align:center; margin:12px 0 16px; min-height:58px; display:flex; flex-direction:column; justify-content:center; }
+.pfa .welcome h2{ font-family:"Manrope",sans-serif; font-weight:800; font-size:24px; line-height:1.2; letter-spacing:-.02em; margin:0 0 4px; }
+.pfa .welcome p{ font-size:13.5px; line-height:1.4; color:var(--slate); margin:0; }
 .pfa .field{ margin-bottom:11px; }
 .pfa .field > label{ display:block; font-size:13.5px; font-weight:600; margin-bottom:5px; }
 .pfa .input{ position:relative; display:flex; align-items:stretch; border:1.5px solid var(--input-bd);
