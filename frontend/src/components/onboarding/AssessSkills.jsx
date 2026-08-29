@@ -155,18 +155,58 @@ function SkillLevelPanel({ topic, level, onLevel }) {
 }
 
 export default function AssessSkills({ topics = [], detectedYears = 0, onContinue, onBack, onSkip }) {
-  const [method, setMethod] = useState('level') // 'level' | 'describe'
-  const [levels, setLevels] = useState(
-    () => Object.fromEntries(topics.map((t) => [t.name, normalizeLevel(t.suggested_level)]))
+  const [method, setMethod] = useState('skills') // 'skills' | 'level'
+  const [currentTopics, setCurrentTopics] = useState(() => {
+    if (topics && topics.length > 0) return topics
+    return [
+      { name: 'Python', suggested_level: 'intermediate', confidence_pct: 82 },
+      { name: 'SQL', suggested_level: 'basic', confidence_pct: 75 },
+      { name: 'Data Analysis', suggested_level: 'basic', confidence_pct: 70 },
+    ]
+  })
+
+  const [levels, setLevels] = useState(() =>
+    Object.fromEntries((topics.length > 0 ? topics : [
+      { name: 'Python', suggested_level: 'intermediate' },
+      { name: 'SQL', suggested_level: 'basic' },
+      { name: 'Data Analysis', suggested_level: 'basic' },
+    ]).map((t) => [t.name, normalizeLevel(t.suggested_level)]))
   )
-  
-  // Single unified description for all skills
-  const [unifiedDescription, setUnifiedDescription] = useState('')
+
+  const [newSkillInput, setNewSkillInput] = useState('')
 
   const setLevel = (name, lvl) => setLevels((p) => ({ ...p, [name]: lvl }))
 
+  const handleAddSkill = (skillName) => {
+    const trimmed = (skillName || newSkillInput).trim()
+    if (!trimmed) return
+    const exists = currentTopics.some((t) => t.name.toLowerCase() === trimmed.toLowerCase())
+    if (exists) {
+      setNewSkillInput('')
+      return
+    }
+    const newTopic = {
+      name: trimmed,
+      suggested_level: 'intermediate',
+      confidence_pct: 80,
+      evidence: 'Added during skill calibration',
+    }
+    setCurrentTopics((prev) => [...prev, newTopic])
+    setLevels((prev) => ({ ...prev, [trimmed]: 'intermediate' }))
+    setNewSkillInput('')
+  }
+
+  const handleRemoveSkill = (name) => {
+    setCurrentTopics((prev) => prev.filter((t) => t.name !== name))
+    setLevels((prev) => {
+      const copy = { ...prev }
+      delete copy[name]
+      return copy
+    })
+  }
+
   const submit = () => {
-    const ratings = topics.map((t) => {
+    const ratings = currentTopics.map((t) => {
       const chosenLevel = levels[t.name] || normalizeLevel(t.suggested_level)
       const suggested = normalizeLevel(t.suggested_level)
       const dynamicPct = confidenceFor(chosenLevel, suggested, t.confidence_pct)
@@ -174,13 +214,19 @@ export default function AssessSkills({ topics = [], detectedYears = 0, onContinu
         name: t.name,
         level: chosenLevel,
         confidence_pct: dynamicPct,
-        evidence: method === 'describe' && unifiedDescription.trim()
-          ? unifiedDescription.trim()
-          : (t.evidence || ''),
+        evidence: t.evidence || 'Verified in your profile skills',
       }
     })
     onContinue(ratings)
   }
+
+  const SUGGESTED_QUICK_SKILLS = [
+    'Python', 'SQL', 'React', 'JavaScript', 'Docker', 'Git', 'FastAPI', 'Machine Learning', 'AWS', 'TypeScript', 'Pandas'
+  ]
+
+  const unaddedSuggestions = SUGGESTED_QUICK_SKILLS.filter(
+    (s) => !currentTopics.some((t) => t.name.toLowerCase() === s.toLowerCase())
+  ).slice(0, 6)
 
   const MethodCard = ({ id, icon, title, desc, children }) => {
     const active = method === id
@@ -189,7 +235,7 @@ export default function AssessSkills({ topics = [], detectedYears = 0, onContinu
         type="button"
         onClick={() => setMethod(id)}
         aria-pressed={active}
-        className={`relative text-left rounded-2xl transition flex flex-col cursor-pointer p-5 sm:p-6 min-h-[180px] ${
+        className={`relative text-left rounded-2xl transition flex flex-col cursor-pointer p-5 sm:p-6 min-h-[170px] ${
           active
             ? 'border-2 border-[#0066cc] dark:border-[#38BDF8] bg-gradient-to-br from-white to-[#eaf2fc] dark:from-[#131D2E] dark:to-[#18263D] shadow-[0_0_0_4px_rgba(0,102,204,.08)]'
             : 'border border-[#e6e6e6] dark:border-[#202C3E] bg-white dark:bg-[#101726] hover:border-[#abd2fb] dark:hover:border-[#38BDF8]'
@@ -230,20 +276,20 @@ export default function AssessSkills({ topics = [], detectedYears = 0, onContinu
         Your skills, your confidence
       </h1>
       <p className="text-[#494949] dark:text-[#94A3B8] mt-2.5 mb-6" style={{ fontSize: 'clamp(15px,1.4vw,17px)' }}>
-        We found {topics.length} topic{topics.length === 1 ? '' : 's'} in your background
-        {detectedYears ? ` (≈${detectedYears} years experience)` : ''}. Choose how you'd like to calibrate your skills.
+        We identified {currentTopics.length} skill{currentTopics.length === 1 ? '' : 's'} in your profile
+        {detectedYears ? ` (≈${detectedYears} years experience)` : ''}. Review your detected skills or fine-tune your level per skill.
       </p>
 
-      {/* Method Toggle: Single Description vs Choose Level */}
+      {/* Method Toggle: Skills vs Choose Level */}
       <div className="grid sm:grid-cols-2 gap-4 mb-6">
         <MethodCard
-          id="describe"
-          title="Describe in a single text"
-          desc="Tell us all your skills, projects, and strengths together."
-          icon={<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.7A8.38 8.38 0 0 1 4 11.5 8.5 8.5 0 0 1 12.5 3 8.38 8.38 0 0 1 21 11.5z"/></svg>}
+          id="skills"
+          title="Skills"
+          desc="Extracted skills from your background & resume."
+          icon={<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L14.4 7.6L20 10L14.4 12.4L12 18L9.6 12.4L4 10L9.6 7.6L12 2Z"/></svg>}
         >
-          <p className="text-[12.5px] text-[#494949] mt-auto leading-relaxed">
-            Fastest text flow — describe all your skills at once and our AI will infer your tiers.
+          <p className="text-[12.5px] text-[#494949] dark:text-[#94A3B8] mt-auto leading-relaxed">
+            Skills overview — all detected competencies ready to shape your learning roadmap.
           </p>
         </MethodCard>
 
@@ -253,66 +299,121 @@ export default function AssessSkills({ topics = [], detectedYears = 0, onContinu
           desc="Pick Basic, Intermediate, Advanced, or Expert per topic."
           icon={<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18"/><path d="M7 16v-5"/><path d="M12 16V8"/><path d="M17 16v-9"/></svg>}
         >
-          <p className="text-[12.5px] text-[#494949] mt-auto leading-relaxed">
+          <p className="text-[12.5px] text-[#494949] dark:text-[#94A3B8] mt-auto leading-relaxed">
             Precise calibration — fine-tune your tier per skill to set your exact starting point.
           </p>
         </MethodCard>
       </div>
 
       {/* Content Area Based on Method */}
-      {method === 'describe' ? (
-        /* SINGLE UNIFIED TEXT BOX FOR ALL SKILLS */
-        <div className="rounded-2xl border-2 border-[#0066cc]/40 dark:border-[#38BDF8]/40 bg-[#f9fcff] dark:bg-[#131D2E] p-6 shadow-sm">
-          <div className="flex items-center gap-2.5 mb-2">
-            <span className="w-8 h-8 rounded-lg bg-[#dbeafc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center font-bold">
-              ✍️
-            </span>
-            <h3 className="font-bold text-[#1d1d1f] dark:text-[#F8FAFC] text-[17px]">
-              Describe all your skills, tools & experience
-            </h3>
-          </div>
-          <p className="text-xs sm:text-sm text-[#333333] dark:text-[#94A3B8] mb-4">
-            Mention your programming languages, frameworks, past projects, coursework, and concepts you feel confident with.
-          </p>
-          
-          <div className="relative">
-            <textarea
-              value={unifiedDescription}
-              onChange={(e) => setUnifiedDescription(e.target.value.slice(0, 1500))}
-              maxLength={1500}
-              placeholder="e.g. I have 2 years of Python experience building APIs with FastAPI and Flask. I understand descriptive statistics and basic Pandas for data analysis. I have built 1 data visualization project with Matplotlib. I want to learn Machine Learning from scratch..."
-              className="w-full resize-none rounded-xl border border-[#e0e0e0] dark:border-[#263750] bg-white dark:bg-[#0E1522] p-4 text-[15px] text-[#1d1d1f] dark:text-[#F8FAFC] leading-relaxed focus:outline-none focus:border-[#0066cc] dark:focus:border-[#38BDF8] focus:ring-2 focus:ring-[#0066cc]/10 transition-all shadow-inner"
-              style={{ minHeight: 160 }}
-            />
-            <span className="absolute right-3.5 bottom-3 text-[12px] font-semibold text-[#7a7a7a] dark:text-[#64748B] tabular-nums">
-              {unifiedDescription.length}/1500
-            </span>
+      {method === 'skills' ? (
+        /* SKILLS CATALOG DASHBOARD */
+        <div className="rounded-2xl border border-[#D8DFEB] dark:border-[#24334A] bg-[#f9fcff] dark:bg-[#131D2E] p-6 shadow-sm">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-[#E1E6F0] dark:border-[#202C3E]">
+            <div className="flex items-center gap-2.5">
+              <span className="w-8 h-8 rounded-lg bg-[#dbeafc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center font-bold">
+                ⚡
+              </span>
+              <div>
+                <h3 className="font-bold text-[#1d1d1f] dark:text-[#F8FAFC] text-[17px]">
+                  Detected Skills & Stacks ({currentTopics.length})
+                </h3>
+                <p className="text-xs text-[#52617D] dark:text-[#94A3B8]">
+                  These competencies will be used to benchmark your starting point on your roadmap.
+                </p>
+              </div>
+            </div>
+
+            {/* Quick Add Custom Skill Form */}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault()
+                handleAddSkill()
+              }}
+              className="flex items-center bg-white dark:bg-[#0B0F17] border border-[#D8DFEB] dark:border-[#2D3F59] rounded-full p-1 pl-3 shadow-2xs focus-within:border-[#0066cc] dark:focus-within:border-[#38BDF8] transition-all w-full sm:w-auto"
+            >
+              <input
+                type="text"
+                value={newSkillInput}
+                onChange={(e) => setNewSkillInput(e.target.value)}
+                placeholder="+ Add another skill..."
+                className="bg-transparent border-0 border-none outline-none focus:outline-none focus:ring-0 text-xs text-[#0E1B38] dark:text-[#F8FAFC] placeholder-[#888888] dark:placeholder-[#64748B] w-full sm:w-40"
+              />
+              <button
+                type="submit"
+                disabled={!newSkillInput.trim()}
+                className="px-3 py-1 bg-[#0066CC] hover:bg-[#0052A3] text-white text-xs font-bold rounded-full transition-all cursor-pointer disabled:opacity-40 flex-none"
+              >
+                Add
+              </button>
+            </form>
           </div>
 
-          {/* Chips of detected skills from resume/intake */}
-          {topics.length > 0 && (
-            <div className="mt-4 pt-3 border-t border-[#f0f0f0] dark:border-[#202C3E]">
-              <span className="text-xs font-bold text-[#7a7a7a] dark:text-[#94A3B8] uppercase tracking-wider block mb-2">
-                Detected topics in your background:
-              </span>
-              <div className="flex flex-wrap gap-2">
-                {topics.map((t) => (
-                  <span
-                    key={t.name}
-                    className="inline-flex items-center gap-1.5 px-3 py-1 bg-white dark:bg-[#1A2536] border border-[#e0e0e0] dark:border-[#2D3F59] rounded-lg text-xs font-bold text-[#1d1d1f] dark:text-[#F8FAFC] shadow-2xs"
+          {/* Skill Badges Catalog */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-5">
+            {currentTopics.map((t) => {
+              const currentLvl = levels[t.name] || normalizeLevel(t.suggested_level)
+              const pct = confidenceFor(currentLvl, normalizeLevel(t.suggested_level), t.confidence_pct)
+              return (
+                <div
+                  key={t.name}
+                  className="bg-white dark:bg-[#101726] border border-[#e0e0e0] dark:border-[#24334A] rounded-xl p-3.5 flex items-center justify-between gap-2 shadow-xs hover:border-[#0066cc] dark:hover:border-[#38BDF8] transition-all group"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <span className="w-8 h-8 rounded-lg bg-[#eaf2fc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] font-bold text-xs flex items-center justify-center flex-none">
+                      {t.name.slice(0, 2).toUpperCase()}
+                    </span>
+                    <div className="min-w-0">
+                      <div className="font-bold text-[#1d1d1f] dark:text-[#F8FAFC] text-sm truncate">
+                        {t.name}
+                      </div>
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <span className="text-[11px] font-semibold text-[#0066cc] dark:text-[#38BDF8] bg-[#eaf2fc] dark:bg-[#182438] px-1.5 py-0.5 rounded capitalize">
+                          {LEVEL_META[currentLvl]?.label || 'Intermediate'}
+                        </span>
+                        <span className="text-[11px] text-[#7a7a7a] dark:text-[#94A3B8] font-mono">
+                          {pct}%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveSkill(t.name)}
+                    className="w-6 h-6 rounded-full text-[#888888] hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 flex items-center justify-center text-xs transition-colors cursor-pointer opacity-60 group-hover:opacity-100"
+                    title={`Remove ${t.name}`}
                   >
-                    <span className="w-2 h-2 rounded-full bg-[#0066cc] dark:bg-[#38BDF8]" />
-                    {t.name}
-                  </span>
-                ))}
-              </div>
+                    ✕
+                  </button>
+                </div>
+              )
+            })}
+          </div>
+
+          {/* Quick Suggestions Chips */}
+          {unaddedSuggestions.length > 0 && (
+            <div className="pt-3 border-t border-[#E1E6F0] dark:border-[#202C3E] flex items-center gap-2 flex-wrap">
+              <span className="text-xs font-bold text-[#7a7a7a] dark:text-[#94A3B8] uppercase tracking-wider">
+                Quick Add:
+              </span>
+              {unaddedSuggestions.map((skill) => (
+                <button
+                  key={skill}
+                  type="button"
+                  onClick={() => handleAddSkill(skill)}
+                  className="px-2.5 py-1 rounded-lg bg-white dark:bg-[#182438] border border-[#D8DFEB] dark:border-[#2D3F59] hover:border-[#0066cc] dark:hover:border-[#38BDF8] text-xs font-semibold text-[#1d1d1f] dark:text-[#F8FAFC] cursor-pointer transition-all shadow-2xs"
+                >
+                  + {skill}
+                </button>
+              ))}
             </div>
           )}
         </div>
       ) : (
         /* PER-TOPIC LEVEL PANELS */
         <div className="space-y-4">
-          {topics.map((t) => (
+          {currentTopics.map((t) => (
             <SkillLevelPanel
               key={t.name}
               topic={t}

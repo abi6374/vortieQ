@@ -503,7 +503,9 @@ export default function GoalCompass({ topicRatings = [], detectedYears = 0, init
               <div className="cinput"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></svg><input type="month" id="gc-target" value={target} onChange={(e) => setTarget(e.target.value)} /></div>
             </div>
             <div className="cfield">
-              <label htmlFor="gc-weekly">Weekly learning time</label>
+              <label htmlFor="gc-weekly">
+                Weekly learning time <span className="text-xs font-bold text-[#0066cc] dark:text-[#38BDF8]">(Required)</span>
+              </label>
               <div className="time-val"><b>{weekly}</b><span>hours per week</span></div>
               <input type="range" id="gc-weekly" min="2" max="30" step="1" value={weekly} onChange={(e) => setWeekly(Number(e.target.value))} />
               <div className="range-ends"><span>2h</span><span>30h</span></div>
@@ -579,10 +581,12 @@ export default function GoalCompass({ topicRatings = [], detectedYears = 0, init
           <button
             type="button"
             className="btn-plan"
-            disabled={!(goal || '').trim() || (isCustomRole && !(customRoleName || '').trim())}
+            disabled={!(goal || '').trim() || !weekly || weekly < 1 || (isCustomRole && !(customRoleName || '').trim())}
             title={
               !(goal || '').trim()
                 ? 'Please describe your learning goal before creating your plan'
+                : !weekly || weekly < 1
+                ? 'Weekly learning time is required before creating your plan'
                 : isCustomRole && !(customRoleName || '').trim()
                 ? 'Please enter your custom target role'
                 : undefined

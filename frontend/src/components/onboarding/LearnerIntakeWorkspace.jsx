@@ -5,6 +5,32 @@ import ThemeToggle from '../ui/ThemeToggle'
 
 const EMPTY_DRAFT = { skills: '', education: '', projects: '', confidence: '', goal: '', summary: '' }
 
+const COMMON_TECH_SKILLS = [
+  'Python', 'JavaScript', 'TypeScript', 'React', 'Node.js', 'Next.js', 'Vue', 'Angular',
+  'HTML', 'CSS', 'Tailwind', 'Bootstrap', 'FastAPI', 'Flask', 'Django', 'Express',
+  'SQL', 'PostgreSQL', 'MySQL', 'MongoDB', 'Redis', 'GraphQL', 'REST APIs', 'Git', 'GitHub',
+  'Docker', 'Kubernetes', 'AWS', 'Azure', 'GCP', 'Linux', 'Machine Learning', 'Deep Learning',
+  'TensorFlow', 'PyTorch', 'Pandas', 'NumPy', 'Scikit-Learn', 'Data Analysis', 'Tableau', 'Power BI',
+  'C++', 'Java', 'C#', 'Go', 'Rust', 'Swift', 'Kotlin', 'DevOps', 'CI/CD', 'Agile'
+]
+
+function extractKeywordsFromText(text) {
+  if (!text) return []
+  const detected = []
+  COMMON_TECH_SKILLS.forEach((skill) => {
+    const reg = new RegExp(`\\b${skill.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i')
+    if (reg.test(text)) {
+      detected.push({
+        name: skill,
+        suggested_level: 'intermediate',
+        confidence_pct: 82,
+        evidence: `Mentioned in background description`,
+      })
+    }
+  })
+  return detected
+}
+
 // Qualitative label for an average suggested_level across real extracted topics.
 // Purely descriptive of what was actually detected — never a guess.
 function levelLabel(topics) {
@@ -38,8 +64,12 @@ export default function LearnerIntakeWorkspace({
   authenticatedUsername = '',
   onSyncGithub,
 }) {
-  // Selection mode: 'resume' (default selected) or 'chat'
-  const [selectedMethod, setSelectedMethod] = useState('chat')
+  // Selection mode: 'text' (default selected) or 'resume'
+  const [selectedMethod, setSelectedMethod] = useState('text')
+
+  // Single Text input state (Required)
+  const [singleDescription, setSingleDescription] = useState('')
+  const descInputRef = useRef(null)
 
   // Per-user GitHub username state
   const [customUsername, setCustomUsername] = useState(authenticatedUsername || '')
@@ -52,17 +82,7 @@ export default function LearnerIntakeWorkspace({
   const [uploadError, setUploadError] = useState('')
   const [dragOver, setDragOver] = useState(false)
   const fileInputRef = useRef(null)
-  const chatInputRef = useRef(null)
 
-  // Chat conversation state
-  const [chatStory, setChatStory] = useState('')
-  const [chatMessages, setChatMessages] = useState([
-    {
-      id: 1,
-      sender: 'ai',
-      text: 'Tell me about your skills, experience, and what you want to achieve.',
-    },
-  ])
   const [continueError, setContinueError] = useState('')
 
   // AI Profile Draft
@@ -70,7 +90,7 @@ export default function LearnerIntakeWorkspace({
 
   // Sync draft if GitHub data arrives
   React.useEffect(() => {
-    if (githubData?.topics && githubData.topics.length > 0 && !file && chatMessages.length <= 1) {
+    if (githubData?.topics && githubData.topics.length > 0 && !file && !singleDescription.trim()) {
       const topics = githubData.topics
       const confStr = topics.length ? `${avgConfidence(topics)} (${levelLabel(topics)})` : ''
       setProfileDraft((prev) => ({
@@ -109,12 +129,11 @@ export default function LearnerIntakeWorkspace({
       }))
     }
 
-    const hasUserStory = chatMessages.some((m) => m.sender === 'user') || !!file
-    if (!hasUserStory) {
-      setContinueError('GitHub stack confirmed! Please describe your background and learning goals in the chat box below to complete your AI Profile Draft.')
-      setSelectedMethod('chat')
+    if (!singleDescription.trim()) {
+      setContinueError('GitHub stack confirmed! Please fill out the "Describe in a single text" box (Required) to complete your intake.')
+      setSelectedMethod('text')
       setTimeout(() => {
-        chatInputRef.current?.focus()
+        descInputRef.current?.focus()
       }, 100)
     } else {
       handleContinue()
@@ -142,74 +161,47 @@ export default function LearnerIntakeWorkspace({
     setUploadError('')
     setContinueError('')
     setFile(f)
-    setSelectedMethod('resume')
     setProfileDraft((prev) => ({
       ...EMPTY_DRAFT,
       ...prev,
-      summary: `"${f.name}" is ready. Click Continue to analyze and merge with your profile draft.`,
+      summary: `"${f.name}" is attached. It will be analyzed together with your single text description.`,
     }))
   }
 
-  // Handle chat submission
-  const handleSendChatMessage = (e) => {
-    e?.preventDefault()
-    const trimmed = chatStory.trim()
-    if (!trimmed) return
-
-    const newMsg = {
-      id: Date.now(),
-      sender: 'user',
-      text: trimmed,
-    }
-    const updatedMessages = [...chatMessages, newMsg]
-    setChatMessages(updatedMessages)
-    setChatStory('')
-    setSelectedMethod('chat')
+  // Handle single description typing
+  const handleDescriptionChange = (e) => {
+    const val = e.target.value
+    setSingleDescription(val)
     setContinueError('')
 
-    const userNotes = updatedMessages
-      .filter((m) => m.sender === 'user')
-      .map((m) => m.text)
-      .join(' ')
-
-    const existingSkills = profileDraft?.skills || (githubData?.topics ? githubData.topics.map((t) => t.name).join(', ') : '')
-    const existingConfidence = profileDraft?.confidence || (githubData?.topics?.length ? `${avgConfidence(githubData.topics)} (${levelLabel(githubData.topics)})` : '')
+    const detected = extractKeywordsFromText(val)
+    const skillsList = detected.map((d) => d.name).join(', ')
 
     setProfileDraft((prev) => ({
       ...EMPTY_DRAFT,
       ...prev,
-      skills: existingSkills || prev?.skills || '',
-      confidence: existingConfidence || prev?.confidence || '',
-      goal: userNotes,
-      summary: existingSkills
-        ? `We noted your skills in ${existingSkills}. In your own words: "${userNotes.slice(0, 180)}${userNotes.length > 180 ? '…' : ''}"`
-        : `In your own words: "${userNotes.slice(0, 220)}${userNotes.length > 220 ? '…' : ''}"`,
+      skills: skillsList || prev?.skills || '',
+      goal: val,
+      summary: val.trim().length > 15
+        ? `Draft from your description: "${val.slice(0, 140)}${val.length > 140 ? '…' : ''}"`
+        : (prev?.summary || 'Describe your background to build your AI Profile Draft.'),
     }))
   }
 
   // Handle Continue button action
   const handleContinue = async () => {
     setContinueError('')
+    const trimmedDesc = singleDescription.trim()
 
-    const hasUserStory = chatMessages.some((m) => m.sender === 'user')
-    const userStory = chatMessages
-      .filter((m) => m.sender === 'user')
-      .map((m) => m.text)
-      .join(' ')
-      .trim()
-
-    // Saying in natural language is mandatory; resume is optional
-    if (!hasUserStory && !file) {
-      setContinueError('Describing your background or goals in the chat box is required before continuing (resume upload is optional).')
-      setSelectedMethod('chat')
-      chatInputRef.current?.focus()
+    // Filling the single text description is strictly REQUIRED
+    if (!trimmedDesc) {
+      setContinueError('Describing your background in a single text is required before continuing.')
+      setSelectedMethod('text')
+      descInputRef.current?.focus()
       return
     }
 
-    if (!profileDraft) {
-      setContinueError('AI Profile Draft is required. Please add your background in the chat box or upload a resume.')
-      return
-    }
+    const detectedFromText = extractKeywordsFromText(trimmedDesc)
 
     if (file) {
       setUploading(true)
@@ -220,50 +212,76 @@ export default function LearnerIntakeWorkspace({
         const { data } = await apiClient.post('/api/profile/resume', form, {
           headers: { 'Content-Type': 'multipart/form-data' },
         })
-        const topics = data.topics || []
-        const confStr = topics.length ? `${avgConfidence(topics)} (${levelLabel(topics)})` : ''
+        const resumeTopics = data.topics || []
+        const existingNames = new Set(resumeTopics.map((t) => t.name.toLowerCase()))
+        const mergedTopics = [...resumeTopics]
+        detectedFromText.forEach((dt) => {
+          if (!existingNames.has(dt.name.toLowerCase())) {
+            mergedTopics.push(dt)
+          }
+        })
+        const confStr = mergedTopics.length ? `${avgConfidence(mergedTopics)} (${levelLabel(mergedTopics)})` : ''
         const updatedDraft = {
           ...EMPTY_DRAFT,
           ...profileDraft,
-          skills: topics.map((t) => t.name).join(', ') || profileDraft?.skills || '',
+          skills: mergedTopics.map((t) => t.name).join(', ') || profileDraft?.skills || '',
           confidence: confStr || profileDraft?.confidence || '',
           education: data.education || profileDraft?.education || '',
           projects: data.projects || profileDraft?.projects || '',
-          goal: userStory || data.suggested_goal || profileDraft?.goal || '',
-          summary: topics.length
-            ? `Identified ${topics.length} skill${topics.length === 1 ? '' : 's'} (~${avgConfidence(topics)} confidence)${
+          goal: trimmedDesc || data.suggested_goal || profileDraft?.goal || '',
+          summary: mergedTopics.length
+            ? `Identified ${mergedTopics.length} skill${mergedTopics.length === 1 ? '' : 's'} (~${avgConfidence(mergedTopics)} confidence)${
                 data.detected_years_experience ? ` and ~${data.detected_years_experience} years experience` : ''
-              }: ${topics.map((t) => t.name).join(', ')}.`
-            : profileDraft?.summary || 'Resume analyzed and profile draft updated.',
+              }: ${mergedTopics.map((t) => t.name).join(', ')}.`
+            : profileDraft?.summary || 'Profile draft updated.',
         }
         setProfileDraft(updatedDraft)
         onExtracted(
-          topics,
+          mergedTopics,
           data.detected_years_experience || 0,
           updatedDraft.education,
           updatedDraft.projects,
-          updatedDraft.goal || data.suggested_goal || userStory || ''
+          updatedDraft.goal || data.suggested_goal || trimmedDesc
         )
       } catch (err) {
         console.error('Resume extraction failed:', err)
         setUploadError(
           err?.response?.data?.detail ||
-            'Could not analyze this resume. Please try a different file, or use the chat option instead.'
+            'Could not analyze this resume. Continuing with your description.'
+        )
+        onExtracted(
+          detectedFromText,
+          0,
+          profileDraft?.education || '',
+          profileDraft?.projects || '',
+          trimmedDesc
         )
       } finally {
         setUploading(false)
       }
     } else if (githubData?.topics && githubData.topics.length > 0) {
-      // GitHub topics + natural language story
+      const existingNames = new Set(githubData.topics.map((t) => t.name.toLowerCase()))
+      const mergedTopics = [...githubData.topics]
+      detectedFromText.forEach((dt) => {
+        if (!existingNames.has(dt.name.toLowerCase())) {
+          mergedTopics.push(dt)
+        }
+      })
       onExtracted(
-        githubData.topics,
+        mergedTopics,
         githubData.detected_years_experience || 0,
         profileDraft?.education || '',
         profileDraft?.projects || '',
-        userStory || profileDraft?.goal || ''
+        trimmedDesc || profileDraft?.goal || ''
       )
-    } else if (userStory) {
-      onChatSubmit?.(userStory)
+    } else {
+      onExtracted(
+        detectedFromText,
+        0,
+        profileDraft?.education || '',
+        profileDraft?.projects || '',
+        trimmedDesc
+      )
     }
   }
 
@@ -599,11 +617,11 @@ export default function LearnerIntakeWorkspace({
           )}
         </div>
 
-        {/* Right Card: Natural Language Chat */}
+        {/* Right Card: Describe in a single text */}
         <div
-          onClick={() => setSelectedMethod('chat')}
+          onClick={() => setSelectedMethod('text')}
           className={`rounded-2xl p-6 sm:p-7 flex flex-col justify-between transition-all cursor-pointer border-2 ${
-            selectedMethod === 'chat'
+            selectedMethod === 'text'
               ? 'bg-[#fbfdff] dark:bg-[#131D2E] border-[#0066cc] dark:border-[#38BDF8] shadow-[0_6px_24px_rgba(0,102,204,0.08)] ring-1 ring-[#0066cc]/20'
               : 'bg-white dark:bg-[#101726] border-[#e0e0e0] dark:border-[#202C3E] hover:border-[#abd2fb] dark:hover:border-[#38BDF8] shadow-xs'
           }`}
@@ -620,87 +638,36 @@ export default function LearnerIntakeWorkspace({
                 strokeLinecap="round"
                 strokeLinejoin="round"
               >
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                <path d="M13 8l1 2 2 1-2 1-1 2-1-2-2-1 2-1z" fill="currentColor" />
+                <path d="M12 20h9" />
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
               </svg>
             </div>
 
             <h2 className="text-[22px] font-bold text-[#1d1d1f] dark:text-[#F8FAFC] mb-1">
-              Tell PathFinder in a chat <span className="text-xs font-bold text-[#0066cc] dark:text-[#38BDF8]">(Required)</span>
+              Describe in a single text <span className="text-xs font-bold text-[#0066cc] dark:text-[#38BDF8]">(Required)</span>
             </h2>
             <p className="text-[14.5px] text-[#333333] dark:text-[#94A3B8] leading-snug mb-4 text-balance">
               Describe your background naturally. We’ll build your learner profile together.
             </p>
           </div>
 
-          <div className="space-y-2.5 max-h-[170px] overflow-y-auto pr-1">
-            {chatMessages.map((msg) => (
-              <div
-                key={msg.id}
-                className={`flex items-start gap-2 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                {msg.sender === 'ai' && (
-                  <div className="w-6 h-6 rounded-full bg-[#dbeafc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-xs">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 2L14.4 7.6L20 10L14.4 12.4L12 18L9.6 12.4L4 10L9.6 7.6L12 2Z" />
-                    </svg>
-                  </div>
-                )}
-                <div
-                  className={`text-[13.5px] leading-relaxed rounded-2xl px-3.5 py-2 max-w-[88%] ${
-                    msg.sender === 'user'
-                      ? 'bg-[#0066cc] text-white rounded-tr-sm shadow-xs'
-                      : 'bg-[#eaf2fc] dark:bg-[#182438] text-[#1d1d1f] dark:text-[#F1F5F9] rounded-tl-sm border border-[#e3f0fe] dark:border-[#22334D]'
-                  }`}
-                >
-                  {msg.text}
-                </div>
-                {msg.sender === 'user' && (
-                  <div className="w-6 h-6 rounded-full bg-[#e9e9e9] dark:bg-[#1E293B] text-[#7a7a7a] dark:text-[#CBD5E1] flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-                      <circle cx="12" cy="7" r="4" />
-                    </svg>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-
-          <form
-            onSubmit={handleSendChatMessage}
-            onClick={(e) => e.stopPropagation()}
-            className="bg-[#fbfbfb] dark:bg-[#121927] border border-[#e0e0e0] dark:border-[#263750] rounded-xl px-3 py-1.5 flex items-center justify-between gap-2 mt-4 focus-within:border-[#0066cc] dark:focus-within:border-[#38BDF8] focus-within:bg-white dark:focus-within:bg-[#162133] focus-within:ring-2 focus-within:ring-[#0066cc]/15 transition-all shadow-xs"
-          >
-            <input
-              ref={chatInputRef}
-              type="text"
-              value={chatStory}
-              onChange={(e) => setChatStory(e.target.value)}
-              placeholder="Type your background, skills & goals here..."
-              className="w-full bg-transparent border-0 border-none outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 ring-0 shadow-none text-[14px] text-[#1d1d1f] dark:text-[#F8FAFC] placeholder-[#7a7a7a] dark:placeholder-[#64748B] px-1"
-              style={{ border: 'none', outline: 'none', boxShadow: 'none' }}
+          <div className="relative mt-2" onClick={(e) => e.stopPropagation()}>
+            <textarea
+              ref={descInputRef}
+              value={singleDescription}
+              onChange={handleDescriptionChange}
+              maxLength={1500}
+              placeholder="e.g. I have 2 years of Python experience building APIs with FastAPI and Flask. I understand descriptive statistics and basic Pandas for data analysis. I have built 1 data visualization project with Matplotlib. I want to learn Machine Learning from scratch..."
+              className="w-full resize-none rounded-xl border border-[#D8DFEB] dark:border-[#263750] bg-[#fbfbfb] dark:bg-[#0E1522] p-3.5 text-[14px] text-[#1d1d1f] dark:text-[#F8FAFC] placeholder-[#7a7a7a] dark:placeholder-[#64748B] leading-relaxed focus:outline-none focus:border-[#0066cc] dark:focus:border-[#38BDF8] focus:bg-white dark:focus:bg-[#141C2B] focus:ring-2 focus:ring-[#0066cc]/15 transition-all shadow-inner"
+              style={{ minHeight: 155 }}
             />
-            <button
-              type="submit"
-              className="w-7 h-7 rounded-full bg-[#0066cc] hover:bg-[#004fa3] text-white flex items-center justify-center cursor-pointer transition-colors shadow-sm flex-shrink-0"
-              aria-label="Send message"
-            >
-              <svg
-                width="13"
-                height="13"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <line x1="22" y1="2" x2="11" y2="13" />
-                <polygon points="22 2 15 22 11 13 2 9 22 2" />
-              </svg>
-            </button>
-          </form>
+            <div className="flex items-center justify-between mt-1 text-[11.5px] font-semibold text-[#7a7a7a] dark:text-[#64748B]">
+              <span className={singleDescription.trim() ? "text-emerald-600 dark:text-emerald-400 font-bold" : "text-amber-600 dark:text-amber-400"}>
+                {singleDescription.trim() ? "✓ Description entered" : "* Required to continue"}
+              </span>
+              <span className="tabular-nums">{singleDescription.length}/1500</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -710,14 +677,12 @@ export default function LearnerIntakeWorkspace({
           You can{' '}
           <button
             type="button"
-            onClick={() =>
-              setSelectedMethod((prev) => (prev === 'resume' ? 'chat' : 'resume'))
-            }
+            onClick={() => fileInputRef.current?.click()}
             className="text-[#0066cc] dark:text-[#38BDF8] font-semibold hover:underline cursor-pointer focus:outline-none"
           >
-            add the other
+            upload a resume
           </button>{' '}
-          later.
+          to enhance and auto-extract additional project skills.
         </p>
       </div>
 
@@ -798,7 +763,7 @@ export default function LearnerIntakeWorkspace({
             <p className="text-[13px] text-[#333333] dark:text-[#94A3B8] leading-relaxed mt-1">
               {profileDraft?.summary
                 ? `"${profileDraft.summary}"`
-                : 'Upload a resume or start describing your background — your real profile draft will appear here.'}
+                : 'Describe your background in the text box above to generate your AI Profile Draft.'}
             </p>
 
             <button
@@ -853,12 +818,10 @@ export default function LearnerIntakeWorkspace({
         <button
           type="button"
           onClick={handleContinue}
-          disabled={uploading || !profileDraft || (!chatMessages.some((m) => m.sender === 'user') && !file)}
+          disabled={uploading || !singleDescription.trim()}
           title={
-            !chatMessages.some((m) => m.sender === 'user') && !file
-              ? 'Please describe your background in the chat box (or upload a resume) to complete your AI Profile Draft'
-              : !profileDraft
-              ? 'AI Profile Draft is required before continuing'
+            !singleDescription.trim()
+              ? 'Please describe your background in the text box (Required) before continuing'
               : undefined
           }
           className="w-[160px] h-[48px] bg-[#0066cc] hover:bg-[#004fa3] active:scale-[0.99] text-white font-bold rounded-xl shadow-[0_4px_14px_rgba(0,102,204,0.35)] transition-all flex items-center justify-center text-[15px] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"

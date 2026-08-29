@@ -116,7 +116,7 @@ export default function OnboardingPage() {
     // the learner hasn't already typed a goal elsewhere (chat lane), never
     // overwrites something they wrote themselves.
     if (suggestedGoal && !(goalText || '').trim()) setGoalText(suggestedGoal)
-    setPhase(merged && merged.length > 0 ? 'topics' : 'goalcompass')
+    setPhase('topics')
   }
 
   const handleChatIntake = (storyText) => {

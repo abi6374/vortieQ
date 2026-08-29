@@ -113,53 +113,92 @@ function Illustration() {
 
 export default function GeneratingOverlay({ status = 'loading', onFinished, onRetry, onBack }) {
   const reduce = useReducedMotion()
-  const [pct, setPct] = useState(reduce ? (status === 'success' ? 100 : 60) : 5)
-  const [activeStep, setActiveStep] = useState(0)
+  const [pct, setPct] = useState(0)
 
-  // Dynamically advance through the 5 steps while loading
-  useEffect(() => {
-    if (status !== 'loading') return
-    setActiveStep(0)
-    const timers = [
-      setTimeout(() => setActiveStep(1), 1000),
-      setTimeout(() => setActiveStep(2), 2400),
-      setTimeout(() => setActiveStep(3), 4200),
-      setTimeout(() => setActiveStep(4), 6200),
-    ]
-    return () => timers.forEach(clearTimeout)
-  }, [status])
-
-  // Ease the progress value smoothly
+  // Smooth, dynamic monotonic progress animation
   useEffect(() => {
     if (status === 'error') return
+
     if (reduce) {
-      setPct(status === 'success' ? 100 : 60)
+      setPct(status === 'success' ? 100 : 70)
       return
     }
-    const id = setInterval(() => {
-      setPct((p) => {
-        if (status === 'success') {
-          const delta = (100 - p) * 0.25
-          return Math.abs(100 - p) < 0.5 ? 100 : p + delta
+
+    if (status === 'success') {
+      // Rapidly but smoothly glide to 100%
+      const interval = setInterval(() => {
+        setPct((p) => {
+          if (p >= 100) {
+            clearInterval(interval)
+            return 100
+          }
+          const step = Math.max(1.5, (100 - p) * 0.35)
+          const next = p + step
+          return next >= 99.5 ? 100 : next
+        })
+      }, 30)
+      return () => clearInterval(interval)
+    }
+
+    // Dynamic continuous progress during loading
+    const startTime = Date.now()
+    const interval = setInterval(() => {
+      setPct((current) => {
+        const elapsed = (Date.now() - startTime) / 1000 // in seconds
+        
+        // Target dynamic curve:
+        // 0-2s   : reaches ~25%
+        // 2-4.5s : reaches ~52%
+        // 4.5-7s : reaches ~76%
+        // 7-10s  : reaches ~90%
+        // 10s+   : asymptotically reaches ~97% smoothly
+        let target = 0
+        if (elapsed <= 2) {
+          target = (elapsed / 2) * 25
+        } else if (elapsed <= 4.5) {
+          target = 25 + ((elapsed - 2) / 2.5) * 27
+        } else if (elapsed <= 7) {
+          target = 52 + ((elapsed - 4.5) / 2.5) * 24
+        } else if (elapsed <= 10) {
+          target = 76 + ((elapsed - 7) / 3) * 14
+        } else {
+          // Asymptotic micro-creep towards 97%
+          const extra = elapsed - 10
+          target = 90 + 7 * (1 - Math.exp(-extra / 6))
         }
-        if (p < 92) {
-          return p + (92 - p) * 0.03 + 0.1
-        }
-        return p
+
+        // Smoothly interpolate towards target, always strictly monotonic (never decrease)
+        const delta = Math.max(0, (target - current) * 0.25)
+        const next = Math.max(current, current + delta + 0.05)
+        return Math.min(97.5, next)
       })
     }, 40)
-    return () => clearInterval(id)
+
+    return () => clearInterval(interval)
   }, [status, reduce])
 
-  // After the success fill completes, hand off to the parent (navigates to roadmap).
+  // Active step dynamically derived from current progress
+  const isSuccess = status === 'success' || pct >= 100
+  const isError = status === 'error'
+
+  const activeStep = isSuccess
+    ? 5
+    : pct < 22
+    ? 0
+    : pct < 48
+    ? 1
+    : pct < 72
+    ? 2
+    : pct < 88
+    ? 3
+    : 4
+
+  // After the success fill completes, hand off to parent
   useEffect(() => {
     if (status !== 'success') return
-    const t = setTimeout(() => onFinished && onFinished(), 1150)
+    const t = setTimeout(() => onFinished && onFinished(), 800)
     return () => clearTimeout(t)
   }, [status, onFinished])
-
-  const isSuccess = status === 'success'
-  const isError = status === 'error'
 
   const stepState = (i) => {
     if (isSuccess) return 'done'
