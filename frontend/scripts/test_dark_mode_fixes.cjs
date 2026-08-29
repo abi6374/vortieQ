@@ -69,8 +69,41 @@ async function testDarkModeFixes() {
   await page.screenshot({ path: path.join(SCREENSHOT_DIR, 'dark_step3_goal_compass.png'), fullPage: true });
   console.log('Saved dark_step3_goal_compass.png');
 
+  // 3. STEP 4: Verify GeneratingOverlay in Dark Mode
+  console.log('3. Checking Step 4: GeneratingOverlay in Dark Mode...');
+  // Mock endpoints
+  await page.route('**/api/profile/**', async (route) => {
+    await new Promise((r) => setTimeout(r, 600));
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true }) });
+  });
+
+  await page.route('**/api/paths/generate', async (route) => {
+    await new Promise((r) => setTimeout(r, 4000));
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ path_id: 'test-path-dark' }),
+    });
+  });
+
+  const createPlanBtn = page.locator('button:has-text("Create my learning plan")');
+  await createPlanBtn.click();
+
+  await page.waitForSelector('.genov');
+  console.log('GeneratingOverlay is active in dark mode!');
+
+  // Capture in-progress animation in dark theme
+  await page.waitForTimeout(2200);
+  await page.screenshot({ path: path.join(SCREENSHOT_DIR, 'dark_step4_generating_overlay.png'), fullPage: true });
+  console.log('Saved dark_step4_generating_overlay.png');
+
+  // Capture 100% completed state in dark theme
+  await page.waitForTimeout(2500);
+  await page.screenshot({ path: path.join(SCREENSHOT_DIR, 'dark_step4_generating_overlay_ready.png'), fullPage: true });
+  console.log('Saved dark_step4_generating_overlay_ready.png');
+
   await browser.close();
-  console.log('Dark mode verification test completed successfully!');
+  console.log('All dark mode verification tests completed successfully!');
 }
 
 testDarkModeFixes().catch((err) => {
