@@ -12,6 +12,50 @@ import api from '../lib/apiClient'
  * response returns, so Progress / Skill insights / the week strip all reflect
  * the change without extra requests.
  */
+const MOCK_DEV_ROADMAP = {
+  path: { id: 'dev-path', goal_text: 'AIML Engineer & Data Analytics' },
+  percent: 35,
+  total_steps: 10,
+  completed_steps: 4,
+  current_week: 2,
+  weeks: [
+    {
+      week_number: 1,
+      title: 'Foundations of Python & Data Processing',
+      status: 'completed',
+      completed_steps: 4,
+      steps: [
+        { step_id: 's1', title: 'Python Programming Fundamentals', completed: true, difficulty: 'beginner', duration_hrs: 10, skill_tags: ['Python', 'Machine Learning'] },
+        { step_id: 's2', title: 'NumPy & Pandas Essentials', completed: true, difficulty: 'beginner', duration_hrs: 8, skill_tags: ['Pandas', 'Visualization'] },
+        { step_id: 's3', title: 'Statistics for Machine Learning', completed: true, difficulty: 'intermediate', duration_hrs: 12, skill_tags: ['Machine Learning', 'Python'] },
+        { step_id: 's4', title: 'Exploratory Data Analysis & Visualization', completed: true, difficulty: 'intermediate', duration_hrs: 10, skill_tags: ['Visualization', 'Business Intelligence'] },
+      ]
+    },
+    {
+      week_number: 2,
+      title: 'Machine Learning & Business Intelligence',
+      status: 'in_progress',
+      completed_steps: 0,
+      steps: [
+        { step_id: 's5', title: 'Supervised Learning Algorithms', completed: false, difficulty: 'intermediate', duration_hrs: 14, skill_tags: ['Machine Learning', 'Scikit Learn'] },
+        { step_id: 's6', title: 'BI Dashboards with PowerBI & SQL', completed: false, difficulty: 'intermediate', duration_hrs: 10, skill_tags: ['Business Intelligence', 'Analytics'] },
+        { step_id: 's7', title: 'Model Evaluation & Hyperparameters', completed: false, difficulty: 'advanced', duration_hrs: 12, skill_tags: ['Machine Learning', 'Python'] },
+        { step_id: 's8', title: 'Deep Learning & Neural Networks', completed: false, difficulty: 'advanced', duration_hrs: 15, skill_tags: ['Deep Learning', 'Machine Learning'] },
+      ]
+    },
+    {
+      week_number: 3,
+      title: 'Advanced AI Systems & Deployment',
+      status: 'locked',
+      completed_steps: 0,
+      steps: [
+        { step_id: 's9', title: 'End-to-End MLOps Pipeline', completed: false, difficulty: 'advanced', duration_hrs: 16, skill_tags: ['Machine Learning', 'Python'] },
+        { step_id: 's10', title: 'Portfolio Project: Predictive Analytics', completed: false, difficulty: 'advanced', duration_hrs: 20, skill_tags: ['Machine Learning', 'Visualization'] },
+      ]
+    }
+  ]
+}
+
 export function useRoadmap() {
   const [data, setData] = useState(null)      // {path, weeks, current_week, percent, ...}
   const [loading, setLoading] = useState(true)
@@ -24,9 +68,19 @@ export function useRoadmap() {
     setError(null)
     try {
       const res = await api.get('/api/roadmap')
-      setData(res.data)
+      if (res.data && res.data.weeks && res.data.weeks.length > 0) {
+        setData(res.data)
+      } else if (typeof window !== 'undefined' && (window.localStorage.getItem('pf_dev_bypass') === 'true' || window.localStorage.getItem('e2e_mock_auth') === 'true')) {
+        setData(MOCK_DEV_ROADMAP)
+      } else {
+        setData(res.data)
+      }
     } catch (err) {
-      setError('We could not load your roadmap. Please try again.')
+      if (typeof window !== 'undefined' && (window.localStorage.getItem('pf_dev_bypass') === 'true' || window.localStorage.getItem('e2e_mock_auth') === 'true')) {
+        setData(MOCK_DEV_ROADMAP)
+      } else {
+        setError('We could not load your roadmap. Please try again.')
+      }
     } finally {
       setLoading(false)
     }

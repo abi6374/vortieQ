@@ -316,18 +316,18 @@ export default function SkillInsightsScreen() {
     })
 
   const getHeatmapColor = (val) => {
-    if (val >= 75) return 'bg-[#ECFDF3] text-[#22A06B] border-[#D1FADF]' // Strong green
-    if (val >= 50) return 'bg-[#FFF7E6] text-[#D88700] border-[#FEE4B2]' // Developing amber
-    return 'bg-[#FFF0F0] text-[#E5484D] border-[#FECDCA]' // Gap red
+    if (val >= 75) return 'bg-[#ECFDF3] dark:bg-emerald-950/70 text-[#22A06B] dark:text-emerald-300 border-[#D1FADF] dark:border-emerald-800' // Strong green
+    if (val >= 50) return 'bg-[#FFF7E6] dark:bg-amber-950/70 text-[#D88700] dark:text-amber-300 border-[#FEE4B2] dark:border-amber-800' // Developing amber
+    return 'bg-[#FFF0F0] dark:bg-rose-950/70 text-[#E5484D] dark:text-rose-300 border-[#FECDCA] dark:border-rose-800' // Gap red
   }
 
   // Custom Bar with Target Outline
   const CustomBarWithTarget = (props) => {
     const { x, y, width, height, value, index } = props
-    const targetVal = proficiencyData[index]?.target || 80
-    const chartHeight = 180 // Reference height inside chart
-    const targetHeight = (targetVal / 100) * 180
-    const targetY = 190 - targetHeight
+    const targetVal = proficiencyData[index]?.target || 100
+    const targetHeight = 160 // Reference height inside chart
+    const targetY = 30
+    const isZero = !value || value === 0
 
     return (
       <g>
@@ -339,30 +339,32 @@ export default function SkillInsightsScreen() {
           height={targetHeight}
           fill="transparent"
           stroke="#d2d2d7"
+          className="dark:stroke-[#334155] dark:fill-[#38BDF8]/5"
           strokeWidth="1.5"
           strokeDasharray="4 4"
           rx="6"
         />
-        {/* Current Solid Violet Bar */}
-        <rect
-          x={x}
-          y={y}
-          width={width}
-          height={height}
-          fill="#0066cc"
-          rx="6"
-          className="transition-all duration-300 hover:fill-[#004fa3] cursor-pointer"
-        />
-        {/* Percentage Label Above Bar */}
+        {/* Current Solid Bar */}
+        {!isZero && (
+          <rect
+            x={x}
+            y={y}
+            width={width}
+            height={height}
+            fill="#0066cc"
+            className="dark:fill-[#38BDF8] transition-all duration-300 hover:opacity-85 cursor-pointer"
+            rx="6"
+          />
+        )}
+        {/* Percentage Label */}
         <text
           x={x + width / 2}
-          y={y - 8}
-          fill="#1d1d1f"
+          y={isZero ? targetY + targetHeight - 8 : y - 8}
+          fill="currentColor"
+          className="fill-[#1d1d1f] dark:fill-white font-extrabold text-[11px]"
           textAnchor="middle"
-          fontSize="11"
-          fontWeight="700"
         >
-          {value}%
+          {value || 0}%
         </text>
       </g>
     )
@@ -675,13 +677,13 @@ export default function SkillInsightsScreen() {
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart
                         data={proficiencyData}
-                        margin={{ top: 20, right: 10, left: -20, bottom: 20 }}
+                        margin={{ top: 20, right: 10, left: -20, bottom: 24 }}
                         barSize={24}
                       >
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f5f5f7" className="dark:opacity-10" />
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f5f5f7" className="stroke-[#f0f0f0] dark:stroke-[#242E40]" />
                         <XAxis
                           dataKey="skill"
-                          tick={{ fill: '#64748B', fontSize: 10.5, fontWeight: 600 }}
+                          tick={{ fill: '#94A3B8', fontSize: 11, fontWeight: 600 }}
                           axisLine={{ stroke: '#242E40' }}
                           tickLine={false}
                           interval={0}
@@ -697,21 +699,21 @@ export default function SkillInsightsScreen() {
                           domain={[0, 100]}
                           ticks={[0, 20, 40, 60, 80, 100]}
                           tickFormatter={(val) => `${val}%`}
-                          tick={{ fill: '#64748B', fontSize: 10, fontWeight: 600 }}
+                          tick={{ fill: '#94A3B8', fontSize: 10, fontWeight: 600 }}
                           axisLine={false}
                           tickLine={false}
                         />
                         <RechartsTooltip
-                          cursor={{ fill: 'rgba(0,102,204,0.04)' }}
+                          cursor={{ fill: 'rgba(56,189,248,0.06)' }}
                           content={({ active, payload }) => {
                             if (active && payload && payload.length) {
                               const d = payload[0].payload
                               return (
-                                <div className="bg-[#1d1d1f] dark:bg-[#0E131E] text-white p-2.5 rounded-xl shadow-xl text-xs space-y-1">
+                                <div className="bg-[#1d1d1f] dark:bg-[#0E131E] border border-gray-700 dark:border-[#242E40] text-white p-2.5 rounded-xl shadow-xl text-xs space-y-1">
                                   <div className="font-bold border-b border-gray-700 pb-1 text-[#dbeafc]">{d.name || d.skill}</div>
                                   <div className="flex justify-between gap-4">
                                     <span className="text-gray-300">Your Level:</span>
-                                    <span className="font-bold text-[#61a9f5]">{d.current}%</span>
+                                    <span className="font-bold text-[#38BDF8]">{d.current}%</span>
                                   </div>
                                   <div className="flex justify-between gap-4">
                                     <span className="text-gray-300">Target Level:</span>
@@ -719,7 +721,7 @@ export default function SkillInsightsScreen() {
                                   </div>
                                   <div className="flex justify-between gap-4 text-[11px] pt-1 text-gray-400">
                                     <span>Gap:</span>
-                                    <span className={d.gap > 20 ? 'text-red-400 font-bold' : 'text-green-400 font-bold'}>{d.gap}%</span>
+                                    <span className={d.gap > 20 ? 'text-rose-400 font-bold' : 'text-emerald-400 font-bold'}>{d.gap}%</span>
                                   </div>
                                 </div>
                               )
@@ -755,16 +757,16 @@ export default function SkillInsightsScreen() {
                   <div className="h-60 w-full flex items-center justify-center pt-2">
                     <ResponsiveContainer width="100%" height="100%">
                       <RadarChart data={radarData} outerRadius="75%">
-                        <PolarGrid stroke="#f0f0f0" className="dark:opacity-15" />
+                        <PolarGrid stroke="#334155" className="stroke-[#e0e0e0] dark:stroke-[#242E40]" />
                         <PolarAngleAxis
                           dataKey="skill"
-                          tick={{ fill: '#64748B', fontSize: 10, fontWeight: 600 }}
+                          tick={{ fill: '#CBD5E1', fontSize: 10.5, fontWeight: 600 }}
                         />
                         <PolarRadiusAxis domain={[0, 100]} tick={false} axisLine={false} />
                         <Radar
                           name="Target Level"
                           dataKey="target"
-                          stroke="#c3c4c5"
+                          stroke="#64748B"
                           fill="transparent"
                           strokeDasharray="4 4"
                           strokeWidth={1.5}
@@ -772,10 +774,11 @@ export default function SkillInsightsScreen() {
                         <Radar
                           name="Your Level"
                           dataKey="current"
-                          stroke="#0066cc"
-                          fill="#0066cc"
-                          fillOpacity={0.2}
-                          strokeWidth={2}
+                          stroke="#38BDF8"
+                          fill="#38BDF8"
+                          fillOpacity={0.25}
+                          strokeWidth={2.5}
+                          dot={{ r: 3.5, fill: '#38BDF8', strokeWidth: 1.5, stroke: '#0E131E' }}
                         />
                       </RadarChart>
                     </ResponsiveContainer>
@@ -908,14 +911,14 @@ export default function SkillInsightsScreen() {
                       <AreaChart data={trendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                         <defs>
                           <linearGradient id="violetGradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#0066cc" stopOpacity={0.25} />
-                            <stop offset="95%" stopColor="#0066cc" stopOpacity={0.0} />
+                            <stop offset="5%" stopColor="#38BDF8" stopOpacity={0.35} />
+                            <stop offset="95%" stopColor="#38BDF8" stopOpacity={0.0} />
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f5f5f7" className="dark:opacity-10" />
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f5f5f7" className="stroke-[#f0f0f0] dark:stroke-[#242E40]" />
                         <XAxis
                           dataKey="week"
-                          tick={{ fill: '#64748B', fontSize: 11, fontWeight: 600 }}
+                          tick={{ fill: '#94A3B8', fontSize: 11, fontWeight: 600 }}
                           axisLine={{ stroke: '#242E40' }}
                           tickLine={false}
                         />
@@ -923,7 +926,7 @@ export default function SkillInsightsScreen() {
                           domain={[0, 100]}
                           ticks={[0, 20, 40, 60, 80, 100]}
                           tickFormatter={(v) => `${v}%`}
-                          tick={{ fill: '#64748B', fontSize: 10, fontWeight: 600 }}
+                          tick={{ fill: '#94A3B8', fontSize: 10, fontWeight: 600 }}
                           axisLine={false}
                           tickLine={false}
                         />
@@ -931,7 +934,7 @@ export default function SkillInsightsScreen() {
                           content={({ active, payload }) => {
                             if (active && payload && payload.length) {
                               return (
-                                <div className="bg-[#1d1d1f] dark:bg-[#0E131E] text-white px-2.5 py-1.5 rounded-lg text-xs font-bold shadow-lg">
+                                <div className="bg-[#1d1d1f] dark:bg-[#0E131E] border border-gray-700 dark:border-[#242E40] text-white px-2.5 py-1.5 rounded-lg text-xs font-bold shadow-lg">
                                   {payload[0].payload.week}: {payload[0].value}% Readiness
                                 </div>
                               )
@@ -942,12 +945,12 @@ export default function SkillInsightsScreen() {
                         <Area
                           type="monotone"
                           dataKey="readiness"
-                          stroke="#0066cc"
+                          stroke="#38BDF8"
                           strokeWidth={2.5}
                           fillOpacity={1}
                           fill="url(#violetGradient)"
-                          dot={{ fill: '#0066cc', stroke: '#FFFFFF', strokeWidth: 2, r: 4 }}
-                          activeDot={{ fill: '#0066cc', stroke: '#eaf2fc', strokeWidth: 3, r: 6 }}
+                          dot={{ fill: '#38BDF8', stroke: '#0E131E', strokeWidth: 2, r: 4 }}
+                          activeDot={{ fill: '#38BDF8', stroke: '#ffffff', strokeWidth: 2, r: 6 }}
                         />
                       </AreaChart>
                     </ResponsiveContainer>
@@ -1153,14 +1156,14 @@ export default function SkillInsightsScreen() {
               {activeTab === 'heatmap' ? (
                 /* SKILL GAP HEATMAP MATRIX */
                 <div className="bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-6 shadow-sm">
-                  <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+                  <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
                     <span className="font-bold text-sm text-[#1d1d1f] dark:text-white">
                       Tiered Skill-Gap Matrix (Foundations → Intermediate → Advanced)
                     </span>
-                    <div className="flex items-center gap-3 text-[11px] font-semibold text-[#333333] dark:text-[#CBD5E1]">
-                      <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded bg-[#ECFDF3] dark:bg-emerald-950/40 border border-[#D1FADF] dark:border-emerald-800/60" /> Strong (≥75%)</span>
-                      <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded bg-[#FFF7E6] dark:bg-amber-950/40 border border-[#FEE4B2] dark:border-amber-800/60" /> Developing (50–74%)</span>
-                      <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded bg-[#FFF0F0] dark:bg-rose-950/40 border border-[#FECDCA] dark:border-rose-800/60" /> Priority Gap (&lt;50%)</span>
+                    <div className="flex items-center gap-3.5 text-xs font-semibold text-[#333333] dark:text-[#CBD5E1]">
+                      <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-md bg-[#ECFDF3] dark:bg-emerald-950/70 border border-[#D1FADF] dark:border-emerald-800" /> <span className="text-[#22A06B] dark:text-emerald-300">Strong (≥75%)</span></span>
+                      <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-md bg-[#FFF7E6] dark:bg-amber-950/70 border border-[#FEE4B2] dark:border-amber-800" /> <span className="text-[#D88700] dark:text-amber-300">Developing (50–74%)</span></span>
+                      <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-md bg-[#FFF0F0] dark:bg-rose-950/70 border border-[#FECDCA] dark:border-rose-800" /> <span className="text-[#E5484D] dark:text-rose-300">Priority Gap (&lt;50%)</span></span>
                     </div>
                   </div>
 
@@ -1168,24 +1171,24 @@ export default function SkillInsightsScreen() {
                     <table className="w-full text-xs text-left">
                       <thead>
                         <tr className="border-b border-[#f0f0f0] dark:border-[#1E2638] text-[#7a7a7a] dark:text-[#94A3B8]">
-                          <th className="py-2.5 px-3 font-bold">Tier Level</th>
+                          <th className="py-3 px-4 font-bold uppercase tracking-wider text-[11px]">Tier Level</th>
                           {heatmapSkills.map((s) => (
-                            <th key={s.tag} className="py-2.5 px-3 font-bold text-center">{cap(s.tag)}</th>
+                            <th key={s.tag} className="py-3 px-4 font-bold text-center text-[#1d1d1f] dark:text-white">{cap(s.tag)}</th>
                           ))}
                         </tr>
                       </thead>
                       <tbody>
                         {heatmapData.map((row) => (
-                          <tr key={row.level} className="border-b border-[#f5f5f7] dark:border-[#1E2638]">
-                            <td className="py-3 px-3 font-bold text-[#1d1d1f] dark:text-white">{row.level}</td>
+                          <tr key={row.level} className="border-b border-[#f5f5f7] dark:border-[#1E2638] hover:bg-gray-50/50 dark:hover:bg-[#101622]/50 transition-colors">
+                            <td className="py-3.5 px-4 font-extrabold text-[#1d1d1f] dark:text-white">{row.level}</td>
                             {heatmapSkills.map((s) => {
                               const val = row[s.tag]
                               return (
-                                <td key={s.tag} className="py-3 px-3 text-center">
+                                <td key={s.tag} className="py-3.5 px-4 text-center">
                                   {val === null ? (
-                                    <span className="text-[#c3c4c5] dark:text-[#64748B]">—</span>
+                                    <span className="text-[#c3c4c5] dark:text-[#475569] font-bold">—</span>
                                   ) : (
-                                    <span className={`inline-block px-3 py-1 rounded-lg border font-bold ${getHeatmapColor(val)}`}>
+                                    <span className={`inline-block px-3.5 py-1.5 rounded-lg border font-extrabold text-xs shadow-xs transition-transform hover:scale-105 ${getHeatmapColor(val)}`}>
                                       {val}%
                                     </span>
                                   )}

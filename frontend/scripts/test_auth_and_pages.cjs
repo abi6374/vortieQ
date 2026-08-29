@@ -49,6 +49,21 @@ async function testAllPages() {
       const imgPath = path.join(SCREENSHOT_DIR, `${r.name}.png`);
       await page.screenshot({ path: imgPath, fullPage: true });
       console.log(`📸 Captured screenshot: ${r.name}.png`);
+
+      if (r.path === '/skills') {
+        try {
+          const heatmapBtn = await page.getByRole('button', { name: /Skill-Gap Heatmap/i });
+          if (await heatmapBtn.isVisible()) {
+            await heatmapBtn.click();
+            await page.waitForTimeout(1000);
+            const heatmapImgPath = path.join(SCREENSHOT_DIR, '03_skills_heatmap_dark.png');
+            await page.screenshot({ path: heatmapImgPath, fullPage: true });
+            console.log(`📸 Captured screenshot: 03_skills_heatmap_dark.png`);
+          }
+        } catch (e) {
+          console.log('Heatmap button click skipped:', e.message);
+        }
+      }
     }
 
     console.log('🎉 Playwright Dark Mode Audit Completed!');
