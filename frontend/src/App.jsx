@@ -18,6 +18,8 @@ import AccountPage from './pages/AccountPage'
 import SettingsPage from './pages/SettingsPage'
 import CoachPage from './pages/CoachPage'
 import InterviewPage from './pages/InterviewPage'
+import HackathonsPage from './pages/HackathonsPage'
+import InternshipsPage from './pages/InternshipsPage'
 
 import BackToTop from './components/ui/BackToTop'
 
@@ -110,6 +112,22 @@ export default function App() {
                 element={
                   <ProtectedRoute>
                     <InterviewPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/hackathons"
+                element={
+                  <ProtectedRoute>
+                    <HackathonsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/internships"
+                element={
+                  <ProtectedRoute>
+                    <InternshipsPage />
                   </ProtectedRoute>
                 }
               />

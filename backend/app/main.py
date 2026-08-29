@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from app.routers import profile, paths, feedback, assistant, roadmap, account, resources, coach, github, interview
+from app.routers import profile, paths, feedback, assistant, roadmap, account, resources, coach, github, interview, hackathons, internships
 
 app = FastAPI(title="AI Learning Path Recommender", version="1.0.0")
 
@@ -43,6 +43,8 @@ app.include_router(account.router, prefix="/api", tags=["account"])
 app.include_router(resources.router, prefix="/api/resources", tags=["resources"])
 app.include_router(coach.router, prefix="/api/coach", tags=["coach"])
 app.include_router(interview.router, prefix="/api/interview", tags=["interview"])
+app.include_router(hackathons.router, prefix="/api/hackathons", tags=["hackathons"])
+app.include_router(internships.router, prefix="/api/internships", tags=["internships"])
 
 
 # Log any unhandled exception with the full traceback so backend logs (docker
