@@ -62,6 +62,56 @@ export default function AccountPage() {
     } finally { setSaving(false) }
   }
 
+  const [ghInput, setGhInput] = useState('')
+  const [ghSyncing, setGhSyncing] = useState(false)
+  const [ghFeedback, setGhFeedback] = useState(null)
+
+  const githubHandle =
+    user?.user_metadata?.user_name ||
+    user?.user_metadata?.preferred_username ||
+    profile?.github_username ||
+    me?.github_username ||
+    (typeof window !== 'undefined' && localStorage.getItem(`pf_github_user_${user?.id}`)) ||
+    ''
+
+  const handleSyncGithubAccount = async () => {
+    const target = (ghInput || githubHandle).trim()
+    if (!target) return
+    setGhSyncing(true)
+    setGhFeedback(null)
+    try {
+      const res = await api.post('/api/profile/github', {
+        username: target,
+      })
+      if (res?.data) {
+        if (user?.id) {
+          localStorage.setItem(`pf_github_user_${user.id}`, target)
+          localStorage.setItem(`pf_github_preference_${user.id}`, 'connected')
+        }
+        setGhFeedback({
+          type: 'success',
+          message: `Successfully synced ${res.data.github_projects?.length || 0} repositories for @${target}! Detected ${res.data.topics?.length || 0} skills.`,
+        })
+        if (updateProfile) {
+          updateProfile({
+            topic_ratings: res.data.topics,
+            detected_years_experience: res.data.detected_years_experience,
+            github_username: target,
+          })
+        }
+        flash('GitHub profile synchronized')
+      }
+    } catch (err) {
+      console.warn('GitHub account sync error:', err)
+      setGhFeedback({
+        type: 'error',
+        message: err?.response?.data?.detail || 'Could not sync GitHub account. Please check the handle.',
+      })
+    } finally {
+      setGhSyncing(false)
+    }
+  }
+
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }))
 
   const fullName = form.full_name || profile?.full_name || user?.user_metadata?.full_name || 'Learner'
@@ -225,6 +275,83 @@ export default function AccountPage() {
                       Comma separated keywords. These directly steer your curated resources and practice problems.
                     </p>
                   </div>
+                </div>
+              </section>
+
+              {/* Developer Stack & GitHub Integration Card */}
+              <section className="bg-white border border-[#e0e0e0] rounded-2xl p-6 shadow-2xs">
+                <div className="flex items-center justify-between mb-5 flex-wrap gap-2">
+                  <div className="flex items-center gap-3">
+                    <span className="w-9 h-9 rounded-xl bg-[#181717] text-white flex items-center justify-center flex-none">
+                      <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor">
+                        <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+                      </svg>
+                    </span>
+                    <div>
+                      <h2 className="font-['Manrope'] font-bold text-[16px] text-[#1d1d1f]">
+                        GitHub Integration
+                      </h2>
+                      <p className="text-xs text-[#7a7a7a]">
+                        Calibrate recommendations against your repositories and commit history
+                      </p>
+                    </div>
+                  </div>
+
+                  {githubHandle && (
+                    <span className="inline-flex items-center gap-1.5 bg-[#ECFDF3] text-[#22A06B] text-xs px-3 py-1 rounded-full font-bold">
+                      <span className="w-2 h-2 rounded-full bg-[#22A06B]"></span>
+                      Connected: @{githubHandle}
+                    </span>
+                  )}
+                </div>
+
+                <div className="bg-[#fafafc] border border-[#e0e0e0] rounded-xl p-4 space-y-3">
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+                    <div className="flex-1 flex items-center bg-white border border-[#e0e0e0] rounded-xl px-3 py-2 text-xs sm:text-sm focus-within:border-[#0066cc] focus-within:ring-2 focus-within:ring-[#0066cc]/20 transition-all">
+                      <span className="text-[#86868b] font-mono mr-1">github.com/</span>
+                      <input
+                        type="text"
+                        value={ghInput}
+                        onChange={(e) => setGhInput(e.target.value)}
+                        placeholder={githubHandle || "username (e.g. torvalds)"}
+                        className="flex-1 bg-transparent text-[#1d1d1f] outline-none"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleSyncGithubAccount}
+                      disabled={ghSyncing || (!ghInput.trim() && !githubHandle)}
+                      className="px-4 py-2 bg-[#181717] hover:bg-black text-white text-xs sm:text-sm font-bold rounded-xl transition-colors cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 flex-none"
+                    >
+                      {ghSyncing ? (
+                        <>
+                          <svg className="animate-spin h-3.5 w-3.5 text-white" viewBox="0 0 24 24" fill="none">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                          </svg>
+                          <span>Syncing…</span>
+                        </>
+                      ) : githubHandle ? (
+                        'Re-sync Repos'
+                      ) : (
+                        'Connect GitHub'
+                      )}
+                    </button>
+                  </div>
+
+                  {ghFeedback && (
+                    <p className={`text-xs font-semibold px-3 py-2 rounded-lg ${
+                      ghFeedback.type === 'error'
+                        ? 'bg-[#FDECEC] text-[#B42318]'
+                        : 'bg-[#ECFDF3] text-[#22A06B]'
+                    }`}>
+                      {ghFeedback.message}
+                    </p>
+                  )}
+
+                  <p className="text-[12px] text-[#7a7a7a] leading-relaxed">
+                    Connecting GitHub enables PathFinder's recommendation engine to evaluate your real repository complexity and recommend advanced milestones instead of basic tutorials.
+                  </p>
                 </div>
               </section>
 

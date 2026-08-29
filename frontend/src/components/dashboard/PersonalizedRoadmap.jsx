@@ -5,6 +5,7 @@ import { useRoadmap } from '../../hooks/useRoadmap'
 import { useAuth } from '../../hooks/useAuth'
 import { supabase } from '../../lib/supabaseClient'
 import AppShell from '../layout/AppShell'
+import ConnectGitHubModal from '../ui/ConnectGitHubModal'
 
 /**
  * PersonalizedRoadmap
@@ -47,6 +48,26 @@ export default function PersonalizedRoadmap({ pathData = null }) {
 
   // Modals for other views (Resources, etc.)
   const [activeModal, setActiveModal] = useState(null)
+  const [showGitHubModal, setShowGitHubModal] = useState(false)
+
+  // Prompt Google / Email users to link GitHub if not yet linked and not permanently dismissed
+  useEffect(() => {
+    if (!user) return
+    const userId = user.id
+    const hasGitHub =
+      user.app_metadata?.provider?.includes('github') ||
+      user.user_metadata?.user_name ||
+      profile?.github_username
+    const preference = localStorage.getItem(`pf_github_preference_${userId}`)
+    const sessionDismissed = sessionStorage.getItem(`pf_github_remind_dismissed_${userId}`)
+
+    if (!hasGitHub && preference !== 'no_github' && preference !== 'connected' && sessionDismissed !== 'true') {
+      const timer = setTimeout(() => {
+        setShowGitHubModal(true)
+      }, 1500)
+      return () => clearTimeout(timer)
+    }
+  }, [user, profile])
 
   // (Completion state is derived from useRoadmap.completedIds now — the old
   // useEffect that seeded a local Set was dead code and referenced a setter
@@ -858,6 +879,16 @@ export default function PersonalizedRoadmap({ pathData = null }) {
           </div>
         </div>
       )}
+
+      {/* GitHub Recommendation Booster Modal */}
+      <ConnectGitHubModal
+        isOpen={showGitHubModal}
+        onClose={() => setShowGitHubModal(false)}
+        onConnected={(ghData) => {
+          setToastMessage(`GitHub synced! Calibrated ${ghData.topics?.length || 0} skills & portfolio depth.`)
+          setTimeout(() => setToastMessage(null), 3500)
+        }}
+      />
 
       {/* Toast Notification — the global "Ask PathFinder" FAB (AIChat, mounted
           once in App.jsx) already covers the floating assistant; no per-page
