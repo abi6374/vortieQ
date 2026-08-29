@@ -131,7 +131,8 @@ def upsert_profile(user_id: str, data: dict) -> dict:
     """
     payload = {"id": user_id}
     for key in ("goal_text", "target_role", "current_level", "interests", "weekly_hours",
-                "topic_ratings", "detected_years_experience"):
+                "topic_ratings", "detected_years_experience",
+                "github_username", "github_repos_summary"):
         if key in data:
             payload[key] = data[key]
 

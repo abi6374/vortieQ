@@ -20,6 +20,16 @@ class GitHubRateLimitedError(Exception):
     reporting the latter when the former is true fabricates data about the
     learner."""
 
+
+class GitHubUserNotFoundError(Exception):
+    """Raised when GitHub returns a real 404 for the requested username —
+    i.e. that account genuinely does not exist. Previously this fell through
+    to the same silent empty-list path as any other non-403/429 error, which
+    analyze_github_repositories([]) then confidently reported as a real
+    "beginner, 0 years experience" finding — fabricating a skill assessment
+    for an account that was simply misspelled. Same fabrication class as
+    GitHubRateLimitedError, different HTTP status."""
+
 # Map common language names and repository topics to normalized skill taxonomies
 LANGUAGE_SKILL_MAP = {
     "python": "Python",
@@ -97,6 +107,12 @@ async def fetch_github_repos(token: Optional[str] = None, username: Optional[str
             resp = await client.get(url, headers=headers)
             if resp.status_code == 200:
                 return resp.json()
+            if resp.status_code == 404 and username:
+                # Only meaningful for a username-based lookup — a 404 on
+                # /user/repos (the authenticated-via-token path) would mean
+                # something else entirely (a bad/expired token), not "this
+                # account doesn't exist".
+                raise GitHubUserNotFoundError(username)
             if resp.status_code in (403, 429):
                 # Secondary rate limit or abuse-detection response. Distinct
                 # from "this account genuinely has no public repos" — must
@@ -107,7 +123,7 @@ async def fetch_github_repos(token: Optional[str] = None, username: Optional[str
                 raise GitHubRateLimitedError(f"GitHub returned {resp.status_code}")
             print(f"[github_service] API error ({url}): {resp.status_code} {resp.text}", flush=True)
             return []
-        except GitHubRateLimitedError:
+        except (GitHubRateLimitedError, GitHubUserNotFoundError):
             raise
         except Exception as exc:
             print(f"[github_service] Failed to fetch repos for {username or 'authenticated user'}: {exc}", flush=True)
