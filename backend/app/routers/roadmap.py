@@ -28,13 +28,10 @@ def set_task(
     payload: dict = Body(...),
     user_id: str = Depends(verify_jwt),
 ):
-    """Toggle a task complete/incomplete. Body: {"completed": true|false, "note": str?}.
+    """Toggle a task complete/incomplete. Body: {"completed": true|false, "note": str?, "rating": int?, "tag": str?}.
 
-    `note`: the learner's real feedback on this task - the frontend makes
-    this mandatory before a completion goes through. Ignored on un-complete.
-
-    Returns the full recomputed roadmap so Progress, Skill insights and the
-    week strip can all refresh from one response.
+    `note`, `rating`, `tag`: the learner's real feedback on this task.
+    Returns the full recomputed roadmap.
     """
     if "completed" not in payload:
         raise HTTPException(400, "Body must include 'completed' (true or false)")
@@ -42,9 +39,34 @@ def set_task(
         return roadmap_service.set_task_completion(
             step_id=step_id, user_id=user_id, completed=bool(payload["completed"]),
             note=str(payload.get("note") or ""),
+            rating=payload.get("rating"),
+            tag=str(payload.get("tag") or ""),
         )
     except PermissionError as e:
         # Prerequisite violation — 409 so the UI can show the lock message.
         raise HTTPException(409, str(e))
     except ValueError as e:
         raise HTTPException(404, str(e))
+
+
+@router.post("/rerecommend")
+def rerecommend_step(
+    payload: dict = Body(...),
+    user_id: str = Depends(verify_jwt),
+):
+    """Re-recommends a single week course based on learner preferences. Body: {"step_id": str, "preference": str?, "note": str?}."""
+    step_id = payload.get("step_id")
+    if not step_id:
+        raise HTTPException(400, "Body must include 'step_id'")
+    try:
+        return roadmap_service.rerecommend_task(
+            step_id=step_id,
+            user_id=user_id,
+            preference=str(payload.get("preference") or "custom"),
+            note=str(payload.get("note") or ""),
+        )
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    except Exception as e:
+        raise HTTPException(500, f"Re-recommendation failed: {e}")
+

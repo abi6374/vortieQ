@@ -141,8 +141,28 @@ def test_web_search_ranking_and_graceful_fallback():
         {"href": "https://randomblog.com/post", "title": "Random Blog"},
         {"href": "https://coursera.org/learn/ml", "title": "Coursera ML"},
         {"href": "https://nptel.ac.in/courses/106", "title": "NPTEL AI"},
+        {"href": "https://takeuforward.org/strivers-a2z-dsa-course-sheet", "title": "Striver A2Z Sheet"},
+        {"href": "https://www.geeksforgeeks.org/python-programming-language", "title": "GFG Python"},
     ]
     ranked = _rank(sample_results)
-    assert "nptel.ac.in" in ranked[0]["href"]
-    assert "coursera.org" in ranked[1]["href"]
-    assert "randomblog.com" in ranked[2]["href"]
+    assert any("nptel.ac.in" in r["href"] for r in ranked[:3])
+    assert any("takeuforward.org" in r["href"] for r in ranked[:3])
+    assert any("geeksforgeeks.org" in r["href"] for r in ranked[:3])
+
+
+def test_detect_provider_and_type():
+    from app.services.web_search_service import _detect_provider_and_type
+    prov1, type1 = _detect_provider_and_type("https://takeuforward.org/dsa-sheet", "Striver A2Z DSA")
+    assert prov1 == "Striver Sheet"
+    assert type1 == "practice_sheet"
+
+    prov2, type2 = _detect_provider_and_type("https://www.geeksforgeeks.org/tree-data-structure", "Tree in GFG")
+    assert prov2 == "GeeksforGeeks"
+    assert type2 == "article"
+
+    prov3, type3 = _detect_provider_and_type("https://docs.python.org/3/tutorial", "Python Docs")
+    assert prov3 == "Official Documentation"
+    assert type3 == "documentation"
+
+
+

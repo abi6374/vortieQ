@@ -465,3 +465,115 @@ def _log_swap_event(user_id: str, path_id: str, step_id: str, note: str) -> None
         "event_type": "not_interested",  # reuse existing enum; note carries the semantic
         "note": note,
     }).execute()
+
+
+def swap_step_with_preference(
+    step_id: str, user_id: str, preference: str = "custom", note: str = ""
+) -> dict:
+    """In-place re-recommendation for a single step according to learner's preference."""
+    step, path = _load_step_full(step_id, user_id)
+    old_course = step.get("courses") or {}
+
+    # Fetch profile (skills, resume context, topic ratings, years, goals)
+    prof_r = supabase_client.table("profiles").select("*").eq("id", user_id).execute()
+    if not prof_r.data:
+        raise ValueError("Profile not found")
+    profile = prof_r.data[0]
+
+    # Calculate target difficulty
+    cur_diff = old_course.get("difficulty") or profile.get("current_level") or "beginner"
+    cur_idx = _LEVEL_TIERS.index(cur_diff) if cur_diff in _LEVEL_TIERS else 0
+
+    level_hint = 0
+    if preference == "too_advanced":
+        level_hint = -1
+    elif preference == "too_basic":
+        level_hint = 1
+
+    target_diff = _LEVEL_TIERS[max(0, min(len(_LEVEL_TIERS) - 1, cur_idx + level_hint))]
+
+    # Get candidates from recommender
+    candidates = get_recommender().recommend(profile) or []
+
+    # Exclude courses currently in the path (except the one being replaced)
+    in_path = {
+        row["course_id"]
+        for row in (
+            supabase_client.table("path_steps")
+            .select("course_id")
+            .eq("path_id", path["id"])
+            .execute()
+            .data
+            or []
+        )
+        if row.get("course_id") and row.get("course_id") != old_course.get("id")
+    }
+    completed_ids = set(profile.get("completed_courses") or [])
+    excluded = in_path | completed_ids | {old_course.get("id")}
+
+    available_candidates = [c for c in candidates if c.get("id") not in excluded]
+
+    FREE_PROVIDERS = {"freecodecamp", "mit ocw", "fast.ai", "hugging face", "google", "geeksforgeeks", "youtube", "takeuforward", "w3schools"}
+
+    def _score_pref(candidate: dict) -> float:
+        base_score = _score_alternative(candidate, old_course, target_diff)
+        prov = (candidate.get("provider") or "").lower()
+        title = (candidate.get("title") or "").lower()
+        desc = (candidate.get("description") or "").lower()
+        tags = " ".join((candidate.get("skill_tags") or [])).lower()
+        full_text = f"{title} {desc} {tags}"
+
+        if preference == "free_resource":
+            if any(fp in prov for fp in FREE_PROVIDERS):
+                base_score += 4.0
+        elif preference == "practice_sheet":
+            if any(kw in full_text for kw in ("problem", "practice", "algorithm", "data structure", "sheet", "code", "hands-on", "interview")):
+                base_score += 4.0
+        elif preference == "too_advanced":
+            if candidate.get("difficulty") == "beginner":
+                base_score += 3.0
+        elif preference == "too_basic":
+            if candidate.get("difficulty") == "advanced":
+                base_score += 3.0
+
+        if note and note.strip():
+            note_words = set(note.lower().split())
+            matches = sum(1 for w in note_words if len(w) > 2 and w in full_text)
+            base_score += matches * 1.5
+
+        return base_score
+
+    if not available_candidates:
+        return {"swapped": False, "reason": "No alternative course available in the catalog"}
+
+    available_candidates.sort(key=_score_pref, reverse=True)
+    replacement = available_candidates[0]
+
+    # Generate personalized explanation for this replacement
+    explanation = generate_explanation(profile, replacement)
+    if preference == "free_resource":
+        explanation = f"Recommended based on your preference for free/open-access learning: {explanation}"
+    elif preference == "practice_sheet":
+        explanation = f"Curated for hands-on problem solving and practice: {explanation}"
+    elif note and note.strip():
+        explanation = f"Tailored to your feedback ('{note.strip()[:60]}...'): {explanation}"
+
+    # In-place update of the step
+    supabase_client.table("path_steps").update({
+        "course_id": replacement["id"],
+        "explanation": explanation,
+        "status": "not_started",
+    }).eq("id", step_id).execute()
+
+    _log_swap_event(
+        user_id, path["id"], step_id,
+        note=f"rerecommended for {replacement.get('title')} (preference={preference}, note={note[:200]})"
+    )
+
+    return {
+        "swapped": True,
+        "step_id": step_id,
+        "replacement": replacement,
+        "explanation": explanation,
+    }
+

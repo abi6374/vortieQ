@@ -88,11 +88,16 @@ export function useRoadmap() {
 
   useEffect(() => { load() }, [load])
 
-  const toggleTask = useCallback(async (stepId, completed, note = '') => {
+  const toggleTask = useCallback(async (stepId, completed, note = '', rating = null, tag = '') => {
     setSavingId(stepId)
     setLockMessage(null)
     try {
-      const res = await api.patch(`/api/roadmap/tasks/${stepId}`, { completed, note })
+      const res = await api.patch(`/api/roadmap/tasks/${stepId}`, {
+        completed,
+        note,
+        rating,
+        tag,
+      })
       setData(res.data) // full recomputed roadmap
       return { ok: true }
     } catch (err) {
@@ -124,6 +129,24 @@ export function useRoadmap() {
     }
   }, [])
 
+  const rerecommendTask = useCallback(async (stepId, preference = 'custom', note = '') => {
+    setSavingId(stepId)
+    try {
+      const res = await api.post('/api/roadmap/rerecommend', {
+        step_id: stepId,
+        preference,
+        note,
+      })
+      setData(res.data) // full recomputed roadmap
+      return { ok: true }
+    } catch (err) {
+      const msg = err?.response?.data?.detail || 'Unable to re-recommend course for this week.'
+      return { ok: false, reason: msg }
+    } finally {
+      setSavingId(null)
+    }
+  }, [])
+
   // Convenience derivations so components don't re-implement them.
   const weeks = data?.weeks || []
   const currentWeek = data?.current_week ?? 1
@@ -137,7 +160,7 @@ export function useRoadmap() {
     completedSteps: data?.completed_steps ?? 0,
     path: data?.path || null,
     loading, error, lockMessage, setLockMessage, savingId,
-    reload: load, toggleTask,
+    reload: load, toggleTask, rerecommendTask,
   }
 }
 

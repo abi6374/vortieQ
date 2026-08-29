@@ -220,6 +220,23 @@ export default function LiquidMetalBackground({ className = '', isDark = false }
     const timeUniform = gl.getUniformLocation(program, 'u_time')
     const isDarkUniform = gl.getUniformLocation(program, 'u_isDark')
 
+    let isVisible = true
+    let observer = null
+    if (window.IntersectionObserver) {
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            isVisible = entry.isIntersecting
+            if (isVisible && !animFrame) {
+              animFrame = requestAnimationFrame(render)
+            }
+          })
+        },
+        { threshold: 0.05 }
+      )
+      observer.observe(canvas)
+    }
+
     let mouseX = window.innerWidth * 0.5
     let mouseY = window.innerHeight * 0.5
     let targetMouseX = mouseX
@@ -234,9 +251,10 @@ export default function LiquidMetalBackground({ className = '', isDark = false }
     window.addEventListener('mousemove', handleMouseMove, { passive: true })
 
     const handleResize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 1.5)
-      canvas.width = canvas.clientWidth * dpr
-      canvas.height = canvas.clientHeight * dpr
+      // Clamp to 1.0 to prevent 4x/8x pixel overdraw on high-DPI retina screens
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.0)
+      canvas.width = Math.round((canvas.clientWidth || window.innerWidth) * dpr)
+      canvas.height = Math.round((canvas.clientHeight || window.innerHeight) * dpr)
       gl.viewport(0, 0, canvas.width, canvas.height)
     }
 
@@ -244,9 +262,14 @@ export default function LiquidMetalBackground({ className = '', isDark = false }
     window.addEventListener('resize', handleResize, { passive: true })
 
     let startTime = performance.now()
-    let animFrame
+    let animFrame = null
 
     const render = (time) => {
+      if (!isVisible) {
+        animFrame = null
+        return
+      }
+
       // Damping mouse physics
       mouseX += (targetMouseX - mouseX) * 0.08
       mouseY += (targetMouseY - mouseY) * 0.08
@@ -271,7 +294,8 @@ export default function LiquidMetalBackground({ className = '', isDark = false }
     animFrame = requestAnimationFrame(render)
 
     return () => {
-      cancelAnimationFrame(animFrame)
+      if (animFrame) cancelAnimationFrame(animFrame)
+      if (observer) observer.disconnect()
       window.removeEventListener('mousemove', handleMouseMove)
       window.removeEventListener('resize', handleResize)
       if (gl) {

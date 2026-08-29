@@ -244,15 +244,17 @@ def _owned_step(step_id: str, user_id: str) -> dict:
     return step
 
 
-def set_task_completion(step_id: str, user_id: str, completed: bool, note: str = "") -> dict:
+def set_task_completion(
+    step_id: str, user_id: str, completed: bool, note: str = "",
+    rating: int = None, tag: str = ""
+) -> dict:
     """Mark a task complete or INCOMPLETE. Both directions persist.
 
     Completing is blocked unless every earlier week is finished — enforced here,
     not just in the UI.
 
-    `note`: the learner's real natural-language feedback on this task (the
-    frontend makes this mandatory on every completion). Stored as a real
-    feedback_events row - not just logged for its own sake: once the note's
+    `note`, `rating` (1-5 stars), `tag`: learner's real feedback on this task.
+    Stored as a real feedback_events row - once the note's
     WEEK becomes fully complete, it's used to reconsider the next
     not-started week's course selection (see feedback_service.
     apply_week_feedback). Ignored on un-complete (nothing to act on there).
@@ -278,18 +280,26 @@ def set_task_completion(step_id: str, user_id: str, completed: bool, note: str =
     new_status = "completed" if completed else "not_started"
     supabase_client.table("path_steps").update({"status": new_status}).eq("id", step_id).execute()
 
-    if completed and note and note.strip():
+    if completed and (note or rating or tag):
+        feedback_content = []
+        if rating:
+            feedback_content.append(f"Rating: {rating}/5 stars")
+        if tag:
+            feedback_content.append(f"Tag: {tag}")
+        if note and note.strip():
+            feedback_content.append(note.strip())
+        combined_note = " | ".join(feedback_content)[:1000]
+
         try:
             supabase_client.table("feedback_events").insert({
                 "user_id": user_id, "path_id": path_id, "step_id": step_id,
-                "event_type": "completed", "note": note.strip()[:1000],
+                "event_type": "completed", "note": combined_note,
             }).execute()
         except Exception as e:
             print(f"[roadmap] feedback note write failed: {type(e).__name__}: {e}", flush=True)
 
         # If this was the last not-yet-terminal step in its week, the week is
-        # now fully done - a good moment to fold this week's feedback into
-        # the upcoming week's course selection.
+        # now fully done - fold this week's feedback into the upcoming week's course selection.
         try:
             remaining = (
                 supabase_client.table("path_steps")
@@ -302,19 +312,9 @@ def set_task_completion(step_id: str, user_id: str, completed: bool, note: str =
             print(f"[roadmap] week-feedback application failed: {type(e).__name__}: {e}", flush=True)
 
     # Keep profiles.completed_courses in step with the toggle, both directions,
-    # so the recommender never re-suggests something the learner just finished
-    # (and does re-suggest it if they un-complete it).
-    #
-    # A split course has multiple path_steps rows sharing one course_id (Part
-    # 1, Part 2, ...) - it only counts as done once EVERY part is terminal, so
-    # this checks the other rows for the same course_id before touching
-    # completed_courses. Un-completing always removes it (the course is no
-    # longer 100% done as soon as any one part isn't), which is correct
-    # whether or not it was ever split.
+    # so the recommender never re-suggests something the learner just finished.
     course_id = step.get("course_id")
     if course_id:
-        # Re-fetch after the update above: every row's *current* status for
-        # this course_id tells us directly whether the whole course is done.
         current_statuses = (
             supabase_client.table("path_steps")
             .select("status").eq("path_id", path_id).eq("course_id", course_id).execute()
@@ -331,13 +331,6 @@ def set_task_completion(step_id: str, user_id: str, completed: bool, note: str =
         if changed:
             supabase_client.table("profiles").update({"completed_courses": ids}).eq("id", user_id).execute()
 
-    # Completing a task is qualifying learning activity — log it so the streak
-    # AND the weekly-activity hours on Progress are derived from what the
-    # learner actually did. We don't track live session duration (no timer),
-    # so the REAL hours for what was just completed is used as the
-    # time-investment estimate — this part's own hours if the course was
-    # split (so completing "Part 1 of 2" doesn't log the whole course's
-    # duration twice), else the whole course's real duration_hrs.
     if completed:
         try:
             from app.services import account_service
@@ -353,6 +346,19 @@ def set_task_completion(step_id: str, user_id: str, completed: bool, note: str =
 
     # Return the whole recomputed roadmap so every dependent view can refresh
     # from one response instead of firing extra requests.
+    return get_roadmap(user_id)
+
+
+def rerecommend_task(
+    step_id: str, user_id: str, preference: str = "custom", note: str = ""
+) -> dict:
+    """Re-recommends a single week course based on learner preferences and returns the recomputed roadmap."""
+    from app.services import path_service
+    res = path_service.swap_step_with_preference(
+        step_id=step_id, user_id=user_id, preference=preference, note=note
+    )
+    if not res.get("swapped"):
+        raise ValueError(res.get("reason", "Could not re-recommend course for this week"))
     return get_roadmap(user_id)
 
 
