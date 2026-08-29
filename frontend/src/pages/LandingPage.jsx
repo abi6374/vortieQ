@@ -140,7 +140,7 @@ export default function LandingPage() {
           <MagneticButton
             strength={25}
             onClick={handleStartRoadmap}
-            className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-[#2DB1F9] to-[#0EA5E9] hover:from-[#0EA5E9] hover:to-[#0284C7] text-white font-bold text-base sm:text-lg shadow-xl shadow-[#2DB1F9]/30 hover:shadow-2xl hover:shadow-[#2DB1F9]/40 transition-all flex items-center justify-center gap-3 group"
+            className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-[#0066CC] to-[#004FA3] hover:from-[#0052A3] hover:to-[#003D80] text-white font-bold text-base sm:text-lg shadow-xl shadow-[#0066CC]/30 hover:shadow-2xl hover:shadow-[#0066CC]/40 transition-all flex items-center justify-center gap-3 group"
           >
             <Sparkles className="w-5 h-5 group-hover:rotate-12 transition-transform" />
             <span>Generate Your Learning Path</span>
@@ -365,7 +365,7 @@ export default function LandingPage() {
             <MagneticButton
               strength={30}
               onClick={handleStartRoadmap}
-              className="w-full sm:w-auto px-9 py-4 rounded-2xl bg-gradient-to-r from-[#2DB1F9] to-[#0EA5E9] hover:from-[#0EA5E9] hover:to-[#0284C7] text-white font-bold text-lg shadow-xl shadow-[#2DB1F9]/35 hover:shadow-2xl hover:shadow-[#2DB1F9]/50 transition-all flex items-center justify-center gap-3 group"
+              className="w-full sm:w-auto px-9 py-4 rounded-2xl bg-gradient-to-r from-[#0066CC] to-[#004FA3] hover:from-[#0052A3] hover:to-[#003D80] text-white font-bold text-lg shadow-xl shadow-[#0066CC]/35 hover:shadow-2xl hover:shadow-[#0066CC]/50 transition-all flex items-center justify-center gap-3 group"
             >
               <Sparkles className="w-5 h-5 group-hover:rotate-12 transition-transform" />
               <span>Generate My Free Roadmap</span>

@@ -5,37 +5,37 @@ import { useAuth } from '../../hooks/useAuth'
 
 /**
  * UserProfileDropdown
- * Replaces the static profile display in TopBar with a sleek interactive dropdown.
- * Features:
- * - Avatar with user initials
- * - Clean user info header (Name & Email)
- * - Quick navigation to Account Settings, Goal Compass, Learning History
- * - Accessible Logout trigger with session cleanup
- * - Framer-motion subtle spring popover transition
+ * High-fidelity top-right user profile pill with initials avatar, full name display,
+ * and an interactive dropdown containing user metadata, navigation links, and a functional Sign Out button.
  */
-export default function UserProfileDropdown() {
+export default function UserProfileDropdown({ light = false }) {
+  const { user, profile, signOut } = useAuth()
+  const navigate = useNavigate()
+  const reduce = useReducedMotion()
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef(null)
-  const navigate = useNavigate()
-  const { user, signOut } = useAuth()
-  const reduce = useReducedMotion()
 
-  const fullName = user?.full_name || user?.user_metadata?.full_name || 'Active Learner'
-  const email = user?.email || 'learner@pathfinder.ai'
+  // Derive user info with profile.full_name as priority
+  const fullName =
+    profile?.full_name ||
+    user?.user_metadata?.full_name ||
+    user?.user_metadata?.name ||
+    user?.email?.split('@')?.[0] ||
+    'Learner'
+  const email = profile?.email || user?.email || 'learner@pathfinder.ai'
+  const initials =
+    fullName
+      .split(' ')
+      .map((w) => w[0])
+      .filter(Boolean)
+      .slice(0, 2)
+      .join('')
+      .toUpperCase() || 'P'
 
-  // Extract initials (e.g. "Dev Bypass User" -> "DB", "John Doe" -> "JD")
-  const initials = fullName
-    .split(' ')
-    .filter(Boolean)
-    .map((n) => n[0])
-    .join('')
-    .substring(0, 2)
-    .toUpperCase() || 'U'
-
-  // Outside click listener to dismiss dropdown
+  // Close dropdown on outside click
   useEffect(() => {
-    function handleClickOutside(e) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsOpen(false)
       }
     }
@@ -57,14 +57,14 @@ export default function UserProfileDropdown() {
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        className={`flex items-center gap-2 px-3 py-1.5 rounded-full bg-white dark:bg-[#181E2C] border border-[#e0e0e0] dark:border-[#2D3748] hover:border-[#2DB1F9] dark:hover:border-[#38BDF8] transition-all shadow-xs cursor-pointer select-none ${
-          isOpen ? 'ring-2 ring-[#2DB1F9]/20 dark:ring-[#38BDF8]/20 border-[#2DB1F9] dark:border-[#38BDF8]' : ''
+        className={`flex items-center gap-2 px-3 py-1.5 rounded-full bg-white dark:bg-[#181E2C] border border-[#e0e0e0] dark:border-[#2D3748] hover:border-[#0066cc] dark:hover:border-[#38BDF8] transition-all shadow-xs cursor-pointer select-none ${
+          isOpen ? 'ring-2 ring-[#0066cc]/20 dark:ring-[#38BDF8]/20 border-[#0066cc] dark:border-[#38BDF8]' : ''
         }`}
         aria-expanded={isOpen}
         aria-haspopup="true"
       >
         {/* Avatar Circle with initials */}
-        <span className="w-8 h-8 rounded-lg bg-[#2DB1F9] text-white font-bold text-xs flex items-center justify-center shadow-xs flex-shrink-0">
+        <span className="w-8 h-8 rounded-lg bg-[#0066cc] text-white font-bold text-xs flex items-center justify-center shadow-xs flex-shrink-0">
           {initials}
         </span>
 
@@ -84,7 +84,7 @@ export default function UserProfileDropdown() {
           strokeLinecap="round"
           strokeLinejoin="round"
           className={`text-[#7a7a7a] dark:text-[#9CA3AF] transition-transform duration-150 ${
-            isOpen ? 'rotate-180 text-[#2DB1F9] dark:text-[#38BDF8]' : ''
+            isOpen ? 'rotate-180 text-[#0066cc] dark:text-[#38BDF8]' : ''
           }`}
         >
           <path d="m6 9 6 6 6-6" />
@@ -94,97 +94,100 @@ export default function UserProfileDropdown() {
       {/* Dropdown Menu Modal — framer-motion smooth open + close, frosted glass */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div
-            initial={reduce ? false : { opacity: 0, y: -8, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={reduce ? { opacity: 0 } : { opacity: 0, y: -6, scale: 0.96 }}
-            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            style={{ transformOrigin: 'top right' }}
-            className="absolute right-0 mt-2.5 w-72 bg-white dark:bg-[#181E2C] border border-[#E6EAF2] dark:border-[#2D3748] shadow-[0_24px_60px_rgba(14,27,56,0.22),0_4px_16px_rgba(14,27,56,0.06)] dark:shadow-[0_24px_60px_rgba(0,0,0,0.6)] rounded-2xl py-2 z-[100]"
-          >
-            {/* User Header Details */}
-            <div className="px-4 py-3 border-b border-[#f0f0f0] dark:border-[#263042]">
-              <div className="flex items-center gap-3">
-                <span className="w-10 h-10 rounded-xl bg-[#2DB1F9] text-white font-extrabold text-sm flex items-center justify-center shadow-xs">
-                  {initials}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-bold text-[#1d1d1f] dark:text-[#F3F4F6] truncate">{fullName}</p>
-                  <p className="text-xs text-[#7a7a7a] dark:text-[#9CA3AF] truncate">{email}</p>
-                </div>
-              </div>
-              <div className="mt-2.5 flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-[#22A06B] shadow-[0_0_8px_rgba(34,160,107,0.6)]" />
-                <span className="text-[11px] font-semibold text-[#333333] dark:text-[#E5E7EB]">
-                  Active Learner
-                </span>
+        <motion.div
+          initial={reduce ? false : { opacity: 0, y: -8, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={reduce ? { opacity: 0 } : { opacity: 0, y: -6, scale: 0.96 }}
+          transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          style={{ transformOrigin: 'top right' }}
+          className="absolute right-0 mt-2.5 w-72 bg-white dark:bg-[#181E2C] border border-[#E6EAF2] dark:border-[#2D3748] shadow-[0_24px_60px_rgba(14,27,56,0.22),0_4px_16px_rgba(14,27,56,0.06)] dark:shadow-[0_24px_60px_rgba(0,0,0,0.6)] rounded-2xl py-2 z-[100]"
+        >
+          {/* User Header Details */}
+          <div className="px-4 py-3 border-b border-[#f0f0f0] dark:border-[#263042]">
+            <div className="flex items-center gap-3">
+              <span className="w-10 h-10 rounded-xl bg-[#0066cc] text-white font-extrabold text-sm flex items-center justify-center shadow-xs">
+                {initials}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-bold text-[#1d1d1f] dark:text-[#F3F4F6] truncate">{fullName}</p>
+                <p className="text-xs text-[#7a7a7a] dark:text-[#9CA3AF] truncate">{email}</p>
               </div>
             </div>
-
-            {/* Core Profile & Navigation Options */}
-            <div className="py-1.5">
-              <button
-                type="button"
-                onClick={() => {
-                  setIsOpen(false)
-                  navigate('/account')
-                }}
-                className="w-full text-left px-4 py-2.5 text-xs sm:text-sm font-semibold text-[#333333] dark:text-[#E5E7EB] hover:text-[#2DB1F9] dark:hover:text-[#38BDF8] hover:bg-[#EAF6FD] dark:hover:bg-[#1E293B] flex items-center gap-3 transition-colors cursor-pointer"
-              >
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                  <circle cx="12" cy="7" r="4" />
-                </svg>
-                <span>Account</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setIsOpen(false)
-                  navigate('/settings')
-                }}
-                className="w-full text-left px-4 py-2.5 text-xs sm:text-sm font-semibold text-[#333333] dark:text-[#E5E7EB] hover:text-[#2DB1F9] dark:hover:text-[#38BDF8] hover:bg-[#EAF6FD] dark:hover:bg-[#1E293B] flex items-center gap-3 transition-colors cursor-pointer"
-              >
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="3" />
-                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6 1.65 1.65 0 0 0 10 3.09V3a2 2 0 1 1 4 0v.09A1.65 1.65 0 0 0 15 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-                </svg>
-                <span>Settings</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setIsOpen(false)
-                  navigate('/onboarding')
-                }}
-                className="w-full text-left px-4 py-2.5 text-xs sm:text-sm font-semibold text-[#333333] dark:text-[#E5E7EB] hover:text-[#2DB1F9] dark:hover:text-[#38BDF8] hover:bg-[#EAF6FD] dark:hover:bg-[#1E293B] flex items-center gap-3 transition-colors cursor-pointer"
-              >
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10" />
-                  <polygon points="16.2 7.8 10.5 10.5 7.8 16.2 13.5 13.5" fill="currentColor" />
-                </svg>
-                <span>Regenerate Goal</span>
-              </button>
+            <div className="mt-2.5 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-[#22A06B] shadow-[0_0_8px_rgba(34,160,107,0.6)]" />
+              <span className="text-[11px] font-semibold text-[#333333] dark:text-[#E5E7EB]">
+                Active Learner
+              </span>
             </div>
+          </div>
 
-            {/* Logout Action */}
-            <div className="border-t border-[#f0f0f0] dark:border-[#263042] pt-1.5">
-              <button
-                type="button"
-                onClick={handleSignOut}
-                className="w-full text-left px-4 py-2 text-xs sm:text-sm font-semibold text-[#D92D20] dark:text-[#F87171] hover:bg-[#FEE4E2]/40 dark:hover:bg-[#7F1D1D]/20 flex items-center gap-3 transition-colors cursor-pointer"
-              >
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                  <polyline points="16 17 21 12 16 7" />
-                  <line x1="21" y1="12" x2="9" y2="12" />
-                </svg>
-                <span>Sign out</span>
-              </button>
-            </div>
-          </motion.div>
+          {/* Core Profile & Navigation Options */}
+          <div className="py-1.5">
+            <button
+              type="button"
+              onClick={() => {
+                setIsOpen(false)
+                navigate('/account')
+              }}
+              className="w-full text-left px-4 py-2.5 text-xs sm:text-sm font-semibold text-[#333333] dark:text-[#E5E7EB] hover:text-[#0066cc] dark:hover:text-[#38BDF8] hover:bg-[#eaf2fc] dark:hover:bg-[#1E293B] flex items-center gap-3 transition-colors cursor-pointer"
+            >
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+              <span>Account</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setIsOpen(false)
+                navigate('/settings')
+              }}
+              className="w-full text-left px-4 py-2.5 text-xs sm:text-sm font-semibold text-[#333333] dark:text-[#E5E7EB] hover:text-[#0066cc] dark:hover:text-[#38BDF8] hover:bg-[#eaf2fc] dark:hover:bg-[#1E293B] flex items-center gap-3 transition-colors cursor-pointer"
+            >
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="3" />
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6 1.65 1.65 0 0 0 10 3.09V3a2 2 0 1 1 4 0v.09A1.65 1.65 0 0 0 15 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+              </svg>
+              <span>Settings</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setIsOpen(false)
+                navigate('/onboarding')
+              }}
+              className="w-full text-left px-4 py-2.5 text-xs sm:text-sm font-semibold text-[#333333] dark:text-[#E5E7EB] hover:text-[#0066cc] dark:hover:text-[#38BDF8] hover:bg-[#eaf2fc] dark:hover:bg-[#1E293B] flex items-center gap-3 transition-colors cursor-pointer"
+            >
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <polygon points="16.2 7.8 10.5 10.5 7.8 16.2 13.5 13.5" fill="currentColor" />
+              </svg>
+              <span>Re-calibrate Goal</span>
+            </button>
+          </div>
+
+          {/* Divider */}
+          <div className="border-t border-[#f0f0f0] dark:border-[#263042] my-1" />
+
+          {/* Functional Sign Out */}
+          <div className="px-2 py-1">
+            <button
+              type="button"
+              onClick={handleSignOut}
+              className="w-full text-left px-3 py-2 rounded-xl text-xs sm:text-sm font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 flex items-center gap-2.5 transition-colors cursor-pointer"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+              <span>Sign Out</span>
+            </button>
+          </div>
+        </motion.div>
         )}
       </AnimatePresence>
     </div>

@@ -112,7 +112,7 @@ export default function LandingNavbar() {
           {isAuthed ? (
             <Link
               to="/dashboard"
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#2DB1F9] hover:bg-[#0EA5E9] text-white font-semibold text-sm shadow-md shadow-[#2DB1F9]/25 hover:shadow-lg transition-all active:scale-95"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0066CC] hover:bg-[#0052A3] text-white font-semibold text-sm shadow-md shadow-[#0066CC]/25 hover:shadow-lg transition-all active:scale-95"
             >
               <span>Dashboard</span>
               <ArrowRight className="w-4 h-4" />
@@ -121,13 +121,13 @@ export default function LandingNavbar() {
             <>
               <Link
                 to="/auth"
-                className="hidden sm:inline-flex items-center px-4 py-2 rounded-xl text-sm font-semibold text-[#1D1D1F] dark:text-[#E2E8F0] hover:text-[#2DB1F9] dark:hover:text-[#38BDF8] transition-colors"
+                className="hidden sm:inline-flex items-center px-4 py-2 rounded-xl text-sm font-semibold text-[#1D1D1F] dark:text-[#E2E8F0] hover:text-[#0066CC] dark:hover:text-[#38BDF8] transition-colors"
               >
                 Sign In
               </Link>
               <Link
                 to="/auth"
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#2DB1F9] hover:bg-[#0EA5E9] text-white font-semibold text-sm shadow-md shadow-[#2DB1F9]/25 hover:shadow-lg transition-all active:scale-95 group"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0066CC] hover:bg-[#0052A3] text-white font-semibold text-sm shadow-md shadow-[#0066CC]/25 hover:shadow-lg transition-all active:scale-95 group"
               >
                 <span>Get Started</span>
                 <Sparkles className="w-4 h-4 group-hover:rotate-12 transition-transform" />

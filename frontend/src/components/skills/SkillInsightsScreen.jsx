@@ -1411,7 +1411,7 @@ export default function SkillInsightsScreen() {
                     setSelectedSkillModal(null)
                     navigate('/progress')
                   }}
-                  className="flex-1 py-2.5 bg-[#2DB1F9] hover:bg-[#0EA5E9] text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer"
+                  className="flex-1 py-2.5 bg-[#0066cc] hover:bg-[#004fa3] text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer"
                 >
                   Start Focused Practice
                 </button>

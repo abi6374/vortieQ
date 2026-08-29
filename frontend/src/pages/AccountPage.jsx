@@ -10,7 +10,7 @@ import { supabase } from '../lib/supabaseClient'
  * Fully responsive 2-column layout filling available viewport width.
  */
 
-const V = '#2DB1F9'
+const V = '#0066cc'
 const FIELD = 'w-full rounded-xl border border-[#e0e0e0] dark:border-[#242E40] bg-white dark:bg-[#0E131E] px-3.5 py-2.5 text-[14.5px] text-[#1d1d1f] dark:text-white outline-none focus:border-[#0066cc] dark:focus:border-[#38BDF8] focus:ring-[3px] focus:ring-[#0066cc]/20 transition-colors'
 const LABEL = 'block text-[13.5px] font-semibold text-[#1d1d1f] dark:text-[#CBD5E1] mb-1.5'
 

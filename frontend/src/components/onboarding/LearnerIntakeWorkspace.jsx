@@ -824,7 +824,7 @@ export default function LearnerIntakeWorkspace({
               ? 'Please describe your background in the text box (Required) before continuing'
               : undefined
           }
-          className="w-[160px] h-[48px] bg-[#2DB1F9] hover:bg-[#0EA5E9] active:scale-[0.99] text-white font-bold rounded-xl shadow-[0_4px_14px_rgba(45,177,249,0.35)] transition-all flex items-center justify-center text-[15px] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-[160px] h-[48px] bg-[#0066cc] hover:bg-[#004fa3] active:scale-[0.99] text-white font-bold rounded-xl shadow-[0_4px_14px_rgba(0,102,204,0.35)] transition-all flex items-center justify-center text-[15px] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {uploading ? (
             <span className="flex items-center gap-2">
@@ -922,7 +922,7 @@ export default function LearnerIntakeWorkspace({
               <button
                 type="button"
                 onClick={handleSaveDraft}
-                className="px-5 py-2 bg-[#2DB1F9] hover:bg-[#0EA5E9] text-white text-sm font-bold rounded-xl shadow-sm"
+                className="px-5 py-2 bg-[#0066cc] hover:bg-[#004fa3] text-white text-sm font-bold rounded-xl shadow-sm"
               >
                 Save Draft
               </button>

@@ -10,7 +10,7 @@ import { supabase } from '../../lib/supabaseClient'
  */
 
 const STYLES = `
-.pfa { --violet:#2DB1F9; --violet-2:#38BDF8; --violet-dark:#0EA5E9; --navy:#1d1d1f;
+.pfa { --violet:#0066cc; --violet-2:#0071e3; --violet-dark:#004fa3; --navy:#1d1d1f;
   --slate:#333333; --muted:#7a7a7a; --input-bd:#d3d4d5; --divider:#f0f0f0;
   --app-bd:#f0f0f0; --lav-circle:#dbeafc;
   min-height:100vh; position:relative; overflow:hidden; display:flex; align-items:center;

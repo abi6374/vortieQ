@@ -132,7 +132,7 @@ function HackathonDetailModal({ hackathon, registered, onRegister, onClose }) {
               href={hackathon.registration_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1 py-3 rounded-xl bg-[#2DB1F9] hover:bg-[#0EA5E9] text-white font-bold text-sm text-center transition-all shadow-md cursor-pointer flex items-center justify-center gap-2"
+              className="flex-1 py-3 rounded-xl bg-[#0066cc] hover:bg-[#004fa3] dark:bg-[#38BDF8] dark:hover:bg-[#0ea5e9] text-white dark:text-[#0B0E14] font-bold text-sm text-center transition-all shadow-md cursor-pointer flex items-center justify-center gap-2"
               onClick={() => !registered && onRegister(hackathon.id)}
             >
               <span>{registered ? '✓ Registered — View Event' : 'Register on Official Platform ↗'}</span>
@@ -154,12 +154,12 @@ function HackathonCard({ hackathon, registered, onRegister, onView }) {
   const s = STATUS_META[hackathon.status] || STATUS_META.upcoming
   return (
     <div
-      className="group bg-white dark:bg-[#141A26] rounded-2xl border border-[#e0e0e0] dark:border-[#242E40] shadow-sm hover:shadow-[0_8px_32px_rgba(45,177,249,0.15)] dark:hover:shadow-[0_8px_32px_rgba(56,189,248,0.12)] transition-all duration-200 hover:-translate-y-0.5 overflow-hidden cursor-pointer flex flex-col justify-between"
+      className="group bg-white dark:bg-[#141A26] rounded-2xl border border-[#e0e0e0] dark:border-[#242E40] shadow-sm hover:shadow-[0_8px_32px_rgba(0,102,204,0.10)] dark:hover:shadow-[0_8px_32px_rgba(56,189,248,0.08)] transition-all duration-200 hover:-translate-y-0.5 overflow-hidden cursor-pointer flex flex-col justify-between"
       onClick={() => onView(hackathon)}
     >
       <div>
         {/* Card image banner */}
-        <div className="relative h-28 overflow-hidden flex-none bg-gradient-to-br from-[#2DB1F9] to-[#0EA5E9] dark:from-[#1a3a6e] dark:to-[#0d1f3c]">
+        <div className="relative h-28 overflow-hidden flex-none bg-gradient-to-br from-[#0066cc] to-[#0047b3] dark:from-[#1a3a6e] dark:to-[#0d1f3c]">
           {hackathon.image_url && (
             <img src={hackathon.image_url} alt={hackathon.name} className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-60 transition-opacity" />
           )}
@@ -178,7 +178,7 @@ function HackathonCard({ hackathon, registered, onRegister, onView }) {
         {/* Body */}
         <div className="flex flex-col gap-3 p-4">
           <div>
-            <h3 className="font-['Manrope'] font-extrabold text-base text-[#1d1d1f] dark:text-white leading-tight line-clamp-2 group-hover:text-[#2DB1F9] dark:group-hover:text-[#38BDF8] transition-colors">
+            <h3 className="font-['Manrope'] font-extrabold text-base text-[#1d1d1f] dark:text-white leading-tight line-clamp-2 group-hover:text-[#0066cc] dark:group-hover:text-[#38BDF8] transition-colors">
               {hackathon.name}
             </h3>
             {hackathon.tagline && (
@@ -190,7 +190,7 @@ function HackathonCard({ hackathon, registered, onRegister, onView }) {
           {hackathon.themes?.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
               {hackathon.themes.slice(0, 3).map((t, i) => (
-                <span key={i} className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-[#EAF6FD] dark:bg-[rgba(45,177,249,0.15)] text-[#2DB1F9] dark:text-[#38BDF8]">
+                <span key={i} className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-[#eaf2fc] dark:bg-[rgba(41,151,255,0.15)] text-[#0066cc] dark:text-[#38BDF8]">
                   {t}
                 </span>
               ))}
@@ -226,7 +226,7 @@ function HackathonCard({ hackathon, registered, onRegister, onView }) {
           className={`w-full py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center ${
             registered
               ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
-              : 'bg-[#2DB1F9] hover:bg-[#0EA5E9] text-white shadow-sm'
+              : 'bg-[#0066cc] hover:bg-[#004fa3] dark:bg-[#38BDF8] dark:hover:bg-[#0ea5e9] text-white dark:text-[#0B0E14] shadow-sm'
           }`}
         >
           <span>{registered ? '✓ Registered — View Website ↗' : 'Register on Website ↗'}</span>
@@ -380,8 +380,8 @@ export default function HackathonsScreen() {
                         onClick={() => setSelectedTheme(theme)}
                         className={`flex-none px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer ${
                           selectedTheme === theme
-                            ? 'bg-[#2DB1F9] text-white border-[#2DB1F9]'
-                            : 'bg-white dark:bg-[#141A26] text-[#333] dark:text-[#D1D5DB] border-[#e0e0e0] dark:border-[#242E40] hover:border-[#2DB1F9] dark:hover:border-[#38BDF8]'
+                            ? 'bg-[#0066cc] dark:bg-[#38BDF8] text-white dark:text-[#0B0E14] border-[#0066cc] dark:border-[#38BDF8]'
+                            : 'bg-white dark:bg-[#141A26] text-[#333] dark:text-[#D1D5DB] border-[#e0e0e0] dark:border-[#242E40] hover:border-[#0066cc] dark:hover:border-[#38BDF8]'
                         }`}
                       >
                         {theme}
@@ -413,14 +413,14 @@ export default function HackathonsScreen() {
               {/* States */}
               {loading && (
                 <div className="flex flex-col items-center justify-center py-20 gap-4">
-                  <div className="w-10 h-10 rounded-full border-4 border-[#e0e0e0] border-t-[#2DB1F9] animate-spin" />
+                  <div className="w-10 h-10 rounded-full border-4 border-[#e0e0e0] border-t-[#0066cc] animate-spin" />
                   <p className="text-sm text-[#7a7a7a] dark:text-[#9CA3AF]">Loading hackathons…</p>
                 </div>
               )}
               {error && !loading && (
                 <div className="flex flex-col items-center gap-4 py-16">
                   <p className="text-[#6e6e73] dark:text-[#9CA3AF] text-sm">{error}</p>
-                  <button onClick={loadHackathons} className="px-4 py-2 rounded-xl bg-[#2DB1F9] hover:bg-[#0EA5E9] text-white text-sm font-semibold cursor-pointer">Retry</button>
+                  <button onClick={loadHackathons} className="px-4 py-2 rounded-xl bg-[#0066cc] text-white text-sm font-semibold cursor-pointer">Retry</button>
                 </div>
               )}
               {!loading && !error && filtered.length === 0 && (
@@ -429,7 +429,7 @@ export default function HackathonsScreen() {
                   <p className="text-xs sm:text-sm text-[#7a7a7a] dark:text-[#9CA3AF] text-center max-w-sm">
                     No hackathon events match your current filter selection.
                   </p>
-                  <button onClick={() => { setSelectedTheme('All'); setSelectedStatus('All') }} className="mt-2 text-xs font-bold text-[#2DB1F9] dark:text-[#38BDF8] cursor-pointer">
+                  <button onClick={() => { setSelectedTheme('All'); setSelectedStatus('All') }} className="mt-2 text-xs font-bold text-[#0066cc] dark:text-[#38BDF8] cursor-pointer">
                     Clear all filters
                   </button>
                 </div>

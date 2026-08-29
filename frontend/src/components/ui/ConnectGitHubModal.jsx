@@ -157,7 +157,7 @@ export default function ConnectGitHubModal({ isOpen, onClose, onConnected, onRem
                 <button
                   type="submit"
                   disabled={loading || !username.trim()}
-                  className="px-4 py-1.5 bg-[#2DB1F9] hover:bg-[#0EA5E9] text-white text-xs font-bold rounded-xl shadow-xs transition-colors cursor-pointer disabled:opacity-40"
+                  className="px-4 py-1.5 bg-[#0066cc] hover:bg-[#0052a3] text-white text-xs font-bold rounded-xl shadow-xs transition-colors cursor-pointer disabled:opacity-40"
                 >
                   {loading ? 'Syncing…' : 'Sync'}
                 </button>

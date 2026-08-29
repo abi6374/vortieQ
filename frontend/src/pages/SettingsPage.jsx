@@ -9,7 +9,7 @@ import api from '../lib/apiClient'
  * so the plan genuinely reflects the new budget.
  */
 
-const V = '#2DB1F9'
+const V = '#0066cc'
 const FIELD = 'w-full rounded-xl border border-[#e0e0e0] dark:border-[#242E40] bg-white dark:bg-[#0E131E] px-3.5 py-2.5 text-[14.5px] text-[#1d1d1f] dark:text-white outline-none focus:border-[#0066cc] dark:focus:border-[#38BDF8] focus:ring-[3px] focus:ring-[#0066cc]/20 transition-colors'
 const LABEL = 'block text-[13.5px] font-semibold text-[#1d1d1f] dark:text-[#CBD5E1] mb-1.5'
 
@@ -215,8 +215,8 @@ export default function SettingsPage() {
                         onClick={() => toggleFormat(f)}
                         className={`rounded-xl px-4 py-2 text-[13px] font-bold border transition-all capitalize cursor-pointer shadow-xs ${
                           on
-                            ? 'bg-[#2DB1F9] border-[#2DB1F9] text-white'
-                            : 'bg-white dark:bg-[#0E131E] border-[#e0e0e0] dark:border-[#242E40] text-[#333333] dark:text-[#CBD5E1] hover:border-[#2DB1F9] dark:hover:border-[#38BDF8]'
+                            ? 'bg-[#0066cc] border-[#0066cc] text-white'
+                            : 'bg-white dark:bg-[#0E131E] border-[#e0e0e0] dark:border-[#242E40] text-[#333333] dark:text-[#CBD5E1] hover:border-[#0066cc] dark:hover:border-[#38BDF8]'
                         }`}
                       >
                         {on ? `✓ ${f}` : `+ ${f}`}

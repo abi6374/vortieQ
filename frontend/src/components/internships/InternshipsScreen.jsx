@@ -124,7 +124,7 @@ function InternshipDetailModal({ internship, applied, onApply, onClose }) {
               href={internship.apply_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1 py-3 rounded-xl bg-[#2DB1F9] hover:bg-[#0EA5E9] text-white font-bold text-sm text-center transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+              className="flex-1 py-3 rounded-xl bg-[#0066cc] hover:bg-[#004fa3] dark:bg-[#38BDF8] dark:hover:bg-[#0ea5e9] text-white dark:text-[#0B0E14] font-bold text-sm text-center transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
               onClick={() => onApply(internship.id, internship.apply_url)}
             >
               <span>{applied ? '✓ Applied — View Posting' : 'Apply on Official Board ↗'}</span>
@@ -145,7 +145,7 @@ function InternshipDetailModal({ internship, applied, onApply, onClose }) {
 function InternshipCard({ internship, applied, onApply, onView }) {
   return (
     <div
-      className="group bg-white dark:bg-[#141A26] rounded-2xl border border-[#e0e0e0] dark:border-[#242E40] p-5 shadow-sm hover:shadow-[0_8px_32px_rgba(45,177,249,0.15)] dark:hover:shadow-[0_8px_32px_rgba(56,189,248,0.12)] transition-all duration-200 hover:-translate-y-0.5 cursor-pointer flex flex-col justify-between"
+      className="group bg-white dark:bg-[#141A26] rounded-2xl border border-[#e0e0e0] dark:border-[#242E40] p-5 shadow-sm hover:shadow-[0_8px_32px_rgba(0,102,204,0.10)] dark:hover:shadow-[0_8px_32px_rgba(56,189,248,0.08)] transition-all duration-200 hover:-translate-y-0.5 cursor-pointer flex flex-col justify-between"
       onClick={() => onView(internship)}
     >
       <div className="flex flex-col gap-3">
@@ -153,7 +153,7 @@ function InternshipCard({ internship, applied, onApply, onView }) {
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1">
             <div className="flex items-center gap-2 flex-wrap mb-1">
-              <span className="text-xs font-extrabold uppercase tracking-wider text-[#2DB1F9] dark:text-[#38BDF8]">
+              <span className="text-xs font-extrabold uppercase tracking-wider text-[#0066cc] dark:text-[#38BDF8]">
                 {internship.company}
               </span>
               {internship.is_remote && (
@@ -162,11 +162,11 @@ function InternshipCard({ internship, applied, onApply, onView }) {
                 </span>
               )}
             </div>
-            <h3 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white leading-tight group-hover:text-[#2DB1F9] dark:group-hover:text-[#38BDF8] transition-colors line-clamp-2">
+            <h3 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white leading-tight group-hover:text-[#0066cc] dark:group-hover:text-[#38BDF8] transition-colors line-clamp-2">
               {internship.title}
             </h3>
           </div>
-          <div className="w-8 h-8 rounded-xl bg-[#EAF6FD] dark:bg-[rgba(45,177,249,0.18)] text-[#2DB1F9] dark:text-[#38BDF8] flex items-center justify-center flex-none">
+          <div className="w-8 h-8 rounded-xl bg-[#eaf2fc] dark:bg-[rgba(41,151,255,0.18)] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center flex-none">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
           </div>
         </div>
@@ -214,7 +214,7 @@ function InternshipCard({ internship, applied, onApply, onView }) {
           className={`px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all flex items-center gap-1 cursor-pointer ${
             applied
               ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
-              : 'bg-[#2DB1F9] hover:bg-[#0EA5E9] text-white shadow-sm'
+              : 'bg-[#0066cc] hover:bg-[#004fa3] dark:bg-[#38BDF8] dark:hover:bg-[#0ea5e9] text-white dark:text-[#0B0E14] shadow-sm'
           }`}
         >
           <span>{applied ? '✓ Applied — View Job ↗' : 'Apply on Website ↗'}</span>
@@ -386,12 +386,12 @@ export default function InternshipsScreen() {
                   </div>
 
                   {/* Remote Toggle with Rounded Box */}
-                  <label className="flex items-center gap-2.5 text-xs sm:text-sm font-semibold text-[#1d1d1f] dark:text-white cursor-pointer select-none px-3 py-2 rounded-xl border border-[#e0e0e0] dark:border-[#242E40] bg-white dark:bg-[#141A26] hover:border-[#2DB1F9] dark:hover:border-[#38BDF8] transition-colors shadow-xs">
+                  <label className="flex items-center gap-2.5 text-xs sm:text-sm font-semibold text-[#1d1d1f] dark:text-white cursor-pointer select-none px-3 py-2 rounded-xl border border-[#e0e0e0] dark:border-[#242E40] bg-white dark:bg-[#141A26] hover:border-[#0066cc] dark:hover:border-[#38BDF8] transition-colors shadow-xs">
                     <input
                       type="checkbox"
                       checked={remoteOnly}
                       onChange={e => setRemoteOnly(e.target.checked)}
-                      className="w-4 h-4 rounded-md text-[#2DB1F9] border-[#d1d5db] dark:border-[#4b5563] focus:ring-0 cursor-pointer accent-[#2DB1F9]"
+                      className="w-4 h-4 rounded-md text-[#0066cc] border-[#d1d5db] dark:border-[#4b5563] focus:ring-0 cursor-pointer accent-[#0066cc]"
                     />
                     <span>Remote Only</span>
                   </label>
@@ -406,8 +406,8 @@ export default function InternshipsScreen() {
                         onClick={() => setSelectedCategory(cat)}
                         className={`flex-none px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer ${
                           selectedCategory === cat
-                            ? 'bg-[#2DB1F9] text-white border-[#2DB1F9]'
-                            : 'bg-white dark:bg-[#141A26] text-[#333] dark:text-[#D1D5DB] border-[#e0e0e0] dark:border-[#242E40] hover:border-[#2DB1F9] dark:hover:border-[#38BDF8]'
+                            ? 'bg-[#0066cc] dark:bg-[#38BDF8] text-white dark:text-[#0B0E14] border-[#0066cc] dark:border-[#38BDF8]'
+                            : 'bg-white dark:bg-[#141A26] text-[#333] dark:text-[#D1D5DB] border-[#e0e0e0] dark:border-[#242E40] hover:border-[#0066cc] dark:hover:border-[#38BDF8]'
                         }`}
                       >
                         {cat}
@@ -429,14 +429,14 @@ export default function InternshipsScreen() {
               {/* States */}
               {loading && (
                 <div className="flex flex-col items-center justify-center py-20 gap-4">
-                  <div className="w-10 h-10 rounded-full border-4 border-[#e0e0e0] border-t-[#2DB1F9] animate-spin" />
+                  <div className="w-10 h-10 rounded-full border-4 border-[#e0e0e0] border-t-[#0066cc] animate-spin" />
                   <p className="text-sm text-[#7a7a7a] dark:text-[#9CA3AF]">Querying live Greenhouse boards in parallel…</p>
                 </div>
               )}
               {error && !loading && (
                 <div className="flex flex-col items-center gap-4 py-16">
                   <p className="text-[#6e6e73] dark:text-[#9CA3AF] text-sm">{error}</p>
-                  <button onClick={loadInternships} className="px-4 py-2 rounded-xl bg-[#2DB1F9] hover:bg-[#0EA5E9] text-white text-sm font-semibold cursor-pointer">Retry</button>
+                  <button onClick={loadInternships} className="px-4 py-2 rounded-xl bg-[#0066cc] text-white text-sm font-semibold cursor-pointer">Retry</button>
                 </div>
               )}
               {!loading && !error && filtered.length === 0 && (

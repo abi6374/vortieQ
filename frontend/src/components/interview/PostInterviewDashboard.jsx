@@ -142,7 +142,7 @@ ${recommended_learning_topics.map(t => `- ${t}`).join('\n')}
             <button
               type="button"
               onClick={() => navigate('/dashboard')}
-              className="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-[#2DB1F9] hover:bg-[#0EA5E9] transition-all shadow-sm cursor-pointer flex items-center gap-2"
+              className="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-[#0066cc] dark:bg-[#38BDF8] dark:text-[#090D16] hover:bg-[#0052a3] dark:hover:bg-[#0284c7] transition-all shadow-sm cursor-pointer flex items-center gap-2"
             >
               <span>Return to Roadmap</span>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -458,7 +458,7 @@ ${recommended_learning_topics.map(t => `- ${t}`).join('\n')}
               <button
                 type="button"
                 onClick={() => navigate('/dashboard')}
-                className="px-4 py-2 rounded-xl bg-[#2DB1F9] text-white text-xs font-bold hover:bg-[#0EA5E9] transition-colors cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-[#0066cc] text-white text-xs font-bold hover:bg-[#005bb5] transition-colors cursor-pointer"
               >
                 Go to Roadmap
               </button>

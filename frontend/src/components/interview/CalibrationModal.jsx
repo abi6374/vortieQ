@@ -514,7 +514,7 @@ export default function CalibrationModal({
                 type="button"
                 disabled={!canProceed}
                 onClick={handleStartInterview}
-                className="w-full py-3.5 px-5 rounded-xl text-sm font-bold text-white bg-[#2DB1F9] hover:bg-[#0EA5E9] disabled:opacity-40 disabled:cursor-not-allowed shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-3.5 px-5 rounded-xl text-sm font-bold text-white bg-[#0066cc] hover:bg-[#0052a3] dark:bg-[#38BDF8] dark:text-[#090D16] dark:hover:bg-[#0284c7] disabled:opacity-40 disabled:cursor-not-allowed shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10" />

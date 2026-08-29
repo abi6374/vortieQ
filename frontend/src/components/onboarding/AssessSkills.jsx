@@ -18,8 +18,8 @@ const LEVEL_META = {
   expert:       { label: 'Expert',       blurb: 'Architect & mentor level' },
 }
 
-const V = '#2DB1F9'
-const V_DARK = '#0EA5E9'
+const V = '#0066cc'
+const V_DARK = '#004fa3'
 
 function normalizeLevel(l) {
   const k = (l || '').toLowerCase()
@@ -344,7 +344,7 @@ export default function AssessSkills({ topics = [], detectedYears = 0, onContinu
               <button
                 type="submit"
                 disabled={!newSkillInput.trim()}
-                className="px-3 py-1 bg-[#2DB1F9] hover:bg-[#0EA5E9] text-white text-xs font-bold rounded-full transition-all cursor-pointer disabled:opacity-40 flex-none"
+                className="px-3 py-1 bg-[#0066CC] hover:bg-[#0052A3] text-white text-xs font-bold rounded-full transition-all cursor-pointer disabled:opacity-40 flex-none"
               >
                 Add
               </button>
