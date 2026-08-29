@@ -227,6 +227,36 @@ def process_interview_answer(
     current_milestone = path_info["current_milestone"]
     is_final = question_number >= total_questions
 
+    clean_transcript = (transcript or "").strip()
+    is_empty = not clean_transcript or clean_transcript in ("Candidate answered verbally.", "No answer recorded.", "No verbal response recorded.") or len(clean_transcript.split()) < 3
+
+    if is_empty:
+        unanswered_eval = {
+            "question_id": current_question.get("id", f"q{question_number}"),
+            "score": 0,
+            "verdict": "weak",
+            "strengths": [],
+            "missing_concepts": ["Candidate did not provide a verbal answer to this question"],
+            "feedback": "No verbal answer was provided for this question."
+        }
+        next_q = None
+        if not is_final:
+            next_q = {
+                "id": f"q{question_number + 1}",
+                "question": f"Moving to our next topic, can you describe key considerations when working with {current_milestone}?",
+                "category": "Foundations & Practice",
+                "difficulty": "medium",
+                "skill_focus": current_milestone,
+                "key_criteria": ["Clear explanation of core principles", "Practical application"],
+                "model_answer_summary": "Candidate outlines fundamental mechanics and use-cases."
+            }
+        return {
+            "question_number": question_number,
+            "answer_evaluation": unanswered_eval,
+            "completed": is_final,
+            "next_question": next_q
+        }
+
     # Single Bedrock request: evaluate current answer + generate adaptive next question
     prompt = f"""You are the AI Interviewer evaluating a candidate's verbal response and deciding the next step.
 
@@ -236,7 +266,7 @@ CONTEXT:
 - Question Number: {question_number} of {total_questions}
 - Question Asked: "{current_question.get('question')}"
 - Key Criteria Expected: {json.dumps(current_question.get('key_criteria', []))}
-- Candidate Transcript: "{transcript or 'No verbal response recorded.'}"
+- Candidate Transcript: "{clean_transcript}"
 
 TASK:
 1. Evaluate the candidate's answer:
@@ -291,7 +321,7 @@ Respond ONLY in valid JSON matching this schema:
                     "question_number": question_number,
                     "category": current_question.get("category"),
                     "question_text": current_question.get("question"),
-                    "candidate_transcript": transcript,
+                    "candidate_transcript": clean_transcript,
                     "score": parsed["answer_evaluation"].get("score", 75),
                     "strengths": parsed["answer_evaluation"].get("strengths"),
                     "missing_concepts": parsed["answer_evaluation"].get("missing_concepts"),
@@ -311,9 +341,9 @@ Respond ONLY in valid JSON matching this schema:
         logger.warning(f"Bedrock adaptive turn failed, generating local fallback: {e}")
 
     # Fallback adaptive response
-    words = len(transcript.split()) if transcript else 0
-    score = min(92, max(55, 65 + int(words / 4)))
-    verdict = "strong" if score >= 80 else "partial" if score >= 65 else "weak"
+    words = len(clean_transcript.split()) if clean_transcript else 0
+    score = min(92, max(30, 45 + int(words / 3)))
+    verdict = "strong" if score >= 80 else "partial" if score >= 60 else "weak"
 
     fallback_eval = {
         "question_id": current_question.get("id", f"q{question_number}"),
@@ -361,6 +391,53 @@ def finalize_interview_session(
     current_milestone = path_info["current_milestone"]
     upcoming_topics = path_info["upcoming_topics"]
 
+    # Filter out empty or placeholder answers
+    valid_answers = [a for a in answers if a.get("transcript") and a.get("transcript").strip() not in ("", "Candidate answered verbally.", "No answer recorded.") and len(a.get("transcript", "").strip().split()) >= 3]
+
+    if not valid_answers:
+        zero_result = {
+            "overall_score": 0,
+            "verdict": "Do Not Hire",
+            "summary": f"The candidate did not provide any verbal answers to the questions asked during the session for '{target_role}'.",
+            "scores": {
+                "concept_understanding": 0,
+                "practical_application": 0,
+                "problem_solving": 0,
+                "communication": 0,
+                "confidence_structure": 0
+            },
+            "strengths": [
+                "Initiated the technical interview session"
+            ],
+            "skill_gaps": [
+                f"Provide verbal answers aloud to technical questions for {target_role}",
+                "Practice articulating fundamental concepts using structured responses"
+            ],
+            "recommended_learning_topics": [
+                upcoming_topics[0] if upcoming_topics else "Technical Fundamentals",
+                "Communication & Response Framing",
+                "Architecture & System Design"
+            ]
+        }
+        # Update session in Supabase if exists
+        try:
+            supabase_client.table("interview_sessions").update({
+                "status": "completed",
+                "overall_score": 0,
+                "verdict": "Do Not Hire",
+                "summary": zero_result["summary"],
+                "scores": zero_result["scores"],
+                "strengths": zero_result["strengths"],
+                "skill_gaps": zero_result["skill_gaps"],
+                "recommended_topics": zero_result["recommended_learning_topics"],
+                "duration_sec": total_duration_sec,
+                "completed_at": "now()"
+            }).eq("id", session_id).execute()
+        except Exception:
+            pass
+
+        return zero_result
+
     # Build multi-turn transcript summary
     transcript_summary = ""
     for i, q in enumerate(questions):
@@ -378,6 +455,7 @@ INTERVIEW TRANSCRIPT:
 {transcript_summary}
 
 Analyze the candidate's answers deeply and produce a structured final assessment.
+NOTE: Compute the overall_score as the exact average of individual question performance (0-100).
 
 Return ONLY valid JSON matching this schema:
 {{
@@ -439,36 +517,9 @@ Return ONLY valid JSON matching this schema:
         logger.warning(f"Bedrock finalization failed, generating algorithmic synthesis: {e}")
 
     # Fallback algorithmic final score
-    valid_answers = [a for a in answers if a.get("transcript") and a.get("transcript").strip() not in ("", "Candidate answered verbally.", "No answer recorded.")]
     total_w = sum(len(a.get("transcript", "").split()) for a in valid_answers)
-
-    if not valid_answers or total_w == 0:
-        return {
-            "overall_score": 0,
-            "verdict": "Do Not Hire",
-            "summary": f"The candidate did not provide any verbal responses to the questions asked during the session for '{target_role}'.",
-            "scores": {
-                "concept_understanding": 0,
-                "practical_application": 0,
-                "problem_solving": 0,
-                "communication": 0,
-                "confidence_structure": 0
-            },
-            "strengths": [
-                "Initiated the technical interview calibration session"
-            ],
-            "skill_gaps": [
-                f"Provide verbal explanations of core concepts required for {target_role}",
-                "Practice framing structured technical answers aloud"
-            ],
-            "recommended_learning_topics": [
-                upcoming_topics[0] if upcoming_topics else "Technical Fundamentals",
-                "Communication & Problem Framing",
-                "Architecture & System Design"
-            ]
-        }
-
-    avg_score = min(92, max(30, int(50 + (total_w / 15))))
+    answered_ratio = len(valid_answers) / max(1, len(questions))
+    avg_score = min(92, max(0, int((45 + (total_w / 15)) * answered_ratio)))
 
     return {
         "overall_score": avg_score,
