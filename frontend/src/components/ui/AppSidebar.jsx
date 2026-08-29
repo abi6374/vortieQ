@@ -87,8 +87,8 @@ export const NAV = [
   { key: 'progress',   label: 'Progress',        path: '/progress' },
   { key: 'skills',     label: 'Skill insights',  path: '/skills' },
   { key: 'resources',  label: 'Resources',       path: '/resources' },
-  { key: 'hackathons', label: 'Hackathons',      path: '/hackathons', badge: 'New' },
-  { key: 'internships',label: 'Internships',     path: '/internships', badge: 'New' },
+  { key: 'hackathons', label: 'Hackathons',      path: '/hackathons' },
+  { key: 'internships',label: 'Internships',     path: '/internships' },
   { key: 'interview',  label: 'AI Interview',    path: '/interview', badge: 'Beta' },
   { key: 'coach',      label: 'AI coach',        path: '/coach' },
 ]
