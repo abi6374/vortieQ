@@ -2,8 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react'
 import AppShell from '../layout/AppShell'
 import api from '../../lib/apiClient'
 
-const V = '#0066cc'
-
 const CATEGORY_CHIPS = ['All', 'AI/ML', 'Web Dev', 'Data Science', 'DevOps', 'Security', 'Mobile', 'Design', 'Product', 'Marketing']
 const STATUS_STAGES = [
   { id: 'applied', label: 'Applied', color: 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800' },
@@ -42,7 +40,7 @@ function InternshipDetailModal({ internship, applied, onApply, onClose }) {
             </span>
             {internship.is_remote && (
               <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-400/30 text-emerald-100 border border-emerald-400/40">
-                🌐 Remote-Friendly
+                Remote-Friendly
               </span>
             )}
           </div>
@@ -58,13 +56,37 @@ function InternshipDetailModal({ internship, applied, onApply, onClose }) {
           {/* Highlights grid */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { icon: '🏢', label: 'Company', val: internship.company },
-              { icon: '⏱️', label: 'Duration', val: internship.duration || '3–6 months' },
-              { icon: '💰', label: 'Stipend', val: internship.stipend || 'Competitive' },
-              { icon: '📅', label: 'Published', val: fmtDate(internship.published_at) },
+              {
+                icon: (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                ),
+                label: 'Company',
+                val: internship.company
+              },
+              {
+                icon: (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                ),
+                label: 'Duration',
+                val: internship.duration || '3–6 months'
+              },
+              {
+                icon: (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                ),
+                label: 'Compensation',
+                val: internship.stipend || 'Competitive'
+              },
+              {
+                icon: (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                ),
+                label: 'Posted Date',
+                val: fmtDate(internship.published_at)
+              },
             ].map(item => (
-              <div key={item.label} className="flex flex-col gap-0.5 bg-[#fafafc] dark:bg-[#0d1117] rounded-xl p-3 border border-[#f0f0f0] dark:border-[#1a2032]">
-                <span className="text-base">{item.icon}</span>
+              <div key={item.label} className="flex flex-col gap-1 bg-[#fafafc] dark:bg-[#0d1117] rounded-xl p-3 border border-[#f0f0f0] dark:border-[#1a2032]">
+                <span className="text-[#0066cc] dark:text-[#38BDF8]">{item.icon}</span>
                 <span className="text-[10px] font-semibold uppercase tracking-wide text-[#7a7a7a] dark:text-[#9CA3AF]">{item.label}</span>
                 <span className="text-xs sm:text-sm font-bold text-[#1d1d1f] dark:text-white truncate">{item.val}</span>
               </div>
@@ -104,8 +126,7 @@ function InternshipDetailModal({ internship, applied, onApply, onClose }) {
               className="flex-1 py-3 rounded-xl bg-[#0066cc] hover:bg-[#004fa3] dark:bg-[#38BDF8] dark:hover:bg-[#0ea5e9] text-white dark:text-[#0B0E14] font-bold text-sm text-center transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
               onClick={() => onApply(internship.id, internship.apply_url)}
             >
-              <span>{applied ? '✓ Applied — View Posting' : '🚀 Apply on Official Board'}</span>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              <span>{applied ? '✓ Applied — View Posting' : 'Apply on Official Board ↗'}</span>
             </a>
             <button
               onClick={onClose}
@@ -136,7 +157,7 @@ function InternshipCard({ internship, applied, onApply, onView }) {
               </span>
               {internship.is_remote && (
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40">
-                  🌐 Remote
+                  Remote
                 </span>
               )}
             </div>
@@ -144,8 +165,8 @@ function InternshipCard({ internship, applied, onApply, onView }) {
               {internship.title}
             </h3>
           </div>
-          <div className="w-9 h-9 rounded-xl bg-[#eaf2fc] dark:bg-[rgba(41,151,255,0.18)] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center flex-none font-bold text-sm">
-            💼
+          <div className="w-8 h-8 rounded-xl bg-[#eaf2fc] dark:bg-[rgba(41,151,255,0.18)] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center flex-none">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
           </div>
         </div>
 
@@ -227,7 +248,7 @@ export default function InternshipsScreen() {
       setMyInternships(mine)
       setAppliedIds(new Set(mine.map(i => i.id)))
     } catch (e) {
-      setError('Unable to load internships. Please verify backend service.')
+      setError('Unable to load internships. Please verify backend connection.')
     } finally {
       setLoading(false)
     }
@@ -241,7 +262,7 @@ export default function InternshipsScreen() {
       setAppliedIds(prev => new Set([...prev, internshipId]))
       const item = internships.find(x => x.id === internshipId)
       if (item) setMyInternships(prev => [...prev, { ...item, application_status: 'applied', applied_on: new Date().toISOString() }])
-      showToast('Tracked in My Applications! 🎉')
+      showToast('Tracked in My Applications!')
       if (applyUrl) window.open(applyUrl, '_blank', 'noopener')
     } catch {
       if (applyUrl) window.open(applyUrl, '_blank', 'noopener')
@@ -268,18 +289,17 @@ export default function InternshipsScreen() {
 
   return (
     <AppShell>
-      <div className="w-full min-h-screen bg-[#F5F5F7] dark:bg-[#0B0E14] font-['Inter',sans-serif]">
+      <div className="font-['Inter',sans-serif] flex flex-col gap-8 pb-12">
         {/* Toast */}
         {toast && (
           <div className={`fixed top-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl shadow-2xl text-sm font-semibold flex items-center gap-2 transition-all ${
             toast.type === 'error' ? 'bg-red-500 text-white' : 'bg-[#0066cc] text-white dark:bg-[#38BDF8] dark:text-[#0B0E14]'
           }`}>
-            {toast.type === 'error' ? '❌' : '✅'} {toast.msg}
+            <span>{toast.msg}</span>
           </div>
         )}
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-8">
-          {/* Hero Banner */}
+        {/* Hero Banner */}
           <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0066cc] via-[#0052a3] to-[#003d7a] p-8 sm:p-10 text-white shadow-[0_20px_60px_rgba(0,102,204,0.25)]">
             <div className="absolute inset-0 opacity-10">
               <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-white transform translate-x-32 -translate-y-32" />
@@ -288,8 +308,9 @@ export default function InternshipsScreen() {
             <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
               <div>
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="text-3xl">💼</span>
-                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-white/20 border border-white/30">Verified Employer API</span>
+                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-white/20 border border-white/30">
+                    Verified Employer API
+                  </span>
                 </div>
                 <h1 className="font-['Manrope'] font-extrabold text-3xl sm:text-4xl leading-tight mb-2">
                   Launch Your Career with<br />Curated Internships
@@ -299,15 +320,19 @@ export default function InternshipsScreen() {
                 </p>
               </div>
               <div className="flex flex-col gap-2 text-sm">
-                <div className="flex items-center gap-2 bg-white/15 rounded-xl px-4 py-3">
-                  <span className="text-xl">🌐</span>
+                <div className="flex items-center gap-3 bg-white/15 rounded-xl px-4 py-3">
+                  <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center font-bold">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                  </div>
                   <div>
                     <p className="font-bold">{internships.filter(i => i.is_remote).length} Remote-Friendly</p>
                     <p className="text-white/70 text-xs">internships available</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 bg-white/15 rounded-xl px-4 py-3">
-                  <span className="text-xl">🏢</span>
+                <div className="flex items-center gap-3 bg-white/15 rounded-xl px-4 py-3">
+                  <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center font-bold">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+                  </div>
                   <div>
                     <p className="font-bold">{new Set(internships.map(i => i.company)).size} Tech Companies</p>
                     <p className="text-white/70 text-xs">live greenhouse feeds</p>
@@ -355,15 +380,15 @@ export default function InternshipsScreen() {
                     <svg className="absolute left-3 top-2.5 text-[#888]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                   </div>
 
-                  {/* Remote Toggle */}
-                  <label className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-[#1d1d1f] dark:text-white cursor-pointer select-none">
+                  {/* Remote Toggle with Rounded Box */}
+                  <label className="flex items-center gap-2.5 text-xs sm:text-sm font-semibold text-[#1d1d1f] dark:text-white cursor-pointer select-none px-3 py-2 rounded-xl border border-[#e0e0e0] dark:border-[#242E40] bg-white dark:bg-[#141A26] hover:border-[#0066cc] dark:hover:border-[#38BDF8] transition-colors shadow-xs">
                     <input
                       type="checkbox"
                       checked={remoteOnly}
                       onChange={e => setRemoteOnly(e.target.checked)}
-                      className="w-4 h-4 rounded text-[#0066cc] focus:ring-0 cursor-pointer"
+                      className="w-4 h-4 rounded-md text-[#0066cc] border-[#d1d5db] dark:border-[#4b5563] focus:ring-0 cursor-pointer accent-[#0066cc]"
                     />
-                    🌐 Remote Only
+                    <span>Remote Only</span>
                   </label>
                 </div>
 
@@ -405,16 +430,19 @@ export default function InternshipsScreen() {
               )}
               {error && !loading && (
                 <div className="flex flex-col items-center gap-4 py-16">
-                  <span className="text-5xl">😔</span>
                   <p className="text-[#6e6e73] dark:text-[#9CA3AF] text-sm">{error}</p>
                   <button onClick={loadInternships} className="px-4 py-2 rounded-xl bg-[#0066cc] text-white text-sm font-semibold cursor-pointer">Retry</button>
                 </div>
               )}
               {!loading && !error && filtered.length === 0 && (
-                <div className="flex flex-col items-center gap-4 py-16 bg-white dark:bg-[#141A26] rounded-2xl border border-[#e0e0e0] dark:border-[#242E40]">
-                  <span className="text-5xl">🔍</span>
-                  <p className="text-[#6e6e73] dark:text-[#9CA3AF] text-sm">No internships found matching your filters.</p>
-                  <button onClick={() => { setSelectedCategory('All'); setRemoteOnly(false); setSearchQuery('') }} className="text-sm text-[#0066cc] dark:text-[#38BDF8] font-semibold cursor-pointer">Reset all filters</button>
+                <div className="flex flex-col items-center gap-3 py-16 bg-white dark:bg-[#141A26] rounded-2xl border border-[#e0e0e0] dark:border-[#242E40]">
+                  <p className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">No Internships Found</p>
+                  <p className="text-xs sm:text-sm text-[#7a7a7a] dark:text-[#9CA3AF] text-center max-w-sm">
+                    No internship openings match your active filter and search criteria.
+                  </p>
+                  <button onClick={() => { setSelectedCategory('All'); setRemoteOnly(false); setSearchQuery('') }} className="mt-2 text-xs font-bold text-[#0066cc] dark:text-[#38BDF8] cursor-pointer">
+                    Reset all filters
+                  </button>
                 </div>
               )}
 
@@ -438,11 +466,14 @@ export default function InternshipsScreen() {
           {tab === 'mine' && (
             <div className="flex flex-col gap-4">
               {myInternships.length === 0 ? (
-                <div className="flex flex-col items-center gap-4 py-16 bg-white dark:bg-[#141A26] rounded-2xl border border-[#e0e0e0] dark:border-[#242E40]">
-                  <span className="text-5xl">💼</span>
-                  <p className="font-['Manrope'] font-bold text-[#1d1d1f] dark:text-white">No applications tracked yet</p>
-                  <p className="text-sm text-[#7a7a7a] dark:text-[#9CA3AF] text-center max-w-xs">Click "Apply Now" on any internship in Discover to automatically track its progress here.</p>
-                  <button onClick={() => setTab('discover')} className="px-4 py-2 rounded-xl bg-[#0066cc] text-white text-sm font-semibold cursor-pointer">Explore Internships</button>
+                <div className="flex flex-col items-center gap-3 py-16 bg-white dark:bg-[#141A26] rounded-2xl border border-[#e0e0e0] dark:border-[#242E40]">
+                  <p className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">No Applications Tracked</p>
+                  <p className="text-xs sm:text-sm text-[#7a7a7a] dark:text-[#9CA3AF] text-center max-w-xs">
+                    Click "Apply Now" on any internship in Discover to automatically track its progress here.
+                  </p>
+                  <button onClick={() => setTab('discover')} className="mt-2 px-4 py-2 rounded-xl bg-[#0066cc] text-white text-xs font-bold cursor-pointer">
+                    Explore Internships
+                  </button>
                 </div>
               ) : (
                 myInternships.map(item => {
@@ -466,20 +497,25 @@ export default function InternshipsScreen() {
                       {/* Status Pipeline Changer */}
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-xs text-[#7a7a7a] font-medium">Stage:</span>
-                        <select
-                          value={currentStatus}
-                          onChange={e => handleStatusChange(item.id, e.target.value)}
-                          className="px-2.5 py-1.5 rounded-xl border border-[#e0e0e0] dark:border-[#242E40] bg-[#fafafc] dark:bg-[#1a2032] text-xs font-bold text-[#1d1d1f] dark:text-white cursor-pointer focus:outline-none focus:border-[#0066cc]"
-                        >
-                          {STATUS_STAGES.map(s => (
-                            <option key={s.id} value={s.id}>{s.label}</option>
-                          ))}
-                        </select>
+                        <div className="relative">
+                          <select
+                            value={currentStatus}
+                            onChange={e => handleStatusChange(item.id, e.target.value)}
+                            className="appearance-none pl-3 pr-7 py-1.5 rounded-xl border border-[#e0e0e0] dark:border-[#242E40] bg-[#fafafc] dark:bg-[#1a2032] text-xs font-bold text-[#1d1d1f] dark:text-white cursor-pointer focus:outline-none focus:border-[#0066cc]"
+                          >
+                            {STATUS_STAGES.map(s => (
+                              <option key={s.id} value={s.id}>{s.label}</option>
+                            ))}
+                          </select>
+                          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-[#7a7a7a]">
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                          </div>
+                        </div>
                         <a
                           href={item.apply_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="px-3 py-1.5 rounded-xl border border-[#0066cc] dark:border-[#38BDF8] text-[#0066cc] dark:text-[#38BDF8] text-xs font-bold hover:bg-[#eaf2fc] dark:hover:bg-white/5 transition-colors"
+                          className="px-3 py-1.5 rounded-xl border border-[#0066cc] dark:border-[#38BDF8] text-[#0066cc] dark:text-[#38BDF8] text-xs font-bold hover:bg-[#eaf2fc] dark:hover:bg-white/5 transition-colors cursor-pointer"
                         >
                           View Job ↗
                         </a>
@@ -491,7 +527,6 @@ export default function InternshipsScreen() {
             </div>
           )}
         </div>
-      </div>
 
       {/* Modal View */}
       {activeDetail && (

@@ -2,10 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react'
 import AppShell from '../layout/AppShell'
 import api from '../../lib/apiClient'
 
-const V = '#0066cc'
-const V_SOFT = '#eaf2fc'
-const V_BORDER = '#cfe4fb'
-
 const STATUS_META = {
   upcoming:  { label: 'Upcoming',  bg: 'bg-blue-50 dark:bg-blue-900/20',   text: 'text-blue-700 dark:text-blue-300',   dot: 'bg-blue-500'  },
   ongoing:   { label: 'Ongoing',   bg: 'bg-emerald-50 dark:bg-emerald-900/20', text: 'text-emerald-700 dark:text-emerald-300', dot: 'bg-emerald-500' },
@@ -31,7 +27,7 @@ function HackathonDetailModal({ hackathon, registered, onRegister, onClose }) {
         className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-[#141A26] rounded-3xl border border-[#e0e0e0] dark:border-[#242E40] shadow-[0_32px_80px_rgba(0,0,0,0.22)]"
         onClick={e => e.stopPropagation()}
       >
-        {/* Hero */}
+        {/* Hero Banner */}
         <div className="relative h-44 rounded-t-3xl overflow-hidden bg-gradient-to-br from-[#0066cc] to-[#0047b3]">
           {hackathon.image_url && (
             <img src={hackathon.image_url} alt={hackathon.name} className="absolute inset-0 w-full h-full object-cover opacity-40" />
@@ -46,7 +42,7 @@ function HackathonDetailModal({ hackathon, registered, onRegister, onClose }) {
           </div>
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-colors"
+            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-colors cursor-pointer"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
@@ -57,15 +53,39 @@ function HackathonDetailModal({ hackathon, registered, onRegister, onClose }) {
           {/* Key info grid */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { icon: '📅', label: 'Start', val: fmt(hackathon.starts_at) },
-              { icon: '📅', label: 'End', val: fmt(hackathon.ends_at) },
-              { icon: hackathon.is_online ? '🌐' : '📍', label: hackathon.is_online ? 'Mode' : 'Location', val: hackathon.is_online ? 'Online' : (hackathon.location || 'In-Person') },
-              { icon: '👥', label: 'Team Size', val: `${hackathon.team_min || 1}–${hackathon.team_max || 4}` },
+              {
+                icon: (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                ),
+                label: 'Start Date',
+                val: fmt(hackathon.starts_at)
+              },
+              {
+                icon: (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                ),
+                label: 'End Date',
+                val: fmt(hackathon.ends_at)
+              },
+              {
+                icon: (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                ),
+                label: hackathon.is_online ? 'Format' : 'Location',
+                val: hackathon.is_online ? 'Virtual / Online' : (hackathon.location || 'In-Person')
+              },
+              {
+                icon: (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                ),
+                label: 'Team Size',
+                val: `${hackathon.team_min || 1}–${hackathon.team_max || 4} members`
+              },
             ].map(item => (
-              <div key={item.label} className="flex flex-col gap-0.5 bg-[#fafafc] dark:bg-[#0d1117] rounded-xl p-3 border border-[#f0f0f0] dark:border-[#1a2032]">
-                <span className="text-lg">{item.icon}</span>
+              <div key={item.label} className="flex flex-col gap-1 bg-[#fafafc] dark:bg-[#0d1117] rounded-xl p-3 border border-[#f0f0f0] dark:border-[#1a2032]">
+                <span className="text-[#0066cc] dark:text-[#38BDF8]">{item.icon}</span>
                 <span className="text-[10px] font-semibold uppercase tracking-wide text-[#7a7a7a] dark:text-[#9CA3AF]">{item.label}</span>
-                <span className="text-sm font-bold text-[#1d1d1f] dark:text-white">{item.val}</span>
+                <span className="text-xs sm:text-sm font-bold text-[#1d1d1f] dark:text-white truncate">{item.val}</span>
               </div>
             ))}
           </div>
@@ -74,14 +94,14 @@ function HackathonDetailModal({ hackathon, registered, onRegister, onClose }) {
           {hackathon.description && (
             <div>
               <h3 className="font-['Manrope'] font-bold text-sm text-[#1d1d1f] dark:text-white mb-1.5">About this Hackathon</h3>
-              <p className="text-sm text-[#6e6e73] dark:text-[#9CA3AF] leading-relaxed">{hackathon.description}</p>
+              <p className="text-xs sm:text-sm text-[#6e6e73] dark:text-[#9CA3AF] leading-relaxed">{hackathon.description}</p>
             </div>
           )}
 
           {/* Themes */}
           {hackathon.themes?.length > 0 && (
             <div>
-              <h3 className="font-['Manrope'] font-bold text-sm text-[#1d1d1f] dark:text-white mb-2">Themes</h3>
+              <h3 className="font-['Manrope'] font-bold text-sm text-[#1d1d1f] dark:text-white mb-2">Themes & Tracks</h3>
               <div className="flex flex-wrap gap-2">
                 {hackathon.themes.map((t, i) => (
                   <span key={i} className="px-3 py-1 rounded-full text-xs font-semibold bg-[#eaf2fc] dark:bg-[rgba(41,151,255,0.18)] text-[#0066cc] dark:text-[#38BDF8] border border-[#cfe4fb] dark:border-[rgba(41,151,255,0.3)]">
@@ -94,11 +114,13 @@ function HackathonDetailModal({ hackathon, registered, onRegister, onClose }) {
 
           {/* Prizes */}
           {hackathon.prizes && (
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40">
-              <span className="text-2xl">🏆</span>
+            <div className="flex items-center gap-3 p-3.5 rounded-xl bg-[#fafafc] dark:bg-[#0d1117] border border-[#f0f0f0] dark:border-[#1a2032]">
+              <div className="w-8 h-8 rounded-lg bg-[#eaf2fc] dark:bg-[rgba(41,151,255,0.18)] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center flex-none">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+              </div>
               <div>
-                <p className="text-xs font-bold uppercase tracking-wide text-amber-700 dark:text-amber-300">Prize Pool</p>
-                <p className="text-sm font-semibold text-amber-900 dark:text-amber-200">{hackathon.prizes}</p>
+                <p className="text-[11px] font-bold uppercase tracking-wide text-[#7a7a7a] dark:text-[#9CA3AF]">Prize Pool & Awards</p>
+                <p className="text-sm font-bold text-[#1d1d1f] dark:text-white">{hackathon.prizes}</p>
               </div>
             </div>
           )}
@@ -109,14 +131,14 @@ function HackathonDetailModal({ hackathon, registered, onRegister, onClose }) {
               href={hackathon.registration_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1 py-3 rounded-xl bg-[#0066cc] hover:bg-[#004fa3] dark:bg-[#38BDF8] dark:hover:bg-[#0ea5e9] text-white dark:text-[#0B0E14] font-bold text-sm text-center transition-all shadow-md"
+              className="flex-1 py-3 rounded-xl bg-[#0066cc] hover:bg-[#004fa3] dark:bg-[#38BDF8] dark:hover:bg-[#0ea5e9] text-white dark:text-[#0B0E14] font-bold text-sm text-center transition-all shadow-md cursor-pointer flex items-center justify-center gap-2"
               onClick={() => !registered && onRegister(hackathon.id)}
             >
-              {registered ? '✓ Registered — View on Devfolio' : '🚀 Register Now'}
+              <span>{registered ? '✓ Registered — View Event' : 'Register on Official Platform ↗'}</span>
             </a>
             <button
               onClick={onClose}
-              className="px-5 py-3 rounded-xl border border-[#e0e0e0] dark:border-[#242E40] text-[#1d1d1f] dark:text-white font-semibold text-sm hover:bg-[#f5f5f7] dark:hover:bg-white/5 transition-colors"
+              className="px-5 py-3 rounded-xl border border-[#e0e0e0] dark:border-[#242E40] text-[#1d1d1f] dark:text-white font-semibold text-sm hover:bg-[#f5f5f7] dark:hover:bg-white/5 transition-colors cursor-pointer"
             >
               Close
             </button>
@@ -131,76 +153,76 @@ function HackathonCard({ hackathon, registered, onRegister, onView }) {
   const s = STATUS_META[hackathon.status] || STATUS_META.upcoming
   return (
     <div
-      className="group bg-white dark:bg-[#141A26] rounded-2xl border border-[#e0e0e0] dark:border-[#242E40] shadow-sm hover:shadow-[0_8px_32px_rgba(0,102,204,0.10)] dark:hover:shadow-[0_8px_32px_rgba(56,189,248,0.08)] transition-all duration-200 hover:-translate-y-0.5 overflow-hidden cursor-pointer flex flex-col"
+      className="group bg-white dark:bg-[#141A26] rounded-2xl border border-[#e0e0e0] dark:border-[#242E40] shadow-sm hover:shadow-[0_8px_32px_rgba(0,102,204,0.10)] dark:hover:shadow-[0_8px_32px_rgba(56,189,248,0.08)] transition-all duration-200 hover:-translate-y-0.5 overflow-hidden cursor-pointer flex flex-col justify-between"
       onClick={() => onView(hackathon)}
     >
-      {/* Card image / gradient banner */}
-      <div className="relative h-28 overflow-hidden flex-none bg-gradient-to-br from-[#0066cc] to-[#0047b3] dark:from-[#1a3a6e] dark:to-[#0d1f3c]">
-        {hackathon.image_url && (
-          <img src={hackathon.image_url} alt={hackathon.name} className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-60 transition-opacity" />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-        <span className={`absolute top-3 right-3 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ${s.bg} ${s.text} flex items-center gap-1`}>
-          <span className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
-          {s.label}
-        </span>
-        {hackathon.is_online && (
-          <span className="absolute top-3 left-3 px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/20 text-white flex items-center gap-1">
-            🌐 Online
-          </span>
-        )}
-      </div>
-
-      {/* Body */}
-      <div className="flex flex-col gap-3 p-4 flex-1">
-        <div>
-          <h3 className="font-['Manrope'] font-extrabold text-base text-[#1d1d1f] dark:text-white leading-tight line-clamp-2 group-hover:text-[#0066cc] dark:group-hover:text-[#38BDF8] transition-colors">
-            {hackathon.name}
-          </h3>
-          {hackathon.tagline && (
-            <p className="text-xs text-[#6e6e73] dark:text-[#9CA3AF] mt-1 line-clamp-2">{hackathon.tagline}</p>
+      <div>
+        {/* Card image banner */}
+        <div className="relative h-28 overflow-hidden flex-none bg-gradient-to-br from-[#0066cc] to-[#0047b3] dark:from-[#1a3a6e] dark:to-[#0d1f3c]">
+          {hackathon.image_url && (
+            <img src={hackathon.image_url} alt={hackathon.name} className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-60 transition-opacity" />
           )}
-        </div>
-
-        {/* Themes */}
-        {hackathon.themes?.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
-            {hackathon.themes.slice(0, 3).map((t, i) => (
-              <span key={i} className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#eaf2fc] dark:bg-[rgba(41,151,255,0.15)] text-[#0066cc] dark:text-[#38BDF8]">
-                {t}
-              </span>
-            ))}
-          </div>
-        )}
-
-        {/* Dates */}
-        <div className="flex flex-col gap-1 text-xs text-[#6e6e73] dark:text-[#9CA3AF]">
-          <span className="flex items-center gap-1.5">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            {fmt(hackathon.starts_at)} → {fmt(hackathon.ends_at)}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+          <span className={`absolute top-3 right-3 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ${s.bg} ${s.text} flex items-center gap-1.5 shadow-xs`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
+            {s.label}
           </span>
-          {!hackathon.is_online && hackathon.location && (
-            <span className="flex items-center gap-1.5">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              {hackathon.location}
+          {hackathon.is_online && (
+            <span className="absolute top-3 left-3 px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/20 text-white flex items-center gap-1">
+              Virtual
             </span>
           )}
-          <span className="flex items-center gap-1.5">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            Team: {hackathon.team_min || 1}–{hackathon.team_max || 4} members
-          </span>
         </div>
 
-        {/* Register CTA */}
+        {/* Body */}
+        <div className="flex flex-col gap-3 p-4">
+          <div>
+            <h3 className="font-['Manrope'] font-extrabold text-base text-[#1d1d1f] dark:text-white leading-tight line-clamp-2 group-hover:text-[#0066cc] dark:group-hover:text-[#38BDF8] transition-colors">
+              {hackathon.name}
+            </h3>
+            {hackathon.tagline && (
+              <p className="text-xs text-[#6e6e73] dark:text-[#9CA3AF] mt-1 line-clamp-2">{hackathon.tagline}</p>
+            )}
+          </div>
+
+          {/* Themes */}
+          {hackathon.themes?.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {hackathon.themes.slice(0, 3).map((t, i) => (
+                <span key={i} className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-[#eaf2fc] dark:bg-[rgba(41,151,255,0.15)] text-[#0066cc] dark:text-[#38BDF8]">
+                  {t}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Dates & Location */}
+          <div className="flex flex-col gap-1 text-xs text-[#6e6e73] dark:text-[#9CA3AF]">
+            <span className="flex items-center gap-1.5">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              {fmt(hackathon.starts_at)} → {fmt(hackathon.ends_at)}
+            </span>
+            {!hackathon.is_online && hackathon.location && (
+              <span className="flex items-center gap-1.5 truncate">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                {hackathon.location}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Footer CTA */}
+      <div className="p-4 pt-0">
         <button
           onClick={e => { e.stopPropagation(); onRegister(hackathon.id, hackathon.registration_url) }}
-          className={`w-full mt-auto py-2.5 rounded-xl font-bold text-xs transition-all ${
+          className={`w-full py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer ${
             registered
               ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
               : 'bg-[#0066cc] hover:bg-[#004fa3] dark:bg-[#38BDF8] dark:hover:bg-[#0ea5e9] text-white dark:text-[#0B0E14] shadow-sm'
           }`}
         >
-          {registered ? '✓ Registered' : 'Register Now'}
+          {registered ? '✓ Registered' : 'Register Now ↗'}
         </button>
       </div>
     </div>
@@ -255,10 +277,10 @@ export default function HackathonsScreen() {
       setRegisteredIds(prev => new Set([...prev, hackathonId]))
       const h = hackathons.find(x => x.id === hackathonId)
       if (h) setMyHackathons(prev => [...prev, { ...h, user_status: 'registered' }])
-      showToast('Registered successfully! 🎉')
+      showToast('Registered successfully!')
       if (regUrl) window.open(regUrl, '_blank', 'noopener')
     } catch {
-      showToast('Registration failed. Please try again.', 'error')
+      if (regUrl) window.open(regUrl, '_blank', 'noopener')
     }
   }
 
@@ -270,18 +292,17 @@ export default function HackathonsScreen() {
 
   return (
     <AppShell>
-      <div className="w-full min-h-screen bg-[#F5F5F7] dark:bg-[#0B0E14] font-['Inter',sans-serif]">
+      <div className="font-['Inter',sans-serif] flex flex-col gap-8 pb-12">
         {/* Toast */}
         {toast && (
           <div className={`fixed top-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl shadow-2xl text-sm font-semibold flex items-center gap-2 transition-all ${
             toast.type === 'error' ? 'bg-red-500 text-white' : 'bg-[#0066cc] text-white dark:bg-[#38BDF8] dark:text-[#0B0E14]'
           }`}>
-            {toast.type === 'error' ? '❌' : '✅'} {toast.msg}
+            <span>{toast.msg}</span>
           </div>
         )}
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-8">
-          {/* Hero */}
+        {/* Hero */}
           <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0066cc] via-[#0052a3] to-[#003d7a] p-8 sm:p-10 text-white shadow-[0_20px_60px_rgba(0,102,204,0.25)]">
             <div className="absolute inset-0 opacity-10">
               <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-white transform translate-x-32 -translate-y-32" />
@@ -290,8 +311,9 @@ export default function HackathonsScreen() {
             <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
               <div>
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="text-3xl">🏆</span>
-                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-white/20 border border-white/30">Live Data</span>
+                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-white/20 border border-white/30">
+                    Live Verified Data
+                  </span>
                 </div>
                 <h1 className="font-['Manrope'] font-extrabold text-3xl sm:text-4xl leading-tight mb-2">
                   Join the World's Best<br />Hackathons
@@ -301,18 +323,22 @@ export default function HackathonsScreen() {
                 </p>
               </div>
               <div className="flex flex-col gap-2 text-sm">
-                <div className="flex items-center gap-2 bg-white/15 rounded-xl px-4 py-3">
-                  <span className="text-xl">🌐</span>
+                <div className="flex items-center gap-3 bg-white/15 rounded-xl px-4 py-3">
+                  <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center font-bold">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                  </div>
                   <div>
-                    <p className="font-bold">{hackathons.filter(h => h.is_online).length} Online</p>
-                    <p className="text-white/70 text-xs">hackathons available</p>
+                    <p className="font-bold">{hackathons.filter(h => h.is_online).length} Virtual / Online</p>
+                    <p className="text-white/70 text-xs">open to global participants</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 bg-white/15 rounded-xl px-4 py-3">
-                  <span className="text-xl">🚀</span>
+                <div className="flex items-center gap-3 bg-white/15 rounded-xl px-4 py-3">
+                  <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center font-bold">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  </div>
                   <div>
-                    <p className="font-bold">{hackathons.filter(h => h.status === 'upcoming').length} Upcoming</p>
-                    <p className="text-white/70 text-xs">registration open</p>
+                    <p className="font-bold">{hackathons.filter(h => h.status === 'upcoming').length} Upcoming Events</p>
+                    <p className="text-white/70 text-xs">registration currently active</p>
                   </div>
                 </div>
               </div>
@@ -328,7 +354,7 @@ export default function HackathonsScreen() {
               <button
                 key={t.id}
                 onClick={() => setTab(t.id)}
-                className={`pb-3 px-4 text-sm font-bold border-b-2 transition-all flex items-center gap-2 ${
+                className={`pb-3 px-4 text-sm font-bold border-b-2 transition-all flex items-center gap-2 cursor-pointer ${
                   tab === t.id
                     ? 'border-[#0066cc] text-[#0066cc] dark:border-[#38BDF8] dark:text-[#38BDF8]'
                     : 'border-transparent text-[#7a7a7a] hover:text-[#1d1d1f] dark:hover:text-white'
@@ -343,15 +369,15 @@ export default function HackathonsScreen() {
           {tab === 'discover' && (
             <>
               {/* Filters */}
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center justify-between">
                 {/* Theme chips */}
-                <div className="flex-1 overflow-x-auto">
-                  <div className="flex gap-2 pb-1">
+                <div className="flex-1 overflow-x-auto pb-1">
+                  <div className="flex gap-2">
                     {THEME_CHIPS.map(theme => (
                       <button
                         key={theme}
                         onClick={() => setSelectedTheme(theme)}
-                        className={`flex-none px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all ${
+                        className={`flex-none px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer ${
                           selectedTheme === theme
                             ? 'bg-[#0066cc] dark:bg-[#38BDF8] text-white dark:text-[#0B0E14] border-[#0066cc] dark:border-[#38BDF8]'
                             : 'bg-white dark:bg-[#141A26] text-[#333] dark:text-[#D1D5DB] border-[#e0e0e0] dark:border-[#242E40] hover:border-[#0066cc] dark:hover:border-[#38BDF8]'
@@ -362,21 +388,27 @@ export default function HackathonsScreen() {
                     ))}
                   </div>
                 </div>
-                {/* Status filter */}
-                <select
-                  value={selectedStatus}
-                  onChange={e => setSelectedStatus(e.target.value)}
-                  className="flex-none px-3 py-1.5 rounded-xl border border-[#e0e0e0] dark:border-[#242E40] bg-white dark:bg-[#141A26] text-sm text-[#333] dark:text-white font-medium focus:outline-none focus:border-[#0066cc] dark:focus:border-[#38BDF8]"
-                >
-                  {STATUS_TABS.map(s => <option key={s}>{s}</option>)}
-                </select>
+
+                {/* Rounded Dropdown Filter */}
+                <div className="relative flex-none">
+                  <select
+                    value={selectedStatus}
+                    onChange={e => setSelectedStatus(e.target.value)}
+                    className="appearance-none pl-3.5 pr-8 py-2 rounded-xl border border-[#e0e0e0] dark:border-[#242E40] bg-white dark:bg-[#141A26] text-xs font-bold text-[#1d1d1f] dark:text-white focus:outline-none focus:border-[#0066cc] dark:focus:border-[#38BDF8] shadow-xs cursor-pointer"
+                  >
+                    {STATUS_TABS.map(s => <option key={s} value={s}>{s === 'All' ? 'All Statuses' : s}</option>)}
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-[#7a7a7a]">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                  </div>
+                </div>
               </div>
 
               {/* Results info */}
               {!loading && !error && (
                 <p className="text-sm text-[#7a7a7a] dark:text-[#9CA3AF]">
                   Showing <strong className="text-[#1d1d1f] dark:text-white">{filtered.length}</strong> hackathons
-                  {selectedTheme !== 'All' && ` tagged "${selectedTheme}"`}
+                  {selectedTheme !== 'All' && ` in ${selectedTheme}`}
                   {selectedStatus !== 'All' && ` · ${selectedStatus}`}
                 </p>
               )}
@@ -385,21 +417,24 @@ export default function HackathonsScreen() {
               {loading && (
                 <div className="flex flex-col items-center justify-center py-20 gap-4">
                   <div className="w-10 h-10 rounded-full border-4 border-[#e0e0e0] border-t-[#0066cc] animate-spin" />
-                  <p className="text-sm text-[#7a7a7a] dark:text-[#9CA3AF]">Fetching real hackathons from Devfolio & Devpost…</p>
+                  <p className="text-sm text-[#7a7a7a] dark:text-[#9CA3AF]">Loading hackathons…</p>
                 </div>
               )}
               {error && !loading && (
                 <div className="flex flex-col items-center gap-4 py-16">
-                  <span className="text-5xl">😔</span>
                   <p className="text-[#6e6e73] dark:text-[#9CA3AF] text-sm">{error}</p>
-                  <button onClick={loadHackathons} className="px-4 py-2 rounded-xl bg-[#0066cc] text-white text-sm font-semibold">Retry</button>
+                  <button onClick={loadHackathons} className="px-4 py-2 rounded-xl bg-[#0066cc] text-white text-sm font-semibold cursor-pointer">Retry</button>
                 </div>
               )}
               {!loading && !error && filtered.length === 0 && (
-                <div className="flex flex-col items-center gap-4 py-16">
-                  <span className="text-5xl">🔍</span>
-                  <p className="text-[#6e6e73] dark:text-[#9CA3AF] text-sm">No hackathons found for these filters.</p>
-                  <button onClick={() => { setSelectedTheme('All'); setSelectedStatus('All') }} className="text-sm text-[#0066cc] dark:text-[#38BDF8] font-semibold">Clear filters</button>
+                <div className="flex flex-col items-center gap-3 py-16 bg-white dark:bg-[#141A26] rounded-2xl border border-[#e0e0e0] dark:border-[#242E40]">
+                  <p className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">No Hackathons Found</p>
+                  <p className="text-xs sm:text-sm text-[#7a7a7a] dark:text-[#9CA3AF] text-center max-w-sm">
+                    No hackathon events match your current filter selection.
+                  </p>
+                  <button onClick={() => { setSelectedTheme('All'); setSelectedStatus('All') }} className="mt-2 text-xs font-bold text-[#0066cc] dark:text-[#38BDF8] cursor-pointer">
+                    Clear all filters
+                  </button>
                 </div>
               )}
 
@@ -422,32 +457,37 @@ export default function HackathonsScreen() {
           {tab === 'mine' && (
             <div className="flex flex-col gap-4">
               {myHackathons.length === 0 ? (
-                <div className="flex flex-col items-center gap-4 py-16 bg-white dark:bg-[#141A26] rounded-2xl border border-[#e0e0e0] dark:border-[#242E40]">
-                  <span className="text-5xl">🏆</span>
-                  <p className="font-['Manrope'] font-bold text-[#1d1d1f] dark:text-white">No hackathons yet</p>
-                  <p className="text-sm text-[#7a7a7a] dark:text-[#9CA3AF] text-center max-w-xs">Register for hackathons in the Discover tab to track them here.</p>
-                  <button onClick={() => setTab('discover')} className="px-4 py-2 rounded-xl bg-[#0066cc] text-white text-sm font-semibold">Discover Hackathons</button>
+                <div className="flex flex-col items-center gap-3 py-16 bg-white dark:bg-[#141A26] rounded-2xl border border-[#e0e0e0] dark:border-[#242E40]">
+                  <p className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">No Registered Hackathons</p>
+                  <p className="text-xs sm:text-sm text-[#7a7a7a] dark:text-[#9CA3AF] text-center max-w-xs">
+                    Register for hackathons in the Discover tab to track your participation here.
+                  </p>
+                  <button onClick={() => setTab('discover')} className="mt-2 px-4 py-2 rounded-xl bg-[#0066cc] text-white text-xs font-bold cursor-pointer">
+                    Explore Hackathons
+                  </button>
                 </div>
               ) : (
                 myHackathons.map(h => {
                   const s = STATUS_META[h.status] || STATUS_META.upcoming
                   return (
-                    <div key={h.id} className="bg-white dark:bg-[#141A26] rounded-2xl border border-[#e0e0e0] dark:border-[#242E40] p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4 shadow-sm">
+                    <div key={h.id} className="bg-white dark:bg-[#141A26] rounded-2xl border border-[#e0e0e0] dark:border-[#242E40] p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
                       <div className="flex-1 flex flex-col gap-1">
                         <div className="flex items-center gap-2 flex-wrap">
                           <h3 className="font-['Manrope'] font-extrabold text-base text-[#1d1d1f] dark:text-white">{h.name}</h3>
                           <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${s.bg} ${s.text}`}>{s.label}</span>
                           <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300">✓ {h.user_status || 'Registered'}</span>
                         </div>
-                        <p className="text-xs text-[#7a7a7a] dark:text-[#9CA3AF]">{fmt(h.starts_at)} → {fmt(h.ends_at)} · {h.is_online ? '🌐 Online' : h.location}</p>
+                        <p className="text-xs text-[#7a7a7a] dark:text-[#9CA3AF]">
+                          {fmt(h.starts_at)} → {fmt(h.ends_at)} · {h.is_online ? 'Virtual / Online' : h.location}
+                        </p>
                       </div>
                       <a
                         href={h.registration_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex-none px-4 py-2 rounded-xl border border-[#0066cc] dark:border-[#38BDF8] text-[#0066cc] dark:text-[#38BDF8] text-xs font-bold hover:bg-[#eaf2fc] dark:hover:bg-white/5 transition-colors"
+                        className="flex-none px-4 py-2 rounded-xl border border-[#0066cc] dark:border-[#38BDF8] text-[#0066cc] dark:text-[#38BDF8] text-xs font-bold hover:bg-[#eaf2fc] dark:hover:bg-white/5 transition-colors cursor-pointer"
                       >
-                        View Hackathon ↗
+                        View Event ↗
                       </a>
                     </div>
                   )
@@ -456,7 +496,6 @@ export default function HackathonsScreen() {
             </div>
           )}
         </div>
-      </div>
 
       {/* Detail Modal */}
       {activeDetail && (
