@@ -12,6 +12,23 @@ import api from '../lib/apiClient'
  * response returns, so Progress / Skill insights / the week strip all reflect
  * the change without extra requests.
  */
+// Same dev/e2e-only bypass pattern as AuthContext.getDevBypassUser() -
+// import.meta.env.DEV is a Vite build-time constant (false in a real `vite
+// build`), so this check and MOCK_DEV_ROADMAP below are dead code the
+// bundler strips from what actually ships to Vercel. Previously these two
+// localStorage checks (in `load` below) had NO such gate - a production
+// user who happened to have either flag set (or hit by a stale test
+// artifact) and a slow/failing /api/roadmap call would see a fully
+// fabricated roadmap (fake completed steps, fake percent, fake course
+// titles) presented as their real progress.
+function isDevBypassActive() {
+  return (
+    import.meta.env.DEV &&
+    typeof window !== 'undefined' &&
+    (window.localStorage.getItem('pf_dev_bypass') === 'true' || window.localStorage.getItem('e2e_mock_auth') === 'true')
+  )
+}
+
 const MOCK_DEV_ROADMAP = {
   path: { id: 'dev-path', goal_text: 'AIML Engineer & Data Analytics' },
   percent: 35,
@@ -70,13 +87,13 @@ export function useRoadmap() {
       const res = await api.get('/api/roadmap')
       if (res.data && res.data.weeks && res.data.weeks.length > 0) {
         setData(res.data)
-      } else if (typeof window !== 'undefined' && (window.localStorage.getItem('pf_dev_bypass') === 'true' || window.localStorage.getItem('e2e_mock_auth') === 'true')) {
+      } else if (isDevBypassActive()) {
         setData(MOCK_DEV_ROADMAP)
       } else {
         setData(res.data)
       }
     } catch (err) {
-      if (typeof window !== 'undefined' && (window.localStorage.getItem('pf_dev_bypass') === 'true' || window.localStorage.getItem('e2e_mock_auth') === 'true')) {
+      if (isDevBypassActive()) {
         setData(MOCK_DEV_ROADMAP)
       } else {
         setError('We could not load your roadmap. Please try again.')

@@ -3,16 +3,35 @@ import { supabase } from '../lib/supabaseClient'
 
 const AuthContext = createContext(null)
 
+// Dev/e2e-only auth bypass - lets a local `vite dev` session or a Playwright
+// run skip real Supabase auth by setting one of these localStorage flags.
+// `import.meta.env.DEV` is a Vite build-time constant: false in a real
+// `vite build` (what actually ships to Vercel), so this whole branch is
+// dead code the bundler can strip from the production bundle - it is not
+// just "hard to trigger in prod", it does not exist in the shipped JS at
+// all. Previously this had no such gate and was duplicated across four
+// separate spots in this file (three of which is a plain runtime
+// localStorage check with ZERO environment gating) - meaning anyone
+// opening devtools on the live production site could set one flag and get
+// a fully fabricated session + profile with no backend involvement
+// whatsoever. Consolidated into one helper, one flag check, one mock
+// object - real prod code no longer sees fabricated learner data.
+function getDevBypassUser() {
+  if (!import.meta.env.DEV) return null
+  if (typeof window === 'undefined') return null
+  if (localStorage.getItem('pf_dev_bypass') !== 'true' && localStorage.getItem('e2e_mock_auth') !== 'true') return null
+  return {
+    id: '11111111-1111-1111-1111-111111111111',
+    email: 'dev-bypass@pathfinder.local',
+    user_metadata: { full_name: 'Dev Bypass User', name: 'Dev Bypass User' },
+  }
+}
+
 export function AuthProvider({ children }) {
-  const isDevBypass = typeof window !== 'undefined' && (localStorage.getItem('pf_dev_bypass') === 'true' || localStorage.getItem('e2e_mock_auth') === 'true')
-  const defaultUser = isDevBypass ? {
-    id: 'demo-user-1',
-    email: 'hcltech@pathfinder.io',
-    user_metadata: { full_name: 'HCL Tech', name: 'HCL Tech' }
-  } : null
-  const [session, setSession] = useState(defaultUser ? { user: defaultUser, access_token: 'demo-token' } : null)
-  const [profile, setProfile] = useState(defaultUser ? { id: 'demo-user-1', target_role: 'Data Analyst', weekly_hours: 10 } : null)
-  const [loading, setLoading] = useState(!isDevBypass)
+  const devUser = getDevBypassUser()
+  const [session, setSession] = useState(devUser ? { user: devUser, access_token: 'dev-bypass-token' } : null)
+  const [profile, setProfile] = useState(null)
+  const [loading, setLoading] = useState(!devUser)
   const [oauthError, setOauthError] = useState(null)
 
   const loadProfile = async (userId) => {
@@ -59,14 +78,9 @@ export function AuthProvider({ children }) {
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!mounted) return
-      if (!session && typeof window !== 'undefined' && (localStorage.getItem('pf_dev_bypass') === 'true' || localStorage.getItem('e2e_mock_auth') === 'true')) {
-        const mockUser = {
-          id: 'demo-user-1',
-          email: 'hcltech@pathfinder.io',
-          user_metadata: { full_name: 'HCL Tech', name: 'HCL Tech' }
-        }
-        setSession({ user: mockUser, access_token: 'demo-token' })
-        setProfile({ id: 'demo-user-1', target_role: 'Data Analyst', weekly_hours: 10 })
+      if (!session && getDevBypassUser()) {
+        // Dev/e2e bypass already seeded into state by useState() above -
+        // nothing real to reconcile against, so just stop loading.
         setLoading(false)
         return
       }
@@ -79,7 +93,7 @@ export function AuthProvider({ children }) {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!mounted) return
-      if (!session && typeof window !== 'undefined' && (localStorage.getItem('pf_dev_bypass') === 'true' || localStorage.getItem('e2e_mock_auth') === 'true')) {
+      if (!session && getDevBypassUser()) {
         return
       }
       setSession(session)
@@ -216,31 +230,26 @@ export function AuthProvider({ children }) {
     }
   }
 
-  const mockUser = typeof window !== 'undefined' && (window.localStorage.getItem('e2e_mock_auth') || window.localStorage.getItem('pf_dev_bypass')) ? {
-    id: "11111111-1111-1111-1111-111111111111",
-    email: "hcltech@pathfinder.ai",
-    user_metadata: { full_name: "HCL Tech", name: "HCL Tech" }
-  } : null
-  const effectiveSession = session || (mockUser ? { user: mockUser } : null)
-  const effectiveUser = session?.user || mockUser
-  const effectiveProfile = profile || (mockUser ? { id: mockUser.id, target_role: 'Data Analyst', weekly_hours: 10, goal_text: 'Become a Data Analyst with Python and SQL' } : null)
-  const effectiveLoading = mockUser ? false : loading
-
+  // session/profile/loading already correctly reflect the dev bypass (seeded
+  // once via useState above, in DEV builds only) or a real Supabase session -
+  // no separate "effective" fallback needed, and critically, no fabricated
+  // profile fields (target_role/weekly_hours/goal_text) presented as if they
+  // were real learner data.
   return (
     <AuthContext.Provider
       value={{
-        session: effectiveSession,
-        loading: effectiveLoading,
-        profile: effectiveProfile,
+        session,
+        loading,
+        profile,
         updateProfile,
-        refreshProfile: () => effectiveUser?.id && loadProfile(effectiveUser.id),
+        refreshProfile: () => session?.user?.id && loadProfile(session.user.id),
         signIn,
         signUp,
         signInWithGoogle,
         signInWithGithub,
         linkGithub,
         signOut,
-        user: effectiveUser,
+        user: session?.user || null,
         oauthError,
       }}
     >

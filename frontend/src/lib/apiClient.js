@@ -61,7 +61,14 @@ let _redirecting = false
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    const isBypass = typeof window !== 'undefined' && (window.localStorage.getItem('e2e_mock_auth') === 'true' || window.localStorage.getItem('pf_dev_bypass') === 'true')
+    // Dev/e2e bypass only: a bypass session has no real Supabase token, so
+    // every real backend call 401s - without this, the redirect-to-login
+    // below would fire instantly and make the bypass unusable for local
+    // testing. Gated to DEV builds (see AuthContext.getDevBypassUser) so
+    // flipping this flag in production can't suppress the real 401 safety
+    // net for a real session.
+    const isBypass = import.meta.env.DEV && typeof window !== 'undefined' &&
+      (window.localStorage.getItem('e2e_mock_auth') === 'true' || window.localStorage.getItem('pf_dev_bypass') === 'true')
     if (error?.response?.status === 401 && typeof window !== 'undefined' && !_redirecting && !isBypass) {
       _redirecting = true
       try { await supabase.auth.signOut() } catch {}
