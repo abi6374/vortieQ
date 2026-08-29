@@ -467,12 +467,57 @@ def _log_swap_event(user_id: str, path_id: str, step_id: str, note: str) -> None
     }).execute()
 
 
+def _ensure_course_in_catalog(course_data: dict) -> dict:
+    """Ensures a dynamically found or synthesized course exists in the database courses table."""
+    url = (course_data.get("resource_url") or "").strip()
+    title = (course_data.get("title") or "").strip()
+
+    # Check if this course or URL already exists
+    if url and url != "https://google.com":
+        existing = supabase_client.table("courses").select("*").eq("resource_url", url).execute()
+        if existing.data:
+            return existing.data[0]
+    if title:
+        existing = supabase_client.table("courses").select("*").ilike("title", title).execute()
+        if existing.data:
+            return existing.data[0]
+
+    # Create embedding for pgvector
+    from app.ml.embedder import embed_text
+    desc = course_data.get("description", "") or title
+    tags = course_data.get("skill_tags") or []
+    if isinstance(tags, str):
+        tags = [t.strip() for t in tags.split(",") if t.strip()]
+
+    emb = embed_text(f"{title} {desc} {' '.join(tags)}")
+
+    new_course = {
+        "title": title,
+        "description": desc,
+        "provider": course_data.get("provider", "Web Learning Resource"),
+        "difficulty": course_data.get("difficulty", "beginner"),
+        "duration_hrs": int(course_data.get("duration_hrs") or 6),
+        "resource_url": url or "https://google.com",
+        "skill_tags": tags,
+        "prerequisites": course_data.get("prerequisites") or [],
+        "embedding": emb,
+    }
+    res = supabase_client.table("courses").insert(new_course).execute()
+    if res.data:
+        return res.data[0]
+    return course_data
+
+
 def swap_step_with_preference(
     step_id: str, user_id: str, preference: str = "custom", note: str = ""
 ) -> dict:
-    """In-place re-recommendation for a single step according to learner's preference."""
+    """Realtime in-depth AI & Web Search re-recommendation for a single step according to learner's preference."""
     step, path = _load_step_full(step_id, user_id)
     old_course = step.get("courses") or {}
+    old_title = old_course.get("title") or "Current Module"
+    old_skills = old_course.get("skill_tags") or []
+    old_diff = old_course.get("difficulty") or "beginner"
+    milestone = step.get("milestone_label") or "Core Skills"
 
     # Fetch profile (skills, resume context, topic ratings, years, goals)
     prof_r = supabase_client.table("profiles").select("*").eq("id", user_id).execute()
@@ -480,83 +525,146 @@ def swap_step_with_preference(
         raise ValueError("Profile not found")
     profile = prof_r.data[0]
 
-    # Calculate target difficulty
-    cur_diff = old_course.get("difficulty") or profile.get("current_level") or "beginner"
-    cur_idx = _LEVEL_TIERS.index(cur_diff) if cur_diff in _LEVEL_TIERS else 0
+    # Target specific topic/technology of this step to prevent unrelated topic jumps
+    topic_keywords = f"{old_title} {' '.join(old_skills[:2])}".strip()
 
-    level_hint = 0
+    # 1. Multi-query targeted live web search
+    search_queries = []
     if preference == "too_advanced":
-        level_hint = -1
+        search_queries.append(f"{topic_keywords} beginner step by step tutorial crash course guide")
+        search_queries.append(f"{topic_keywords} fundamentals for beginners documentation")
     elif preference == "too_basic":
-        level_hint = 1
+        search_queries.append(f"{topic_keywords} advanced production deep dive masterclass architecture")
+        search_queries.append(f"{topic_keywords} best practices scaling guide")
+    elif preference == "free_resource":
+        search_queries.append(f"{topic_keywords} official documentation free course youtube freecodecamp")
+        search_queries.append(f"{topic_keywords} free guide geeksforgeeks documentation")
+    elif preference in ("hands_on", "practice_sheet"):
+        search_queries.append(f"{topic_keywords} interactive hands-on coding tutorial lab exercises")
+        search_queries.append(f"{topic_keywords} practical exercises implementation guide")
+    else:
+        search_queries.append(f"{topic_keywords} best online tutorial guide documentation")
 
-    target_diff = _LEVEL_TIERS[max(0, min(len(_LEVEL_TIERS) - 1, cur_idx + level_hint))]
+    if note and note.strip():
+        search_queries.append(f"{topic_keywords} {note.strip()}")
 
-    # Get candidates from recommender
-    candidates = get_recommender().recommend(profile) or []
+    web_results = []
+    seen_urls = set()
+    for q in search_queries[:3]:
+        try:
+            results = web_search_service.search_learning_resources(q, max_results=5)
+            for r in results:
+                u = r.get("url")
+                if u and u not in seen_urls:
+                    seen_urls.add(u)
+                    web_results.append(r)
+        except Exception as e:
+            print(f"[path_service] search query '{q}' failed: {e}", flush=True)
 
-    # Exclude courses currently in the path (except the one being replaced)
-    in_path = {
+    # 2. Vector search candidate fallback in DB specifically on topic
+    from app.ml.embedder import embed_text
+    from app.ml.retriever import retrieve_candidates
+    try:
+        topic_emb = embed_text(f"{topic_keywords} {preference} {note}")
+        catalog_matches = retrieve_candidates(topic_emb, n=6)
+    except Exception:
+        catalog_matches = []
+
+    in_path_ids = {
         row["course_id"]
         for row in (
             supabase_client.table("path_steps")
             .select("course_id")
             .eq("path_id", path["id"])
             .execute()
-            .data
-            or []
+            .data or []
         )
-        if row.get("course_id") and row.get("course_id") != old_course.get("id")
+        if row.get("course_id")
     }
-    completed_ids = set(profile.get("completed_courses") or [])
-    excluded = in_path | completed_ids | {old_course.get("id")}
 
-    available_candidates = [c for c in candidates if c.get("id") not in excluded]
+    # 3. AI synthesis and selection
+    system_prompt = """You are an expert AI Curriculum Designer and Technical Recommender.
+A learner wants to re-recommend / swap a specific learning module in their active learning path.
 
-    FREE_PROVIDERS = {"freecodecamp", "mit ocw", "fast.ai", "hugging face", "google", "geeksforgeeks", "youtube", "takeuforward", "w3schools"}
+CRITICAL INSTRUCTIONS:
+1. STRICT SUBJECT DOMAIN COHERENCE: The new course MUST be on the exact same subject / technology as the current module (e.g. if the current course is Kubernetes / Containers, the replacement MUST be Kubernetes / Containers — NEVER switch to an unrelated subject like AWS Solutions Architect, React, or Python unless explicitly asked in the user's note).
+2. SATISFY LEARNER INTENT:
+   - 'too_advanced' / gentler: A clear, step-by-step beginner-friendly introduction with zero unnecessary jargon, focusing on foundational mechanics.
+   - 'too_basic': An advanced, production-grade deep dive focusing on real-world architecture, scaling, and best practices.
+   - 'free_resource': A verified free / open-source resource (Official Docs, YouTube crash course, freeCodeCamp, GeeksforGeeks, NPTEL).
+   - 'hands_on': Practical hands-on exercises, labs, and interactive code implementations.
+   - 'custom' / user note: Directly satisfy the learner's exact written request.
+3. GROUNDING: Use the provided live web search results whenever possible to pick a REAL course / tutorial with an authentic title, provider, and valid resource URL.
+4. EXPLANATION: Write a 2-sentence explanation of why this replacement is better suited for the learner based on their feedback, experience, and target goal.
 
-    def _score_pref(candidate: dict) -> float:
-        base_score = _score_alternative(candidate, old_course, target_diff)
-        prov = (candidate.get("provider") or "").lower()
-        title = (candidate.get("title") or "").lower()
-        desc = (candidate.get("description") or "").lower()
-        tags = " ".join((candidate.get("skill_tags") or [])).lower()
-        full_text = f"{title} {desc} {tags}"
+Return ONLY a JSON object with this exact schema (no markdown fences, no extra keys):
+{
+  "title": "String",
+  "provider": "String",
+  "description": "String",
+  "resource_url": "String",
+  "difficulty": "beginner" | "intermediate" | "advanced",
+  "duration_hrs": 6,
+  "skill_tags": ["String", "String"],
+  "explanation": "String"
+}"""
 
-        if preference == "free_resource":
-            if any(fp in prov for fp in FREE_PROVIDERS):
-                base_score += 4.0
-        elif preference == "practice_sheet":
-            if any(kw in full_text for kw in ("problem", "practice", "algorithm", "data structure", "sheet", "code", "hands-on", "interview")):
-                base_score += 4.0
-        elif preference == "too_advanced":
-            if candidate.get("difficulty") == "beginner":
-                base_score += 3.0
-        elif preference == "too_basic":
-            if candidate.get("difficulty") == "advanced":
-                base_score += 3.0
+    user_payload = {
+        "learner_profile": {
+            "target_role": profile.get("target_role"),
+            "current_level": profile.get("current_level"),
+            "detected_years_experience": profile.get("detected_years_experience"),
+            "goal_text": profile.get("goal_text"),
+        },
+        "current_module": {
+            "milestone": milestone,
+            "title": old_title,
+            "description": old_course.get("description"),
+            "difficulty": old_diff,
+            "skill_tags": old_skills,
+        },
+        "swap_request": {
+            "preference": preference,
+            "user_note": note,
+        },
+        "live_web_search_results": web_results[:6],
+        "catalog_candidates": [
+            {
+                "id": c.get("id"),
+                "title": c.get("title"),
+                "provider": c.get("provider"),
+                "difficulty": c.get("difficulty"),
+                "resource_url": c.get("resource_url"),
+            }
+            for c in catalog_matches if c.get("id") not in in_path_ids and c.get("id") != old_course.get("id")
+        ][:3],
+    }
 
-        if note and note.strip():
-            note_words = set(note.lower().split())
-            matches = sum(1 for w in note_words if len(w) > 2 and w in full_text)
-            base_score += matches * 1.5
+    user_msg = f"<<<SWAP_REQUEST>>>\n{json.dumps(user_payload, indent=2)}\n<<<END_SWAP_REQUEST>>>"
 
-        return base_score
+    try:
+        raw = _call_groq([
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_msg},
+        ], max_tokens=2500)
+        parsed = json.loads(_strip_fences(raw))
+    except Exception as e:
+        print(f"[path_service] LLM swap call failed: {e}, falling back to top web result", flush=True)
+        top_w = web_results[0] if web_results else {}
+        parsed = {
+            "title": top_w.get("title") or f"{old_title} (Tailored Alternative)",
+            "provider": top_w.get("provider") or "Web Learning Resource",
+            "description": top_w.get("snippet") or old_course.get("description") or "Alternative learning module",
+            "resource_url": top_w.get("url") or old_course.get("resource_url") or "https://google.com",
+            "difficulty": "beginner" if preference == "too_advanced" else "advanced" if preference == "too_basic" else old_diff,
+            "duration_hrs": old_course.get("duration_hrs") or 6,
+            "skill_tags": old_skills or [old_title],
+            "explanation": f"Calibrated alternative module matching your request for {preference.replace('_', ' ')}."
+        }
 
-    if not available_candidates:
-        return {"swapped": False, "reason": "No alternative course available in the catalog"}
-
-    available_candidates.sort(key=_score_pref, reverse=True)
-    replacement = available_candidates[0]
-
-    # Generate personalized explanation for this replacement
-    explanation = generate_explanation(profile, replacement)
-    if preference == "free_resource":
-        explanation = f"Recommended based on your preference for free/open-access learning: {explanation}"
-    elif preference == "practice_sheet":
-        explanation = f"Curated for hands-on problem solving and practice: {explanation}"
-    elif note and note.strip():
-        explanation = f"Tailored to your feedback ('{note.strip()[:60]}...'): {explanation}"
+    # Ensure this course is in Supabase catalog
+    replacement = _ensure_course_in_catalog(parsed)
+    explanation = parsed.get("explanation") or generate_explanation(profile, replacement)
 
     # In-place update of the step
     supabase_client.table("path_steps").update({
@@ -576,4 +684,5 @@ def swap_step_with_preference(
         "replacement": replacement,
         "explanation": explanation,
     }
+
 

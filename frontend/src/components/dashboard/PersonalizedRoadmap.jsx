@@ -132,7 +132,7 @@ export default function PersonalizedRoadmap({
   const priorityGaps = useMemo(() => {
     const stats = {}
     roadmap.allSteps.forEach((s) => {
-      ;(s.skill_tags || []).forEach((tag) => {
+      ; (s.skill_tags || []).forEach((tag) => {
         if (!stats[tag]) stats[tag] = { total: 0, done: 0 }
         stats[tag].total += 1
         if (s.status === 'completed') stats[tag].done += 1
@@ -200,7 +200,7 @@ export default function PersonalizedRoadmap({
     {
       id: 'free_resource',
       title: 'Free & Open Source Resource',
-      desc: 'Prioritize GeeksforGeeks, MDN, Official Docs, YouTube, and freeCodeCamp',
+      desc: 'Prioritize GeeksforGeeks, MDN, Official Docs, YouTube, freeCodeCamp, and NPTEL',
       icon: (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
@@ -208,20 +208,21 @@ export default function PersonalizedRoadmap({
       ),
     },
     {
-      id: 'practice_sheet',
-      title: 'Coding Practice & Striver Sheet',
-      desc: 'Hands-on coding challenges, DSA patterns, and interactive exercises',
+      id: 'hands_on',
+      title: 'Hands-on Practice & Project Labs',
+      desc: 'Interactive exercises, practical code implementations, and project challenges',
       icon: (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
           <polyline points="16 18 22 12 16 6" />
           <polyline points="8 6 2 12 8 18" />
+          <line x1="14" y1="4" x2="10" y2="20" />
         </svg>
       ),
     },
     {
       id: 'too_advanced',
       title: 'Too Advanced (Need gentler intro)',
-      desc: 'Find a beginner-friendly foundation step before diving deep',
+      desc: 'Find a beginner-friendly foundation step before diving deep into complex topics',
       icon: (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
           <polyline points="23 18 13.5 8.5 8.5 13.5 1 6" />
@@ -232,7 +233,7 @@ export default function PersonalizedRoadmap({
     {
       id: 'too_basic',
       title: 'Too Basic (Want advanced project)',
-      desc: 'Skip basic syntax and tackle production-grade architecture',
+      desc: 'Skip basic syntax and tackle production-grade architecture and scaling',
       icon: (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
           <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
@@ -714,7 +715,7 @@ export default function PersonalizedRoadmap({
                           <button
                             type="button"
                             onClick={() => handleOpenRerecommend(task)}
-                            title="Re-recommend a different resource for this week"
+                            title="Re-recommend an alternative for this topic"
                             className="px-2.5 py-1 bg-white dark:bg-[#1E293B] border border-[#e0e0e0] dark:border-[#242E40] hover:border-[#0066cc] dark:hover:border-[#38BDF8] hover:text-[#0066cc] dark:hover:text-[#38BDF8] rounded-lg text-xs font-semibold text-[#555555] dark:text-[#CBD5E1] transition-all flex items-center gap-1 cursor-pointer"
                           >
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
@@ -1206,7 +1207,7 @@ export default function PersonalizedRoadmap({
               <textarea
                 value={rerecommendNote}
                 onChange={(e) => setRerecommendNote(e.target.value)}
-                placeholder="e.g. Focus on Striver's A2Z sheet, need hands-on Python coding exercises / prefer free video playlist..."
+                placeholder={`e.g. Focus on interactive labs for ${rerecommendTaskTarget?.title || 'this topic'}, need hands-on step-by-step guidance...`}
                 rows={2}
                 className="w-full border border-[#e0e0e0] dark:border-[#242E40] bg-white dark:bg-[#0E131E] rounded-xl px-3.5 py-2 text-sm text-[#1d1d1f] dark:text-white focus:outline-none focus:border-[#0066cc] dark:focus:border-[#38BDF8] resize-none placeholder:text-gray-400 dark:placeholder:text-gray-600"
               />
@@ -1233,7 +1234,7 @@ export default function PersonalizedRoadmap({
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
                     </svg>
-                    <span>Calibrating...</span>
+                    <span>Calibrating with Live Web & AI...</span>
                   </>
                 ) : (
                   <>

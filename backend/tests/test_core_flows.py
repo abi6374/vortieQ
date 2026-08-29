@@ -165,4 +165,88 @@ def test_detect_provider_and_type():
     assert type3 == "documentation"
 
 
+def test_swap_step_with_preference_realtime_flow():
+    """Verify swap_step_with_preference searches live resources and updates step with LLM output."""
+    from unittest.mock import patch, MagicMock
+    from app.services.path_service import swap_step_with_preference
+    import json
+
+    mock_supabase = MagicMock()
+    # Step query
+    mock_step_resp = MagicMock(data=[{
+        "id": "step-1",
+        "path_id": "path-1",
+        "milestone_label": "Container Orchestration",
+        "courses": {
+            "id": "c-k8s-old",
+            "title": "Kubernetes for Beginners",
+            "description": "Deep cluster setup",
+            "difficulty": "intermediate",
+            "skill_tags": ["Kubernetes", "DevOps"],
+        },
+        "learning_paths": {"id": "path-1", "user_id": "u-1"}
+    }])
+    # Profile query
+    mock_prof_resp = MagicMock(data=[{
+        "id": "u-1",
+        "target_role": "DevOps Engineer",
+        "current_level": "beginner",
+        "goal_text": "Learn Kubernetes and cloud",
+    }])
+
+    def mock_table(name):
+        t = MagicMock()
+        if name == "path_steps":
+            t.select.return_value.eq.return_value.execute.return_value = mock_step_resp
+            t.update.return_value.eq.return_value.execute.return_value = MagicMock(data=[{"id": "step-1"}])
+        elif name == "profiles":
+            t.select.return_value.eq.return_value.execute.return_value = mock_prof_resp
+        elif name == "courses":
+            t.select.return_value.eq.return_value.execute.return_value = MagicMock(data=[])
+            t.select.return_value.ilike.return_value.execute.return_value = MagicMock(data=[])
+            t.insert.return_value.execute.return_value = MagicMock(data=[{
+                "id": "c-k8s-new",
+                "title": "Kubernetes Basics & Interactive Labs",
+                "provider": "Kubernetes Official Docs",
+                "resource_url": "https://kubernetes.io/docs/tutorials/kubernetes-basics/",
+                "difficulty": "beginner",
+                "duration_hrs": 5,
+            }])
+        return t
+
+    mock_supabase.table.side_effect = mock_table
+
+    mock_search = [
+        {
+            "title": "Kubernetes Basics Interactive Labs",
+            "url": "https://kubernetes.io/docs/tutorials/kubernetes-basics/",
+            "provider": "Kubernetes Official Docs",
+            "snippet": "Learn Kubernetes fundamentals with interactive hands-on browser labs",
+        }
+    ]
+
+    mock_llm_json = json.dumps({
+        "title": "Kubernetes Basics & Interactive Labs",
+        "provider": "Kubernetes Official Docs",
+        "description": "Interactive step-by-step walkthrough of pods and services.",
+        "resource_url": "https://kubernetes.io/docs/tutorials/kubernetes-basics/",
+        "difficulty": "beginner",
+        "duration_hrs": 5,
+        "skill_tags": ["Kubernetes", "DevOps"],
+        "explanation": "Gentle foundation for Kubernetes requested by the learner.",
+    })
+
+    with patch("app.services.path_service.supabase_client", mock_supabase), \
+         patch("app.services.web_search_service.search_learning_resources", return_value=mock_search), \
+         patch("app.services.path_service._call_groq", return_value=mock_llm_json), \
+         patch("app.ml.embedder.embed_text", return_value=[0.1] * 384):
+
+        res = swap_step_with_preference("step-1", "u-1", preference="too_advanced", note="Need a gentler intro")
+
+        assert res["swapped"] is True
+        assert res["replacement"]["title"] == "Kubernetes Basics & Interactive Labs"
+        assert res["replacement"]["id"] == "c-k8s-new"
+
+
+
 
