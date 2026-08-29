@@ -273,9 +273,9 @@ function ProjectsTab() {
   }
 
   const DIFF_COLOR = {
-    beginner: 'bg-[#ECFDF3] text-[#16A34A] border-[#D1FADF]',
-    intermediate: 'bg-[#eaf2fc] text-[#0066cc] border-[#cfe4fb]',
-    advanced: 'bg-[#FFF0F0] text-[#E5484D] border-[#FECDCA]',
+    beginner: 'bg-[#ECFDF3] dark:bg-emerald-950/50 text-[#16A34A] dark:text-emerald-300 border-[#D1FADF] dark:border-emerald-800/60',
+    intermediate: 'bg-[#eaf2fc] dark:bg-blue-950/50 text-[#0066cc] dark:text-blue-300 border-[#cfe4fb] dark:border-blue-800/60',
+    advanced: 'bg-[#FFF0F0] dark:bg-rose-950/50 text-[#E5484D] dark:text-rose-300 border-[#FECDCA] dark:border-rose-800/60',
   }
 
   return (
@@ -301,7 +301,7 @@ function ProjectsTab() {
         <div className="bg-white border border-[#e0e0e0] rounded-2xl p-6">
           <div className="flex items-center gap-2 flex-wrap mb-2">
             <h2 className="font-bold text-lg text-[#1d1d1f]">{idea.title}</h2>
-            <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${DIFF_COLOR[idea.difficulty] || DIFF_COLOR.beginner}`}>
+            <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border capitalize ${DIFF_COLOR[idea.difficulty] || DIFF_COLOR.beginner}`}>
               {idea.difficulty}
             </span>
           </div>
@@ -388,12 +388,12 @@ export default function CoachScreen() {
             </div>
 
             {/* Context Awareness Notice */}
-            <div className="bg-gradient-to-br from-[#fafbfc] to-[#eaf2fc] border-[1.5px] border-[#BFDBFE] rounded-2xl p-6 sm:p-7 shadow-sm">
-              <h4 className="font-['Manrope'] font-bold text-sm text-[#1d1d1f] mb-2 flex items-center gap-2">
+            <div className="bg-gradient-to-br from-[#fafbfc] to-[#eaf2fc] dark:from-[#141A26] dark:to-[#182236] border-[1.5px] border-[#BFDBFE] dark:border-[#24344D] rounded-2xl p-6 sm:p-7 shadow-sm">
+              <h4 className="font-['Manrope'] font-bold text-sm text-[#1d1d1f] dark:text-[#F9FAFB] mb-2 flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#22A06B] shadow-[0_0_8px_rgba(34,160,107,0.6)]" />
                 Roadmap-Grounded
               </h4>
-              <p className="text-xs sm:text-[13px] text-[#444444] leading-relaxed">
+              <p className="text-xs sm:text-[13px] text-[#444444] dark:text-[#CBD5E1] leading-relaxed">
                 Your AI Coach continuously inspects your completed lessons, quiz outcomes, and target roles to provide accurate, tailored answers.
               </p>
             </div>

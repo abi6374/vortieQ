@@ -235,15 +235,15 @@ export default function ProgressScreen() {
   const getHeatmapColor = (intensity) => {
     switch (intensity) {
       case 4:
-        return 'bg-[#0066cc]' // Strong purple
+        return 'bg-[#0066cc]'
       case 3:
-        return 'bg-[#61a9f5]' // Medium purple
+        return 'bg-[#61a9f5]'
       case 2:
-        return 'bg-[#a1ccfb]' // Light purple
+        return 'bg-[#a1ccfb] dark:bg-[#2563EB]'
       case 1:
-        return 'bg-[#dcecfe]' // Very light purple
+        return 'bg-[#dcecfe] dark:bg-[#1D4ED8]/60'
       default:
-        return 'bg-[#f5f5f7]' // No activity
+        return 'bg-[#f5f5f7] dark:bg-[#1C2433]'
     }
   }
 
@@ -1047,20 +1047,20 @@ export default function ProgressScreen() {
             </section>
 
             {/* RIGHT CARD 2: AI Progress Insight Card ("PathFinder insight") */}
-            <section className="bg-[#f5faff] border border-[#cfe4fb] rounded-[14px] p-5 shadow-sm">
-              <div className="flex items-center gap-2 text-[#0066cc] mb-2">
+            <section className="bg-[#f5faff] dark:bg-[#141E30] border border-[#cfe4fb] dark:border-[#233550] rounded-[14px] p-5 shadow-sm">
+              <div className="flex items-center gap-2 text-[#0066cc] dark:text-[#38BDF8] mb-2">
                 <Sparkles className="w-4 h-4" />
-                <h3 className="font-['Inter'] font-bold text-xs uppercase tracking-wider">
+                <h3 className="font-['Inter'] font-bold text-xs uppercase tracking-wider text-[#0066cc] dark:text-[#38BDF8]">
                   PathFinder insight
                 </h3>
               </div>
-              <p className="text-xs text-[#004fa3] leading-relaxed">
-                You're progressing well in Python and data analysis, but <strong>Statistics</strong> is currently your biggest skill gap. Strengthening descriptive statistics this week will keep your roadmap on track for Machine Learning.
+              <p className="text-xs text-[#004fa3] dark:text-[#E2E8F0] leading-relaxed">
+                You're progressing well in Python and data analysis, but <strong className="text-[#004fa3] dark:text-[#38BDF8]">Statistics</strong> is currently your biggest skill gap. Strengthening descriptive statistics this week will keep your roadmap on track for Machine Learning.
               </p>
               <button
                 type="button"
                 onClick={() => navigate('/skills')}
-                className="mt-3 text-xs font-bold text-[#0066cc] hover:underline inline-flex items-center gap-1"
+                className="mt-3 text-xs font-bold text-[#0066cc] dark:text-[#38BDF8] hover:underline inline-flex items-center gap-1"
               >
                 <span>View recommended resources</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -1087,15 +1087,15 @@ export default function ProgressScreen() {
                   return (
                     <div
                       key={act.id}
-                      className="p-3 rounded-xl bg-[#fafafc] border border-[#f5f5f7] hover:border-[#0066cc] transition-all flex items-center justify-between gap-2"
+                      className="p-3 rounded-xl bg-[#fafafc] dark:bg-[#0E131E] border border-[#f5f5f7] dark:border-[#1E2638] hover:border-[#0066cc] dark:hover:border-[#38BDF8] transition-all flex items-center justify-between gap-2"
                     >
                       <div className="flex items-start gap-2.5">
-                        <span className="font-mono text-xs font-extrabold text-[#0066cc] mt-0.5">
+                        <span className="font-mono text-xs font-extrabold text-[#0066cc] dark:text-[#38BDF8] mt-0.5">
                           {act.id}
                         </span>
                         <div>
-                          <h4 className="font-bold text-xs text-[#1d1d1f]">{act.title}</h4>
-                          <span className="text-[10px] text-[#6e6e73] font-medium">{act.duration}</span>
+                          <h4 className="font-bold text-xs text-[#1d1d1f] dark:text-[#F9FAFB]">{act.title}</h4>
+                          <span className="text-[10px] text-[#6e6e73] dark:text-[#94A3B8] font-medium">{act.duration}</span>
                         </div>
                       </div>
 
@@ -1117,13 +1117,13 @@ export default function ProgressScreen() {
               {/* Item 1: Roadmap status */}
               <div>
                 <div className="flex items-center justify-between text-xs font-bold mb-1">
-                  <span className="text-[#1d1d1f]">Roadmap status</span>
-                  <span className="text-[#0066cc]">{roadmap.percent}% complete</span>
+                  <span className="text-[#1d1d1f] dark:text-[#F9FAFB]">Roadmap status</span>
+                  <span className="text-[#0066cc] dark:text-[#38BDF8]">{roadmap.percent}% complete</span>
                 </div>
                 <div className="w-full bg-[#f5f5f7] h-2 rounded-full overflow-hidden">
                   <div className="bg-[#0066cc] h-full rounded-full" style={{ width: roadmap.percent + '%' }} />
                 </div>
-                <p className="text-[11px] text-[#6e6e73] mt-1">You're on track for your February 2027 target.</p>
+                <p className="text-[11px] text-[#6e6e73] dark:text-[#94A3B8] mt-1">You're on track for your February 2027 target.</p>
               </div>
 
               <hr className="border-[#f5f5f7]" />
@@ -1131,8 +1131,8 @@ export default function ProgressScreen() {
               {/* Item 2: This week's goal */}
               <div>
                 <div className="flex items-center justify-between text-xs font-bold mb-1">
-                  <span className="text-[#1d1d1f]">This week's goal</span>
-                  <span className="text-[#16A34A]">17.4 / 20 hrs (87%)</span>
+                  <span className="text-[#1d1d1f] dark:text-[#F9FAFB]">This week's goal</span>
+                  <span className="text-[#16A34A] dark:text-[#34D399]">17.4 / 20 hrs (87%)</span>
                 </div>
                 <div className="w-full bg-[#f5f5f7] h-2 rounded-full overflow-hidden">
                   <div className="bg-[#16A34A] h-full rounded-full" style={{ width: '87%' }} />
@@ -1140,7 +1140,7 @@ export default function ProgressScreen() {
                 <button
                   type="button"
                   onClick={() => navigate('/dashboard')}
-                  className="mt-2 w-full py-1.5 bg-[#eaf2fc] text-[#0066cc] hover:bg-[#0066cc] hover:text-white text-xs font-bold rounded-lg transition-colors"
+                  className="mt-2 w-full py-1.5 bg-[#eaf2fc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] hover:bg-[#0066cc] hover:text-white text-xs font-bold rounded-lg transition-colors"
                 >
                   Continue learning
                 </button>
@@ -1151,12 +1151,12 @@ export default function ProgressScreen() {
               {/* Item 3: Skill gap & Next milestone */}
               <div className="space-y-2 text-xs">
                 <div className="flex items-center justify-between">
-                  <span className="text-[#6e6e73]">Primary skill gap:</span>
+                  <span className="text-[#6e6e73] dark:text-[#94A3B8]">Primary skill gap:</span>
                   <span className="font-bold text-[#F59E0B]">Statistics (55%)</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-[#6e6e73]">Next milestone:</span>
-                  <span className="font-bold text-[#0066cc]">Statistics checkpoint (This week)</span>
+                  <span className="text-[#6e6e73] dark:text-[#94A3B8]">Next milestone:</span>
+                  <span className="font-bold text-[#0066cc] dark:text-[#38BDF8]">Statistics checkpoint (This week)</span>
                 </div>
               </div>
             </section>
@@ -1167,7 +1167,7 @@ export default function ProgressScreen() {
                 <h3 className="font-['Inter'] font-bold text-sm text-[#1d1d1f]">
                   Achievements
                 </h3>
-                <span className="text-[11px] font-bold text-[#16A34A]">4 Unlocked</span>
+                <span className="text-[11px] font-bold text-[#16A34A] dark:text-[#34D399]">4 Unlocked</span>
               </div>
 
               <div className="grid grid-cols-2 gap-2 mt-3">
@@ -1176,14 +1176,14 @@ export default function ProgressScreen() {
                     key={ach.title}
                     className={`p-2.5 rounded-xl border flex items-center gap-2 ${
                       ach.unlocked
-                        ? 'bg-[#fafafc] border-[#f5f5f7]'
-                        : 'bg-[#f5f5f5] border-[#e9e9e9] opacity-60'
+                        ? 'bg-[#fafafc] dark:bg-[#0E131E] border-[#f5f5f7] dark:border-[#1E2638]'
+                        : 'bg-[#f5f5f5] dark:bg-[#151C28] border-[#e9e9e9] dark:border-[#222C3D] opacity-60'
                     }`}
                   >
                     <span className="text-base">{ach.icon}</span>
                     <div className="truncate">
-                      <h4 className="font-bold text-[11px] text-[#1d1d1f] truncate">{ach.title}</h4>
-                      <span className="text-[9px] text-[#6e6e73] font-medium">{ach.status}</span>
+                      <h4 className="font-bold text-[11px] text-[#1d1d1f] dark:text-[#F9FAFB] truncate">{ach.title}</h4>
+                      <span className="text-[9px] text-[#6e6e73] dark:text-[#94A3B8] font-medium">{ach.status}</span>
                     </div>
                   </div>
                 ))}

@@ -124,6 +124,85 @@ const STYLES = `
 .pfa .err{ margin-top:16px; text-align:center; color:#DC2626; font-size:14.5px; font-weight:500; }
 .pfa .spin{ width:18px; height:18px; border:2px solid rgba(255,255,255,.5); border-top-color:#fff; border-radius:50%; animation:pfaspin .7s linear infinite; }
 @keyframes pfaspin{ to{ transform:rotate(360deg); } }
+
+/* Dark mode styles for AuthScreen */
+html.dark .pfa {
+  --navy: #F9FAFB;
+  --slate: #D1D5DB;
+  --muted: #94A3B8;
+  --input-bd: #2E384D;
+  --divider: #242E40;
+  --app-bd: #242E40;
+  --lav-circle: rgba(41, 151, 255, 0.2);
+  background:
+    radial-gradient(1100px 680px at 8% -8%, rgba(20,50,100,0.45) 0%, rgba(20,50,100,0) 55%),
+    radial-gradient(900px 560px at 112% 112%, rgba(25,40,80,0.35) 0%, rgba(25,40,80,0) 52%),
+    #0B0E14;
+}
+html.dark .pfa .app {
+  background: rgba(20, 26, 38, 0.94);
+  border: 1px solid rgba(45, 56, 78, 0.85);
+  box-shadow: 0 30px 80px -28px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.08);
+}
+html.dark .pfa .brand-panel {
+  background: linear-gradient(160deg, rgba(22, 28, 42, 0.9) 0%, rgba(16, 21, 32, 0.85) 100%);
+  border-right: 1px solid rgba(45, 56, 78, 0.85);
+}
+html.dark .pfa .form-panel {
+  background: rgba(18, 24, 34, 0.85);
+}
+html.dark .pfa .input {
+  background: #101520;
+  border-color: #2E384D;
+}
+html.dark .pfa .input input {
+  color: #F9FAFB;
+}
+html.dark .pfa .input input:-webkit-autofill,
+html.dark .pfa .input input:-webkit-autofill:hover, 
+html.dark .pfa .input input:-webkit-autofill:focus, 
+html.dark .pfa .input input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #101520 inset !important;
+  -webkit-text-fill-color: #F9FAFB !important;
+  caret-color: #F9FAFB !important;
+}
+html.dark .pfa .btn-google {
+  background: #101520;
+  color: #F9FAFB;
+  border-color: #2E384D;
+}
+html.dark .pfa .btn-google:hover:not(:disabled) {
+  background: #182030;
+  border-color: #38BDF8;
+}
+html.dark .pfa .btn-github {
+  background: #182030;
+  border: 1.5px solid #2E384D;
+}
+html.dark .pfa .btn-github:hover:not(:disabled) {
+  background: #202A40;
+}
+html.dark .pfa .checkbox {
+  background: #101520;
+  border-color: #2E384D;
+}
+html.dark .pfa .logo-name {
+  color: #F9FAFB;
+}
+html.dark .pfa .tab {
+  color: #94A3B8;
+}
+html.dark .pfa .tab.active {
+  color: #38BDF8;
+}
+html.dark .pfa .path-deco path {
+  stroke: #1E293B;
+}
+html.dark .pfa .path-deco circle {
+  fill: #1E293B;
+  stroke: #334155;
+}
+
 @media (max-width:900px){ .pfa .app{ grid-template-columns:1fr; min-height:0; } .pfa .brand-panel{ border-right:none; border-bottom:1px solid var(--divider); } .pfa .hero{ margin-top:28px; } }
 @media (prefers-reduced-motion:reduce){ .pfa *{ transition:none !important; } .pfa .spin{ animation:none; } }
 `

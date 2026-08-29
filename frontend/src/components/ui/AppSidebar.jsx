@@ -91,14 +91,15 @@ export default function AppSidebar() {
           aria-label="PathFinder Home"
         >
           <span
-            className="grid place-items-center rounded-xl flex-none"
-            style={{ width: 34, height: 34, background: `linear-gradient(160deg,#0071e3,${V})`, boxShadow: '0 4px 10px rgba(0,102,204,.30)' }}
+            className="grid place-items-center rounded-xl flex-none bg-gradient-to-br from-[#0071e3] to-[#0066cc] shadow-[0_4px_12px_rgba(0,102,204,0.35)]"
+            style={{ width: 34, height: 34 }}
           >
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 12h4l3 8 4-16 3 8h4" />
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="9" />
+              <polygon points="16 8 10.5 10.5 8 16 13.5 13.5" fill="#fff" stroke="none" />
             </svg>
           </span>
-          <span className="font-['Manrope'] font-extrabold text-[#1d1d1f]" style={{ fontSize: 17, letterSpacing: '-.02em' }}>
+          <span className="font-['Manrope'] font-extrabold text-[#1d1d1f] dark:text-white text-[17px] tracking-tight">
             PathFinder
           </span>
         </button>
