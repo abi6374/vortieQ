@@ -439,25 +439,51 @@ Return ONLY valid JSON matching this schema:
         logger.warning(f"Bedrock finalization failed, generating algorithmic synthesis: {e}")
 
     # Fallback algorithmic final score
-    avg_score = 80
-    if answers:
-        total_w = sum(len(a.get("transcript", "").split()) for a in answers)
-        avg_score = min(92, max(65, 70 + int(total_w / 20)))
+    valid_answers = [a for a in answers if a.get("transcript") and a.get("transcript").strip() not in ("", "Candidate answered verbally.", "No answer recorded.")]
+    total_w = sum(len(a.get("transcript", "").split()) for a in valid_answers)
+
+    if not valid_answers or total_w == 0:
+        return {
+            "overall_score": 0,
+            "verdict": "Do Not Hire",
+            "summary": f"The candidate did not provide any verbal responses to the questions asked during the session for '{target_role}'.",
+            "scores": {
+                "concept_understanding": 0,
+                "practical_application": 0,
+                "problem_solving": 0,
+                "communication": 0,
+                "confidence_structure": 0
+            },
+            "strengths": [
+                "Initiated the technical interview calibration session"
+            ],
+            "skill_gaps": [
+                f"Provide verbal explanations of core concepts required for {target_role}",
+                "Practice framing structured technical answers aloud"
+            ],
+            "recommended_learning_topics": [
+                upcoming_topics[0] if upcoming_topics else "Technical Fundamentals",
+                "Communication & Problem Framing",
+                "Architecture & System Design"
+            ]
+        }
+
+    avg_score = min(92, max(30, int(50 + (total_w / 15))))
 
     return {
         "overall_score": avg_score,
-        "verdict": "Strong Hire" if avg_score >= 85 else "Hire" if avg_score >= 75 else "Leaning Hire",
-        "summary": f"Demonstrated solid practical grasp of {current_milestone} for {target_role} with articulate delivery and structured problem solving.",
+        "verdict": "Strong Hire" if avg_score >= 85 else "Hire" if avg_score >= 70 else "Leaning Hire" if avg_score >= 50 else "Do Not Hire",
+        "summary": f"Demonstrated practical grasp of {current_milestone} for {target_role} with articulate delivery.",
         "scores": {
-            "concept_understanding": avg_score + 2,
-            "practical_application": avg_score - 1,
+            "concept_understanding": min(100, avg_score + 2),
+            "practical_application": max(0, avg_score - 2),
             "problem_solving": avg_score,
-            "communication": avg_score + 4,
-            "confidence_structure": avg_score + 1
+            "communication": min(100, avg_score + 4),
+            "confidence_structure": avg_score
         },
         "strengths": [
             f"Solid understanding of core {current_milestone} concepts",
-            "Clear and articulate vocal communication"
+            "Clear vocal communication"
         ],
         "skill_gaps": [
             "Include specific operational constraints and metrics when describing system scale",

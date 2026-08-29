@@ -222,13 +222,18 @@ export function calculatePacing(wordCount, durationSeconds) {
 export function evaluateLocally({ topic, trackId, questions, answers, durationSec = 0 }) {
   let totalWords = 0
   let totalScore = 0
+  let answeredCount = 0
   const qEvals = []
 
   questions.forEach((q, idx) => {
-    const ans = answers.find(a => a.question_id === q.id)
-    const transcript = ans?.transcript?.trim() || ''
+    const ans = answers.find(a => a.question_id === q.id || a.question_number === idx + 1)
+    const rawTranscript = ans?.transcript?.trim() || ''
+    const isPlaceholder = rawTranscript === 'Candidate answered verbally.' || rawTranscript === 'No verbal response recorded.'
+    const transcript = isPlaceholder ? '' : rawTranscript
     const words = transcript ? transcript.split(/\s+/).length : 0
     totalWords += words
+
+    if (words > 0) answeredCount++
 
     // Check matching criteria
     const lowerTrans = transcript.toLowerCase()
@@ -240,30 +245,39 @@ export function evaluateLocally({ topic, trackId, questions, answers, durationSe
     })
 
     // Compute question score (scale 0-100)
-    let score = 70
-    if (words > 80) score += 12
-    else if (words > 40) score += 8
-    else if (words > 15) score += 4
-    else if (words === 0) score = 40
+    let score = 0
+    if (words === 0) {
+      score = 0
+    } else {
+      score = 50
+      if (words > 80) score += 20
+      else if (words > 40) score += 12
+      else if (words > 15) score += 6
 
-    if (matchedCriteria >= 2) score += 12
-    else if (matchedCriteria === 1) score += 6
+      if (matchedCriteria >= 2) score += 20
+      else if (matchedCriteria === 1) score += 10
 
-    score = Math.min(96, Math.max(50, score))
+      score = Math.min(96, Math.max(25, score))
+    }
+
     totalScore += score
 
     const strengths = []
     const missing = []
 
-    if (words >= 40) strengths.push('Detailed explanation with concrete context')
-    if (matchedCriteria >= 1) strengths.push('Directly addressed core architectural criteria')
-    if (strengths.length === 0) strengths.push('Clear, concise delivery style')
+    if (words === 0) {
+      missing.push('Candidate did not provide a verbal answer to this question')
+    } else {
+      if (words >= 40) strengths.push('Detailed explanation with concrete context')
+      if (matchedCriteria >= 1) strengths.push('Directly addressed core architectural criteria')
+      if (strengths.length === 0) strengths.push('Engaged with the question')
 
-    if (matchedCriteria < (q.key_criteria?.length || 2)) {
-      missing.push(q.key_criteria?.[q.key_criteria.length - 1] || 'Specific production metrics & constraints')
-    }
-    if (words < 30) {
-      missing.push('Expand further with concrete technical examples and trade-offs')
+      if (matchedCriteria < (q.key_criteria?.length || 2)) {
+        missing.push(q.key_criteria?.[q.key_criteria.length - 1] || 'Specific production metrics & constraints')
+      }
+      if (words < 30) {
+        missing.push('Expand further with concrete technical examples and trade-offs')
+      }
     }
 
     qEvals.push({
@@ -274,57 +288,68 @@ export function evaluateLocally({ topic, trackId, questions, answers, durationSe
       score,
       key_criteria: q.key_criteria,
       model_answer_summary: q.model_answer_summary,
-      strengths,
+      strengths: strengths.length > 0 ? strengths : ['Initiated question prompt'],
       missing_concepts: missing.length > 0 ? missing : ['Minor edge case failure modes'],
-      feedback: score >= 85
+      feedback: words === 0
+        ? 'No answer provided for this question.'
+        : score >= 85
         ? 'Exceptional clarity and technical depth. Demonstrated strong real-world understanding.'
-        : score >= 75
-        ? 'Solid conceptual answer. Expanding on operational metrics and failure modes will make it even stronger.'
-        : 'Good initial direction. Try structuring answers using the STAR format with deeper technical details.'
+        : score >= 70
+        ? 'Solid response covering fundamental requirements.'
+        : 'Good effort, but needs deeper technical articulation and trade-off analysis.'
     })
   })
 
-  const avgScore = Math.round(totalScore / (questions.length || 1))
-  const combinedTrans = answers.map(a => a.transcript || '').join(' ')
-  const fillerAnalysis = analyzeFillerWords(combinedTrans)
-  const pacing = calculatePacing(totalWords, durationSec || (questions.length * 60))
+  const overallScore = answeredCount === 0 ? 0 : Math.round(totalScore / questions.length)
+  const fillerAnalysis = analyzeFillerWords(answers.map(a => a.transcript || '').join(' '))
+  const pacingAnalysis = calculatePacing(totalWords, durationSec)
 
-  let verdict = 'Strong Hire'
-  if (avgScore < 72) verdict = 'Needs Practice'
-  else if (avgScore < 82) verdict = 'Leaning Hire'
-  else if (avgScore < 90) verdict = 'Hire'
+  let verdict = 'Do Not Hire'
+  if (answeredCount > 0) {
+    if (overallScore >= 85) verdict = 'Strong Hire'
+    else if (overallScore >= 75) verdict = 'Hire'
+    else if (overallScore >= 55) verdict = 'Leaning Hire'
+  }
 
   return {
-    overall_score: avgScore,
+    overall_score: overallScore,
     verdict,
-    summary: `Candidate demonstrated solid technical foundation for ${topic || 'the target role'}, communicating key concepts with ${avgScore >= 80 ? 'high confidence and strong structural clarity' : 'good fundamentals and active engagement'}.`,
+    summary: answeredCount === 0
+      ? `The candidate did not provide any verbal responses during the session for ${topic || trackId}.`
+      : overallScore >= 80
+      ? `Demonstrated strong practical grasp of core concepts for ${topic || trackId} with articulate delivery.`
+      : `Demonstrated foundational concepts for ${topic || trackId}, with opportunity for deeper technical precision.`,
     scores: {
-      technical_depth: Math.min(98, Math.max(60, avgScore - 2)),
-      communication_clarity: Math.min(98, Math.max(65, avgScore + 3)),
-      problem_solving: Math.min(98, Math.max(60, avgScore)),
-      confidence_structure: Math.min(98, Math.max(62, avgScore + 1))
+      technical_depth: answeredCount === 0 ? 0 : Math.max(20, overallScore - 4),
+      communication_clarity: answeredCount === 0 ? 0 : Math.min(98, overallScore + 5),
+      problem_solving: answeredCount === 0 ? 0 : overallScore,
+      confidence_structure: answeredCount === 0 ? 0 : Math.max(20, overallScore - 2)
     },
-    metrics: {
-      duration_sec: durationSec,
-      total_words: totalWords,
-      wpm: pacing.wpm,
-      pacing_status: pacing.status,
-      filler_words: fillerAnalysis
-    },
-    strengths: [
-      'Articulate communication with structured reasoning',
-      'Solid intuition for system design and engineering trade-offs',
-      'Good engagement and professional response cadence'
-    ],
-    areas_for_improvement: [
-      'Mention specific operational metrics (p99 latency, RPS, memory footprints)',
-      'Discuss failure modes, retry policies, and fallback degradation strategies'
-    ],
+    filler_words_estimate: fillerAnalysis,
+    pacing: pacingAnalysis,
+    strengths: answeredCount === 0
+      ? ['Completed calibration and initiated interview']
+      : [
+          'Structured response framing with clear context-setting',
+          'Good engagement with fundamental technical requirements'
+        ],
+    areas_for_improvement: answeredCount === 0
+      ? ['Provide verbal answers aloud to technical questions', 'Practice articulating fundamental concepts']
+      : [
+          'Mention specific operational metrics (p99 latency, RPS, memory footprints)',
+          'Discuss failure modes, retry policies, and fallback degradation strategies'
+        ],
     question_evaluations: qEvals,
     recommended_learning_topics: [
-      'High-Throughput Distributed Systems Architecture',
-      'Database Query Profiling & Index Optimization',
-      'Observability: OpenTelemetry, Metrics & Alerts'
-    ]
+      `${topic || trackId} Core Architecture & Best Practices`,
+      'System Resilience & Production Observability',
+      'Performance Optimization & Bottleneck Diagnosis'
+    ],
+    metrics: {
+      totalWords,
+      durationSec,
+      wpm: pacingAnalysis.wpm,
+      fillerCount: fillerAnalysis.count
+    }
   }
 }

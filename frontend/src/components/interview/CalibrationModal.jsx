@@ -3,8 +3,8 @@ import { motion } from 'framer-motion'
 import { INTERVIEW_TRACKS } from './interviewQuestions'
 
 /**
- * CalibrationModal (Stage 1) — Pre-interview hardware and environment calibration.
- * Checks camera, microphone, ambient audio levels, and lets candidate pick interview track.
+ * CalibrationScreen (Stage 1) — Full-page pre-interview hardware and environment calibration.
+ * Replaces the old modal-overlay approach which was clipped by the AppShell layout.
  */
 export default function CalibrationModal({
   onStart,
@@ -20,14 +20,13 @@ export default function CalibrationModal({
   const [permissionState, setPermissionState] = useState('prompt') // 'prompt' | 'checking' | 'granted' | 'denied'
   const [voiceOnlyFallback, setVoiceOnlyFallback] = useState(false)
   const [micLevel, setMicLevel] = useState(0)
-  const [noiseStatus, setNoiseStatus] = useState('Calibrating...') // 'Clean' | 'Moderate Noise' | 'Calibrating...'
+  const [noiseStatus, setNoiseStatus] = useState('Calibrating...')
 
   const videoPreviewRef = useRef(null)
   const audioContextRef = useRef(null)
   const analyserRef = useRef(null)
   const animFrameRef = useRef(null)
 
-  // Start checking camera and microphone
   const requestMediaAccess = async (forceVoiceOnly = false) => {
     setPermissionState('checking')
     try {
@@ -59,18 +58,15 @@ export default function CalibrationModal({
       setPermissionState('granted')
       if (forceVoiceOnly) setVoiceOnlyFallback(true)
 
-      // Bind video preview
       if (videoPreviewRef.current && hasVideoTrack) {
         videoPreviewRef.current.srcObject = stream
       }
 
-      // Initialize Web Audio API for live mic meter
       if (hasAudioTrack) {
         setupAudioAnalyser(stream)
       }
     } catch (err) {
       console.warn('getUserMedia failed:', err)
-      // If full permissions failed, attempt audio-only
       if (!forceVoiceOnly) {
         try {
           const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true })
@@ -110,9 +106,7 @@ export default function CalibrationModal({
       const pollAudio = () => {
         analyser.getByteFrequencyData(dataArray)
         let sum = 0
-        for (let i = 0; i < dataArray.length; i++) {
-          sum += dataArray[i]
-        }
+        for (let i = 0; i < dataArray.length; i++) sum += dataArray[i]
         const avg = sum / dataArray.length
         const normalized = Math.min(1, avg / 120)
         setMicLevel(normalized)
@@ -143,6 +137,13 @@ export default function CalibrationModal({
     }
   }, [])
 
+  // When video track becomes available, bind srcObject
+  useEffect(() => {
+    if (videoPreviewRef.current && mediaStream && hasCamera && !voiceOnlyFallback) {
+      videoPreviewRef.current.srcObject = mediaStream
+    }
+  }, [mediaStream, hasCamera, voiceOnlyFallback])
+
   const handleStartInterview = () => {
     onStart({
       trackId: selectedTrack,
@@ -156,18 +157,30 @@ export default function CalibrationModal({
   const canProceed = permissionState === 'granted' && hasMic
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/80 backdrop-blur-xl overflow-y-auto">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 15 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 10 }}
-        transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-        className="relative w-full max-w-4xl bg-white dark:bg-[#121824] rounded-3xl border border-[#E6EAF2] dark:border-[#242E40] shadow-[0_25px_70px_rgba(0,0,0,0.45)] overflow-hidden my-auto"
-      >
-        {/* Header Bar */}
-        <div className="px-6 py-5 border-b border-[#f0f0f0] dark:border-[#242E40] flex items-center justify-between bg-[#fafbfc] dark:bg-[#171F2F]">
+    <div
+      className="fixed inset-0 z-[9999] flex items-start justify-center bg-[#09101e] overflow-y-auto"
+      style={{ fontFamily: "'Inter', 'Manrope', sans-serif" }}
+    >
+      {/* Ambient Background Glow */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div
+          className="absolute rounded-full blur-[120px] opacity-30"
+          style={{
+            width: 600,
+            height: 600,
+            background: 'radial-gradient(circle, #0071e3 0%, transparent 70%)',
+            top: '-150px',
+            left: '50%',
+            transform: 'translateX(-50%)'
+          }}
+        />
+      </div>
+
+      <div className="relative w-full max-w-5xl mx-auto px-4 py-8 sm:py-12">
+        {/* Page Header */}
+        <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#0071e3] to-[#0066cc] flex items-center justify-center text-white shadow-md shadow-[#0066cc]/25">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#0071e3] to-[#0066cc] flex items-center justify-center text-white shadow-lg shadow-[#0066cc]/30">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
                 <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
@@ -176,15 +189,15 @@ export default function CalibrationModal({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-xl font-bold font-['Manrope'] text-[#1d1d1f] dark:text-white">
+                <h1 className="text-xl font-extrabold text-white" style={{ fontFamily: 'Manrope, sans-serif' }}>
                   AI Interview Studio
-                </h2>
-                <span className="px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider rounded-md bg-[#0066cc]/10 text-[#0066cc] dark:bg-[#38BDF8]/20 dark:text-[#38BDF8]">
-                  Calibration
+                </h1>
+                <span className="px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider rounded-md bg-[#0066cc]/20 text-[#38BDF8] border border-[#38BDF8]/30">
+                  Beta
                 </span>
               </div>
-              <p className="text-xs text-[#7a7a7a] dark:text-[#94A3B8]">
-                Check your camera, microphone, and choose your interview track before starting.
+              <p className="text-xs text-slate-400 mt-0.5">
+                Check your camera, microphone, and choose your interview track.
               </p>
             </div>
           </div>
@@ -192,231 +205,276 @@ export default function CalibrationModal({
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close setup"
-            className="w-8 h-8 rounded-full flex items-center justify-center text-[#7a7a7a] hover:text-[#1d1d1f] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+            aria-label="Exit interview setup"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white border border-white/10 hover:border-white/25 hover:bg-white/5 transition-all cursor-pointer"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
+            <span>Exit</span>
           </button>
         </div>
 
-        {/* Body Content */}
-        <div className="p-6 sm:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Left Column: Video Preview & Hardware Meters (7 cols) */}
-          <div className="lg:col-span-7 flex flex-col gap-4">
-            {/* Live Camera Viewport */}
-            <div className="relative aspect-video rounded-2xl bg-slate-900 overflow-hidden border border-slate-700/60 shadow-lg flex items-center justify-center">
-              {hasCamera && !voiceOnlyFallback ? (
-                <video
-                  ref={videoPreviewRef}
-                  autoPlay
-                  playsInline
-                  muted
-                  className="w-full h-full object-cover transform -scale-x-100"
-                />
-              ) : (
-                <div className="flex flex-col items-center justify-center p-6 text-center text-slate-400">
-                  <div className="w-16 h-16 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center mb-3">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        {/* Main Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          className="w-full bg-[#111827]/90 rounded-3xl border border-white/10 shadow-2xl overflow-hidden backdrop-blur-xl"
+        >
+          {/* Card Inner Grid */}
+          <div className="p-6 sm:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            {/* ── Left Column: Camera Preview + Mic Meter ── */}
+            <div className="lg:col-span-7 flex flex-col gap-4">
+              {/* Live Camera Viewport */}
+              <div className="relative aspect-video rounded-2xl bg-[#0a0f1a] overflow-hidden border border-white/10 shadow-lg flex items-center justify-center">
+                {hasCamera && !voiceOnlyFallback ? (
+                  <video
+                    ref={videoPreviewRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    className="w-full h-full object-cover"
+                    style={{ transform: 'scaleX(-1)' }}
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center p-6 text-center text-slate-400">
+                    <div className="w-16 h-16 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center mb-3">
+                      {permissionState === 'checking' ? (
+                        <div className="w-8 h-8 rounded-full border-2 border-[#0071e3] border-t-transparent animate-spin" />
+                      ) : (
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+                          <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                        </svg>
+                      )}
+                    </div>
+                    <span className="text-sm font-semibold text-slate-200">
+                      {permissionState === 'checking'
+                        ? 'Requesting camera access...'
+                        : voiceOnlyFallback
+                        ? 'Voice-Only Mode Active'
+                        : permissionState === 'denied'
+                        ? 'Camera/Mic Permission Denied'
+                        : 'Waiting for camera permission'}
+                    </span>
+                    <span className="text-xs text-slate-400 mt-1.5 max-w-xs leading-relaxed">
+                      {permissionState === 'denied'
+                        ? 'Please allow camera and microphone access in your browser settings and refresh the page.'
+                        : voiceOnlyFallback
+                        ? 'The interview will rely on speech input without capturing candidate video.'
+                        : 'Grant camera access in your browser to enable the full video interview experience.'}
+                    </span>
+                    {permissionState === 'denied' && (
+                      <button
+                        type="button"
+                        onClick={() => requestMediaAccess(true)}
+                        className="mt-3 px-4 py-2 rounded-xl text-xs font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 hover:bg-amber-500/30 transition-colors cursor-pointer"
+                      >
+                        Continue in Voice-Only Mode
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {/* Status Overlay Badges */}
+                <div className="absolute top-3 left-3 flex items-center gap-2">
+                  <span className="px-2.5 py-1 rounded-lg bg-black/70 backdrop-blur-md text-[11px] font-semibold text-white flex items-center gap-1.5">
+                    <span
+                      className={`w-2 h-2 rounded-full animate-pulse ${
+                        permissionState === 'granted'
+                          ? 'bg-emerald-400'
+                          : permissionState === 'checking'
+                          ? 'bg-amber-400'
+                          : 'bg-red-400'
+                      }`}
+                    />
+                    {permissionState === 'granted'
+                      ? 'Hardware Ready'
+                      : permissionState === 'checking'
+                      ? 'Checking...'
+                      : 'Permission Required'}
+                  </span>
+                </div>
+
+                {/* Framing Guideline */}
+                {hasCamera && !voiceOnlyFallback && (
+                  <div className="absolute inset-8 border border-white/15 rounded-xl pointer-events-none flex items-start justify-center pt-2">
+                    <span className="text-[10px] text-white/50 uppercase tracking-wider bg-black/40 px-2 py-0.5 rounded backdrop-blur-sm">
+                      Frame eyes at upper third
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Mic Level Meter */}
+              <div className="p-4 rounded-2xl bg-[#1a2235] border border-white/10 flex flex-col gap-3">
+                <div className="flex items-center justify-between text-xs font-semibold">
+                  <div className="flex items-center gap-2 text-white">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
                       <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
                     </svg>
+                    <span>Microphone Input Level</span>
                   </div>
-                  <span className="text-sm font-semibold text-slate-200">
-                    {voiceOnlyFallback ? 'Voice-Only Mode Active' : 'Camera Access Needed'}
-                  </span>
-                  <span className="text-xs text-slate-400 mt-1 max-w-xs">
-                    {voiceOnlyFallback
-                      ? 'The interview will rely on speech input without capturing candidate video.'
-                      : 'Grant camera access to enable the realistic face-to-face video interview.'}
+                  <span className="text-[#38BDF8] font-mono">
+                    {hasMic ? (micLevel > 0.05 ? '🎙 Speaking...' : '✓ Ready') : 'Mic Required'}
                   </span>
                 </div>
-              )}
 
-              {/* Status Badge Overlays */}
-              <div className="absolute top-3 left-3 flex items-center gap-2">
-                <span className="px-2.5 py-1 rounded-lg bg-black/60 backdrop-blur-md text-[11px] font-semibold text-white flex items-center gap-1.5">
-                  <span className={`w-2 h-2 rounded-full ${permissionState === 'granted' ? 'bg-emerald-400' : 'bg-amber-400'} animate-pulse`} />
-                  {permissionState === 'granted' ? 'Hardware Ready' : 'Awaiting Permissions'}
-                </span>
-              </div>
-
-              {/* Live Framing Guideline Box */}
-              {hasCamera && !voiceOnlyFallback && (
-                <div className="absolute inset-8 border border-white/20 rounded-xl pointer-events-none flex items-start justify-center pt-2">
-                  <span className="text-[10px] text-white/60 uppercase tracking-wider bg-black/40 px-2 py-0.5 rounded backdrop-blur-xs">
-                    Frame eyes at upper third
-                  </span>
+                <div className="w-full h-3 rounded-full bg-slate-800 overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all duration-75"
+                    style={{
+                      width: `${Math.max(4, micLevel * 100)}%`,
+                      background: micLevel > 0.75
+                        ? 'linear-gradient(90deg, #10b981, #f59e0b, #ef4444)'
+                        : micLevel > 0.35
+                        ? 'linear-gradient(90deg, #10b981, #34d399)'
+                        : '#10b981'
+                    }}
+                  />
                 </div>
-              )}
-            </div>
 
-            {/* Hardware Status & Live Mic Level */}
-            <div className="p-4 rounded-2xl bg-[#f5f7fa] dark:bg-[#182132] border border-[#e5e9f0] dark:border-[#242E40] flex flex-col gap-3">
-              <div className="flex items-center justify-between text-xs font-semibold">
-                <div className="flex items-center gap-2 text-[#1d1d1f] dark:text-white">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0066cc" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
-                    <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-                  </svg>
-                  <span>Microphone Input Level</span>
+                <div className="flex items-center justify-between text-[11px] text-slate-400">
+                  <span>Ambient Noise: <strong className="text-slate-200">{noiseStatus}</strong></span>
+                  {permissionState !== 'granted' && (
+                    <button
+                      type="button"
+                      onClick={() => requestMediaAccess(false)}
+                      className="text-[#38BDF8] font-bold hover:underline cursor-pointer"
+                    >
+                      Retry Permissions
+                    </button>
+                  )}
                 </div>
-                <span className="text-[#0066cc] dark:text-[#38BDF8] font-mono">
-                  {hasMic ? (micLevel > 0.05 ? 'Speaking...' : 'Ready') : 'Mic Required'}
-                </span>
               </div>
 
-              {/* Dynamic Decibel Volume Bar */}
-              <div className="w-full h-3 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden flex items-center p-0.5">
-                <div
-                  className="h-full rounded-full transition-all duration-75"
-                  style={{
-                    width: `${Math.max(4, micLevel * 100)}%`,
-                    background: micLevel > 0.75
-                      ? 'linear-gradient(90deg, #10b981, #f59e0b, #ef4444)'
-                      : micLevel > 0.35
-                      ? 'linear-gradient(90deg, #10b981, #34d399)'
-                      : '#10b981'
-                  }}
-                />
-              </div>
-
-              {/* Ambient Noise Indicator */}
-              <div className="flex items-center justify-between text-[11px] text-[#7a7a7a] dark:text-[#94A3B8]">
-                <span>Ambient Noise: <strong className="text-[#1d1d1f] dark:text-slate-200">{noiseStatus}</strong></span>
-                {permissionState === 'denied' && (
-                  <button
-                    type="button"
-                    onClick={() => requestMediaAccess(false)}
-                    className="text-[#0066cc] dark:text-[#38BDF8] font-bold hover:underline"
-                  >
-                    Retry Permissions
-                  </button>
-                )}
+              {/* Privacy Note */}
+              <div className="text-[11px] text-slate-400 leading-relaxed bg-slate-800/50 p-3 rounded-xl border border-white/5">
+                <span className="font-bold text-slate-300">🔒 Privacy & Consent:</span> Your camera and microphone are used exclusively for the live interview simulation. Video is processed locally in your browser and never uploaded to any server.
               </div>
             </div>
 
-            {/* Permission explanation banner */}
-            <div className="text-[11px] text-[#7a7a7a] dark:text-[#94A3B8] leading-relaxed bg-[#f0f4f9] dark:bg-[#141b29] p-3 rounded-xl border border-[#dce5f2] dark:border-[#1f293d]">
-              <span className="font-bold text-[#1d1d1f] dark:text-slate-200">🔒 Privacy & Consent:</span> This app uses your camera and microphone exclusively to simulate a real-time conversational interview and generate personalized learning recommendations. Video is processed locally in your browser.
-            </div>
-          </div>
+            {/* ── Right Column: Track & Settings ── */}
+            <div className="lg:col-span-5 flex flex-col justify-between gap-5">
+              <div className="flex flex-col gap-4">
+                {/* Interview Track Selection */}
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+                    Select Interview Track
+                  </label>
+                  <div className="flex flex-col gap-2">
+                    {INTERVIEW_TRACKS.map((t) => {
+                      const isSelected = selectedTrack === t.id
+                      return (
+                        <button
+                          key={t.id}
+                          type="button"
+                          onClick={() => setSelectedTrack(t.id)}
+                          className={`p-3 rounded-xl text-left border transition-all cursor-pointer flex flex-col gap-1 ${
+                            isSelected
+                              ? 'bg-[#0066cc]/20 border-[#38BDF8]/60 shadow-sm shadow-[#38BDF8]/10'
+                              : 'bg-white/5 border-white/10 hover:border-white/20 hover:bg-white/8'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className={`text-sm font-bold ${isSelected ? 'text-[#38BDF8]' : 'text-white'}`}>
+                              {t.name}
+                            </span>
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/10 text-slate-300">
+                              {t.badge}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-400 line-clamp-2">
+                            {t.description}
+                          </p>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
 
-          {/* Right Column: Track & Settings Selection (5 cols) */}
-          <div className="lg:col-span-5 flex flex-col justify-between gap-5">
-            <div className="flex flex-col gap-4">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-[#7a7a7a] dark:text-[#94A3B8] mb-2">
-                  Select Interview Track
-                </label>
-                <div className="grid grid-cols-1 gap-2">
-                  {INTERVIEW_TRACKS.map((t) => {
-                    const isSelected = selectedTrack === t.id
-                    return (
+                {/* Custom Topic */}
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                    Custom Topic / Specialization
+                    <span className="ml-1 normal-case font-normal text-slate-500">(optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Next.js 14, Kafka Streams, GraphQL, PyTorch"
+                    value={customTopic}
+                    onChange={(e) => setCustomTopic(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-white/10 bg-white/5 text-sm text-white placeholder:text-slate-500 focus:border-[#38BDF8]/60 focus:bg-white/8 focus:outline-none transition-colors"
+                  />
+                </div>
+
+                {/* Question Count */}
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                    Interview Length
+                  </label>
+                  <div className="flex gap-2">
+                    {[3, 4, 5].map((cnt) => (
                       <button
-                        key={t.id}
+                        key={cnt}
                         type="button"
-                        onClick={() => setSelectedTrack(t.id)}
-                        className={`p-3 rounded-xl text-left border transition-all cursor-pointer flex flex-col gap-1 ${
-                          isSelected
-                            ? 'bg-[#eaf2fc] dark:bg-[rgba(41,151,255,0.18)] border-[#0066cc] dark:border-[#38BDF8] shadow-sm'
-                            : 'bg-white dark:bg-[#151D2C] border-[#E6EAF2] dark:border-[#242E40] hover:border-[#0066cc]/40'
+                        onClick={() => setQuestionCount(cnt)}
+                        className={`flex-1 py-2.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                          questionCount === cnt
+                            ? 'bg-[#0071e3] text-white border-[#0071e3] shadow-md shadow-[#0071e3]/30'
+                            : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10 hover:border-white/20'
                         }`}
                       >
-                        <div className="flex items-center justify-between">
-                          <span className={`text-sm font-bold ${isSelected ? 'text-[#0066cc] dark:text-[#38BDF8]' : 'text-[#1d1d1f] dark:text-white'}`}>
-                            {t.name}
-                          </span>
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-black/5 dark:bg-white/10 text-[#64748b] dark:text-slate-300">
-                            {t.badge}
-                          </span>
-                        </div>
-                        <p className="text-[11px] text-[#7a7a7a] dark:text-[#94A3B8] line-clamp-2">
-                          {t.description}
-                        </p>
+                        {cnt} Q (~{cnt * 2} min)
                       </button>
-                    )
-                  })}
+                    ))}
+                  </div>
                 </div>
               </div>
 
-              {/* Optional Custom Topic Focus */}
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-[#7a7a7a] dark:text-[#94A3B8] mb-1.5">
-                  Custom Topic / Specialization (Optional)
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Next.js 14, Kafka Streams, GraphQL, PyTorch"
-                  value={customTopic}
-                  onChange={(e) => setCustomTopic(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#d2d2d7] dark:border-[#28303F] bg-white dark:bg-[#141A26] text-sm text-[#1d1d1f] dark:text-white focus:border-[#0066cc] focus:outline-hidden"
-                />
-              </div>
+              {/* Actions */}
+              <div className="flex flex-col gap-3 pt-3 border-t border-white/10">
+                {!hasCamera && permissionState === 'granted' && (
+                  <div className="text-xs text-amber-400 bg-amber-950/40 border border-amber-500/20 p-2.5 rounded-xl text-center font-medium">
+                    📸 Camera not detected — continuing in Voice-Only mode
+                  </div>
+                )}
 
-              {/* Question Count Selector */}
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-[#7a7a7a] dark:text-[#94A3B8] mb-1.5">
-                  Interview Length
-                </label>
-                <div className="flex gap-2">
-                  {[3, 4, 5].map((cnt) => (
-                    <button
-                      key={cnt}
-                      type="button"
-                      onClick={() => setQuestionCount(cnt)}
-                      className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-colors ${
-                        questionCount === cnt
-                          ? 'bg-[#0066cc] text-white border-[#0066cc] shadow-sm'
-                          : 'bg-white dark:bg-[#151D2C] border-[#E6EAF2] dark:border-[#242E40] text-[#1d1d1f] dark:text-white hover:bg-[#fafbfc]'
-                      }`}
-                    >
-                      {cnt} Questions (~{cnt * 2} min)
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Actions & Start CTA */}
-            <div className="flex flex-col gap-2 pt-3 border-t border-[#f0f0f0] dark:border-[#242E40]">
-              {!hasCamera && permissionState === 'granted' && (
-                <div className="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 p-2 rounded-lg text-center font-medium">
-                  Camera not detected — continuing in Voice-Only mode.
-                </div>
-              )}
-
-              <button
-                type="button"
-                disabled={!canProceed}
-                onClick={handleStartInterview}
-                className="w-full py-3.5 px-5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-[#0071e3] to-[#0066cc] hover:from-[#0077ed] hover:to-[#005bb5] disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_8px_20px_rgba(0,102,204,0.3)] transition-all flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <span>Start Live AI Interview</span>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                  <polyline points="12 5 19 12 12 19" />
-                </svg>
-              </button>
-
-              <div className="flex items-center justify-between px-1">
                 <button
                   type="button"
-                  onClick={() => requestMediaAccess(true)}
-                  className="text-xs text-[#7a7a7a] hover:text-[#0066cc] dark:hover:text-[#38BDF8] underline cursor-pointer"
+                  disabled={!canProceed}
+                  onClick={handleStartInterview}
+                  className="w-full py-3.5 px-5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-[#0071e3] to-[#0066cc] hover:from-[#0077ed] hover:to-[#005bb5] disabled:opacity-40 disabled:cursor-not-allowed shadow-[0_8px_20px_rgba(0,102,204,0.35)] hover:shadow-[0_8px_25px_rgba(0,113,227,0.45)] transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  Switch to Voice-Only Mode
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none" />
+                  </svg>
+                  <span>Start Live AI Interview</span>
                 </button>
-                <span className="text-[11px] text-[#7a7a7a] dark:text-[#94A3B8]">
-                  Practice Simulation
-                </span>
+
+                <div className="flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={() => requestMediaAccess(true)}
+                    className="text-xs text-slate-400 hover:text-[#38BDF8] underline cursor-pointer transition-colors"
+                  >
+                    Switch to Voice-Only Mode
+                  </button>
+                  <span className="text-[11px] text-slate-500">
+                    Adaptive AI Questions · Amazon Bedrock
+                  </span>
+                </div>
               </div>
             </div>
+
           </div>
-        </div>
-      </motion.div>
+        </motion.div>
+      </div>
     </div>
   )
 }
