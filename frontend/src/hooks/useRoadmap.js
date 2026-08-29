@@ -102,6 +102,22 @@ export function useRoadmap() {
         setLockMessage(msg)
         return { ok: false, reason: msg }
       }
+      if (import.meta.env.DEV && (!localStorage.getItem('token') || localStorage.getItem('token') === 'dev-token')) {
+        setData((prev) => {
+          if (!prev) return prev
+          const newWeeks = (prev.weeks || []).map((w) => {
+            const steps = (w.steps || []).map((s) => (s.step_id === stepId ? { ...s, completed } : s))
+            const completed_steps = steps.filter((s) => s.completed).length
+            return { ...w, steps, completed_steps, is_complete: completed_steps === steps.length }
+          })
+          const allSteps = newWeeks.flatMap((w) => w.steps || [])
+          const completedSteps = allSteps.filter((s) => s.completed).length
+          const totalSteps = allSteps.length
+          const percent = totalSteps ? Math.round((completedSteps / totalSteps) * 100) : 0
+          return { ...prev, weeks: newWeeks, completed_steps: completedSteps, total_steps: totalSteps, percent }
+        })
+        return { ok: true }
+      }
       return { ok: false, reason: 'Unable to update. Try again.' }
     } finally {
       setSavingId(null)

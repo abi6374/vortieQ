@@ -351,7 +351,7 @@ export default function PersonalizedRoadmap({
         </div>
 
         <div className="pf-glass-card p-5 sm:p-6 flex items-center gap-5 sm:gap-6">
-          <span className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#ECFDF3] to-[#D1FADF] text-[#22A06B] flex items-center justify-center flex-none shadow-sm mr-1">
+          <span className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#ECFDF3] to-[#D1FADF] dark:from-emerald-950/80 dark:to-emerald-900/60 text-[#22A06B] dark:text-emerald-400 border border-transparent dark:border-emerald-800/60 flex items-center justify-center flex-none shadow-sm mr-1">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
               <polyline points="17 6 23 6 23 12" />
@@ -450,8 +450,8 @@ export default function PersonalizedRoadmap({
                   <div key={task.id} className="space-y-2">
                     <div className={`border rounded-xl p-3.5 sm:p-4 flex items-center justify-between gap-3 transition-colors ${
                       isCompleted
-                        ? 'border-[#22A06B]/30 bg-[#F6FEF9]'
-                        : 'border-[#e0e0e0] bg-white hover:border-[#0066cc]/40'
+                        ? 'border-[#22A06B]/30 dark:border-emerald-800/60 bg-[#F6FEF9] dark:bg-emerald-950/20'
+                        : 'border-[#e0e0e0] dark:border-[#242E40] bg-white dark:bg-[#141A26] hover:border-[#0066cc]/40 dark:hover:border-[#38BDF8]/40'
                     }`}>
                       <div className="flex items-center gap-3.5 min-w-0">
                         {/* Checkbox button */}
@@ -460,8 +460,8 @@ export default function PersonalizedRoadmap({
                           onClick={() => toggleTask(task)}
                           className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0 cursor-pointer ${
                             isCompleted
-                              ? 'bg-[#22A06B] border-[#22A06B] text-white shadow-xs'
-                              : 'border-[#d2d2d7] hover:border-[#0066cc]'
+                              ? 'bg-[#22A06B] dark:bg-emerald-500 border-[#22A06B] dark:border-emerald-500 text-white shadow-xs'
+                              : 'border-[#d2d2d7] dark:border-[#475569] hover:border-[#0066cc] dark:hover:border-[#38BDF8]'
                           }`}
                           aria-label="Toggle task completion"
                         >
@@ -473,7 +473,11 @@ export default function PersonalizedRoadmap({
                         </button>
 
                         {/* Task Icon / Emoji */}
-                        <span className="w-9 h-9 rounded-lg bg-[#eaf2fc] text-[#0066cc] flex items-center justify-center flex-none font-bold text-sm">
+                        <span className={`w-9 h-9 rounded-lg flex items-center justify-center flex-none font-bold text-sm ${
+                          isCompleted
+                            ? 'bg-emerald-100/70 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60'
+                            : 'bg-[#eaf2fc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] border border-[#cfe4fb] dark:border-[#242E40]'
+                        }`}>
                           {task.skill_tags?.[0]?.toLowerCase().includes('python')
                             ? '🐍'
                             : task.skill_tags?.[0]?.toLowerCase().includes('stat')
@@ -487,15 +491,27 @@ export default function PersonalizedRoadmap({
 
                         {/* Title & Subtitle */}
                         <div className="min-w-0">
-                          <h4 className={`font-bold text-sm text-[#1d1d1f] truncate flex items-center gap-1.5 ${isCompleted ? 'line-through opacity-60' : ''}`}>
+                          <h4 className={`font-bold text-sm truncate flex items-center gap-1.5 ${
+                            isCompleted
+                              ? 'line-through text-emerald-900 dark:text-emerald-300/80'
+                              : 'text-[#1d1d1f] dark:text-white'
+                          }`}>
                             <span className="truncate">{task.title}</span>
                             {task.partTotal > 1 && (
-                              <span className="flex-none text-[10px] font-bold text-[#0066cc] bg-[#eaf2fc] px-1.5 py-0.5 rounded-full no-underline">
+                              <span className={`flex-none text-[10px] font-bold px-1.5 py-0.5 rounded-full no-underline ${
+                                isCompleted
+                                  ? 'bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300'
+                                  : 'text-[#0066cc] dark:text-[#38BDF8] bg-[#eaf2fc] dark:bg-sky-950/70 border border-[#cfe4fb] dark:border-sky-800/60'
+                              }`}>
                                 Part {task.partNumber}/{task.partTotal}
                               </span>
                             )}
                           </h4>
-                          <p className="text-xs text-[#7a7a7a] mt-0.5 truncate">
+                          <p className={`text-xs mt-0.5 truncate ${
+                            isCompleted
+                              ? 'text-emerald-700/70 dark:text-emerald-400/60'
+                              : 'text-[#7a7a7a] dark:text-[#94A3B8]'
+                          }`}>
                             {task.subtitle}
                           </p>
                         </div>
@@ -504,7 +520,11 @@ export default function PersonalizedRoadmap({
                       {/* Right Controls */}
                       <div className="flex items-center gap-3 flex-shrink-0">
                         <span
-                          className="text-xs font-semibold text-[#0066cc] bg-[#eaf2fc] px-2.5 py-1 rounded-lg"
+                          className={`text-xs font-semibold px-2.5 py-1 rounded-lg ${
+                            isCompleted
+                              ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-100/70 dark:bg-emerald-950/70 border border-emerald-200 dark:border-emerald-800/60'
+                              : 'text-[#0066cc] dark:text-[#38BDF8] bg-[#eaf2fc] dark:bg-sky-950/70 border border-[#cfe4fb] dark:border-sky-800/60'
+                          }`}
                           title={task.partTotal > 1 ? `${task.duration_hrs}h this week of ${task.fullDurationHrs}h total` : undefined}
                         >
                           {task.duration_hrs} hrs
@@ -512,7 +532,11 @@ export default function PersonalizedRoadmap({
                         <button
                           type="button"
                           onClick={() => toggleWhy(task.id)}
-                          className="text-xs font-semibold text-[#0066cc] hover:underline whitespace-nowrap cursor-pointer"
+                          className={`text-xs font-semibold hover:underline whitespace-nowrap cursor-pointer ${
+                            isCompleted
+                              ? 'text-emerald-600 dark:text-emerald-400'
+                              : 'text-[#0066cc] dark:text-[#38BDF8]'
+                          }`}
                         >
                           Why this?
                         </button>
@@ -521,7 +545,7 @@ export default function PersonalizedRoadmap({
                             href={task.resource_url}
                             target="_blank"
                             rel="noreferrer"
-                            className="px-2.5 py-1 bg-white border border-[#e0e0e0] hover:border-[#0066cc] hover:text-[#0066cc] rounded-lg text-xs font-semibold text-[#333333] transition-colors"
+                            className="px-2.5 py-1 bg-white dark:bg-[#1E293B] border border-[#e0e0e0] dark:border-[#242E40] hover:border-[#0066cc] dark:hover:border-[#38BDF8] hover:text-[#0066cc] dark:hover:text-[#38BDF8] rounded-lg text-xs font-semibold text-[#333333] dark:text-white transition-colors"
                           >
                             Open ↗
                           </a>
@@ -767,14 +791,14 @@ export default function PersonalizedRoadmap({
 
       {/* Task Completion Note Modal */}
       {pendingCompleteTask && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4" onClick={() => setPendingCompleteTask(null)}>
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 dark:bg-black/75 p-4" onClick={() => setPendingCompleteTask(null)}>
           <div
-            className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6"
+            className="bg-white dark:bg-[#141A26] border border-transparent dark:border-[#242E40] rounded-2xl shadow-2xl w-full max-w-md p-6"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="font-bold text-base text-[#1d1d1f] mb-1">How did this go?</h3>
-            <p className="text-sm text-[#6e6e73] mb-4">
-              Marking <span className="font-semibold text-[#1d1d1f]">"{pendingCompleteTask.title}"</span> as done.
+            <h3 className="font-bold text-base text-[#1d1d1f] dark:text-white mb-1">How did this go?</h3>
+            <p className="text-sm text-[#6e6e73] dark:text-[#94A3B8] mb-4">
+              Marking <span className="font-semibold text-[#1d1d1f] dark:text-white">"{pendingCompleteTask.title}"</span> as done.
               A quick note helps us pick better courses for what's next.
             </p>
             <textarea
@@ -783,16 +807,16 @@ export default function PersonalizedRoadmap({
               onChange={(e) => { setCompleteNote(e.target.value); if (completeNoteError) setCompleteNoteError('') }}
               placeholder="e.g. This was too easy, I already knew most of it / This was perfect, more like this please / Too theoretical, I wanted more hands-on practice..."
               rows={3}
-              className="w-full border border-[#e0e0e0] rounded-xl px-3.5 py-2.5 text-sm text-[#1d1d1f] focus:outline-none focus:border-[#0066cc] focus:ring-2 focus:ring-[#0066cc]/15 resize-none"
+              className="w-full border border-[#e0e0e0] dark:border-[#242E40] bg-white dark:bg-[#0E131E] rounded-xl px-3.5 py-2.5 text-sm text-[#1d1d1f] dark:text-white focus:outline-none focus:border-[#0066cc] dark:focus:border-[#38BDF8] focus:ring-2 focus:ring-[#0066cc]/15 resize-none placeholder:text-gray-400 dark:placeholder:text-gray-600"
             />
             {completeNoteError && (
-              <p className="text-xs font-semibold text-red-600 mt-1.5">{completeNoteError}</p>
+              <p className="text-xs font-semibold text-red-600 dark:text-rose-400 mt-1.5">{completeNoteError}</p>
             )}
             <div className="flex items-center justify-end gap-3 mt-4">
               <button
                 type="button"
                 onClick={() => setPendingCompleteTask(null)}
-                className="px-4 py-2 text-sm font-semibold text-[#333333] hover:text-[#1d1d1f]"
+                className="px-4 py-2 text-sm font-semibold text-[#333333] dark:text-[#CBD5E1] hover:text-[#1d1d1f] dark:hover:text-white cursor-pointer"
               >
                 Cancel
               </button>
@@ -800,7 +824,7 @@ export default function PersonalizedRoadmap({
                 type="button"
                 onClick={confirmCompleteTask}
                 disabled={!completeNote.trim()}
-                className="px-5 py-2 bg-[#0066cc] hover:bg-[#004fa3] disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-bold rounded-xl shadow-sm"
+                className="px-5 py-2 bg-[#0066cc] hover:bg-[#004fa3] disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-bold rounded-xl shadow-sm cursor-pointer"
               >
                 Mark done
               </button>

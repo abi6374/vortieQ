@@ -50,6 +50,31 @@ async function testAllPages() {
       await page.screenshot({ path: imgPath });
       console.log(`📸 Captured screenshot: ${r.name}.png`);
 
+      if (r.path === '/dashboard') {
+        try {
+          const taskCheckBtn = await page.$('button[aria-label="Toggle task completion"]');
+          if (taskCheckBtn) {
+            await taskCheckBtn.click();
+            await page.waitForTimeout(400);
+            const textarea = await page.$('textarea');
+            if (textarea) {
+              await textarea.fill('Completed lesson hands-on exercises.');
+              await page.waitForTimeout(200);
+            }
+            const markDoneBtn = await page.getByRole('button', { name: /Mark done/i });
+            if (await markDoneBtn.isVisible()) {
+              await markDoneBtn.click();
+            }
+            await page.waitForTimeout(800);
+            const compImgPath = path.join(SCREENSHOT_DIR, '01_dashboard_completed_task_dark.png');
+            await page.screenshot({ path: compImgPath });
+            console.log(`📸 Captured screenshot: 01_dashboard_completed_task_dark.png`);
+          }
+        } catch (e) {
+          console.error('Failed to toggle task completion:', e);
+        }
+      }
+
       if (r.path === '/progress') {
         try {
           await page.evaluate(() => {
