@@ -1,18 +1,19 @@
-import React, { useRef, useState } from 'react'
+import React, { useRef, useEffect } from 'react'
 
 /**
  * MagneticButton (React Bits)
- * Magnetic cursor attraction button for high-conversion CTAs.
+ * High-performance magnetic cursor attraction button for high-conversion CTAs.
+ * Direct DOM transforms with zero React re-render overhead.
  */
 export default function MagneticButton({
   children,
   className = '',
-  strength = 30,
+  strength = 24,
   onClick,
   ...props
 }) {
   const btnRef = useRef(null)
-  const [position, setPosition] = useState({ x: 0, y: 0 })
+  const rafRef = useRef(null)
 
   const handleMouseMove = (e) => {
     if (!btnRef.current) return
@@ -24,12 +25,31 @@ export default function MagneticButton({
     const deltaX = (clientX - centerX) / (width / 2)
     const deltaY = (clientY - centerY) / (height / 2)
 
-    setPosition({ x: deltaX * strength, y: deltaY * strength })
+    const posX = (deltaX * strength).toFixed(1)
+    const posY = (deltaY * strength).toFixed(1)
+
+    if (rafRef.current) cancelAnimationFrame(rafRef.current)
+    rafRef.current = requestAnimationFrame(() => {
+      if (btnRef.current) {
+        btnRef.current.style.transform = `translate3d(${posX}px, ${posY}px, 0)`
+        btnRef.current.style.transition = 'transform 0.08s ease-out'
+      }
+    })
   }
 
   const handleMouseLeave = () => {
-    setPosition({ x: 0, y: 0 })
+    if (rafRef.current) cancelAnimationFrame(rafRef.current)
+    if (btnRef.current) {
+      btnRef.current.style.transform = 'translate3d(0, 0, 0)'
+      btnRef.current.style.transition = 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
+    }
   }
+
+  useEffect(() => {
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current)
+    }
+  }, [])
 
   return (
     <button
@@ -38,10 +58,7 @@ export default function MagneticButton({
       onMouseLeave={handleMouseLeave}
       onClick={onClick}
       style={{
-        transform: `translate3d(${position.x}px, ${position.y}px, 0)`,
-        transition: position.x === 0 && position.y === 0
-          ? 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)'
-          : 'transform 0.1s ease-out',
+        transform: 'translate3d(0, 0, 0)',
       }}
       className={`will-change-transform active:scale-95 select-none ${className}`}
       {...props}
@@ -50,3 +67,4 @@ export default function MagneticButton({
     </button>
   )
 }
+

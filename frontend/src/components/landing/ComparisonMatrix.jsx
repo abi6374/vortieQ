@@ -40,7 +40,7 @@ export default function ComparisonMatrix() {
   ]
 
   return (
-    <div className="w-full max-w-5xl mx-auto overflow-x-auto rounded-3xl border border-[#E0E0E0] dark:border-[#263348] bg-white/90 dark:bg-[#111726]/90 backdrop-blur-2xl shadow-2xl p-6 sm:p-8">
+    <div className="w-full max-w-5xl mx-auto overflow-x-auto rounded-3xl border border-[#E0E0E0] dark:border-[#263348] bg-white/95 dark:bg-[#111726]/95 backdrop-blur-md shadow-2xl p-6 sm:p-8 will-change-transform">
       <table className="w-full text-left border-collapse">
         <thead>
           <tr className="border-b border-[#E0E0E0] dark:border-[#1E293B]">

@@ -322,7 +322,7 @@ export default function LandingPage() {
 
       {/* 10. FINAL LAUNCH CTA BANNER */}
       <section className="relative py-24 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto z-10">
-        <div className="relative rounded-3xl p-10 sm:p-14 border border-[#0066CC]/30 dark:border-[#38BDF8]/30 bg-gradient-to-br from-[#EAF2FC]/90 via-white/80 to-[#DBEAFC]/90 dark:from-[#0E1726]/90 dark:via-[#111A2E]/80 dark:to-[#0A1220]/90 backdrop-blur-2xl shadow-2xl overflow-hidden text-center">
+        <div className="relative rounded-3xl p-10 sm:p-14 border border-[#0066CC]/30 dark:border-[#38BDF8]/30 bg-gradient-to-br from-[#EAF2FC]/90 via-white/85 to-[#DBEAFC]/90 dark:from-[#0E1726]/90 dark:via-[#111A2E]/85 dark:to-[#0A1220]/90 backdrop-blur-lg shadow-2xl overflow-hidden text-center will-change-transform">
           <div className="font-shadow text-2xl sm:text-3xl text-[#0066CC] dark:text-[#38BDF8] font-bold mb-3">
             Start Your Transformation Today
           </div>

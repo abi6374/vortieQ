@@ -62,7 +62,7 @@ export default function LiveRoadmapPreview() {
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto rounded-3xl border border-[#E0E0E0] dark:border-[#263348] bg-white/90 dark:bg-[#111726]/90 backdrop-blur-2xl shadow-2xl p-6 sm:p-8 relative overflow-hidden transition-all duration-300">
+    <div className="w-full max-w-4xl mx-auto rounded-3xl border border-[#E0E0E0] dark:border-[#263348] bg-white/95 dark:bg-[#111726]/95 backdrop-blur-md shadow-2xl p-6 sm:p-8 relative overflow-hidden transition-all duration-200 will-change-transform">
       {/* Top Banner & AI Recalibration Indicator */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#F0F0F0] dark:border-[#1E293B]">
         <div className="flex items-center gap-3">

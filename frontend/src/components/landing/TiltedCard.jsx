@@ -1,8 +1,9 @@
-import React, { useRef, useState } from 'react'
+import React, { useRef, useEffect } from 'react'
 
 /**
  * TiltedCard (React Bits)
- * 3D Parallax Tilt Card with dynamic glare and spring-damping physics.
+ * High-performance 3D Parallax Tilt Card with direct DOM transforms
+ * (0 React re-renders on mousemove) and touch-safe physics.
  */
 export default function TiltedCard({
   children,
@@ -13,9 +14,8 @@ export default function TiltedCard({
   ...props
 }) {
   const cardRef = useRef(null)
-  const [tilt, setTilt] = useState({ x: 0, y: 0 })
-  const [glarePos, setGlarePos] = useState({ x: 50, y: 50, opacity: 0 })
-  const [isHovered, setIsHovered] = useState(false)
+  const glareRef = useRef(null)
+  const rafRef = useRef(null)
 
   const handleMouseMove = (e) => {
     if (!cardRef.current) return
@@ -25,45 +25,49 @@ export default function TiltedCard({
     const mouseX = e.clientX - rect.left
     const mouseY = e.clientY - rect.top
 
-    // Calculate rotation (-maxTilt to +maxTilt)
     const xRot = ((mouseY - height / 2) / (height / 2)) * -maxTilt
     const yRot = ((mouseX - width / 2) / (width / 2)) * maxTilt
 
-    setTilt({ x: xRot, y: yRot })
-
-    if (glare) {
-      const glX = (mouseX / width) * 100
-      const glY = (mouseY / height) * 100
-      setGlarePos({ x: glX, y: glY, opacity: 0.25 })
-    }
-  }
-
-  const handleMouseEnter = () => {
-    setIsHovered(true)
+    if (rafRef.current) cancelAnimationFrame(rafRef.current)
+    rafRef.current = requestAnimationFrame(() => {
+      if (cardRef.current) {
+        cardRef.current.style.transform = `perspective(1000px) rotateX(${xRot.toFixed(2)}deg) rotateY(${yRot.toFixed(2)}deg) scale3d(${scale}, ${scale}, ${scale})`
+        cardRef.current.style.transition = 'transform 0.08s ease-out'
+      }
+      if (glare && glareRef.current) {
+        const glX = ((mouseX / width) * 100).toFixed(1)
+        const glY = ((mouseY / height) * 100).toFixed(1)
+        glareRef.current.style.opacity = '0.25'
+        glareRef.current.style.background = `radial-gradient(circle at ${glX}% ${glY}%, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 60%)`
+      }
+    })
   }
 
   const handleMouseLeave = () => {
-    setIsHovered(false)
-    setTilt({ x: 0, y: 0 })
-    setGlarePos((prev) => ({ ...prev, opacity: 0 }))
+    if (rafRef.current) cancelAnimationFrame(rafRef.current)
+    if (cardRef.current) {
+      cardRef.current.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)'
+      cardRef.current.style.transition = 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
+    }
+    if (glare && glareRef.current) {
+      glareRef.current.style.opacity = '0'
+    }
   }
 
+  useEffect(() => {
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current)
+    }
+  }, [])
+
   return (
-    <div
-      style={{ perspective: '1000px' }}
-      className={`inline-block ${className}`}
-      {...props}
-    >
+    <div className={`inline-block ${className}`} {...props}>
       <div
         ref={cardRef}
         onMouseMove={handleMouseMove}
-        onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         style={{
-          transform: isHovered
-            ? `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) scale3d(${scale}, ${scale}, ${scale})`
-            : 'rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)',
-          transition: isHovered ? 'transform 0.1s ease-out' : 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
+          transform: 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)',
           transformStyle: 'preserve-3d',
         }}
         className="relative will-change-transform"
@@ -72,14 +76,12 @@ export default function TiltedCard({
 
         {glare && (
           <div
-            className="pointer-events-none absolute inset-0 rounded-2xl transition-opacity duration-300 z-20"
-            style={{
-              opacity: glarePos.opacity,
-              background: `radial-gradient(circle at ${glarePos.x}% ${glarePos.y}%, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 60%)`,
-            }}
+            ref={glareRef}
+            className="pointer-events-none absolute inset-0 rounded-2xl transition-opacity duration-300 z-20 opacity-0"
           />
         )}
       </div>
     </div>
   )
 }
+
