@@ -108,12 +108,11 @@ export default function AppSidebar() {
         <button
           type="button"
           onClick={() => setCollapsed(true)}
-          title="Hide sidebar"
           aria-label="Hide sidebar"
-          className="relative group flex items-center justify-center w-8 h-8 rounded-lg text-[#7a7a7a] hover:text-[#0066cc] hover:bg-[#eaf2fc] border border-[#f0f0f0] hover:border-[#0066cc] transition-all cursor-pointer shadow-2xs"
+          className="relative group flex items-center justify-center w-8 h-8 rounded-lg text-[#7a7a7a] hover:text-[#0066cc] hover:bg-[#eaf2fc] dark:hover:bg-white/10 border border-[#f0f0f0] dark:border-[#242E40] hover:border-[#0066cc] dark:hover:border-[#38BDF8] transition-all cursor-pointer shadow-2xs"
         >
           <SidebarIcon className="w-4 h-4" />
-          <span className="pointer-events-none absolute left-full ml-2 px-2 py-1 bg-[#1d1d1f] text-white text-[11px] font-bold rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg z-50">
+          <span className="pointer-events-none absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2.5 py-1 bg-slate-900 dark:bg-slate-800 text-white text-[11px] font-semibold rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-xl z-50 border border-slate-700">
             Hide sidebar
           </span>
         </button>

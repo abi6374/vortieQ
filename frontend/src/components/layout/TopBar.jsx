@@ -78,17 +78,16 @@ export default function TopBar({ children }) {
                 setCollapsed(false)
                 setIsHoverOpen(false)
               }}
-              title="Show sidebar"
               aria-label="Show sidebar"
-              className="relative group flex items-center justify-center w-8 h-8 rounded-lg text-[#7a7a7a] hover:text-[#0066cc] hover:bg-[#eaf2fc] border border-[#f0f0f0] hover:border-[#0066cc] transition-all cursor-pointer shadow-2xs"
+              className="relative group flex items-center justify-center w-8 h-8 rounded-lg text-[#7a7a7a] hover:text-[#0066cc] hover:bg-[#eaf2fc] dark:hover:bg-white/10 border border-[#f0f0f0] dark:border-[#242E40] hover:border-[#0066cc] dark:hover:border-[#38BDF8] transition-all cursor-pointer shadow-2xs"
             >
               <SidebarIcon className="w-4 h-4" />
-              <span className="pointer-events-none absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2.5 py-1 bg-[#1d1d1f] text-white text-[11px] font-bold rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg z-50">
+              <span className="pointer-events-none absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2.5 py-1 bg-slate-900 dark:bg-slate-800 text-white text-[11px] font-semibold rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-xl z-50 border border-slate-700">
                 Show sidebar
               </span>
             </button>
 
-            <span className="h-6 w-px bg-[#f0f0f0] mx-1 flex-none" />
+            <span className="h-6 w-px bg-[#f0f0f0] dark:bg-[#242E40] mx-1 flex-none" />
 
             {/* Hover Floating Navigation Dropdown with Framer Motion */}
             <AnimatePresence>
@@ -103,7 +102,7 @@ export default function TopBar({ children }) {
                   onMouseEnter={handleMouseEnter}
                   onMouseLeave={handleMouseLeave}
                 >
-                  <div className="bg-white rounded-2xl border border-[#E6EAF2] shadow-[0_20px_50px_rgba(14,27,56,0.18),0_4px_12px_rgba(14,27,56,0.06)] p-2">
+                  <div className="bg-white dark:bg-[#141A26] rounded-2xl border border-[#E6EAF2] dark:border-[#242E40] shadow-[0_20px_50px_rgba(14,27,56,0.18),0_4px_12px_rgba(14,27,56,0.06)] p-2">
                     <nav className="flex flex-col gap-0.5">
                       {NAV.map((item) => {
                         const on = active === item.key
@@ -115,18 +114,15 @@ export default function TopBar({ children }) {
                               navigate(item.path)
                               setIsHoverOpen(false)
                             }}
-                            className="flex items-center gap-3 rounded-[10px] border-none cursor-pointer text-left transition-colors w-full"
-                            style={{
-                              padding: '10px 12px',
-                              background: on ? '#eaf2fc' : 'transparent',
-                              color: on ? '#0066cc' : '#333333',
-                              fontWeight: on ? 600 : 500,
-                              fontSize: 14,
-                            }}
-                            onMouseEnter={(e) => { if (!on) e.currentTarget.style.background = '#fafbfc' }}
-                            onMouseLeave={(e) => { if (!on) e.currentTarget.style.background = 'transparent' }}
+                            className={`flex items-center gap-3 rounded-[10px] border-none cursor-pointer text-left transition-colors w-full px-3 py-2.5 text-sm ${
+                              on
+                                ? 'bg-[#eaf2fc] dark:bg-[rgba(41,151,255,0.22)] text-[#0066cc] dark:text-[#38BDF8] font-semibold'
+                                : 'bg-transparent text-[#333333] dark:text-[#D1D5DB] hover:bg-[#fafbfc] dark:hover:bg-white/5 font-medium'
+                            }`}
                           >
-                            <span style={{ color: on ? '#0066cc' : '#6e6e73', display: 'flex' }}>{ICONS[item.key]}</span>
+                            <span className={`flex ${on ? 'text-[#0066cc] dark:text-[#38BDF8]' : 'text-[#6e6e73] dark:text-[#94A3B8]'}`}>
+                              {ICONS[item.key]}
+                            </span>
                             <span>{item.label}</span>
                           </button>
                         )

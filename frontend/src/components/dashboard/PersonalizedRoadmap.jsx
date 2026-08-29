@@ -365,10 +365,9 @@ export default function PersonalizedRoadmap({ pathData = null }) {
               Personalized roadmap calibrated from your skills and weekly availability.
             </p>
           </div>
-
-          {/* 3 Top Stats Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4.5 mb-6">
-            <div className="pf-glass-card p-5 flex items-center gap-4.5">
+               {/* 3 Top Stats Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-6 mb-6">
+            <div className="pf-glass-card p-5 sm:p-6 flex items-center gap-4.5">
               <span className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#eaf2fc] to-[#dbeafc] text-[#0066cc] flex items-center justify-center flex-none shadow-sm">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
@@ -387,7 +386,7 @@ export default function PersonalizedRoadmap({ pathData = null }) {
               </div>
             </div>
 
-            <div className="pf-glass-card p-5 flex items-center gap-4.5">
+            <div className="pf-glass-card p-5 sm:p-6 flex items-center gap-4.5">
               <span className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#eaf2fc] to-[#dbeafc] text-[#0066cc] flex items-center justify-center flex-none shadow-sm">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10" />
@@ -404,7 +403,7 @@ export default function PersonalizedRoadmap({ pathData = null }) {
               </div>
             </div>
 
-            <div className="pf-glass-card p-5 flex items-center gap-4.5">
+            <div className="pf-glass-card p-5 sm:p-6 flex items-center gap-4.5">
               <span className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#ECFDF3] to-[#D1FADF] text-[#22A06B] flex items-center justify-center flex-none shadow-sm">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
@@ -428,35 +427,32 @@ export default function PersonalizedRoadmap({ pathData = null }) {
             {/* LEFT COLUMN: Your learning roadmap */}
             <div className="pf-glass-card p-6 sm:p-7 flex flex-col justify-between min-w-0">
               <div>
-                <h2 className="font-['Manrope'] font-bold text-lg text-[#1d1d1f] mb-4">
-                  Your learning roadmap
-                </h2>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="font-['Manrope'] font-bold text-lg text-[#1d1d1f]">
+                    Your learning roadmap
+                  </h2>
+                </div>
 
-                {/* Week Tabs Navigation */}
-                <div className="flex flex-wrap items-center gap-2 mb-6 pb-4 border-b border-[#f5f5f7]">
+                {/* Week Selector Chips */}
+                <div className="flex flex-wrap gap-2 mb-6">
                   {weekTabs.map((tab) => {
-                    const isSel = selectedWeek === tab
+                    const isSelected = selectedWeek === tab
                     const wg = weekGroups[tab] || {}
-                    // Locked weeks stay VISIBLE but muted with a lock icon —
-                    // the learner can still open them to see what's ahead.
+                    const isLocked = !!wg.isLocked
                     return (
                       <button
                         key={tab}
                         type="button"
                         onClick={() => setSelectedWeek(tab)}
-                        title={wg.isLocked ? wg.lockedReason : undefined}
-                        className={`px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer inline-flex items-center gap-1.5 ${
-                          isSel
-                            ? 'bg-[#0066cc] text-white shadow-sm'
-                            : wg.isLocked
-                            ? 'bg-white text-[#86868b] hover:bg-gray-50'
-                            : 'bg-white text-[#333333] hover:text-[#1d1d1f] hover:bg-gray-100/70'
+                        className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                          isSelected
+                            ? 'bg-[#0066cc] text-white shadow-xs'
+                            : isLocked
+                            ? 'bg-[#fafbfc] dark:bg-[#101622] text-[#86868b] dark:text-[#94A3B8] border border-[#f0f0f0] dark:border-[#242E40] opacity-85'
+                            : 'bg-[#f5f5f7] dark:bg-[#1A2232] text-[#333333] dark:text-[#CBD5E1] hover:bg-[#eaf2fc] dark:hover:bg-blue-950/40 hover:text-[#0066cc] dark:hover:text-[#38BDF8]'
                         }`}
                       >
-                        {wg.isComplete && !isSel && (
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#22A06B" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
-                        )}
-                        {wg.isLocked && (
+                        {isLocked && (
                           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
                         )}
                         {tab}
@@ -466,13 +462,11 @@ export default function PersonalizedRoadmap({ pathData = null }) {
                 </div>
 
                 {currentWeekData.isLocked && (
-                  <div className="mb-4 flex items-center gap-3 rounded-xl border px-4 py-3"
-                       style={{ background: '#FEF6E7', borderColor: '#F3DB9B' }}>
-                    <span className="grid place-items-center rounded-full flex-none"
-                          style={{ width: 28, height: 28, background: '#E0A100', color: '#fff' }}>
+                  <div className="mb-4 flex items-center gap-3 rounded-xl border border-[#F3DB9B] dark:border-amber-800/60 bg-[#FEF6E7] dark:bg-amber-950/40 px-4 py-3 shadow-xs">
+                    <span className="grid place-items-center rounded-full flex-none w-7 h-7 bg-[#E0A100] text-white">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
                     </span>
-                    <span className="text-sm font-semibold" style={{ color: '#8A6100' }}>
+                    <span className="text-sm font-semibold text-[#8A6100] dark:text-amber-300">
                       {currentWeekData.lockedReason || 'Complete the previous week to unlock this one.'}
                     </span>
                   </div>
@@ -617,14 +611,14 @@ export default function PersonalizedRoadmap({ pathData = null }) {
               </div>
 
               {/* ROADMAP MILESTONE STRIP (Bottom Nodes with Arrows) */}
-              <div className="mt-8 pt-6 border-t border-[#f5f5f7]">
-                <div className="flex items-center gap-2 overflow-x-auto pb-2">
+              <div className="mt-8 pt-6 border-t border-[#f5f5f7] dark:border-[#1E2638]">
+                <div className="flex items-center gap-2 overflow-x-auto pb-2.5 pf-custom-scrollbar">
                   {milestoneNodes.map((node, i) => {
                     const isSelected = activeMilestone === node.id
                     return (
                       <React.Fragment key={node.id}>
                         {i > 0 && (
-                          <span className="text-[#d2d2d7] font-bold text-sm flex-none">
+                          <span className="text-[#d2d2d7] dark:text-[#4B5563] font-bold text-sm flex-none">
                             →
                           </span>
                         )}
@@ -632,39 +626,39 @@ export default function PersonalizedRoadmap({ pathData = null }) {
                           onClick={() => handleMilestoneClick(node)}
                           className={`flex-none rounded-xl p-2.5 sm:p-3 flex flex-col items-center justify-center text-center cursor-pointer transition-all min-w-[95px] sm:min-w-[110px] border ${
                             isSelected
-                              ? 'border-2 border-[#0066cc] bg-[#eaf2fc] shadow-xs ring-2 ring-[#0066cc]/10'
+                              ? 'border-2 border-[#0066cc] dark:border-[#38BDF8] bg-[#eaf2fc] dark:bg-blue-950/40 shadow-xs ring-2 ring-[#0066cc]/10'
                               : node.isComplete
-                              ? 'border-[#22A06B]/40 bg-[#F6FEF9] shadow-2xs hover:border-[#22A06B]'
-                              : 'border-[#e0e0e0] bg-white hover:border-[#d2d2d7]'
+                              ? 'border-[#22A06B]/40 bg-[#F6FEF9] dark:bg-emerald-950/30 shadow-2xs hover:border-[#22A06B]'
+                              : 'border-[#e0e0e0] dark:border-[#242E40] bg-white dark:bg-[#101520] hover:border-[#d2d2d7] dark:hover:border-[#3B4860]'
                           }`}
                         >
                           {/* Consistent Clean Circle Number */}
                           <span
                             className={`w-6 h-6 rounded-full font-bold text-xs flex items-center justify-center mb-1 ${
                               isSelected
-                                ? 'bg-[#0066cc] text-white shadow-xs'
-                                : 'bg-[#333333] text-white'
+                                ? 'bg-[#0066cc] dark:bg-[#38BDF8] text-white dark:text-slate-900 shadow-xs'
+                                : 'bg-[#333333] dark:bg-[#242E40] text-white'
                             }`}
                           >
                             {node.id}
                           </span>
 
                           {/* Milestone Label */}
-                          <span className="text-[11px] sm:text-xs font-bold text-[#1d1d1f] leading-tight truncate max-w-[95px]">
+                          <span className="text-[11px] sm:text-xs font-bold text-[#1d1d1f] dark:text-[#F9FAFB] leading-tight truncate max-w-[95px]">
                             {node.label}
                           </span>
 
                           {/* Real state badge: locked / complete / real step number */}
                           {node.isLocked ? (
-                            <span className="inline-flex items-center gap-0.5 text-[9.5px] font-bold text-[#86868b] bg-[#f5f5f5] border border-[#e9e9e9] px-1.5 py-0.5 rounded-full mt-1 shadow-2xs">
+                            <span className="inline-flex items-center gap-0.5 text-[9.5px] font-bold text-[#86868b] dark:text-[#94A3B8] bg-[#f5f5f5] dark:bg-[#1A2232] border border-[#e9e9e9] dark:border-[#242E40] px-1.5 py-0.5 rounded-full mt-1 shadow-2xs">
                               🔒 Locked
                             </span>
                           ) : node.isComplete ? (
-                            <span className="inline-flex items-center gap-0.5 text-[9.5px] font-bold text-[#22A06B] bg-[#ECFDF3] border border-[#D1FADF] px-1.5 py-0.5 rounded-full mt-1 shadow-2xs">
+                            <span className="inline-flex items-center gap-0.5 text-[9.5px] font-bold text-[#22A06B] dark:text-emerald-400 bg-[#ECFDF3] dark:bg-emerald-950/50 border border-[#D1FADF] dark:border-emerald-800/60 px-1.5 py-0.5 rounded-full mt-1 shadow-2xs">
                               ✓ Complete
                             </span>
                           ) : (
-                            <span className="text-[10px] text-[#7a7a7a] mt-1">
+                            <span className="text-[10px] text-[#7a7a7a] dark:text-[#94A3B8] mt-1">
                               Step {node.id}
                             </span>
                           )}
@@ -680,7 +674,7 @@ export default function PersonalizedRoadmap({ pathData = null }) {
             <div className="space-y-5 min-w-0">
               
               {/* WIDGET 1: "This week's plan" */}
-              <div className="pf-glass-card p-5 sm:p-6 shadow-sm border border-[#dbeafc] bg-gradient-to-br from-[#f2f7ff]/95 to-[#e6f1fc]/90">
+              <div className="pf-glass-card p-5 sm:p-6 shadow-sm border border-[#dbeafc] dark:border-[#242E40] bg-gradient-to-br from-[#f2f7ff]/95 to-[#e6f1fc]/90 dark:from-[#141A26] dark:to-[#101520]">
                 <h3 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] mb-4">
                   This week’s plan ({selectedWeek})
                 </h3>
@@ -689,7 +683,7 @@ export default function PersonalizedRoadmap({ pathData = null }) {
                   {/* Progress Ring */}
                   <div className="relative w-20 h-20 flex-none">
                     <svg className="w-full h-full -rotate-90" viewBox="0 0 48 48">
-                      <circle cx="24" cy="24" r="20" fill="none" stroke="#d7e8fa" strokeWidth="4.5" />
+                      <circle cx="24" cy="24" r="20" fill="none" stroke="#d7e8fa" className="dark:stroke-slate-800" strokeWidth="4.5" />
                       <circle
                         cx="24"
                         cy="24"
@@ -703,7 +697,7 @@ export default function PersonalizedRoadmap({ pathData = null }) {
                           (125.6 * (weekCompletedCount / Math.max(currentWeekData.tasks.length, 1)))
                         }
                         strokeLinecap="round"
-                        className="transition-all duration-300"
+                        className="transition-all duration-300 dark:stroke-[#38BDF8]"
                       />
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
@@ -721,7 +715,7 @@ export default function PersonalizedRoadmap({ pathData = null }) {
                     {currentWeekData.tasks.map((t) => (
                       <div key={t.id} className="flex items-center gap-2 truncate">
                         <span className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                          completedTaskIds.has(t.id) ? 'bg-[#22A06B] shadow-[0_0_8px_rgba(34,160,107,0.5)]' : 'bg-[#e0e0e0]'
+                          completedTaskIds.has(t.id) ? 'bg-[#22A06B] shadow-[0_0_8px_rgba(34,160,107,0.5)]' : 'bg-[#e0e0e0] dark:bg-slate-700'
                         }`} />
                         <span className={`truncate ${completedTaskIds.has(t.id) ? 'line-through text-[#7a7a7a]' : ''}`}>
                           {t.title}
@@ -758,12 +752,12 @@ export default function PersonalizedRoadmap({ pathData = null }) {
                 {priorityGaps.length > 0 ? (
                   <div className="space-y-3.5">
                     {priorityGaps.map((g) => (
-                      <div key={g.tag}>
-                        <div className="flex justify-between text-xs font-bold text-[#1d1d1f] mb-1">
-                          <span className="capitalize">{g.tag}</span>
-                          <span className="text-[#0066cc]">{g.progress}%</span>
+                      <div key={g.tag} className="space-y-1.5">
+                        <div className="flex items-center justify-between text-xs font-bold">
+                          <span className="text-[#1d1d1f] capitalize">{g.tag}</span>
+                          <span className="text-[#0066cc] dark:text-[#38BDF8]">{g.progress}%</span>
                         </div>
-                        <div className="w-full h-2 bg-[#f0f2f5] rounded-full overflow-hidden">
+                        <div className="w-full bg-[#f5f5f7] dark:bg-[#1E2638] h-2 rounded-full overflow-hidden">
                           <div className="h-full bg-gradient-to-r from-[#0066cc] to-[#38bdf8] rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(0,102,204,0.4)]" style={{ width: `${g.progress}%` }} />
                         </div>
                       </div>
@@ -776,38 +770,32 @@ export default function PersonalizedRoadmap({ pathData = null }) {
                 <button
                   type="button"
                   onClick={() => navigate('/skills')}
-                  className="mt-4 text-xs font-bold text-[#0066cc] hover:underline flex items-center gap-1 cursor-pointer"
+                  className="mt-4 text-xs font-bold text-[#0066cc] dark:text-[#38BDF8] hover:underline flex items-center gap-1 cursor-pointer"
                 >
                   <span>View skill insights</span>
                   <span>→</span>
                 </button>
               </div>
 
-              {/* WIDGET 3: Recommended for you — a real live-web-search
-                  resource for the current week (NPTEL, Coursera, etc. -
-                  backend already computes this via web_search_service, it
-                  just never reached this component before). Previously this
-                  duplicated the first task already shown above and fell back
-                  to a hardcoded Python-docs link when none existed - neither
-                  was a real recommendation. */}
-              <div className="bg-white border border-[#e0e0e0] rounded-2xl p-5 sm:p-6 shadow-2xs">
+              {/* WIDGET 3: Recommended for you */}
+              <div className="pf-glass-card p-5 sm:p-6 shadow-sm">
                 <h3 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] mb-3">
                   Recommended for you
                 </h3>
 
                 {currentWeekData.webResources?.[0] ? (
-                  <div className="flex items-center justify-between gap-3 p-3 bg-[#f9fcff] border border-[#e1effe] rounded-xl">
+                  <div className="flex items-center justify-between gap-3 p-3.5 bg-[#f9fcff] dark:bg-[#0E131E] border border-[#e1effe] dark:border-[#1E2638] rounded-xl shadow-2xs">
                     <div className="flex items-center gap-3 min-w-0">
-                      <span className="w-9 h-9 rounded-full bg-[#dbeafc] text-[#0066cc] flex items-center justify-center flex-none">
+                      <span className="w-9 h-9 rounded-full bg-[#dbeafc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center flex-none">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
                           <polygon points="5 3 19 12 5 21 5 3" />
                         </svg>
                       </span>
                       <div className="min-w-0">
-                        <h4 className="text-xs font-bold text-[#1d1d1f] max-w-[130px] truncate">
+                        <h4 className="text-xs font-bold text-[#1d1d1f] dark:text-[#F9FAFB] max-w-[130px] truncate">
                           {currentWeekData.webResources[0].title || currentWeekData.webResources[0].url}
                         </h4>
-                        <p className="text-[11px] text-[#7a7a7a] truncate max-w-[150px]">
+                        <p className="text-[11px] text-[#7a7a7a] dark:text-[#94A3B8] truncate max-w-[150px]">
                           {(() => {
                             try { return new URL(currentWeekData.webResources[0].url).hostname.replace('www.', '') }
                             catch { return 'External resource' }
@@ -820,7 +808,7 @@ export default function PersonalizedRoadmap({ pathData = null }) {
                       href={currentWeekData.webResources[0].url}
                       target="_blank"
                       rel="noreferrer"
-                      className="px-3 py-1 bg-white border border-[#0066cc] text-[#0066cc] hover:bg-[#0066cc] hover:text-white rounded-lg text-xs font-bold transition-all shadow-2xs flex-none"
+                      className="px-3.5 py-1.5 bg-white dark:bg-[#141A26] border border-[#0066cc] dark:border-[#38BDF8] text-[#0066cc] dark:text-[#38BDF8] hover:bg-[#0066cc] hover:text-white rounded-lg text-xs font-bold transition-all shadow-2xs flex-none"
                     >
                       Open
                     </a>

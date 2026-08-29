@@ -748,16 +748,48 @@ html.dark .coach-chat-card > div:first-child {
   background-color: #0E131E !important;
 }
 
-/* 12. Dark Mode Scrollbars */
-html.dark ::-webkit-scrollbar-track {
-  background: #0B0E14 !important;
+/* 12. Universal Sleek Scrollbars (Light & Dark) */
+::-webkit-scrollbar,
+.pf-custom-scrollbar::-webkit-scrollbar,
+.overflow-x-auto::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
-html.dark ::-webkit-scrollbar-thumb {
+::-webkit-scrollbar-track,
+.pf-custom-scrollbar::-webkit-scrollbar-track,
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb,
+.pf-custom-scrollbar::-webkit-scrollbar-thumb,
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover,
+.pf-custom-scrollbar::-webkit-scrollbar-thumb:hover,
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background: #0066cc;
+}
+
+html.dark ::-webkit-scrollbar-track,
+html.dark .pf-custom-scrollbar::-webkit-scrollbar-track,
+html.dark .overflow-x-auto::-webkit-scrollbar-track {
+  background: #0E131E !important;
+  border-radius: 9999px !important;
+}
+html.dark ::-webkit-scrollbar-thumb,
+html.dark .pf-custom-scrollbar::-webkit-scrollbar-thumb,
+html.dark .overflow-x-auto::-webkit-scrollbar-thumb {
   background: #242E40 !important;
-  border-color: #0B0E14 !important;
+  border: 1px solid #141A26 !important;
+  border-radius: 9999px !important;
 }
-html.dark ::-webkit-scrollbar-thumb:hover {
-  background: #3B4860 !important;
+html.dark ::-webkit-scrollbar-thumb:hover,
+html.dark .pf-custom-scrollbar::-webkit-scrollbar-thumb:hover,
+html.dark .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background: #38BDF8 !important;
 }
 
 /* When a browser can't do backdrop-filter, fall back to near-opaque surfaces. */
