@@ -272,7 +272,8 @@ export default function LiveInterviewView({
   const handleConfirmSubmit = () => {
     setShowReviewDrawer(false)
     const duration = Math.round((Date.now() - currentQuestionStartTimeRef.current) / 1000)
-    const finalAnswer = editedTranscript || currentTranscript || 'Candidate responded verbally to the architectural criteria.'
+    const rawAnswer = editedTranscript?.trim() || currentTranscript?.trim() || ''
+    const finalAnswer = rawAnswer === 'Candidate answered verbally.' ? '' : rawAnswer
 
     onAnswerSubmit({
       transcript: finalAnswer,
