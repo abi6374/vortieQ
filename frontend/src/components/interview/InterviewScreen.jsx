@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import CalibrationModal from './CalibrationModal'
 import LiveInterviewView from './LiveInterviewView'
@@ -32,6 +32,17 @@ export default function InterviewScreen() {
   const [recordedBlob, setRecordedBlob] = useState(null)
   const [totalDurationSec, setTotalDurationSec] = useState(0)
   const [loadingText, setLoadingText] = useState('AI Evaluator Analyzing Responses...')
+
+  // Ensure camera hardware stops when leaving InterviewScreen
+  useEffect(() => {
+    return () => {
+      if (sessionConfig?.mediaStream) {
+        sessionConfig.mediaStream.getTracks().forEach(track => {
+          try { track.stop() } catch {}
+        })
+      }
+    }
+  }, [sessionConfig])
 
   // Stage 1 -> Stage 2: Calibration Complete
   const handleStartSession = async (config) => {

@@ -1,9 +1,9 @@
-import React, { useRef, useEffect } from 'react'
+import React, { useRef, useEffect, useState } from 'react'
 
 /**
  * CameraPiP — Picture-in-Picture candidate webcam overlay.
  * Renders the user's camera feed with live microphone volume level,
- * camera/mute status badges, and sleek rounded glass border.
+ * posture/framing warnings, camera/mute status badges, and sleek rounded glass border.
  */
 export default function CameraPiP({
   mediaStream = null,
@@ -11,16 +11,78 @@ export default function CameraPiP({
   isMuted = false,
   audioLevel = 0, // 0 to 1
   userName = 'Candidate (You)',
-  position = 'bottom-right', // 'bottom-right' | 'top-right'
   className = ''
 }) {
   const videoRef = useRef(null)
+  const [postureNotice, setPostureNotice] = useState(null)
+  const canvasRef = useRef(null)
 
   useEffect(() => {
     if (videoRef.current && mediaStream) {
       videoRef.current.srcObject = mediaStream
     }
   }, [mediaStream, isCameraOn])
+
+  // Posture & Framing Detector on PIP Camera
+  useEffect(() => {
+    if (!isCameraOn || !mediaStream) {
+      setPostureNotice(null)
+      return
+    }
+
+    const checkPosture = () => {
+      const video = videoRef.current
+      if (!video || video.readyState !== 4) return
+
+      try {
+        if (!canvasRef.current) {
+          canvasRef.current = document.createElement('canvas')
+          canvasRef.current.width = 120
+          canvasRef.current.height = 90
+        }
+        const canvas = canvasRef.current
+        const ctx = canvas.getContext('2d', { willReadFrequently: true })
+        ctx.drawImage(video, 0, 0, 120, 90)
+        const frame = ctx.getImageData(0, 0, 120, 90)
+        const data = frame.data
+
+        let totalLum = 0
+        let leftLum = 0
+        let rightLum = 0
+        let topLum = 0
+        let bottomLum = 0
+
+        for (let y = 0; y < 90; y++) {
+          for (let x = 0; x < 120; x++) {
+            const idx = (y * 120 + x) * 4
+            const lum = 0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2]
+            totalLum += lum
+            if (x < 60) leftLum += lum
+            else rightLum += lum
+            if (y < 45) topLum += lum
+            else bottomLum += lum
+          }
+        }
+
+        const avgBrightness = totalLum / (120 * 90)
+        const horizDiff = Math.abs(leftLum - rightLum) / (totalLum || 1)
+        const vertRatio = bottomLum / (topLum || 1)
+
+        if (avgBrightness < 20) {
+          setPostureNotice('⚠️ Low Light')
+        } else if (horizDiff > 0.28) {
+          setPostureNotice('⚠️ Off-Center')
+        } else if (vertRatio > 1.95) {
+          setPostureNotice('⚠️ Face Low')
+        } else {
+          setPostureNotice(null)
+        }
+      } catch {}
+    }
+
+    const interval = setInterval(checkPosture, 1200)
+    return () => clearInterval(interval)
+  }, [isCameraOn, mediaStream])
 
   // Compute 5-step audio visualizer bars
   const activeBars = Math.min(5, Math.max(0, Math.floor(audioLevel * 6)))
@@ -60,6 +122,13 @@ export default function CameraPiP({
         </div>
       )}
 
+      {/* Posture / Framing Warning Badge */}
+      {postureNotice && isCameraOn && (
+        <div className="absolute top-8 left-1/2 -translate-x-1/2 z-20 px-2.5 py-0.5 rounded-full bg-amber-500/90 text-slate-950 font-extrabold text-[10px] shadow-md backdrop-blur-md animate-pulse">
+          {postureNotice}
+        </div>
+      )}
+
       {/* Top Header: Candidate Name & Recording dot */}
       <div className="absolute top-2 left-2 right-2 flex items-center justify-between pointer-events-none">
         <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-[11px] font-semibold text-white">
@@ -75,7 +144,6 @@ export default function CameraPiP({
               <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6" />
               <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23" />
               <line x1="12" y1="19" x2="12" y2="23" />
-              <line x1="8" y1="23" x2="16" y2="23" />
             </svg>
           </div>
         ) : null}
