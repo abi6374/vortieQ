@@ -574,14 +574,15 @@ export default function LearnerIntakeWorkspace({
           <form
             onSubmit={handleSendChatMessage}
             onClick={(e) => e.stopPropagation()}
-            className="bg-[#fbfbfb] border border-[#e0e0e0] rounded-xl px-3 py-1.5 flex items-center justify-between gap-2 mt-4 focus-within:border-[#0066cc] focus-within:bg-white transition-all shadow-xs"
+            className="bg-[#fbfbfb] border border-[#e0e0e0] rounded-xl px-3 py-1.5 flex items-center justify-between gap-2 mt-4 focus-within:border-[#0066cc] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#0066cc]/15 transition-all shadow-xs"
           >
             <input
               type="text"
               value={chatStory}
               onChange={(e) => setChatStory(e.target.value)}
               placeholder="Type your story here..."
-              className="w-full bg-transparent text-[14px] text-[#1d1d1f] placeholder-[#7a7a7a] outline-none px-1"
+              className="w-full bg-transparent border-0 border-none outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 ring-0 shadow-none text-[14px] text-[#1d1d1f] placeholder-[#7a7a7a] px-1"
+              style={{ border: 'none', outline: 'none', boxShadow: 'none' }}
             />
             <button
               type="submit"

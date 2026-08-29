@@ -395,9 +395,9 @@ export default function SkillInsightsScreen() {
             </button>
           )}
 
-          {/* Live Search Results Floating Panel */}
-          {isSearchFocused && searchQuery.trim().length > 0 && (
-            <div className="absolute left-0 right-0 mt-2 bg-white rounded-2xl border border-[#e0e0e0] shadow-[0_14px_36px_rgba(25,49,75,0.16)] p-3 z-50 animate-in fade-in zoom-in-95 duration-100 max-h-80 overflow-y-auto">
+          {/* Search Results Dropdown */}
+          {isSearchFocused && searchQuery.trim() && (
+            <div className="absolute left-0 right-0 mt-2 bg-white rounded-2xl border border-[#E6EAF2] shadow-[0_22px_60px_rgba(14,27,56,0.22),0_4px_12px_rgba(14,27,56,0.06)] p-3 z-50 animate-in fade-in zoom-in-95 duration-100 max-h-80 overflow-y-auto">
               {matchingSkills.length === 0 && matchingSteps.length === 0 ? (
                 <div className="p-4 text-center text-xs text-[#7a7a7a]">
                   No skills or courses found matching "<strong>{searchQuery}</strong>"
@@ -534,10 +534,10 @@ export default function SkillInsightsScreen() {
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6" aria-label="KPI Cards">
           
           {/* KPI 1: Overall Skill Readiness */}
-          <div className="bg-white border border-[#e0e0e0] rounded-2xl p-5 sm:p-6 shadow-sm hover:border-[#d2d2d7] transition-colors flex flex-col justify-between">
+          <div className="pf-glass-card p-5 sm:p-6 shadow-sm flex flex-col justify-between">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="w-6 h-6 rounded-lg bg-[#eaf2fc] text-[#0066cc] flex items-center justify-center flex-none">
+                <span className="w-7 h-7 rounded-xl bg-[#eaf2fc] text-[#0066cc] flex items-center justify-center flex-none shadow-xs">
                   <BarChart3 className="w-3.5 h-3.5" />
                 </span>
                 <span className="text-xs font-bold text-[#333333]">Overall Skill Readiness</span>
@@ -548,96 +548,95 @@ export default function SkillInsightsScreen() {
               />
             </div>
 
-                <div className="flex items-baseline gap-3 my-2.5">
-                  <span className="font-['Manrope'] font-extrabold text-2xl sm:text-[28px] text-[#1d1d1f] tracking-tight leading-none">
-                    {roadmap.percent}%
-                  </span>
-                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#22A06B] bg-[#ECFDF3] px-2 py-0.5 rounded-full border border-[#D1FADF]">
-                    <TrendingUp className="w-3 h-3" />
-                    <span>{roadmap.completedSteps} of {roadmap.totalSteps} steps done</span>
-                  </span>
-                </div>
+            <div className="flex items-baseline gap-3 my-3">
+              <span className="font-['Manrope'] font-extrabold text-2xl sm:text-[28px] text-[#1d1d1f] tracking-tight leading-none">
+                {roadmap.percent}%
+              </span>
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#22A06B] bg-[#ECFDF3] px-2 py-0.5 rounded-full border border-[#D1FADF]">
+                <TrendingUp className="w-3 h-3" />
+                <span>{roadmap.completedSteps} of {roadmap.totalSteps} steps</span>
+              </span>
+            </div>
 
-                <div className="w-full bg-[#eeeeee] h-2 rounded-full overflow-hidden">
-                  <div className="bg-[#0066cc] h-full rounded-full transition-all duration-500" style={{ width: `${roadmap.percent}%` }} />
-                </div>
+            <div className="w-full bg-[#eef2f6] h-2 rounded-full overflow-hidden">
+              <div className="bg-gradient-to-r from-[#0066cc] to-[#38bdf8] h-full rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(0,102,204,0.4)]" style={{ width: `${roadmap.percent}%` }} />
+            </div>
+          </div>
+
+          {/* KPI 2: Skills Mastered */}
+          <div className="pf-glass-card p-5 sm:p-6 shadow-sm flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="w-7 h-7 rounded-xl bg-[#ECFDF3] text-[#22A06B] flex items-center justify-center flex-none shadow-xs">
+                  <CheckCircle className="w-3.5 h-3.5" />
+                </span>
+                <span className="text-xs font-bold text-[#333333]">Skills Mastered</span>
               </div>
+              <span className="text-[11px] font-bold text-[#7a7a7a]">
+                {totalSkillsCount ? Math.round((masteredSkillsCount / totalSkillsCount) * 100) : 0}%
+              </span>
+            </div>
 
-              {/* KPI 2: Skills Mastered */}
-              <div className="bg-white border border-[#e0e0e0] rounded-2xl p-5 sm:p-6 shadow-sm hover:border-[#d2d2d7] transition-colors flex flex-col justify-between">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-lg bg-[#ECFDF3] text-[#22A06B] flex items-center justify-center flex-none">
-                      <CheckCircle className="w-3.5 h-3.5" />
-                    </span>
-                    <span className="text-xs font-bold text-[#333333]">Skills Mastered</span>
-                  </div>
-                  <span className="text-[11px] font-bold text-[#7a7a7a]">
-                    {totalSkillsCount ? Math.round((masteredSkillsCount / totalSkillsCount) * 100) : 0}%
-                  </span>
-                </div>
+            <div className="my-3">
+              <span className="font-['Manrope'] font-extrabold text-2xl sm:text-[28px] text-[#1d1d1f] tracking-tight leading-none">
+                {masteredSkillsCount} / {totalSkillsCount}
+              </span>
+            </div>
 
-                <div className="my-2.5">
-                  <span className="font-['Manrope'] font-extrabold text-2xl sm:text-[28px] text-[#1d1d1f] tracking-tight leading-none">
-                    {masteredSkillsCount} / {totalSkillsCount}
-                  </span>
-                </div>
+            <div className="w-full bg-[#eef2f6] h-2 rounded-full overflow-hidden">
+              <div className="bg-[#22A06B] h-full rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(34,160,107,0.4)]" style={{ width: `${totalSkillsCount ? (masteredSkillsCount / totalSkillsCount) * 100 : 0}%` }} />
+            </div>
+          </div>
 
-                <div className="w-full bg-[#eeeeee] h-2 rounded-full overflow-hidden">
-                  <div className="bg-[#22A06B] h-full rounded-full transition-all duration-500" style={{ width: `${totalSkillsCount ? (masteredSkillsCount / totalSkillsCount) * 100 : 0}%` }} />
-                </div>
+          {/* KPI 3: Skills In Progress */}
+          <div className="pf-glass-card p-5 sm:p-6 shadow-sm flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="w-7 h-7 rounded-xl bg-[#FFF7E6] text-[#D88700] flex items-center justify-center flex-none shadow-xs">
+                  <Hourglass className="w-3.5 h-3.5" />
+                </span>
+                <span className="text-xs font-bold text-[#333333]">Skills In Progress</span>
               </div>
+              <span className="text-[11px] font-bold text-[#D88700]">{inProgressSkillsCount > 0 ? 'Keep going!' : '—'}</span>
+            </div>
 
-              {/* KPI 3: Skills In Progress */}
-              <div className="bg-white border border-[#e0e0e0] rounded-2xl p-5 sm:p-6 shadow-sm hover:border-[#d2d2d7] transition-colors flex flex-col justify-between">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-lg bg-[#FFF7E6] text-[#D88700] flex items-center justify-center flex-none">
-                      <Hourglass className="w-3.5 h-3.5" />
-                    </span>
-                    <span className="text-xs font-bold text-[#333333]">Skills In Progress</span>
-                  </div>
-                  <span className="text-[11px] font-bold text-[#D88700]">{inProgressSkillsCount > 0 ? 'Keep going!' : '—'}</span>
-                </div>
+            <div className="my-3">
+              <span className="font-['Manrope'] font-extrabold text-2xl sm:text-[28px] text-[#1d1d1f] tracking-tight leading-none">
+                {inProgressSkillsCount}
+              </span>
+            </div>
 
-                <div className="my-2.5">
-                  <span className="font-['Manrope'] font-extrabold text-2xl sm:text-[28px] text-[#1d1d1f] tracking-tight leading-none">
-                    {inProgressSkillsCount}
-                  </span>
-                </div>
+            <div className="w-full bg-[#eef2f6] h-2 rounded-full overflow-hidden">
+              <div className="bg-[#D88700] h-full rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(216,135,0,0.4)]" style={{ width: `${totalSkillsCount ? (inProgressSkillsCount / totalSkillsCount) * 100 : 0}%` }} />
+            </div>
+          </div>
 
-                <div className="w-full bg-[#eeeeee] h-2 rounded-full overflow-hidden">
-                  <div className="bg-[#D88700] h-full rounded-full transition-all duration-500" style={{ width: `${totalSkillsCount ? (inProgressSkillsCount / totalSkillsCount) * 100 : 0}%` }} />
-                </div>
+          {/* KPI 4: Skills to Learn */}
+          <div className="pf-glass-card p-5 sm:p-6 shadow-sm flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="w-7 h-7 rounded-xl bg-[#eaf2fc] text-[#5B8DEF] flex items-center justify-center flex-none shadow-xs">
+                  <BookOpen className="w-3.5 h-3.5" />
+                </span>
+                <span className="text-xs font-bold text-[#333333]">Skills to Learn</span>
               </div>
+              <span className="text-[11px] font-bold text-[#5B8DEF]">{toLearnSkillsCount > 0 ? 'Focus recommended' : '—'}</span>
+            </div>
 
-              {/* KPI 4: Skills to Learn */}
-              <div className="bg-white border border-[#e0e0e0] rounded-2xl p-5 sm:p-6 shadow-sm hover:border-[#d2d2d7] transition-colors flex flex-col justify-between">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-lg bg-[#eaf2fc] text-[#5B8DEF] flex items-center justify-center flex-none">
-                      <BookOpen className="w-3.5 h-3.5" />
-                    </span>
-                    <span className="text-xs font-bold text-[#333333]">Skills to Learn</span>
-                  </div>
-                  <span className="text-[11px] font-bold text-[#5B8DEF]">{toLearnSkillsCount > 0 ? 'Focus recommended' : '—'}</span>
-                </div>
+            <div className="my-3">
+              <span className="font-['Manrope'] font-extrabold text-2xl sm:text-[28px] text-[#1d1d1f] tracking-tight leading-none">
+                {toLearnSkillsCount}
+              </span>
+            </div>
 
-                <div className="my-2.5">
-                  <span className="font-['Manrope'] font-extrabold text-2xl sm:text-[28px] text-[#1d1d1f] tracking-tight leading-none">
-                    {toLearnSkillsCount}
-                  </span>
-                </div>
+            <div className="w-full bg-[#eef2f6] h-2 rounded-full overflow-hidden">
+              <div className="bg-[#5B8DEF] h-full rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(91,141,239,0.4)]" style={{ width: `${totalSkillsCount ? (toLearnSkillsCount / totalSkillsCount) * 100 : 0}%` }} />
+            </div>
+          </div>
+        </section>
 
-                <div className="w-full bg-[#eeeeee] h-2 rounded-full overflow-hidden">
-                  <div className="bg-[#5B8DEF] h-full rounded-full transition-all duration-500" style={{ width: `${totalSkillsCount ? (toLearnSkillsCount / totalSkillsCount) * 100 : 0}%` }} />
-                </div>
-              </div>
-
-            </section>
-
-            {/* ---------------------------------------------------------------------
-                MAIN ANALYTICS GRID - ROW 1:
+        {/* ---------------------------------------------------------------------
+            MAIN ANALYTICS GRID - ROW 1:
                 1. Skill Proficiency Comparison (Large)
                 2. Skill Radar (Medium)
                 3. Top Skill Gaps (Right)

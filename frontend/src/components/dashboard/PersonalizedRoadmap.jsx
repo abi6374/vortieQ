@@ -346,10 +346,10 @@ export default function PersonalizedRoadmap({ pathData = null }) {
           </div>
 
           {/* 3 Top Stats Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-            <div className="bg-white border border-[#e0e0e0] rounded-2xl p-4 sm:p-5 flex items-center gap-4 shadow-2xs">
-              <span className="w-12 h-12 rounded-xl bg-[#eaf2fc] text-[#0066cc] flex items-center justify-center flex-none">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4.5 mb-6">
+            <div className="pf-glass-card p-5 flex items-center gap-4.5">
+              <span className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#eaf2fc] to-[#dbeafc] text-[#0066cc] flex items-center justify-center flex-none shadow-sm">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
                   <line x1="16" y1="2" x2="16" y2="6" />
                   <line x1="8" y1="2" x2="8" y2="6" />
@@ -357,44 +357,44 @@ export default function PersonalizedRoadmap({ pathData = null }) {
                 </svg>
               </span>
               <div>
-                <div className="font-['Manrope'] font-extrabold text-2xl sm:text-[26px] text-[#1d1d1f] leading-none">
+                <div className="font-['Manrope'] font-extrabold text-2xl sm:text-[28px] text-[#1d1d1f] leading-none tracking-tight">
                   {weekTabs.length}
                 </div>
-                <div className="text-xs sm:text-sm font-medium text-[#333333] mt-1">
+                <div className="text-xs sm:text-sm font-semibold text-[#555555] mt-1.5">
                   weeks total
                 </div>
               </div>
             </div>
 
-            <div className="bg-white border border-[#e0e0e0] rounded-2xl p-4 sm:p-5 flex items-center gap-4 shadow-2xs">
-              <span className="w-12 h-12 rounded-xl bg-[#eaf2fc] text-[#0066cc] flex items-center justify-center flex-none">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <div className="pf-glass-card p-5 flex items-center gap-4.5">
+              <span className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#eaf2fc] to-[#dbeafc] text-[#0066cc] flex items-center justify-center flex-none shadow-sm">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10" />
                   <polyline points="12 6 12 12 16 14" />
                 </svg>
               </span>
               <div>
-                <div className="font-['Manrope'] font-extrabold text-2xl sm:text-[26px] text-[#1d1d1f] leading-none">
+                <div className="font-['Manrope'] font-extrabold text-2xl sm:text-[28px] text-[#1d1d1f] leading-none tracking-tight">
                   {currentWeekData.totalHrs}
                 </div>
-                <div className="text-xs sm:text-sm font-medium text-[#333333] mt-1">
+                <div className="text-xs sm:text-sm font-semibold text-[#555555] mt-1.5">
                   hrs/week
                 </div>
               </div>
             </div>
 
-            <div className="bg-white border border-[#e0e0e0] rounded-2xl p-4 sm:p-5 flex items-center gap-4 shadow-2xs">
-              <span className="w-12 h-12 rounded-xl bg-[#eaf2fc] text-[#0066cc] flex items-center justify-center flex-none">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <div className="pf-glass-card p-5 flex items-center gap-4.5">
+              <span className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#ECFDF3] to-[#D1FADF] text-[#22A06B] flex items-center justify-center flex-none shadow-sm">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
                   <polyline points="17 6 23 6 23 12" />
                 </svg>
               </span>
               <div>
-                <div className="font-['Manrope'] font-extrabold text-2xl sm:text-[26px] text-[#1d1d1f] leading-none">
+                <div className="font-['Manrope'] font-extrabold text-2xl sm:text-[28px] text-[#1d1d1f] leading-none tracking-tight">
                   {roadmap.percent}%
                 </div>
-                <div className="text-xs sm:text-sm font-medium text-[#333333] mt-1">
+                <div className="text-xs sm:text-sm font-semibold text-[#555555] mt-1.5">
                   curriculum completed
                 </div>
               </div>
@@ -405,7 +405,7 @@ export default function PersonalizedRoadmap({ pathData = null }) {
           <div className="grid pf-roadmap-grid gap-6 items-start">
 
             {/* LEFT COLUMN: Your learning roadmap */}
-            <div className="bg-white border border-[#e0e0e0] rounded-2xl p-6 sm:p-7 shadow-[0_4px_20px_rgba(25,49,75,0.03)] flex flex-col justify-between min-w-0">
+            <div className="pf-glass-card p-6 sm:p-7 flex flex-col justify-between min-w-0">
               <div>
                 <h2 className="font-['Manrope'] font-bold text-lg text-[#1d1d1f] mb-4">
                   Your learning roadmap
@@ -659,7 +659,7 @@ export default function PersonalizedRoadmap({ pathData = null }) {
             <div className="space-y-5 min-w-0">
               
               {/* WIDGET 1: "This week's plan" */}
-              <div className="bg-[#eaf2fc] border border-[#e1effe] rounded-2xl p-5 sm:p-6 shadow-sm">
+              <div className="pf-glass-card p-5 sm:p-6 shadow-sm border border-[#dbeafc] bg-gradient-to-br from-[#f2f7ff]/95 to-[#e6f1fc]/90">
                 <h3 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] mb-4">
                   This week’s plan ({selectedWeek})
                 </h3>
@@ -700,7 +700,7 @@ export default function PersonalizedRoadmap({ pathData = null }) {
                     {currentWeekData.tasks.map((t) => (
                       <div key={t.id} className="flex items-center gap-2 truncate">
                         <span className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                          completedTaskIds.has(t.id) ? 'bg-[#22A06B]' : 'bg-[#e0e0e0]'
+                          completedTaskIds.has(t.id) ? 'bg-[#22A06B] shadow-[0_0_8px_rgba(34,160,107,0.5)]' : 'bg-[#e0e0e0]'
                         }`} />
                         <span className={`truncate ${completedTaskIds.has(t.id) ? 'line-through text-[#7a7a7a]' : ''}`}>
                           {t.title}
@@ -714,7 +714,7 @@ export default function PersonalizedRoadmap({ pathData = null }) {
                 <button
                   type="button"
                   onClick={handleStartWeek}
-                  className="w-full py-3 bg-[#0066cc] hover:bg-[#004fa3] active:scale-[0.99] text-white font-bold text-sm rounded-xl shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
+                  className="w-full py-3 bg-[#0066cc] hover:bg-[#004fa3] active:scale-[0.98] text-white font-bold text-sm rounded-xl shadow-[0_4px_16px_rgba(0,102,204,0.28)] hover:shadow-[0_6px_20px_rgba(0,102,204,0.36)] transition-all cursor-pointer flex items-center justify-center gap-2"
                 >
                   <span>
                     {weekCompletedCount === currentWeekData.tasks.length
@@ -728,9 +728,8 @@ export default function PersonalizedRoadmap({ pathData = null }) {
                 </button>
               </div>
 
-              {/* WIDGET 2: Priority Gaps — real skill tags, real gap %, from
-                  the learner's actual roadmap steps. */}
-              <div className="bg-white border border-[#e0e0e0] rounded-2xl p-5 sm:p-6 shadow-2xs">
+              {/* WIDGET 2: Priority Gaps */}
+              <div className="pf-glass-card p-5 sm:p-6 shadow-sm">
                 <h3 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] mb-4">
                   Priority gaps
                 </h3>
@@ -743,8 +742,8 @@ export default function PersonalizedRoadmap({ pathData = null }) {
                           <span className="capitalize">{g.tag}</span>
                           <span className="text-[#0066cc]">{g.progress}%</span>
                         </div>
-                        <div className="w-full h-2 bg-[#f2f2f2] rounded-full overflow-hidden">
-                          <div className="h-full bg-[#0066cc] rounded-full" style={{ width: `${g.progress}%` }} />
+                        <div className="w-full h-2 bg-[#f0f2f5] rounded-full overflow-hidden">
+                          <div className="h-full bg-gradient-to-r from-[#0066cc] to-[#38bdf8] rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(0,102,204,0.4)]" style={{ width: `${g.progress}%` }} />
                         </div>
                       </div>
                     ))}

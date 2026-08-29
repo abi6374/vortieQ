@@ -376,7 +376,7 @@ export default function ProgressScreen() {
             </button>
 
             {isGoalDropdownOpen && (
-              <div className="absolute left-0 mt-1.5 w-60 bg-white rounded-xl border border-[#e0e0e0] shadow-xl p-1.5 z-30">
+              <div className="absolute left-0 mt-1.5 w-60 bg-white rounded-xl border border-[#E6EAF2] shadow-[0_22px_60px_rgba(14,27,56,0.22),0_4px_12px_rgba(14,27,56,0.06)] p-1.5 z-30">
                 <button
                   type="button"
                   onClick={() => {
@@ -429,7 +429,7 @@ export default function ProgressScreen() {
         {/* -----------------------------------------------------------------------
             HERO OVERVIEW PROGRESS CARD (68% Prominent Card)
            ----------------------------------------------------------------------- */}
-        <section className="bg-white border border-[#e0e0e0] rounded-[14px] p-6 lg:p-7 shadow-[0_2px_8px_rgba(15,28,42,0.03)] hover:border-[#cfe4fb] hover:shadow-[0_6px_18px_rgba(0,102,204,0.08)] transition-all flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <section className="pf-glass-card p-6 lg:p-7 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
           {/* Left Column Text */}
           <div className="space-y-2 max-w-xl">
             <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#0066cc] bg-[#eaf2fc] px-2.5 py-1 rounded-md border border-[#cfe4fb]">
@@ -519,17 +519,17 @@ export default function ProgressScreen() {
         {/* -----------------------------------------------------------------------
             FOUR KPI METRIC CARDS
            ----------------------------------------------------------------------- */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" aria-label="KPI Cards">
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4.5" aria-label="KPI Cards">
           
           {/* Card 1: Learning Progress */}
-          <div className="bg-white border border-[#e0e0e0] rounded-[14px] p-5 shadow-[0_2px_8px_rgba(15,28,42,0.03)] hover:border-[#cfe4fb] hover:shadow-[0_6px_18px_rgba(0,102,204,0.08)] transition-all flex flex-col justify-between">
+          <div className="pf-glass-card p-5 shadow-sm flex flex-col justify-between">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-[#6e6e73]">Learning progress</span>
-              <span className="w-8 h-8 rounded-full bg-[#eaf2fc] text-[#0066cc] flex items-center justify-center">
+              <span className="w-8 h-8 rounded-xl bg-[#eaf2fc] text-[#0066cc] flex items-center justify-center shadow-xs">
                 <TrendingUp className="w-4 h-4" />
               </span>
             </div>
-            <div className="my-2">
+            <div className="my-2.5">
               <span className="font-['Inter'] font-extrabold text-3xl text-[#1d1d1f] tracking-tight">
                 {roadmap.percent}%
               </span>
@@ -540,14 +540,14 @@ export default function ProgressScreen() {
           </div>
 
           {/* Card 2: Skills Mastered */}
-          <div className="bg-white border border-[#e0e0e0] rounded-[14px] p-5 shadow-[0_2px_8px_rgba(15,28,42,0.03)] hover:border-[#cfe4fb] hover:shadow-[0_6px_18px_rgba(0,102,204,0.08)] transition-all flex flex-col justify-between">
+          <div className="pf-glass-card p-5 shadow-sm flex flex-col justify-between">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-[#6e6e73]">Skills mastered</span>
-              <span className="w-8 h-8 rounded-full bg-[#ECFDF3] text-[#16A34A] flex items-center justify-center">
+              <span className="w-8 h-8 rounded-xl bg-[#ECFDF3] text-[#16A34A] flex items-center justify-center shadow-xs">
                 <BadgeCheck className="w-4 h-4" />
               </span>
             </div>
-            <div className="my-2">
+            <div className="my-2.5">
               <span className="font-['Inter'] font-extrabold text-3xl text-[#1d1d1f] tracking-tight">
                 {masteredSkillCount} / {totalSkillCount}
               </span>
@@ -558,14 +558,14 @@ export default function ProgressScreen() {
           </div>
 
           {/* Card 3: Learning Time */}
-          <div className="bg-white border border-[#e0e0e0] rounded-[14px] p-5 shadow-[0_2px_8px_rgba(15,28,42,0.03)] hover:border-[#cfe4fb] hover:shadow-[0_6px_18px_rgba(0,102,204,0.08)] transition-all flex flex-col justify-between">
+          <div className="pf-glass-card p-5 shadow-sm flex flex-col justify-between">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-[#6e6e73]">Learning time</span>
-              <span className="w-8 h-8 rounded-full bg-[#FFF7E6] text-[#F59E0B] flex items-center justify-center">
+              <span className="w-8 h-8 rounded-xl bg-[#FFF7E6] text-[#F59E0B] flex items-center justify-center shadow-xs">
                 <Clock3 className="w-4 h-4" />
               </span>
             </div>
-            <div className="my-2">
+            <div className="my-2.5">
               <span className="font-['Inter'] font-extrabold text-3xl text-[#1d1d1f] tracking-tight">
                 {Math.round(((streak.minutes_total || 0) / 60) * 10) / 10} hrs
               </span>
@@ -576,14 +576,14 @@ export default function ProgressScreen() {
           </div>
 
           {/* Card 4: Learning Streak */}
-          <div className="bg-white border border-[#e0e0e0] rounded-[14px] p-5 shadow-[0_2px_8px_rgba(15,28,42,0.03)] hover:border-[#cfe4fb] hover:shadow-[0_6px_18px_rgba(0,102,204,0.08)] transition-all flex flex-col justify-between">
+          <div className="pf-glass-card p-5 shadow-sm flex flex-col justify-between">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-[#6e6e73]">Learning streak</span>
-              <span className="w-8 h-8 rounded-full bg-[#f5faff] text-[#EC4899] flex items-center justify-center">
-                <Flame className="w-4 h-4 text-[#F59E0B]" />
+              <span className="w-8 h-8 rounded-xl bg-[#FFF5EB] text-[#F97316] flex items-center justify-center shadow-xs">
+                <Flame className="w-4 h-4 text-[#F97316]" />
               </span>
             </div>
-            <div className="my-2">
+            <div className="my-2.5">
               <span className="font-['Inter'] font-extrabold text-3xl text-[#1d1d1f] tracking-tight">
                 {streak.current_streak} days
               </span>

@@ -36,7 +36,10 @@ html {
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', 'Segoe UI', Roboto, sans-serif;
-  background-color: var(--bg-main);
+  background:
+    radial-gradient(1200px 700px at 12% -8%, rgba(225, 237, 255, 0.7) 0%, rgba(225, 237, 255, 0) 55%),
+    radial-gradient(1000px 600px at 92% 112%, rgba(234, 242, 255, 0.6) 0%, rgba(234, 242, 255, 0) 50%),
+    #F5F5F7;
   color: var(--navy);
   line-height: 1.47;
   -webkit-font-smoothing: antialiased;
@@ -44,26 +47,17 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-h1, h2, h3, h4 {
-  letter-spacing: -0.01em;
-}
-
-/* Long-form paragraph copy stays inside a comfortable reading measure. */
-.pf-prose {
-  max-width: 65ch;
-}
-
-/* Global Clean Autofill: prevents default browser blue rectangle from clipping or overlapping */
-input:-webkit-autofill,
-input:-webkit-autofill:hover,
-input:-webkit-autofill:focus,
-input:-webkit-autofill:active,
-textarea:-webkit-autofill,
-select:-webkit-autofill {
-  -webkit-box-shadow: 0 0 0 1000px #FFFFFF inset !important;
-  -webkit-text-fill-color: var(--navy) !important;
-  caret-color: var(--navy) !important;
-  transition: background-color 5000s ease-in-out 0s;
+.pf-shell {
+  height: 100dvh;
+  min-height: 680px;
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  overflow: hidden;
+  background:
+    radial-gradient(1100px 650px at 10% -5%, rgba(225, 237, 255, 0.65) 0%, rgba(225, 237, 255, 0) 55%),
+    radial-gradient(900px 550px at 95% 105%, rgba(234, 242, 255, 0.5) 0%, rgba(234, 242, 255, 0) 50%),
+    #F5F5F7;
+  transition: grid-template-columns 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* ----------------------------------------------------------------------
@@ -103,6 +97,17 @@ a {
   outline: 2px solid var(--violet-focus);
   outline-offset: 2px;
   border-radius: 4px;
+}
+
+/* Prevent double rectangular outline inside custom search & chat input containers */
+input.border-none:focus-visible,
+input[class*="border-none"]:focus-visible,
+input[class*="outline-none"]:focus-visible,
+input[class*="bg-transparent"]:focus-visible,
+textarea[class*="outline-none"]:focus-visible,
+textarea[class*="border-none"]:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -306,20 +311,47 @@ html {
 
 /* Frosted glass surface — for overlays, menus, cards that sit above content. */
 .pf-glass {
-  background: rgba(255, 255, 255, 0.66);
-  -webkit-backdrop-filter: blur(20px) saturate(1.6);
-  backdrop-filter: blur(20px) saturate(1.6);
-  border: 1px solid rgba(255, 255, 255, 0.55);
-  box-shadow: 0 12px 40px -12px rgba(29, 41, 61, 0.28),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.75);
+  -webkit-backdrop-filter: blur(22px) saturate(1.7);
+  backdrop-filter: blur(22px) saturate(1.7);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow: 0 12px 40px -12px rgba(29, 41, 61, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 .pf-glass-strong {
-  background: rgba(255, 255, 255, 0.82);
-  -webkit-backdrop-filter: blur(26px) saturate(1.8);
-  backdrop-filter: blur(26px) saturate(1.8);
-  border: 1px solid rgba(255, 255, 255, 0.65);
-  box-shadow: 0 24px 64px -20px rgba(29, 41, 61, 0.34),
-    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.88);
+  -webkit-backdrop-filter: blur(28px) saturate(1.8);
+  backdrop-filter: blur(28px) saturate(1.8);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  box-shadow: 0 24px 64px -20px rgba(29, 41, 61, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+/* High-End Glassmorphic Card for widgets, statistics, and main panels */
+.pf-glass-card {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.92) 0%, rgba(248, 250, 253, 0.82) 100%);
+  -webkit-backdrop-filter: blur(20px) saturate(1.6);
+  backdrop-filter: blur(20px) saturate(1.6);
+  border: 1px solid rgba(230, 234, 242, 0.85);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px -8px rgba(20, 40, 80, 0.06), 0 2px 6px rgba(20, 40, 80, 0.02), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+}
+.pf-glass-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(0, 102, 204, 0.3);
+  box-shadow: 0 18px 42px -12px rgba(0, 102, 204, 0.12), 0 3px 10px rgba(20, 40, 80, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.98);
+}
+
+/* Glowing accents */
+.pf-glow-blue {
+  box-shadow: 0 0 24px -4px rgba(0, 102, 204, 0.32);
+}
+.pf-glow-emerald {
+  box-shadow: 0 0 24px -4px rgba(34, 160, 107, 0.32);
+}
+.pf-glow-amber {
+  box-shadow: 0 0 24px -4px rgba(216, 135, 0, 0.32);
 }
 
 /* Hover-lift for interactive cards. */
@@ -336,14 +368,16 @@ html {
 
 /* Light frost on the shared shell chrome — inherited by every page using .pf-shell. */
 .pf-topbar {
-  background: rgba(255, 255, 255, 0.72);
-  -webkit-backdrop-filter: blur(18px) saturate(1.6);
-  backdrop-filter: blur(18px) saturate(1.6);
+  background: rgba(255, 255, 255, 0.82);
+  -webkit-backdrop-filter: blur(20px) saturate(1.7);
+  backdrop-filter: blur(20px) saturate(1.7);
+  border-bottom: 1px solid rgba(230, 234, 242, 0.9);
 }
 .pf-sidebar {
-  background: rgba(255, 255, 255, 0.66);
-  -webkit-backdrop-filter: blur(18px) saturate(1.6);
-  backdrop-filter: blur(18px) saturate(1.6);
+  background: rgba(255, 255, 255, 0.78);
+  -webkit-backdrop-filter: blur(20px) saturate(1.7);
+  backdrop-filter: blur(20px) saturate(1.7);
+  border-right: 1px solid rgba(230, 234, 242, 0.9);
 }
 
 /* Menu / dropdown open animation (CSS fallback for non-framer menus). */
