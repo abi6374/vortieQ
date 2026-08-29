@@ -342,7 +342,7 @@ ${recommended_learning_topics.map(t => `- ${t}`).join('\n')}
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-[#7a7a7a]">Score:</span>
                     <span className="text-sm font-extrabold text-[#0066cc] dark:text-[#38BDF8] bg-[#eaf2fc] dark:bg-[rgba(41,151,255,0.2)] px-2.5 py-0.5 rounded-lg">
-                      {q.score || 80}/100
+                      {q.score ?? 0}/100
                     </span>
                   </div>
                 </div>

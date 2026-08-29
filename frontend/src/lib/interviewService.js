@@ -106,7 +106,7 @@ export async function finalizeInterviewSession({
       answers,
       total_duration_sec: totalDurationSec
     })
-    if (res.data && res.data.overall_score) {
+    if (res.data && typeof res.data.overall_score === 'number') {
       const localResult = evaluateLocally({ topic, trackId, questions, answers, durationSec: totalDurationSec })
       return {
         ...localResult,
@@ -115,14 +115,25 @@ export async function finalizeInterviewSession({
         question_evaluations: questions.map((q, idx) => {
           const ans = answers.find(a => a.question_id === q.id || a.question_number === idx + 1)
           const ansEval = ans?.answer_evaluation || {}
+          const rawTrans = (ans?.transcript || '').trim()
+          const isNoAnswer = !rawTrans || rawTrans === 'Candidate answered verbally.' || rawTrans === 'No verbal response recorded.' || rawTrans.split(/\s+/).length < 3
+
+          const score = isNoAnswer ? 0 : (ansEval.score ?? res.data.overall_score ?? 70)
+          const strengths = isNoAnswer
+            ? ['Initiated question prompt']
+            : (ansEval.strengths?.length ? ansEval.strengths : ['Clear conceptual framing'])
+          const missing_concepts = isNoAnswer
+            ? ['Candidate did not provide a verbal answer to this question']
+            : (ansEval.missing_concepts?.length ? ansEval.missing_concepts : ['Operational scaling metrics'])
+
           return {
             question_id: q.id,
             category: q.category,
             question: q.question,
-            transcript: ans?.transcript || 'Candidate answered verbally.',
-            score: ansEval.score || res.data.overall_score || 80,
-            strengths: ansEval.strengths || ['Clear conceptual framing'],
-            missing_concepts: ansEval.missing_concepts || ['Operational scaling metrics'],
+            transcript: isNoAnswer ? 'No verbal response recorded.' : rawTrans,
+            score,
+            strengths,
+            missing_concepts,
             model_answer_summary: q.model_answer_summary
           }
         })
