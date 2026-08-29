@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import UserProfileDropdown from '../ui/UserProfileDropdown'
+import ThemeToggle from '../ui/ThemeToggle'
 
 /**
  * Goal Compass — the "Set your goal" onboarding step. Computes an
@@ -253,6 +254,65 @@ const STYLES = `
 .gc .btn-plan:disabled{ opacity:.5; cursor:not-allowed; box-shadow:none; }
 .gc .back{ background:none; border:none; color:var(--muted); font:inherit; font-size:14.5px; cursor:pointer; margin-top:14px; }
 .gc .back:hover{ color:var(--slate); }
+
+html.dark .gc {
+  --navy: #F8FAFC;
+  --slate: #CBD5E1;
+  --muted: #94A3B8;
+  --lavender: #182438;
+  --lav-icon: #1E293B;
+  --card-bd: #202B3C;
+  --input-bd: #2D3F59;
+  --divider: #202B3C;
+  --track: #1C2738;
+  --green-surface: rgba(6, 78, 59, 0.3);
+  --green-bd: rgba(52, 211, 153, 0.3);
+  --green-text: #34D399;
+  --amber-surface: rgba(120, 53, 15, 0.3);
+  --amber-bd: rgba(251, 191, 36, 0.3);
+  --amber-text: #FBBF24;
+  --red-surface: rgba(127, 29, 29, 0.3);
+  --red-bd: rgba(248, 113, 113, 0.3);
+  --red-text: #F87171;
+}
+html.dark .gc .card {
+  background: #0E1522;
+  box-shadow: 0 14px 38px rgba(0, 0, 0, 0.5);
+}
+html.dark .gc textarea {
+  background: #0B0F17;
+  color: #F8FAFC;
+}
+html.dark .gc .role,
+html.dark .gc .role-custom,
+html.dark .gc .cinput,
+html.dark .gc .pstep {
+  background: #141C2B;
+}
+html.dark .gc .role.sel,
+html.dark .gc .role-custom.sel {
+  background: #18263D;
+}
+html.dark .gc .role.sel .role-ic {
+  background: #1E293B;
+  color: #38BDF8;
+}
+html.dark .gc .meter {
+  background: linear-gradient(165deg, #0E1522, #121B2C 60%, #0F1726);
+  border-color: #24334A;
+}
+html.dark .gc .callout {
+  background: #131E30;
+  border-color: #22344E;
+}
+html.dark .gc .pstep .pic {
+  background: #1E293B;
+  color: #CBD5E1;
+}
+html.dark .gc .cinput input[type=month] {
+  color-scheme: dark;
+}
+
 @media (max-width:1000px){ .gc .cols{ grid-template-columns:1fr; } .gc .preview-top{ flex-direction:column; align-items:stretch; } .gc .btn-plan{ width:100%; } }
 @media (prefers-reduced-motion:reduce){ .gc *{ transition:none !important; } }
 `
@@ -365,7 +425,10 @@ export default function GoalCompass({ topicRatings = [], detectedYears = 0, init
             </div>
           </div>
         </div>
-        <UserProfileDropdown />
+        <div className="flex items-center gap-2 sm:gap-2.5">
+          <ThemeToggle />
+          <UserProfileDropdown />
+        </div>
       </div>
 
       <div className="cols">

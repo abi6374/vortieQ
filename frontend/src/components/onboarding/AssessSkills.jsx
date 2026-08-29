@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import { subtopicsFor, LEVEL_KEYS } from './skillTaxonomy'
 import UserProfileDropdown from '../ui/UserProfileDropdown'
+import ThemeToggle from '../ui/ThemeToggle'
 
 /**
  * Skill Confidence Assessment — Step 2 of onboarding.
@@ -188,26 +189,22 @@ export default function AssessSkills({ topics = [], detectedYears = 0, onContinu
         type="button"
         onClick={() => setMethod(id)}
         aria-pressed={active}
-        className="relative text-left rounded-2xl bg-white transition flex flex-col cursor-pointer"
-        style={{
-          border: active ? `2px solid ${V}` : '1px solid #e6e6e6',
-          padding: active ? 22 : 24,
-          minHeight: 180,
-          background: active ? 'linear-gradient(160deg,#fff,#eaf2fc)' : '#fff',
-          boxShadow: active ? '0 0 0 4px rgba(0,102,204,.08)' : 'none',
-        }}
+        className={`relative text-left rounded-2xl transition flex flex-col cursor-pointer p-5 sm:p-6 min-h-[180px] ${
+          active
+            ? 'border-2 border-[#0066cc] dark:border-[#38BDF8] bg-gradient-to-br from-white to-[#eaf2fc] dark:from-[#131D2E] dark:to-[#18263D] shadow-[0_0_0_4px_rgba(0,102,204,.08)]'
+            : 'border border-[#e6e6e6] dark:border-[#202C3E] bg-white dark:bg-[#101726] hover:border-[#abd2fb] dark:hover:border-[#38BDF8]'
+        }`}
       >
-        <span className="absolute" style={{ top: 20, right: 20 }}><Radio on={active} /></span>
+        <span className="absolute top-5 right-5"><Radio on={active} /></span>
         <div className="flex items-start gap-3.5 mb-3">
-          <span className="grid place-items-center rounded-xl flex-none" style={{
-            width: 44, height: 44,
-            background: active ? V : '#eef3f8',
-            color: active ? '#fff' : '#494949',
-            boxShadow: active ? '0 4px 12px rgba(0,102,204,.28)' : 'none',
-          }}>{icon}</span>
+          <span className={`grid place-items-center rounded-xl flex-none w-11 h-11 ${
+            active
+              ? 'bg-[#0066cc] dark:bg-[#38BDF8] text-white dark:text-[#0B0F17] shadow-[0_4px_12px_rgba(0,102,204,.28)]'
+              : 'bg-[#eef3f8] dark:bg-[#1E293B] text-[#494949] dark:text-[#CBD5E1]'
+          }`}>{icon}</span>
           <div>
-            <h3 className="font-bold text-[#1d1d1f]" style={{ fontSize: 18, letterSpacing: '-.01em' }}>{title}</h3>
-            <p className="text-[13.5px] text-[#494949] mt-0.5 leading-snug">{desc}</p>
+            <h3 className="font-bold text-[#1d1d1f] dark:text-[#F8FAFC] text-lg tracking-tight">{title}</h3>
+            <p className="text-[13.5px] text-[#494949] dark:text-[#94A3B8] mt-0.5 leading-snug">{desc}</p>
           </div>
         </div>
         {children}
@@ -216,21 +213,23 @@ export default function AssessSkills({ topics = [], detectedYears = 0, onContinu
   }
 
   return (
-    <div className="w-full max-w-[1140px] bg-white rounded-2xl border border-[#f0f0f0] shadow-[0_14px_38px_rgba(25,49,75,0.08)] p-6 sm:p-10 flex flex-col justify-between overflow-hidden">
+    <div className="w-full max-w-[1140px] bg-white dark:bg-[#0E1522] rounded-2xl border border-[#f0f0f0] dark:border-[#202B3C] shadow-[0_14px_38px_rgba(25,49,75,0.08)] dark:shadow-[0_14px_38px_rgba(0,0,0,0.5)] p-6 sm:p-10 flex flex-col justify-between overflow-hidden transition-colors">
       
-      {/* Top Header Row with Step Badge and User Profile */}
+      {/* Top Header Row with Step Badge, ThemeToggle, and User Profile */}
       <div className="flex items-center justify-between mb-4">
-        <span className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[12px] font-bold uppercase tracking-wider"
-              style={{ color: V, background: '#eaf2fc', border: '1px solid #eaf2fc' }}>
+        <span className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[12px] font-bold uppercase tracking-wider text-[#0066cc] dark:text-[#38BDF8] bg-[#eaf2fc] dark:bg-[#1E293B] border border-[#eaf2fc] dark:border-[#2D3A4F]">
           Step 2 · Skill Confidence
         </span>
-        <UserProfileDropdown />
+        <div className="flex items-center gap-2 sm:gap-2.5">
+          <ThemeToggle />
+          <UserProfileDropdown />
+        </div>
       </div>
 
-      <h1 className="font-extrabold text-[#1d1d1f]" style={{ fontSize: 'clamp(26px,3.4vw,38px)', letterSpacing: '-.025em', lineHeight: 1.1 }}>
+      <h1 className="font-extrabold text-[#1d1d1f] dark:text-[#F8FAFC]" style={{ fontSize: 'clamp(26px,3.4vw,38px)', letterSpacing: '-.025em', lineHeight: 1.1 }}>
         Your skills, your confidence
       </h1>
-      <p className="text-[#494949] mt-2.5 mb-6" style={{ fontSize: 'clamp(15px,1.4vw,17px)' }}>
+      <p className="text-[#494949] dark:text-[#94A3B8] mt-2.5 mb-6" style={{ fontSize: 'clamp(15px,1.4vw,17px)' }}>
         We found {topics.length} topic{topics.length === 1 ? '' : 's'} in your background
         {detectedYears ? ` (≈${detectedYears} years experience)` : ''}. Choose how you'd like to calibrate your skills.
       </p>
@@ -263,16 +262,16 @@ export default function AssessSkills({ topics = [], detectedYears = 0, onContinu
       {/* Content Area Based on Method */}
       {method === 'describe' ? (
         /* SINGLE UNIFIED TEXT BOX FOR ALL SKILLS */
-        <div className="rounded-2xl border-2 border-[#0066cc]/40 bg-[#f9fcff] p-6 shadow-sm">
+        <div className="rounded-2xl border-2 border-[#0066cc]/40 dark:border-[#38BDF8]/40 bg-[#f9fcff] dark:bg-[#131D2E] p-6 shadow-sm">
           <div className="flex items-center gap-2.5 mb-2">
-            <span className="w-8 h-8 rounded-lg bg-[#dbeafc] text-[#0066cc] flex items-center justify-center font-bold">
+            <span className="w-8 h-8 rounded-lg bg-[#dbeafc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center font-bold">
               ✍️
             </span>
-            <h3 className="font-bold text-[#1d1d1f] text-[17px]">
+            <h3 className="font-bold text-[#1d1d1f] dark:text-[#F8FAFC] text-[17px]">
               Describe all your skills, tools & experience
             </h3>
           </div>
-          <p className="text-xs sm:text-sm text-[#333333] mb-4">
+          <p className="text-xs sm:text-sm text-[#333333] dark:text-[#94A3B8] mb-4">
             Mention your programming languages, frameworks, past projects, coursework, and concepts you feel confident with.
           </p>
           
@@ -282,27 +281,27 @@ export default function AssessSkills({ topics = [], detectedYears = 0, onContinu
               onChange={(e) => setUnifiedDescription(e.target.value.slice(0, 1500))}
               maxLength={1500}
               placeholder="e.g. I have 2 years of Python experience building APIs with FastAPI and Flask. I understand descriptive statistics and basic Pandas for data analysis. I have built 1 data visualization project with Matplotlib. I want to learn Machine Learning from scratch..."
-              className="w-full resize-none rounded-xl border border-[#e0e0e0] bg-white p-4 text-[15px] text-[#1d1d1f] leading-relaxed focus:outline-none focus:border-[#0066cc] focus:ring-2 focus:ring-[#0066cc]/10 transition-all shadow-inner"
+              className="w-full resize-none rounded-xl border border-[#e0e0e0] dark:border-[#263750] bg-white dark:bg-[#0E1522] p-4 text-[15px] text-[#1d1d1f] dark:text-[#F8FAFC] leading-relaxed focus:outline-none focus:border-[#0066cc] dark:focus:border-[#38BDF8] focus:ring-2 focus:ring-[#0066cc]/10 transition-all shadow-inner"
               style={{ minHeight: 160 }}
             />
-            <span className="absolute right-3.5 bottom-3 text-[12px] font-semibold text-[#7a7a7a] tabular-nums">
+            <span className="absolute right-3.5 bottom-3 text-[12px] font-semibold text-[#7a7a7a] dark:text-[#64748B] tabular-nums">
               {unifiedDescription.length}/1500
             </span>
           </div>
 
           {/* Chips of detected skills from resume/intake */}
           {topics.length > 0 && (
-            <div className="mt-4 pt-3 border-t border-[#f0f0f0]">
-              <span className="text-xs font-bold text-[#7a7a7a] uppercase tracking-wider block mb-2">
+            <div className="mt-4 pt-3 border-t border-[#f0f0f0] dark:border-[#202C3E]">
+              <span className="text-xs font-bold text-[#7a7a7a] dark:text-[#94A3B8] uppercase tracking-wider block mb-2">
                 Detected topics in your background:
               </span>
               <div className="flex flex-wrap gap-2">
                 {topics.map((t) => (
                   <span
                     key={t.name}
-                    className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-[#e0e0e0] rounded-lg text-xs font-bold text-[#1d1d1f] shadow-2xs"
+                    className="inline-flex items-center gap-1.5 px-3 py-1 bg-white dark:bg-[#1A2536] border border-[#e0e0e0] dark:border-[#2D3F59] rounded-lg text-xs font-bold text-[#1d1d1f] dark:text-[#F8FAFC] shadow-2xs"
                   >
-                    <span className="w-2 h-2 rounded-full bg-[#0066cc]" />
+                    <span className="w-2 h-2 rounded-full bg-[#0066cc] dark:bg-[#38BDF8]" />
                     {t.name}
                   </span>
                 ))}
@@ -335,8 +334,8 @@ export default function AssessSkills({ topics = [], detectedYears = 0, onContinu
           Continue
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
         </button>
-        <button type="button" onClick={onSkip} className="px-6 py-3 rounded-xl border border-[#e6e6e6] text-[#494949] hover:bg-gray-50 cursor-pointer text-sm font-semibold">Skip</button>
-        <button type="button" onClick={onBack} className="px-6 py-3 rounded-xl text-[#86868b] hover:text-[#494949] cursor-pointer text-sm font-semibold">← Back</button>
+        <button type="button" onClick={onSkip} className="px-6 py-3 rounded-xl border border-[#e6e6e6] dark:border-[#263750] text-[#494949] dark:text-[#CBD5E1] hover:bg-gray-50 dark:hover:bg-[#1E293B] cursor-pointer text-sm font-semibold">Skip</button>
+        <button type="button" onClick={onBack} className="px-6 py-3 rounded-xl text-[#86868b] dark:text-[#94A3B8] hover:text-[#494949] dark:hover:text-[#F8FAFC] cursor-pointer text-sm font-semibold">← Back</button>
       </div>
     </div>
   )

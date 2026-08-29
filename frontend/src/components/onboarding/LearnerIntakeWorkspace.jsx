@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react'
 import apiClient from '../../lib/apiClient'
 import UserProfileDropdown from '../ui/UserProfileDropdown'
+import ThemeToggle from '../ui/ThemeToggle'
 
 const EMPTY_DRAFT = { skills: '', education: '', projects: '', confidence: '', goal: '', summary: '' }
 
@@ -236,28 +237,31 @@ export default function LearnerIntakeWorkspace({
   }
 
   return (
-    <div className="w-full max-w-[1140px] bg-white rounded-2xl border border-[#f0f0f0] shadow-[0_14px_38px_rgba(25,49,75,0.08)] flex flex-col justify-between overflow-hidden">
+    <div className="w-full max-w-[1140px] bg-white dark:bg-[#0E1522] rounded-2xl border border-[#f0f0f0] dark:border-[#202B3C] shadow-[0_14px_38px_rgba(25,49,75,0.08)] dark:shadow-[0_14px_38px_rgba(0,0,0,0.5)] flex flex-col justify-between overflow-hidden transition-colors">
       
-      {/* Top Header Row with Badge, Title, and Profile Dropdown */}
+      {/* Top Header Row with Badge, Title, ThemeToggle, and Profile Dropdown */}
       <div className="pt-6 sm:pt-8 pb-3 px-6 sm:px-10 relative">
         <div className="flex items-center justify-between mb-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1 text-[12px] font-bold uppercase tracking-wider text-[#0066cc] bg-[#eaf2fc] border border-[#eaf2fc]">
+          <span className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1 text-[12px] font-bold uppercase tracking-wider text-[#0066cc] dark:text-[#38BDF8] bg-[#eaf2fc] dark:bg-[#1E293B] border border-[#eaf2fc] dark:border-[#2D3A4F]">
             Step 1 · Learner Intake
           </span>
-          <UserProfileDropdown />
+          <div className="flex items-center gap-2 sm:gap-2.5">
+            <ThemeToggle />
+            <UserProfileDropdown />
+          </div>
         </div>
 
         <div className="text-center mt-2">
-          <h1 className="text-2xl sm:text-3xl md:text-[38px] font-bold text-[#1d1d1f] tracking-tight leading-tight flex items-center justify-center gap-2.5 flex-wrap">
+          <h1 className="text-2xl sm:text-3xl md:text-[38px] font-bold text-[#1d1d1f] dark:text-[#F8FAFC] tracking-tight leading-tight flex items-center justify-center gap-2.5 flex-wrap">
             <span>Let’s understand where you are today</span>
-            <span className="inline-flex text-[#0066cc]">
+            <span className="inline-flex text-[#0066cc] dark:text-[#38BDF8]">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 2L14.4 7.6L20 10L14.4 12.4L12 18L9.6 12.4L4 10L9.6 7.6L12 2Z" />
                 <path d="M19 16L20.2 18.8L23 20L20.2 21.2L19 24L17.8 21.2L15 20L17.8 18.8L19 16Z" />
               </svg>
             </span>
           </h1>
-          <p className="text-[16px] text-[#333333] mt-2 font-normal">
+          <p className="text-[16px] text-[#333333] dark:text-[#94A3B8] mt-2 font-normal">
             {githubData?.topics?.length > 0
               ? 'Your GitHub repositories are linked. Uploading a resume or adding notes is completely optional.'
               : 'Upload your resume or describe your background in your own words.'}
@@ -266,8 +270,8 @@ export default function LearnerIntakeWorkspace({
 
         {/* GitHub Ingestion Banner if active */}
         {githubLoading && (
-          <div className="mt-4 bg-[#eaf2fc] border border-[#cfe4fb] rounded-xl p-3 flex items-center justify-center gap-2 text-sm text-[#0066cc] animate-pulse">
-            <svg className="animate-spin h-4 w-4 text-[#0066cc]" viewBox="0 0 24 24" fill="none">
+          <div className="mt-4 bg-[#eaf2fc] dark:bg-[#132238] border border-[#cfe4fb] dark:border-[#1E3A5F] rounded-xl p-3 flex items-center justify-center gap-2 text-sm text-[#0066cc] dark:text-[#38BDF8] animate-pulse">
+            <svg className="animate-spin h-4 w-4 text-[#0066cc] dark:text-[#38BDF8]" viewBox="0 0 24 24" fill="none">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
             </svg>
@@ -276,28 +280,28 @@ export default function LearnerIntakeWorkspace({
         )}
 
         {githubSyncError && !githubLoading && (
-          <p className="mt-4 text-xs font-semibold text-red-600 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800/60 rounded-lg px-3.5 py-2.5">
+          <p className="mt-4 text-xs font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800/60 rounded-lg px-3.5 py-2.5">
             {githubSyncError}
           </p>
         )}
 
         {githubData?.topics && githubData.topics.length > 0 && !githubLoading && (
-          <div className="mt-4 bg-[#F8FAFD] border border-[#DCE4F0] rounded-xl p-3.5 flex flex-col gap-3 shadow-2xs">
+          <div className="mt-4 bg-[#F8FAFD] dark:bg-[#141C2B] border border-[#DCE4F0] dark:border-[#24334A] rounded-xl p-3.5 flex flex-col gap-3 shadow-2xs">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-[#181717] text-white flex items-center justify-center flex-none">
+                <div className="w-9 h-9 rounded-lg bg-[#181717] dark:bg-[#1E293B] text-white flex items-center justify-center flex-none">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                     <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
                   </svg>
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-[#0E1B38] flex items-center gap-1.5 flex-wrap">
+                  <p className="text-xs font-bold text-[#0E1B38] dark:text-[#F8FAFC] flex items-center gap-1.5 flex-wrap">
                     <span>GitHub: @{customUsername || authenticatedUsername || 'Connected User'}</span>
-                    <span className="bg-[#ECFDF3] text-[#22A06B] text-[11px] px-2 py-0.5 rounded-full font-bold">
+                    <span className="bg-[#ECFDF3] dark:bg-[#064E3B]/30 text-[#22A06B] dark:text-[#34D399] text-[11px] px-2 py-0.5 rounded-full font-bold">
                       {githubData.github_projects?.length || 0} Repos Synced
                     </span>
                   </p>
-                  <p className="text-[12px] text-[#52617D] mt-0.5">
+                  <p className="text-[12px] text-[#52617D] dark:text-[#94A3B8] mt-0.5">
                     Stack: {githubData.top_languages?.join(', ') || 'Python, TypeScript'} · Experience: ~{githubData.detected_years_experience || 1} yrs
                   </p>
                 </div>
@@ -307,14 +311,14 @@ export default function LearnerIntakeWorkspace({
                 <button
                   type="button"
                   onClick={() => setShowUsernameInput((v) => !v)}
-                  className="px-2.5 py-1.5 border border-[#D8DFEB] hover:bg-white text-[#52617D] text-xs font-semibold rounded-lg transition-colors cursor-pointer"
+                  className="px-2.5 py-1.5 border border-[#D8DFEB] dark:border-[#2D3F59] hover:bg-white dark:hover:bg-[#1E293B] text-[#52617D] dark:text-[#CBD5E1] text-xs font-semibold rounded-lg transition-colors cursor-pointer"
                 >
                   {showUsernameInput ? 'Hide' : 'Switch GitHub User'}
                 </button>
                 <button
                   type="button"
                   onClick={handleContinue}
-                  className="px-3.5 py-1.5 bg-[#5B36E9] hover:bg-[#4826C9] text-white text-xs font-bold rounded-lg shadow-xs transition-colors cursor-pointer flex-none"
+                  className="px-3.5 py-1.5 bg-[#0066CC] hover:bg-[#0052A3] text-white text-xs font-bold rounded-lg shadow-xs transition-colors cursor-pointer flex-none"
                 >
                   Continue with this Stack →
                 </button>
@@ -323,19 +327,19 @@ export default function LearnerIntakeWorkspace({
 
             {/* Inline Username Switcher */}
             {showUsernameInput && (
-              <form onSubmit={handleCustomSync} className="pt-2 border-t border-[#E6EAF2] flex items-center gap-2">
-                <span className="text-xs text-[#74819A] font-mono">github.com/</span>
+              <form onSubmit={handleCustomSync} className="pt-2 border-t border-[#E6EAF2] dark:border-[#24334A] flex items-center gap-2">
+                <span className="text-xs text-[#74819A] dark:text-[#94A3B8] font-mono">github.com/</span>
                 <input
                   type="text"
                   value={customUsername}
                   onChange={(e) => setCustomUsername(e.target.value)}
                   placeholder="Enter GitHub username (e.g. your_handle)"
-                  className="flex-1 bg-white border border-[#D8DFEB] rounded-lg px-2.5 py-1 text-xs text-[#0E1B38] focus:border-[#5B36E9] outline-none"
+                  className="flex-1 bg-white dark:bg-[#1A2536] border border-[#D8DFEB] dark:border-[#2D3F59] rounded-lg px-2.5 py-1 text-xs text-[#0E1B38] dark:text-[#F8FAFC] focus:border-[#0066cc] outline-none"
                 />
                 <button
                   type="submit"
                   disabled={!customUsername.trim()}
-                  className="px-3 py-1 bg-[#0E1B38] hover:bg-black text-white text-xs font-bold rounded-lg transition-colors cursor-pointer disabled:opacity-40"
+                  className="px-3 py-1 bg-[#0E1B38] dark:bg-[#0066CC] hover:bg-black dark:hover:bg-[#0052A3] text-white text-xs font-bold rounded-lg transition-colors cursor-pointer disabled:opacity-40"
                 >
                   Sync Repos
                 </button>
@@ -346,14 +350,14 @@ export default function LearnerIntakeWorkspace({
 
         {/* Sync Prompt if no GitHub data loaded yet */}
         {!githubData && !githubLoading && (
-          <div className="mt-4 bg-[#F8FAFD] border border-[#E1E6F0] rounded-xl p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
+          <div className="mt-4 bg-[#F8FAFD] dark:bg-[#141C2B] border border-[#E1E6F0] dark:border-[#24334A] rounded-xl p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
             <div className="flex items-center gap-2">
-              <span className="w-6 h-6 rounded-md bg-[#181717] text-white flex items-center justify-center flex-none text-xs">
+              <span className="w-6 h-6 rounded-md bg-[#181717] dark:bg-[#1E293B] text-white flex items-center justify-center flex-none text-xs">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                   <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
                 </svg>
               </span>
-              <p className="text-xs text-[#52617D]">
+              <p className="text-xs text-[#52617D] dark:text-[#94A3B8]">
                 Have a GitHub profile? Connect your handle to automatically import your repos & stack.
               </p>
             </div>
@@ -363,12 +367,12 @@ export default function LearnerIntakeWorkspace({
                 value={customUsername}
                 onChange={(e) => setCustomUsername(e.target.value)}
                 placeholder="GitHub handle"
-                className="bg-white border border-[#D8DFEB] rounded-lg px-2.5 py-1 text-xs text-[#0E1B38] focus:border-[#5B36E9] outline-none max-w-[140px]"
+                className="bg-white dark:bg-[#1A2536] border border-[#D8DFEB] dark:border-[#2D3F59] rounded-lg px-2.5 py-1 text-xs text-[#0E1B38] dark:text-[#F8FAFC] focus:border-[#0066cc] outline-none max-w-[140px]"
               />
               <button
                 type="submit"
                 disabled={!customUsername.trim()}
-                className="px-3 py-1 bg-[#181717] hover:bg-black text-white text-xs font-bold rounded-lg transition-colors cursor-pointer disabled:opacity-40 flex-none"
+                className="px-3 py-1 bg-[#181717] dark:bg-[#0066CC] hover:bg-black dark:hover:bg-[#0052A3] text-white text-xs font-bold rounded-lg transition-colors cursor-pointer disabled:opacity-40 flex-none"
               >
                 Sync
               </button>
@@ -385,18 +389,18 @@ export default function LearnerIntakeWorkspace({
           onClick={() => setSelectedMethod('resume')}
           className={`rounded-2xl p-6 sm:p-7 flex flex-col justify-between transition-all cursor-pointer ${
             selectedMethod === 'resume'
-              ? 'bg-[#fbfdff] border-2 border-[#0066cc] shadow-[0_6px_24px_rgba(0,102,204,0.08)] ring-1 ring-[#0066cc]/20'
-              : 'bg-white border border-[#e0e0e0] hover:border-[#abd2fb] shadow-xs'
+              ? 'bg-[#fbfdff] dark:bg-[#131D2E] border-2 border-[#0066cc] dark:border-[#38BDF8] shadow-[0_6px_24px_rgba(0,102,204,0.08)] ring-1 ring-[#0066cc]/20'
+              : 'bg-white dark:bg-[#101726] border border-[#e0e0e0] dark:border-[#202C3E] hover:border-[#abd2fb] dark:hover:border-[#38BDF8] shadow-xs'
           }`}
         >
           <div>
-            <div className="w-[74px] h-[74px] rounded-2xl bg-[#dbeafc] flex items-center justify-center mb-4">
+            <div className="w-[74px] h-[74px] rounded-2xl bg-[#dbeafc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center mb-4">
               <svg
                 width="34"
                 height="34"
                 viewBox="0 0 24 24"
                 fill="none"
-                stroke="#0066cc"
+                stroke="currentColor"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -408,10 +412,10 @@ export default function LearnerIntakeWorkspace({
               </svg>
             </div>
 
-            <h2 className="text-[22px] font-bold text-[#1d1d1f] mb-1">
+            <h2 className="text-[22px] font-bold text-[#1d1d1f] dark:text-[#F8FAFC] mb-1">
               Upload my resume
             </h2>
-            <p className="text-[14.5px] text-[#333333] leading-snug mb-4">
+            <p className="text-[14.5px] text-[#333333] dark:text-[#94A3B8] leading-snug mb-4">
               Upload a PDF or DOCX and we’ll identify your skills, projects and experience.
             </p>
           </div>
@@ -433,8 +437,8 @@ export default function LearnerIntakeWorkspace({
             }}
             className={`border-2 border-dashed rounded-xl p-5 text-center flex flex-col items-center justify-center relative min-h-[160px] transition-colors ${
               dragOver
-                ? 'border-[#0066cc] bg-[#eaf2fc]'
-                : 'border-[#abd2fb] bg-[#fafbfc] hover:bg-[#f1f7fe]'
+                ? 'border-[#0066cc] dark:border-[#38BDF8] bg-[#eaf2fc] dark:bg-[#18263D]'
+                : 'border-[#abd2fb] dark:border-[#263750] bg-[#fafbfc] dark:bg-[#121927] hover:bg-[#f1f7fe] dark:hover:bg-[#162133]'
             }`}
           >
             <input
@@ -447,13 +451,13 @@ export default function LearnerIntakeWorkspace({
 
             {file ? (
               <div className="flex flex-col items-center py-1">
-                <div className="w-9 h-9 rounded-full bg-[#ECFDF3] text-[#22A06B] flex items-center justify-center mb-1.5">
+                <div className="w-9 h-9 rounded-full bg-[#ECFDF3] dark:bg-[#064E3B]/40 text-[#22A06B] dark:text-[#34D399] flex items-center justify-center mb-1.5">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M20 6 9 17l-5-5" />
                   </svg>
                 </div>
-                <p className="font-bold text-[#1d1d1f] text-[14.5px] max-w-[240px] truncate">{file.name}</p>
-                <p className="text-[12.5px] text-[#7a7a7a] mt-0.5">
+                <p className="font-bold text-[#1d1d1f] dark:text-[#F8FAFC] text-[14.5px] max-w-[240px] truncate">{file.name}</p>
+                <p className="text-[12.5px] text-[#7a7a7a] dark:text-[#94A3B8] mt-0.5">
                   {(file.size / (1024 * 1024)).toFixed(2)} MB · Ready to analyze
                 </p>
                 <button
@@ -463,14 +467,14 @@ export default function LearnerIntakeWorkspace({
                     setFile(null)
                     if (fileInputRef.current) fileInputRef.current.value = ''
                   }}
-                  className="mt-2 text-xs font-semibold text-[#0066cc] hover:underline"
+                  className="mt-2 text-xs font-semibold text-[#0066cc] dark:text-[#38BDF8] hover:underline"
                 >
                   Change file
                 </button>
               </div>
             ) : (
               <>
-                <div className="text-[#0066cc] mb-1">
+                <div className="text-[#0066cc] dark:text-[#38BDF8] mb-1">
                   <svg
                     width="28"
                     height="28"
@@ -486,13 +490,13 @@ export default function LearnerIntakeWorkspace({
                   </svg>
                 </div>
 
-                <p className="text-[14.5px] text-[#1d1d1f] font-medium">
+                <p className="text-[14.5px] text-[#1d1d1f] dark:text-[#F8FAFC] font-medium">
                   Drop your resume here or{' '}
-                  <span className="text-[#0066cc] font-semibold underline underline-offset-2">
+                  <span className="text-[#0066cc] dark:text-[#38BDF8] font-semibold underline underline-offset-2">
                     browse
                   </span>
                 </p>
-                <p className="text-[12.5px] text-[#7a7a7a] mt-0.5 mb-2.5">
+                <p className="text-[12.5px] text-[#7a7a7a] dark:text-[#94A3B8] mt-0.5 mb-2.5">
                   PDF or DOCX · up to 10 MB
                 </p>
 
@@ -502,15 +506,15 @@ export default function LearnerIntakeWorkspace({
                     e.stopPropagation()
                     fileInputRef.current?.click()
                   }}
-                  className="bg-white border border-[#0066cc] text-[#0066cc] font-semibold text-[13px] px-5 py-1.5 rounded-xl hover:bg-[#eaf2fc] transition-colors shadow-xs"
+                  className="bg-white dark:bg-[#1A2536] border border-[#0066cc] dark:border-[#38BDF8] text-[#0066cc] dark:text-[#38BDF8] font-semibold text-[13px] px-5 py-1.5 rounded-xl hover:bg-[#eaf2fc] dark:hover:bg-[#1E2D44] transition-colors shadow-xs"
                 >
                   Choose file
                 </button>
               </>
             )}
 
-            <div className="absolute left-3.5 bottom-2.5 flex items-center gap-1.5 text-[11.5px] font-medium text-[#333333]">
-              <span className="text-[#22A06B]">
+            <div className="absolute left-3.5 bottom-2.5 flex items-center gap-1.5 text-[11.5px] font-medium text-[#333333] dark:text-[#94A3B8]">
+              <span className="text-[#22A06B] dark:text-emerald-400">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                   <path d="m9 12 2 2 4-4" />
@@ -521,7 +525,7 @@ export default function LearnerIntakeWorkspace({
           </div>
 
           {uploadError && (
-            <p className="mt-2 text-xs font-semibold text-red-600">{uploadError}</p>
+            <p className="mt-2 text-xs font-semibold text-red-600 dark:text-red-400">{uploadError}</p>
           )}
         </div>
 
@@ -530,31 +534,31 @@ export default function LearnerIntakeWorkspace({
           onClick={() => setSelectedMethod('chat')}
           className={`rounded-2xl p-6 sm:p-7 flex flex-col justify-between transition-all cursor-pointer ${
             selectedMethod === 'chat'
-              ? 'bg-[#fbfdff] border-2 border-[#0066cc] shadow-[0_6px_24px_rgba(0,102,204,0.08)] ring-1 ring-[#0066cc]/20'
-              : 'bg-white border border-[#e0e0e0] hover:border-[#abd2fb] shadow-xs'
+              ? 'bg-[#fbfdff] dark:bg-[#131D2E] border-2 border-[#0066cc] dark:border-[#38BDF8] shadow-[0_6px_24px_rgba(0,102,204,0.08)] ring-1 ring-[#0066cc]/20'
+              : 'bg-white dark:bg-[#101726] border border-[#e0e0e0] dark:border-[#202C3E] hover:border-[#abd2fb] dark:hover:border-[#38BDF8] shadow-xs'
           }`}
         >
           <div>
-            <div className="w-[74px] h-[74px] rounded-2xl bg-[#dbeafc] flex items-center justify-center mb-4">
+            <div className="w-[74px] h-[74px] rounded-2xl bg-[#dbeafc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center mb-4">
               <svg
                 width="34"
                 height="34"
                 viewBox="0 0 24 24"
                 fill="none"
-                stroke="#0066cc"
+                stroke="currentColor"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               >
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                <path d="M13 8l1 2 2 1-2 1-1 2-1-2-2-1 2-1z" fill="#0066cc" />
+                <path d="M13 8l1 2 2 1-2 1-1 2-1-2-2-1 2-1z" fill="currentColor" />
               </svg>
             </div>
 
-            <h2 className="text-[22px] font-bold text-[#1d1d1f] mb-1">
+            <h2 className="text-[22px] font-bold text-[#1d1d1f] dark:text-[#F8FAFC] mb-1">
               Tell PathFinder in a chat
             </h2>
-            <p className="text-[14.5px] text-[#333333] leading-snug mb-4">
+            <p className="text-[14.5px] text-[#333333] dark:text-[#94A3B8] leading-snug mb-4">
               Describe your background naturally. We’ll build your learner profile together.
             </p>
           </div>
@@ -566,7 +570,7 @@ export default function LearnerIntakeWorkspace({
                 className={`flex items-start gap-2 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 {msg.sender === 'ai' && (
-                  <div className="w-6 h-6 rounded-full bg-[#dbeafc] text-[#0066cc] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-xs">
+                  <div className="w-6 h-6 rounded-full bg-[#dbeafc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-xs">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M12 2L14.4 7.6L20 10L14.4 12.4L12 18L9.6 12.4L4 10L9.6 7.6L12 2Z" />
                     </svg>
@@ -576,13 +580,13 @@ export default function LearnerIntakeWorkspace({
                   className={`text-[13.5px] leading-relaxed rounded-2xl px-3.5 py-2 max-w-[88%] ${
                     msg.sender === 'user'
                       ? 'bg-[#0066cc] text-white rounded-tr-sm shadow-xs'
-                      : 'bg-[#eaf2fc] text-[#1d1d1f] rounded-tl-sm border border-[#e3f0fe]'
+                      : 'bg-[#eaf2fc] dark:bg-[#182438] text-[#1d1d1f] dark:text-[#F1F5F9] rounded-tl-sm border border-[#e3f0fe] dark:border-[#22334D]'
                   }`}
                 >
                   {msg.text}
                 </div>
                 {msg.sender === 'user' && (
-                  <div className="w-6 h-6 rounded-full bg-[#e9e9e9] text-[#7a7a7a] flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <div className="w-6 h-6 rounded-full bg-[#e9e9e9] dark:bg-[#1E293B] text-[#7a7a7a] dark:text-[#CBD5E1] flex items-center justify-center flex-shrink-0 mt-0.5">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
                       <circle cx="12" cy="7" r="4" />
@@ -596,14 +600,14 @@ export default function LearnerIntakeWorkspace({
           <form
             onSubmit={handleSendChatMessage}
             onClick={(e) => e.stopPropagation()}
-            className="bg-[#fbfbfb] border border-[#e0e0e0] rounded-xl px-3 py-1.5 flex items-center justify-between gap-2 mt-4 focus-within:border-[#0066cc] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#0066cc]/15 transition-all shadow-xs"
+            className="bg-[#fbfbfb] dark:bg-[#121927] border border-[#e0e0e0] dark:border-[#263750] rounded-xl px-3 py-1.5 flex items-center justify-between gap-2 mt-4 focus-within:border-[#0066cc] dark:focus-within:border-[#38BDF8] focus-within:bg-white dark:focus-within:bg-[#162133] focus-within:ring-2 focus-within:ring-[#0066cc]/15 transition-all shadow-xs"
           >
             <input
               type="text"
               value={chatStory}
               onChange={(e) => setChatStory(e.target.value)}
               placeholder="Type your story here..."
-              className="w-full bg-transparent border-0 border-none outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 ring-0 shadow-none text-[14px] text-[#1d1d1f] placeholder-[#7a7a7a] px-1"
+              className="w-full bg-transparent border-0 border-none outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 ring-0 shadow-none text-[14px] text-[#1d1d1f] dark:text-[#F8FAFC] placeholder-[#7a7a7a] dark:placeholder-[#64748B] px-1"
               style={{ border: 'none', outline: 'none', boxShadow: 'none' }}
             />
             <button
@@ -631,14 +635,14 @@ export default function LearnerIntakeWorkspace({
 
       {/* Reassurance text */}
       <div className="text-center py-1">
-        <p className="text-[14.5px] text-[#333333]">
+        <p className="text-[14.5px] text-[#333333] dark:text-[#94A3B8]">
           You can{' '}
           <button
             type="button"
             onClick={() =>
               setSelectedMethod((prev) => (prev === 'resume' ? 'chat' : 'resume'))
             }
-            className="text-[#0066cc] font-semibold hover:underline cursor-pointer focus:outline-none"
+            className="text-[#0066cc] dark:text-[#38BDF8] font-semibold hover:underline cursor-pointer focus:outline-none"
           >
             add the other
           </button>{' '}
