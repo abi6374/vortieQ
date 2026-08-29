@@ -69,17 +69,7 @@ export default function PersonalizedRoadmap({
     }
   }, [user, profile])
 
-  // Auto-expand the first NOT-YET-DONE real task's "Why this task?" panel ONCE by default
-  const initializedWhyRef = useRef(false)
-  useEffect(() => {
-    if (!initializedWhyRef.current && roadmap.allSteps.length > 0) {
-      const firstOpenStep = roadmap.allSteps.find((s) => s.status !== 'completed' && s.status !== 'skipped')
-      if (firstOpenStep) {
-        setExpandedWhyIds(new Set([firstOpenStep.step_id]))
-        initializedWhyRef.current = true
-      }
-    }
-  }, [roadmap.allSteps])
+
 
   // ---------------------------------------------------------------------------
   // Dynamic Week Grouping & Tabs
