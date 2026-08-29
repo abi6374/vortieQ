@@ -109,7 +109,7 @@ export default function AIChat() {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit() }
   }
 
-  // The chatbot must NOT appear on the Signup/Landing page, onboarding, or full AI coach page,
+  // The chatbot must NOT appear on the Signup/Landing page, onboarding, full AI coach page, or live AI interview,
   // and must only appear after the dashboard / inner workspace is active.
   const isExcludedPath =
     location.pathname === '/' ||
@@ -117,7 +117,8 @@ export default function AIChat() {
     location.pathname.startsWith('/login') ||
     location.pathname.startsWith('/register') ||
     location.pathname.startsWith('/onboarding') ||
-    location.pathname.startsWith('/coach')
+    location.pathname.startsWith('/coach') ||
+    location.pathname.startsWith('/interview')
 
   if (!user || isExcludedPath) return null
 

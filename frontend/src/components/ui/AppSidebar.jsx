@@ -49,6 +49,15 @@ export const ICONS = {
       <path d="M4 5a2 2 0 0 1 2-2h13v18H6a2 2 0 0 0-2 2z" /><path d="M4 5v14" />
     </svg>
   ),
+  interview: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+      <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+      <line x1="12" x2="12" y1="19" y2="22" />
+      <path d="m16 8 4-4" />
+      <path d="m20 8-4-4" />
+    </svg>
+  ),
   coach: (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
       <path d="M21 12a8 8 0 1 1-4.9-7.4L21 3l-1.4 4.9A7.9 7.9 0 0 1 21 12z" />
@@ -62,10 +71,12 @@ export const NAV = [
   { key: 'progress',  label: 'Progress',       path: '/progress' },
   { key: 'skills',    label: 'Skill insights', path: '/skills' },
   { key: 'resources', label: 'Resources',      path: '/resources' },
+  { key: 'interview', label: 'AI Interview',   path: '/interview', badge: 'Beta' },
   { key: 'coach',     label: 'AI coach',       path: '/coach' },
 ]
 
 export function activeKeyFor(pathname) {
+  if (pathname.startsWith('/interview')) return 'interview'
   if (pathname.startsWith('/progress')) return 'progress'
   if (pathname.startsWith('/skill')) return 'skills'
   if (pathname.startsWith('/resources')) return 'resources'
@@ -142,7 +153,12 @@ export default function AppSidebar() {
                 onMouseLeave={(e) => { if (!on) e.currentTarget.style.background = 'transparent' }}
               >
                 <span style={{ color: on ? V : '#6e6e73', display: 'flex' }}>{ICONS[item.key]}</span>
-                <span>{item.label}</span>
+                <span className="flex-1">{item.label}</span>
+                {item.badge && (
+                  <span className="px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md bg-[#0066cc]/10 text-[#0066cc] dark:bg-[#38BDF8]/20 dark:text-[#38BDF8]">
+                    {item.badge}
+                  </span>
+                )}
               </button>
             )
           })}

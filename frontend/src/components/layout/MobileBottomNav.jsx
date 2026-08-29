@@ -28,7 +28,7 @@ export default function MobileBottomNav() {
             style={{ color: on ? V : '#7a7a7a' }}
           >
             {ICONS[item.key]}
-            <span style={{ fontSize: 10, fontWeight: on ? 700 : 500 }}>{item.label.replace('My roadmap', 'Roadmap').replace('Skill insights', 'Insights').replace('AI coach', 'Coach')}</span>
+            <span style={{ fontSize: 10, fontWeight: on ? 700 : 500 }}>{item.label.replace('My roadmap', 'Roadmap').replace('Skill insights', 'Insights').replace('AI Interview', 'Interview').replace('AI coach', 'Coach')}</span>
           </button>
         )
       })}
