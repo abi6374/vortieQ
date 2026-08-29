@@ -16,11 +16,34 @@ from app.config import groq_client, settings
 def chat_completion(messages: list, max_tokens: int = 1500, temperature: float = 0.2) -> str:
     """
     messages: standard [{"role": "system"|"user"|"assistant", "content": str}, ...]
-    Returns the assistant's reply text, stripped. Raises on failure - callers
-    already handle exceptions from the old direct groq_client calls the same way.
+    Returns the assistant's reply text, stripped. Raises only if every
+    available provider fails - callers already handle exceptions from the
+    old direct groq_client calls the same way.
     """
     if settings.LLM_PROVIDER == "bedrock":
-        return _bedrock_chat(messages, max_tokens, temperature)
+        try:
+            return _bedrock_chat(messages, max_tokens, temperature)
+        except Exception as e:
+            # Real incident: this account's Bedrock on-demand throughput quota
+            # throttles even with 8-attempt adaptive retry (see the comment on
+            # _get_bedrock_runtime below and PROGRESS_TRACKER.md Round 11),
+            # which was surfacing as hard 500s on path generation in
+            # production. GROQ_API_KEY is a REQUIRED setting (see config.py)
+            # regardless of LLM_PROVIDER, so Groq is always fully configured
+            # here - falling back to it turns an infra-side quota problem into
+            # a real, successful completion from a different real provider,
+            # rather than an error the learner can't do anything about. This
+            # is not a fabricated result: Groq actually generates the
+            # response for real, same as it does when LLM_PROVIDER="groq".
+            # Only Bedrock failures fall back - if Groq also fails, that
+            # exception propagates normally (both real providers failed; no
+            # data to fabricate in its place).
+            print(
+                f"[llm_client] Bedrock call failed ({type(e).__name__}: {e}); "
+                "falling back to Groq for this request",
+                flush=True,
+            )
+            return _groq_chat(messages, max_tokens, temperature)
     return _groq_chat(messages, max_tokens, temperature)
 
 
@@ -60,10 +83,15 @@ def _get_bedrock_runtime():
         # just blindly retrying, and backs off further under sustained load.
         # Bumped max_attempts well above boto3's default (3) - a real incident
         # (see PROGRESS_TRACKER.md Round 11) showed the default gives up too
-        # fast for this account's on-demand Llama 3 70B throughput quota,
-        # failing 100% of real path-generation requests. This is a mitigation,
-        # not a fix for the underlying quota - see the tracker for the AWS
-        # Service Quotas increase request that's the durable fix.
+        # fast for this account's on-demand throughput quota, failing 100% of
+        # real path-generation requests. Even at 8 attempts this account's
+        # quota has still been observed to exhaust the budget under load -
+        # chat_completion() above falls back to Groq when that happens, so
+        # this retry config is the first line of defense (avoids an
+        # unnecessary provider switch for a transient blip), not the only one.
+        # An AWS Service Quotas increase request is the fix for Bedrock's
+        # throughput itself, if Bedrock-specific latency/quality is wanted
+        # back as the primary path.
         _bedrock_runtime = boto3.client(
             "bedrock-runtime",
             region_name=settings.AWS_REGION,
