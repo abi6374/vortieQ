@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import AppShell from '../layout/AppShell'
 import api from '../../lib/apiClient'
+import CustomSelect from '../ui/CustomSelect'
 
 const STATUS_META = {
   upcoming:  { label: 'Upcoming',  bg: 'bg-blue-50 dark:bg-blue-900/20',   text: 'text-blue-700 dark:text-blue-300',   dot: 'bg-blue-500'  },
@@ -214,16 +215,22 @@ function HackathonCard({ hackathon, registered, onRegister, onView }) {
 
       {/* Footer CTA */}
       <div className="p-4 pt-0">
-        <button
-          onClick={e => { e.stopPropagation(); onRegister(hackathon.id, hackathon.registration_url) }}
-          className={`w-full py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer ${
+        <a
+          href={hackathon.registration_url || '#'}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={e => {
+            e.stopPropagation()
+            onRegister(hackathon.id, hackathon.registration_url)
+          }}
+          className={`w-full py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center ${
             registered
               ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
               : 'bg-[#0066cc] hover:bg-[#004fa3] dark:bg-[#38BDF8] dark:hover:bg-[#0ea5e9] text-white dark:text-[#0B0E14] shadow-sm'
           }`}
         >
-          {registered ? '✓ Registered' : 'Register Now ↗'}
-        </button>
+          <span>{registered ? '✓ Registered — View Website ↗' : 'Register on Website ↗'}</span>
+        </a>
       </div>
     </div>
   )
@@ -267,21 +274,15 @@ export default function HackathonsScreen() {
 
   useEffect(() => { loadHackathons() }, [loadHackathons])
 
-  const handleRegister = async (hackathonId, regUrl) => {
-    if (registeredIds.has(hackathonId)) {
-      if (regUrl) window.open(regUrl, '_blank', 'noopener')
-      return
+  const handleRegister = (hackathonId, regUrl) => {
+    setRegisteredIds(prev => new Set([...prev, hackathonId]))
+    const h = hackathons.find(x => x.id === hackathonId)
+    if (h && !myHackathons.some(m => m.id === hackathonId)) {
+      setMyHackathons(prev => [...prev, { ...h, user_status: 'registered' }])
     }
-    try {
-      await api.post(`/api/hackathons/${hackathonId}/register`)
-      setRegisteredIds(prev => new Set([...prev, hackathonId]))
-      const h = hackathons.find(x => x.id === hackathonId)
-      if (h) setMyHackathons(prev => [...prev, { ...h, user_status: 'registered' }])
-      showToast('Registered successfully!')
-      if (regUrl) window.open(regUrl, '_blank', 'noopener')
-    } catch {
-      if (regUrl) window.open(regUrl, '_blank', 'noopener')
-    }
+    showToast('Redirecting to official registration page...')
+    // Track in background
+    api.post(`/api/hackathons/${hackathonId}/register`).catch(() => {})
   }
 
   const filtered = hackathons.filter(h => {
@@ -390,18 +391,14 @@ export default function HackathonsScreen() {
                 </div>
 
                 {/* Rounded Dropdown Filter */}
-                <div className="relative flex-none">
-                  <select
-                    value={selectedStatus}
-                    onChange={e => setSelectedStatus(e.target.value)}
-                    className="appearance-none pl-3.5 pr-8 py-2 rounded-xl border border-[#e0e0e0] dark:border-[#242E40] bg-white dark:bg-[#141A26] text-xs font-bold text-[#1d1d1f] dark:text-white focus:outline-none focus:border-[#0066cc] dark:focus:border-[#38BDF8] shadow-xs cursor-pointer"
-                  >
-                    {STATUS_TABS.map(s => <option key={s} value={s}>{s === 'All' ? 'All Statuses' : s}</option>)}
-                  </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-[#7a7a7a]">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-                  </div>
-                </div>
+                <CustomSelect
+                  value={selectedStatus}
+                  onChange={setSelectedStatus}
+                  options={STATUS_TABS.map(s => ({ value: s, label: s === 'All' ? 'All Statuses' : s }))}
+                  className="flex-none"
+                  buttonClassName="!py-2 !px-3.5 !text-xs !rounded-xl !border-[#e0e0e0] dark:!border-[#242E40] !bg-white dark:!bg-[#141A26] shadow-xs font-bold"
+                  menuClassName="right-0 left-auto !rounded-xl"
+                />
               </div>
 
               {/* Results info */}
