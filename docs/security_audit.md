@@ -146,3 +146,40 @@ have stopped this.
 `feedback_events` is blocked at two independent layers (RLS + app-level
 `user_id` scoping), verified with real accounts, real data, and real
 production traffic — not just isolated unit assertions.
+
+---
+
+## Round 6 — Platform audit: mock-data removal, catalog poisoning, durable infra
+
+**Scope:** the deeper "Super Master Prompt" platform audit. Full
+remediation plan, architecture, and migration/verification report are in
+`docs/platform_audit_remediation.md` — this section covers only the
+security-relevant subset, in this file's established format.
+
+| Finding | Fix |
+|---|---|
+| Production frontend code let anyone activate a fabricated session/profile/roadmap via localStorage — 4 separate ungated checks, including inside the actual route guard (`ProtectedRoute.jsx`). | Consolidated into `AuthContext.getDevBypassUser()` / `useRoadmap.isDevBypassActive()`, both gated behind `import.meta.env.DEV` — a Vite build-time constant, so the code is genuinely absent from the production bundle (verified by grepping the built `dist/` output and the live Vercel bundle for every bypass string: zero matches), not merely runtime-disabled. |
+| `path_service._ensure_course_in_catalog()` fell back to a literal `"https://google.com"` `resource_url` and inserted it into the shared, global `courses` table (with a real pgvector embedding) whenever the LLM or web search came up empty — a permanent, cross-user catalog-poisoning entry, since the row's URL-based dedup lookup could match and re-serve it to other learners later. | `catalog_service.validate_resource_url()`: real HTTPS + domain-allowlist + live-reachability check (3s timeout, HEAD-then-GET) before ANY dynamically-sourced URL is trusted. `_ensure_course_in_catalog` now raises `ResourceValidationError` instead of inserting an unverified row; the caller surfaces an honest "could not find a verified alternative" failure. A source-scan regression test guards against the exact removed fallback pattern reappearing. |
+| `POST /api/roadmap/rerecommend` had no rate limiter, unlike every sibling LLM-backed mutation route, despite firing up to 3 live web searches + an LLM call per request. | `Depends(rate_limit("roadmap.rerecommend", max_calls=10))` added. |
+| Rate limiting was in-memory only — resets on restart, doesn't work if ever scaled to multiple instances. | Rewritten to use `rate_limit_hits` (Postgres, migration 009) — durable, would work correctly across instances. Fails OPEN on a DB error (a rate limiter is cost protection, not a security gate) rather than taking every LLM-backed route down over a transient hiccup. |
+| Duplicate clicks / retries against `/rerecommend` or `/swap` could fire a second real LLM+search call and insert a second, different "new" course for what the learner experienced as one action. | Optional `Idempotency-Key` header on both routes, backed by `idempotency_keys` (Postgres). The table's own `PRIMARY KEY` on the key is the actual concurrency guard for a race between two near-simultaneous duplicate requests (loser gets a `425`), not application-level locking. |
+| `roadmap.py`'s `PATCH /tasks/{step_id}` did `bool(payload["completed"])` on a raw dict body — `bool("false")` is `True` in Python, so `{"completed": "false"}` would have recorded a task as completed. | New `TaskCompletionSchema`/`RerecommendSchema` (`backend/app/schemas/roadmap.py`) replace both raw `dict = Body(...)` bodies on this router. Pydantic's real bool parsing correctly turns `"false"`/`"False"`/`"0"`/`"no"`/`"off"` into `False` and rejects anything unrecognizable with a `422` instead of silently coercing it. |
+| `schemas/feedback.py`'s `event_type` was a bare `str` — any string accepted at the schema layer (the service layer already validated it downstream, so this was defense-in-depth, not an open hole). | Now a `Literal["completed", "too_easy", "not_interested"]` matching the DB's own `CHECK` constraint exactly, plus a real `max_length` on `note`. |
+| Committed `schema.sql` only ever defined 5 tables; 5 more (`resumes`, `ai_conversations`, `ai_messages`, `user_settings`, `study_sessions`) plus several columns on the original 5 existed live but were never captured in a migration — a clean database could not be reproduced from what was committed. | Migration `005_schema_reconciliation.sql` — purely additive (`CREATE TABLE IF NOT EXISTS` / `ADD COLUMN IF NOT EXISTS` throughout), verified safe on both a fresh DB and the current live one. |
+
+**New tables' RLS**: every new learner-scoped table (`learner_skill_mastery`,
+`recommendation_runs`, `recommendation_explanations`) has an explicit
+`auth.uid() = user_id` (or an `EXISTS` join back to one) policy, matching
+the established pattern from Round 4. Reference/taxonomy tables
+(`skills`, `skill_aliases`, `skill_prerequisites`, `provider_resources`,
+`resource_verification`) are read-only to any authenticated user (no
+learner-facing mutation path exists for them) — writes happen only via the
+service-role-backed ingestion/seeding code. `rate_limit_hits` and
+`idempotency_keys` are service-role-only bookkeeping tables with no RLS
+policy at all, since no learner-facing query path ever touches them
+directly.
+
+Verified: full backend suite (126 tests, including this round's 27 new
+ones) passing; migrations verified applied via direct queries against the
+live database (table list, row counts) before/after; production deploy and
+live-request verification recorded in `docs/platform_audit_remediation.md`.
