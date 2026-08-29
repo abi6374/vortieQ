@@ -200,16 +200,17 @@ const STYLES = `
 .gc .insight svg{ color:var(--violet); flex:none; margin-top:2px; }
 .gc .constraints{ display:grid; grid-template-columns:1fr 1fr; gap:15px; }
 .gc .cfield label{ display:block; font-size:14.5px; font-weight:600; margin-bottom:7px; }
-.gc .cinput{ display:flex; align-items:center; gap:9px; border:1px solid var(--input-bd); border-radius:11px; padding:0 12px; height:50px; background:#fff; }
+.gc .cinput{ display:flex; align-items:center; gap:9px; border:1.5px solid var(--input-bd); border-radius:12px; padding:0 12px; height:48px; background:#fff; transition:border-color .15s,box-shadow .15s; }
 .gc .cinput:focus-within{ border-color:var(--violet); box-shadow:0 0 0 3px rgba(0,102,204,.22); }
 .gc .cinput svg{ color:var(--muted); flex:none; }
-.gc .cinput input[type=month]{ border:none; outline:none; background:none; font:600 15.5px/1 "Inter",sans-serif; color:var(--navy); width:100%; }
+.gc .cinput input[type=month]{ border:none; outline:none; background:transparent; font:600 15px/1 "Inter",sans-serif; color:var(--navy); width:100%; padding:0; margin:0; cursor:pointer; }
 .gc .time-val{ display:flex; align-items:baseline; gap:6px; margin-bottom:6px; }
 .gc .time-val b{ font-size:19px; font-weight:700; color:var(--violet); font-variant-numeric:tabular-nums; }
 .gc .time-val span{ font-size:13.5px; color:var(--slate); }
-.gc input[type=range]{ -webkit-appearance:none; appearance:none; width:100%; height:6px; border-radius:999px; background:var(--track); outline:none; margin:12px 0 3px; }
-.gc input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; appearance:none; width:21px; height:21px; border-radius:50%; background:var(--violet); border:3px solid #fff; box-shadow:0 2px 6px rgba(0,102,204,.4); cursor:pointer; }
-.gc input[type=range]::-moz-range-thumb{ width:21px; height:21px; border-radius:50%; background:var(--violet); border:3px solid #fff; box-shadow:0 2px 6px rgba(0,102,204,.4); cursor:pointer; }
+.gc input[type=range]{ -webkit-appearance:none; appearance:none; width:100%; height:8px; border-radius:999px; background:var(--track); outline:none; margin:12px 0 6px; cursor:pointer; border:1px solid rgba(0,102,204,0.12); }
+.gc input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; appearance:none; width:22px; height:22px; border-radius:50%; background:var(--violet); border:3.5px solid #fff; box-shadow:0 2px 8px rgba(0,102,204,.45); cursor:pointer; transition:transform .15s ease,box-shadow .15s ease; }
+.gc input[type=range]::-webkit-slider-thumb:hover{ transform:scale(1.15); box-shadow:0 0 12px rgba(0,102,204,.7); }
+.gc input[type=range]::-moz-range-thumb{ width:22px; height:22px; border-radius:50%; background:var(--violet); border:3.5px solid #fff; box-shadow:0 2px 8px rgba(0,102,204,.45); cursor:pointer; }
 .gc .range-ends{ display:flex; justify-content:space-between; font-size:12px; color:var(--muted); }
 .gc .meter{ border:1px solid #d5e8fd; background:linear-gradient(165deg,#fff,#fafcff 60%,#f3f9ff); }
 .gc .meter-h{ display:flex; align-items:center; gap:8px; margin:0 0 16px; }
@@ -264,7 +265,8 @@ html.dark .gc {
   --card-bd: #202B3C;
   --input-bd: #2D3F59;
   --divider: #202B3C;
-  --track: #1C2738;
+  --track: #263852;
+  --range-fill: #38BDF8;
   --green-surface: rgba(6, 78, 59, 0.3);
   --green-bd: rgba(52, 211, 153, 0.3);
   --green-text: #34D399;
@@ -285,9 +287,35 @@ html.dark .gc textarea {
 }
 html.dark .gc .role,
 html.dark .gc .role-custom,
-html.dark .gc .cinput,
 html.dark .gc .pstep {
   background: #141C2B;
+}
+html.dark .gc .cinput {
+  background: #0B0F17;
+  border-color: #2D3F59;
+}
+html.dark .gc .cinput:focus-within {
+  border-color: #38BDF8;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.22);
+}
+html.dark .gc .cinput svg {
+  color: #94A3B8;
+}
+html.dark .gc .cinput input[type=month] {
+  color-scheme: dark;
+  background: transparent;
+  color: #F8FAFC;
+}
+html.dark .gc .cinput input[type=month]::-webkit-datetime-edit {
+  background: transparent;
+  color: #F8FAFC;
+}
+html.dark .gc .cinput input[type=month]::-webkit-datetime-edit-fields-wrapper {
+  background: transparent;
+}
+html.dark .gc .cinput input[type=month]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  filter: invert(0.8) brightness(1.2);
 }
 html.dark .gc .role.sel,
 html.dark .gc .role-custom.sel {
@@ -296,6 +324,23 @@ html.dark .gc .role-custom.sel {
 html.dark .gc .role.sel .role-ic {
   background: #1E293B;
   color: #38BDF8;
+}
+html.dark .gc .time-val b {
+  color: #38BDF8;
+}
+html.dark .gc input[type=range] {
+  background: var(--track);
+  border: 1px solid #334A6E;
+}
+html.dark .gc input[type=range]::-webkit-slider-thumb {
+  background: #38BDF8;
+  border: 3.5px solid #0E1522;
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.7);
+}
+html.dark .gc input[type=range]::-moz-range-thumb {
+  background: #38BDF8;
+  border: 3.5px solid #0E1522;
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.7);
 }
 html.dark .gc .meter {
   background: linear-gradient(165deg, #0E1522, #121B2C 60%, #0F1726);
@@ -308,9 +353,6 @@ html.dark .gc .callout {
 html.dark .gc .pstep .pic {
   background: #1E293B;
   color: #CBD5E1;
-}
-html.dark .gc .cinput input[type=month] {
-  color-scheme: dark;
 }
 
 @media (max-width:1000px){ .gc .cols{ grid-template-columns:1fr; } .gc .preview-top{ flex-direction:column; align-items:stretch; } .gc .btn-plan{ width:100%; } }
@@ -507,7 +549,18 @@ export default function GoalCompass({ topicRatings = [], detectedYears = 0, init
                 Weekly learning time <span className="text-xs font-bold text-[#0066cc] dark:text-[#38BDF8]">(Required)</span>
               </label>
               <div className="time-val"><b>{weekly}</b><span>hours per week</span></div>
-              <input type="range" id="gc-weekly" min="2" max="30" step="1" value={weekly} onChange={(e) => setWeekly(Number(e.target.value))} />
+              <input
+                type="range"
+                id="gc-weekly"
+                min="2"
+                max="30"
+                step="1"
+                value={weekly}
+                onChange={(e) => setWeekly(Number(e.target.value))}
+                style={{
+                  background: `linear-gradient(to right, var(--range-fill, #0066cc) 0%, var(--range-fill, #0066cc) ${((weekly - 2) / (30 - 2)) * 100}%, var(--track) ${((weekly - 2) / (30 - 2)) * 100}%, var(--track) 100%)`,
+                }}
+              />
               <div className="range-ends"><span>2h</span><span>30h</span></div>
             </div>
           </div>

@@ -43,13 +43,19 @@ function Radio({ on, small }) {
   const dot = small ? 9 : 11
   return (
     <span
-      style={{
-        width: size, height: size, borderRadius: '50%',
-        border: `2px solid ${on ? V : '#e6e6e6'}`,
-        background: '#fff', display: 'grid', placeItems: 'center', flex: 'none',
-      }}
+      className={`rounded-full grid place-items-center flex-none border-2 transition-all ${
+        on
+          ? 'border-[#0066cc] dark:border-[#38BDF8] bg-white dark:bg-[#131D2E]'
+          : 'border-[#e6e6e6] dark:border-[#2D3A4F] bg-white dark:bg-[#0B0F17]'
+      }`}
+      style={{ width: size, height: size }}
     >
-      {on && <span style={{ width: dot, height: dot, borderRadius: '50%', background: V }} />}
+      {on && (
+        <span
+          className="rounded-full bg-[#0066cc] dark:bg-[#38BDF8]"
+          style={{ width: dot, height: dot }}
+        />
+      )}
     </span>
   )
 }
@@ -60,28 +66,28 @@ function SkillLevelPanel({ topic, level, onLevel }) {
   const pct = confidenceFor(level, suggested, topic.confidence_pct)
 
   return (
-    <section className="rounded-2xl border border-[#e6e6e6] bg-white shadow-sm overflow-hidden">
+    <section className="rounded-2xl border border-[#e6e6e6] dark:border-[#202B3C] bg-white dark:bg-[#101726] shadow-sm overflow-hidden transition-colors">
       {/* header */}
       <div className="flex items-center gap-4 px-5 py-4">
         <div
-          className="grid place-items-center rounded-xl text-white font-bold flex-none"
-          style={{ width: 44, height: 44, background: V, boxShadow: '0 4px 12px rgba(0,102,204,.25)' }}
+          className="grid place-items-center rounded-xl text-white dark:text-[#0B0F17] font-bold flex-none bg-[#0066cc] dark:bg-[#38BDF8] shadow-[0_4px_12px_rgba(0,102,204,.25)] dark:shadow-[0_4px_12px_rgba(56,189,248,.25)]"
+          style={{ width: 44, height: 44 }}
         >
           {topic.name.slice(0, 2).toUpperCase()}
         </div>
-        <span className="font-bold text-[#1d1d1f]" style={{ fontSize: 20, letterSpacing: '-.02em' }}>
+        <span className="font-bold text-[#1d1d1f] dark:text-[#F8FAFC]" style={{ fontSize: 20, letterSpacing: '-.02em' }}>
           {topic.name}
         </span>
         <span className="flex-1" />
         <span className="flex items-baseline gap-1.5">
-          <span className="font-extrabold tabular-nums" style={{ fontSize: 20, color: V }}>{pct}%</span>
-          <span className="text-xs sm:text-sm text-[#494949]">confidence</span>
+          <span className="font-extrabold tabular-nums text-[#0066cc] dark:text-[#38BDF8]" style={{ fontSize: 20 }}>{pct}%</span>
+          <span className="text-xs sm:text-sm text-[#494949] dark:text-[#94A3B8]">confidence</span>
         </span>
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
           aria-label={open ? 'Collapse' : 'Expand'}
-          className="grid place-items-center rounded-full border border-[#e6e6e6] bg-[#f7f9fc] text-[#494949] hover:bg-[#eef3f8] flex-none cursor-pointer"
+          className="grid place-items-center rounded-full border border-[#e6e6e6] dark:border-[#263750] bg-[#f7f9fc] dark:bg-[#1A2536] text-[#494949] dark:text-[#CBD5E1] hover:bg-[#eef3f8] dark:hover:bg-[#25354D] flex-none cursor-pointer transition-colors"
           style={{ width: 36, height: 36 }}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"
@@ -95,7 +101,7 @@ function SkillLevelPanel({ topic, level, onLevel }) {
       {open && (
         <div className="px-5 pb-5">
           {topic.evidence && (
-            <p className="text-[13px] text-[#86868b] italic mb-3.5 -mt-1">"{topic.evidence}"</p>
+            <p className="text-[13px] text-[#86868b] dark:text-[#94A3B8] italic mb-3.5 -mt-1">"{topic.evidence}"</p>
           )}
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -108,21 +114,19 @@ function SkillLevelPanel({ topic, level, onLevel }) {
                   role="radio"
                   aria-checked={active}
                   onClick={() => onLevel(key)}
-                  className="text-left rounded-xl bg-white transition cursor-pointer"
-                  style={{
-                    border: active ? `2px solid ${V}` : '1px solid #e6e6e6',
-                    padding: active ? 13 : 14,
-                    background: active ? 'linear-gradient(160deg,#fff,#eaf2fc 120%)' : '#fff',
-                    boxShadow: active ? '0 0 0 3px rgba(0,102,204,.07)' : 'none',
-                  }}
+                  className={`text-left rounded-xl transition-all cursor-pointer p-3 sm:p-3.5 border-2 ${
+                    active
+                      ? 'border-[#0066cc] dark:border-[#38BDF8] bg-gradient-to-br from-white to-[#eaf2fc] dark:from-[#131D2E] dark:to-[#18263D] shadow-[0_0_0_3px_rgba(0,102,204,.07)] dark:shadow-[0_0_0_3px_rgba(56,189,248,.15)]'
+                      : 'border-[#e6e6e6] dark:border-[#202C3E] bg-white dark:bg-[#0B0F17] hover:border-[#abd2fb] dark:hover:border-[#38BDF8]'
+                  }`}
                 >
                   <span className="flex items-center justify-between gap-1.5">
-                    <span className="font-bold" style={{ fontSize: 14, color: active ? V_DARK : '#1d1d1f' }}>
+                    <span className={`font-bold text-sm ${active ? 'text-[#004fa3] dark:text-[#38BDF8]' : 'text-[#1d1d1f] dark:text-[#F8FAFC]'}`}>
                       {LEVEL_META[key].label}
                     </span>
                     <Radio on={active} small />
                   </span>
-                  <span className="block text-[11.5px] text-[#86868b] mt-1 leading-snug">
+                  <span className={`block text-[11.5px] mt-1 leading-snug ${active ? 'text-[#494949] dark:text-[#94A3B8]' : 'text-[#86868b] dark:text-[#64748B]'}`}>
                     {suggested === key ? 'Matches your resume' : LEVEL_META[key].blurb}
                   </span>
                 </button>
@@ -130,20 +134,18 @@ function SkillLevelPanel({ topic, level, onLevel }) {
             })}
           </div>
 
-          <div className="mt-3.5 flex items-center gap-3.5 rounded-xl border px-4 py-3"
-               style={{ background: '#eaf2fc', borderColor: '#eaf2fc' }}>
-            <span className="grid place-items-center rounded-full flex-none"
-                  style={{ width: 36, height: 36, background: '#eaf2fc', color: V }}>
+          <div className="mt-3.5 flex items-center gap-3.5 rounded-xl border px-4 py-3 bg-[#eaf2fc] dark:bg-[#131E30] border-[#d8e9fb] dark:border-[#22354E] transition-colors">
+            <span className="grid place-items-center rounded-full flex-none w-9 h-9 bg-[#dbeafc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8]">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
                    strokeLinecap="round" strokeLinejoin="round">
                 <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
               </svg>
             </span>
             <div>
-              <div className="text-[11px] font-bold tracking-wide uppercase" style={{ color: V }}>
+              <div className="text-[11px] font-bold tracking-wide uppercase text-[#0066cc] dark:text-[#38BDF8]">
                 Key concepts · {LEVEL_META[level].label}
               </div>
-              <div className="font-semibold text-[#1d1d1f] leading-snug text-[14.5px]">
+              <div className="font-semibold text-[#1d1d1f] dark:text-[#F8FAFC] leading-snug text-[14px]">
                 {subtopicsFor(topic.name, level)}
               </div>
             </div>
