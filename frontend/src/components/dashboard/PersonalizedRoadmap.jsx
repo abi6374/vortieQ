@@ -73,19 +73,6 @@ export default function PersonalizedRoadmap({ pathData = null }) {
   // useEffect that seeded a local Set was dead code and referenced a setter
   // that no longer exists.)
 
-  // Auto-expand the first NOT-YET-DONE real task's "Why this task?" panel ONCE by
-  // default on initial load, but never overwrite user's manual toggles afterwards.
-  const initializedWhyRef = useRef(false)
-  useEffect(() => {
-    if (!initializedWhyRef.current && roadmap.allSteps.length > 0) {
-      const firstOpenStep = roadmap.allSteps.find((s) => s.status !== 'completed' && s.status !== 'skipped')
-      if (firstOpenStep) {
-        setExpandedWhyIds(new Set([firstOpenStep.step_id]))
-        initializedWhyRef.current = true
-      }
-    }
-  }, [roadmap.allSteps])
-
   // ---------------------------------------------------------------------------
   // Dynamic Week Grouping & Tabs
   // ---------------------------------------------------------------------------
@@ -367,8 +354,8 @@ export default function PersonalizedRoadmap({ pathData = null }) {
           </div>
                {/* 3 Top Stats Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-6 mb-6">
-            <div className="pf-glass-card p-5 sm:p-6 flex items-center gap-4.5">
-              <span className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#eaf2fc] to-[#dbeafc] text-[#0066cc] flex items-center justify-center flex-none shadow-sm">
+            <div className="pf-glass-card p-5 sm:p-6 flex items-center gap-5 sm:gap-6">
+              <span className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#eaf2fc] to-[#dbeafc] text-[#0066cc] flex items-center justify-center flex-none shadow-sm mr-1">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
                   <line x1="16" y1="2" x2="16" y2="6" />
@@ -386,8 +373,8 @@ export default function PersonalizedRoadmap({ pathData = null }) {
               </div>
             </div>
 
-            <div className="pf-glass-card p-5 sm:p-6 flex items-center gap-4.5">
-              <span className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#eaf2fc] to-[#dbeafc] text-[#0066cc] flex items-center justify-center flex-none shadow-sm">
+            <div className="pf-glass-card p-5 sm:p-6 flex items-center gap-5 sm:gap-6">
+              <span className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#eaf2fc] to-[#dbeafc] text-[#0066cc] flex items-center justify-center flex-none shadow-sm mr-1">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10" />
                   <polyline points="12 6 12 12 16 14" />
@@ -403,8 +390,8 @@ export default function PersonalizedRoadmap({ pathData = null }) {
               </div>
             </div>
 
-            <div className="pf-glass-card p-5 sm:p-6 flex items-center gap-4.5">
-              <span className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#ECFDF3] to-[#D1FADF] text-[#22A06B] flex items-center justify-center flex-none shadow-sm">
+            <div className="pf-glass-card p-5 sm:p-6 flex items-center gap-5 sm:gap-6">
+              <span className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#ECFDF3] to-[#D1FADF] text-[#22A06B] flex items-center justify-center flex-none shadow-sm mr-1">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
                   <polyline points="17 6 23 6 23 12" />
@@ -584,22 +571,22 @@ export default function PersonalizedRoadmap({ pathData = null }) {
 
                         {/* Expanded "Why this task?" explanation */}
                         {isExpanded && (
-                          <div className="bg-[#eaf2fc] border-l-[3.5px] border-[#0066cc] rounded-xl p-4 sm:p-5 relative animate-in fade-in duration-150">
+                          <div className="bg-[#eaf2fc] dark:bg-[#142036] border-l-[3.5px] border-[#0066cc] dark:border-[#38BDF8] rounded-xl p-4 sm:p-5 relative animate-in fade-in duration-150 shadow-2xs">
                             <div className="flex items-center justify-between mb-1.5">
-                              <span className="font-['Manrope'] font-bold text-xs sm:text-sm text-[#0066cc]">
+                              <span className="font-['Manrope'] font-bold text-xs sm:text-sm text-[#0066cc] dark:text-[#38BDF8]">
                                 Why this task?
                               </span>
                               <button
                                 type="button"
                                 onClick={() => toggleWhy(task.id)}
-                                className="text-[#0066cc] hover:opacity-75 focus:outline-none cursor-pointer"
+                                className="text-[#0066cc] dark:text-[#38BDF8] hover:opacity-75 focus:outline-none cursor-pointer"
                               >
                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                   <polyline points="18 15 12 9 6 15" />
                                 </svg>
                               </button>
                             </div>
-                            <p className="text-xs sm:text-sm text-[#1d1d1f] leading-relaxed">
+                            <p className="text-xs sm:text-sm text-[#1d1d1f] dark:text-[#E2E8F0] leading-relaxed">
                               {task.explanation}
                             </p>
                           </div>
