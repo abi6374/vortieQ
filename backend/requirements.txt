@@ -13,3 +13,4 @@ python-docx
 python-multipart
 duckduckgo_search
 boto3
+requests

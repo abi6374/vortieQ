@@ -15,7 +15,13 @@ from datetime import datetime, timezone
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Optional
 
-import requests
+try:
+    import httpx as http_client
+except ImportError:
+    try:
+        import requests as http_client
+    except ImportError:
+        http_client = None
 
 logger = logging.getLogger(__name__)
 
@@ -154,8 +160,10 @@ def _normalize_greenhouse_job(raw: dict, company: str) -> dict:
 def _fetch_company_jobs(board_token: str) -> list:
     """Fetch and filter internship jobs from one Greenhouse board."""
     try:
+        if not http_client:
+            return []
         url = GREENHOUSE_BASE.format(board=board_token)
-        resp = requests.get(url, timeout=12)
+        resp = http_client.get(url, timeout=12)
         if resp.status_code != 200:
             return []
         data = resp.json()

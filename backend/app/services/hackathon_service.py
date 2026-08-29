@@ -16,7 +16,13 @@ from typing import Optional
 from dotenv import load_dotenv
 load_dotenv()
 
-import requests
+try:
+    import httpx as http_client
+except ImportError:
+    try:
+        import requests as http_client
+    except ImportError:
+        http_client = None
 
 logger = logging.getLogger(__name__)
 
