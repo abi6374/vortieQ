@@ -199,8 +199,14 @@ def get_roadmap(user_id: str) -> dict:
     for w in weeks:
         w.setdefault("web_resources", [])
 
+    # Real target_role from the profile (not a client-side regex guess at
+    # goal_text) - lets the frontend show a real short header ("Data
+    # Analyst") instead of the whole goal sentence.
+    prof = supabase_client.table("profiles").select("target_role").eq("id", user_id).execute()
+    target_role = (prof.data[0].get("target_role") if prof.data else "") or ""
+
     return {
-        "path": {"id": path["id"], "goal_text": path.get("goal_text"), "status": path.get("status")},
+        "path": {"id": path["id"], "goal_text": path.get("goal_text"), "status": path.get("status"), "target_role": target_role},
         "weeks": weeks,
         "current_week": current,
         "total_steps": len(steps),
@@ -238,11 +244,18 @@ def _owned_step(step_id: str, user_id: str) -> dict:
     return step
 
 
-def set_task_completion(step_id: str, user_id: str, completed: bool) -> dict:
+def set_task_completion(step_id: str, user_id: str, completed: bool, note: str = "") -> dict:
     """Mark a task complete or INCOMPLETE. Both directions persist.
 
     Completing is blocked unless every earlier week is finished — enforced here,
     not just in the UI.
+
+    `note`: the learner's real natural-language feedback on this task (the
+    frontend makes this mandatory on every completion). Stored as a real
+    feedback_events row - not just logged for its own sake: once the note's
+    WEEK becomes fully complete, it's used to reconsider the next
+    not-started week's course selection (see feedback_service.
+    apply_week_feedback). Ignored on un-complete (nothing to act on there).
     """
     step = _owned_step(step_id, user_id)
     path_id = step["path_id"]
@@ -264,6 +277,29 @@ def set_task_completion(step_id: str, user_id: str, completed: bool) -> dict:
 
     new_status = "completed" if completed else "not_started"
     supabase_client.table("path_steps").update({"status": new_status}).eq("id", step_id).execute()
+
+    if completed and note and note.strip():
+        try:
+            supabase_client.table("feedback_events").insert({
+                "user_id": user_id, "path_id": path_id, "step_id": step_id,
+                "event_type": "completed", "note": note.strip()[:1000],
+            }).execute()
+        except Exception as e:
+            print(f"[roadmap] feedback note write failed: {type(e).__name__}: {e}", flush=True)
+
+        # If this was the last not-yet-terminal step in its week, the week is
+        # now fully done - a good moment to fold this week's feedback into
+        # the upcoming week's course selection.
+        try:
+            remaining = (
+                supabase_client.table("path_steps")
+                .select("status").eq("path_id", path_id).eq("week_number", week).execute()
+            ).data or []
+            if remaining and all(s.get("status") in TERMINAL for s in remaining):
+                from app.services import feedback_service
+                feedback_service.apply_week_feedback(path_id, user_id, week)
+        except Exception as e:
+            print(f"[roadmap] week-feedback application failed: {type(e).__name__}: {e}", flush=True)
 
     # Keep profiles.completed_courses in step with the toggle, both directions,
     # so the recommender never re-suggests something the learner just finished

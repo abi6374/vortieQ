@@ -18,6 +18,17 @@ class ProfileCreateSchema(BaseModel):
     goal_text: str
     topic_ratings: list[TopicRating] | None = None  # optional; comes from resume flow
     detected_years_experience: int | None = None
+    # Real resume context (education/projects) beyond just skills - folded
+    # into the profile-extraction LLM call as extra grounding so the "AI
+    # Profile Draft" the learner sees is actually reflected in the profile
+    # that drives recommendations, not just displayed and discarded.
+    resume_education: str | None = None
+    resume_projects: str | None = None
+    # Explicit role selection from GoalCompass (custom role text, or one of
+    # the fixed presets) - an authoritative user signal that should win over
+    # whatever the LLM might separately infer from goal_text, not just get
+    # folded into a sentence and hope the LLM parses it back out correctly.
+    target_role_override: str | None = None
 
 
 class ProfileSchema(BaseModel):
@@ -40,3 +51,6 @@ class ResumeExtractedTopic(BaseModel):
 class ResumeExtractResponse(BaseModel):
     topics: list[ResumeExtractedTopic]
     detected_years_experience: int
+    education: str = ""
+    projects: str = ""
+    suggested_goal: str = ""

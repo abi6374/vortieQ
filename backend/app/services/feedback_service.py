@@ -332,3 +332,114 @@ def _append_completed_course(user_id: str, course_id: str) -> None:
         supabase_client.table("profiles").update({"completed_courses": ids}).eq("id", user_id).execute()
 
 
+def apply_week_feedback(path_id: str, user_id: str, finished_week: int) -> None:
+    """Called once a week is fully completed (see roadmap_service.
+    set_task_completion). If the learner left real natural-language feedback
+    on any task during that week, use it to reconsider the NEXT not-started
+    week's course selection - replacing a course only when the feedback
+    clearly suggests it's a poor fit, never touching anything beyond that one
+    upcoming week.
+
+    Best-effort by design: any failure here is logged and swallowed so it can
+    never break the actual task-completion request that triggered it - this
+    is a real feature, but it must never be able to turn "mark task done"
+    into a 500.
+    """
+    try:
+        week_step_ids = [
+            r["id"] for r in (
+                supabase_client.table("path_steps")
+                .select("id").eq("path_id", path_id).eq("week_number", finished_week).execute().data or []
+            )
+        ]
+        if not week_step_ids:
+            return
+
+        notes = [
+            (r.get("note") or "").strip()
+            for r in (
+                supabase_client.table("feedback_events")
+                .select("note").eq("path_id", path_id).in_("step_id", week_step_ids).execute().data or []
+            )
+        ]
+        notes = [n for n in notes if n]
+        if not notes:
+            return  # no real feedback was left - nothing to act on
+
+        next_week_rows = (
+            supabase_client.table("path_steps")
+            .select("id, course_id, courses(id, title, description, difficulty, skill_tags)")
+            .eq("path_id", path_id).eq("week_number", finished_week + 1).eq("status", "not_started")
+            .execute()
+        ).data or []
+        if not next_week_rows:
+            return  # no upcoming week to adjust (path ends here, or it's already underway)
+
+        prof_r = supabase_client.table("profiles").select("*").eq("id", user_id).execute()
+        if not prof_r.data:
+            return
+        profile = prof_r.data[0]
+
+        in_path = {
+            r["course_id"] for r in (
+                supabase_client.table("path_steps").select("course_id").eq("path_id", path_id).execute().data or []
+            ) if r.get("course_id")
+        }
+        candidates = [c for c in (get_recommender().recommend(profile) or []) if c.get("id") not in in_path]
+        if not candidates:
+            return
+
+        current_courses = [
+            {"id": r["course_id"], "title": (r.get("courses") or {}).get("title", "")}
+            for r in next_week_rows
+        ]
+        candidate_courses = [
+            {"id": c["id"], "title": c.get("title", ""), "description": c.get("description", ""),
+             "difficulty": c.get("difficulty", ""), "skill_tags": c.get("skill_tags", [])}
+            for c in candidates[:20]
+        ]
+        combined_note = " | ".join(notes)[:1500]
+        user_msg = (
+            f'Learner feedback on the week just finished: "{combined_note}"\n\n'
+            f"Upcoming week's current courses:\n{json.dumps(current_courses)}\n\n"
+            f"Real alternative courses:\n{json.dumps(candidate_courses)}\n\n"
+            "Decide replacements now."
+        )
+        raw = _call_groq(
+            [
+                {"role": "system", "content": _load_prompt("week_feedback.txt")},
+                {"role": "user", "content": user_msg},
+            ],
+            max_tokens=800,
+        )
+        try:
+            replacements = json.loads(_strip_fences(raw)).get("replacements", [])
+        except Exception:
+            return
+
+        current_ids = {c["id"] for c in current_courses}
+        candidate_lookup = {c["id"]: c for c in candidate_courses}
+        courses_full = {c["id"]: c for c in candidates}
+        row_by_course = {r["course_id"]: r for r in next_week_rows}
+
+        for rep in replacements:
+            old_id = rep.get("replace_course_id")
+            new_id = rep.get("with_course_id")
+            if old_id not in current_ids or new_id not in candidate_lookup:
+                continue  # ignore anything not from the real lists given to the LLM
+            if new_id in in_path:
+                continue  # defensive: never reuse a course already elsewhere in this path
+            row = row_by_course.get(old_id)
+            if not row:
+                continue
+            new_course = courses_full.get(new_id, {})
+            explanation = _generate_explanation(profile, new_course)
+            supabase_client.table("path_steps").update({
+                "course_id": new_id,
+                "explanation": explanation,
+            }).eq("id", row["id"]).execute()
+            in_path.add(new_id)  # don't let a second replacement reuse it too
+    except Exception as e:
+        print(f"[apply_week_feedback] failed: {type(e).__name__}: {e}", flush=True)
+
+

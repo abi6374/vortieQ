@@ -22,16 +22,33 @@ For each topic, output:
 
 Also estimate detected_years_experience (integer, total years of technical work).
 
+Also extract three more real, resume-grounded fields:
+- education : ONE or two sentences summarizing degrees/fields/institutions
+              actually stated in the resume (e.g. "B.Tech in Computer Science,
+              XYZ University, 2021-2025."). Empty string if the resume states
+              no education.
+- projects   : ONE or two sentences summarizing the most notable real projects
+              actually named in the resume (e.g. "Built a real-time chat app
+              with WebSockets; led a 3-person capstone on fraud detection.").
+              Empty string if none are mentioned.
+- suggested_goal : a short, specific target role/career goal inferred ONLY
+              from real evidence in the resume (e.g. "Backend Developer",
+              "Data Analyst") — never a generic guess. Empty string if the
+              resume doesn't give enough signal to infer one confidently.
+
 Return ONLY a valid JSON object with this exact shape:
 {
   "topics": [
     {"name": "Python", "evidence": "3 years building data pipelines with FastAPI", "suggested_level": "advanced", "confidence_pct": 92}
   ],
-  "detected_years_experience": 3
+  "detected_years_experience": 3,
+  "education": "B.Tech in Computer Science, XYZ University, 2021-2025.",
+  "projects": "Built a real-time chat app with WebSockets; led a fraud-detection capstone.",
+  "suggested_goal": "Backend Developer"
 }
 
 Rules:
 - 3 to 12 topics; skip anything mentioned only in passing.
 - Skip pure soft skills (leadership, communication) — technical topics only.
 - Do NOT include markdown, code fences, or explanation outside the JSON.
-- If the file has no technical content, return {"topics": [], "detected_years_experience": 0}.
+- If the file has no technical content, return {"topics": [], "detected_years_experience": 0, "education": "", "projects": "", "suggested_goal": ""}.

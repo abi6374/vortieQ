@@ -9,7 +9,9 @@ import UserProfileDropdown from '../ui/UserProfileDropdown'
  * Props:
  *   topicRatings: [{name, level, evidence}]  (from the Assess Skills step)
  *   detectedYears: number
- *   onCreate(goalText, weeklyHours)          (fires "Create my learning plan")
+ *   onCreate(goalText, weeklyHours, targetRoleOverride)  (fires "Create my learning plan";
+ *                                            targetRoleOverride is the role the learner
+ *                                            explicitly selected/typed - '' if none)
  *   onBack()
  * Styles scoped under `.gc`.
  */
@@ -499,7 +501,20 @@ export default function GoalCompass({ topicRatings = [], detectedYears = 0, init
             type="button"
             className="btn-plan"
             disabled={isCustomRole && !customRoleName.trim() && !goal.trim()}
-            onClick={() => onCreate(goal.trim() || `I want to become a ${effectiveRoleName}.`, weekly)}
+            onClick={() => {
+              // Real bug this fixes: previously, typing ANYTHING in the goal
+              // box silently dropped whatever role (custom or preset) the
+              // learner explicitly selected - only used as a fallback when
+              // the goal box was empty. The selected role is now always
+              // folded in, and also sent as an explicit target_role_override
+              // so the backend uses it directly instead of re-guessing it
+              // from text.
+              const hasRealRole = isCustomRole ? !!customRoleName.trim() : true
+              const composedGoal = goal.trim()
+                ? `${goal.trim()} (Target role: ${effectiveRoleName}.)`
+                : `I want to become a ${effectiveRoleName}.`
+              onCreate(composedGoal, weekly, hasRealRole ? effectiveRoleName : '')
+            }}
           >
             Create my learning plan
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>

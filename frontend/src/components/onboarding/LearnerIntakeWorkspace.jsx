@@ -145,13 +145,19 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
           ...EMPTY_DRAFT,
           skills: topics.map((t) => t.name).join(', '),
           confidence: confStr,
+          // Real resume context beyond just skills - previously these 3
+          // fields stayed blank forever even though the edit modal already
+          // had inputs for them; the backend just never extracted them.
+          education: data.education || '',
+          projects: data.projects || '',
+          goal: data.suggested_goal || '',
           summary: topics.length
             ? `Identified ${topics.length} skill${topics.length === 1 ? '' : 's'} (~${avgConfidence(topics)} confidence)${
                 data.detected_years_experience ? ` and ~${data.detected_years_experience} years experience` : ''
               }: ${topics.map((t) => t.name).join(', ')}.`
             : 'No specific technical topics were detected in this resume — you can still continue and describe your background.',
         })
-        onExtracted(topics, data.detected_years_experience || 0)
+        onExtracted(topics, data.detected_years_experience || 0, data.education || '', data.projects || '', data.suggested_goal || '')
       } catch (err) {
         console.error('Resume extraction failed:', err)
         setUploadError(

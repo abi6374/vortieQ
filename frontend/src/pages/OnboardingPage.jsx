@@ -25,6 +25,12 @@ export default function OnboardingPage() {
   const [resumeTopics, setResumeTopics] = useState([])       // from LLM/GitHub extraction
   const [detectedYears, setDetectedYears] = useState(0)
   const [topicRatings, setTopicRatings] = useState([])       // user-adjusted levels
+  // Real resume context beyond just skills - folded into the profile
+  // extraction call so the "AI Profile Draft" the learner sees actually
+  // shapes their recommendations, not just displayed and discarded.
+  const [resumeEducation, setResumeEducation] = useState('')
+  const [resumeProjects, setResumeProjects] = useState('')
+  const [targetRoleOverride, setTargetRoleOverride] = useState('')
   const [githubData, setGithubData] = useState(null)
   const [githubLoading, setGithubLoading] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -75,7 +81,7 @@ export default function OnboardingPage() {
   }, [phase])
 
   // ------------- Step 1: Intake (Resume, GitHub, or Natural-language notes)
-  const handleResumeExtracted = (topics, years) => {
+  const handleResumeExtracted = (topics, years, education = '', projects = '', suggestedGoal = '') => {
     // If GitHub topics were already loaded, merge them cleanly
     const existingNames = new Set((topics || []).map((t) => t.name.toLowerCase()))
     const merged = [...(topics || [])]
@@ -89,6 +95,12 @@ export default function OnboardingPage() {
     const finalYears = Math.max(years || 0, detectedYears || 0)
     setResumeTopics(merged)
     setDetectedYears(finalYears)
+    if (education) setResumeEducation(education)
+    if (projects) setResumeProjects(projects)
+    // Pre-fill the goal box with the resume's own inferred goal - only if
+    // the learner hasn't already typed a goal elsewhere (chat lane), never
+    // overwrites something they wrote themselves.
+    if (suggestedGoal && !goalText.trim()) setGoalText(suggestedGoal)
     setPhase(merged && merged.length > 0 ? 'topics' : 'goalcompass')
   }
 
@@ -110,8 +122,9 @@ export default function OnboardingPage() {
   }
 
   // ------------- Goal Compass "Create my learning plan"
-  const runPlan = async (goalTextInput, weeklyHours) => {
-    lastPlanArgs.current = { goalTextInput, weeklyHours }
+  const runPlan = async (goalTextInput, weeklyHours, targetRoleOverrideInput = '') => {
+    lastPlanArgs.current = { goalTextInput, weeklyHours, targetRoleOverrideInput }
+    if (targetRoleOverrideInput) setTargetRoleOverride(targetRoleOverrideInput)
     setError(null)
     setPendingPathId(null)
     setGenStatus('loading')
@@ -125,6 +138,14 @@ export default function OnboardingPage() {
       const body = { goal_text: composed }
       if (topicRatings.length > 0) body.topic_ratings = topicRatings
       if (detectedYears > 0) body.detected_years_experience = detectedYears
+      // Real resume context (education/projects) so the profile the LLM
+      // extracts actually reflects the full "AI Profile Draft", not just
+      // skills - and the explicit role the learner selected/typed, which
+      // should win over whatever the LLM separately infers from goal_text.
+      if (resumeEducation) body.resume_education = resumeEducation
+      if (resumeProjects) body.resume_projects = resumeProjects
+      const roleOverride = targetRoleOverrideInput || targetRoleOverride
+      if (roleOverride) body.target_role_override = roleOverride
       await api.post('/api/profile/', body)
       const result = await api.post('/api/paths/generate', {})
       setPendingPathId(result.data.path_id)
@@ -136,7 +157,7 @@ export default function OnboardingPage() {
   const handleCreatePlan = runPlan
   const retryPlan = () => {
     const a = lastPlanArgs.current
-    if (a) runPlan(a.goalTextInput, a.weeklyHours)
+    if (a) runPlan(a.goalTextInput, a.weeklyHours, a.targetRoleOverrideInput)
   }
   const backToGoal = () => { setGenStatus('loading'); setPhase('goalcompass') }
   const finishToRoadmap = () => { if (pendingPathId) navigate(`/roadmap/${pendingPathId}`) }

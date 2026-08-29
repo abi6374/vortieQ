@@ -301,6 +301,45 @@ export default function ResourcesScreen() {
     }
   }, [path, webQuery])
 
+  // Real classified web resources (videos, articles, docs, practice) to
+  // supplement the browsable grid - the seeded 80-course dataset is almost
+  // entirely plain "courses", so the Video/Article/Practice/Documentation
+  // chips were structurally empty before this (typeOf() had nothing but
+  // COURSE/PROJECT-shaped real data to classify). Fetched once automatically
+  // (cached 30min server-side, so repeat loads are cheap) using the path's
+  // real goal - not the learner's manual search box, which stays independent.
+  const [webSteps, setWebSteps] = useState([])
+  useEffect(() => {
+    let cancelled = false
+    async function loadWebSteps() {
+      if (!path?.goal_text) return
+      try {
+        const q = path.goal_text.split('.')[0].slice(0, 100)
+        const { data } = await api.get('/api/resources/search', { params: { query: q } })
+        if (cancelled) return
+        setWebSteps((data.results || []).map((r, i) => {
+          let host = ''
+          try { host = new URL(r.url).hostname.replace('www.', '') } catch {}
+          return {
+            id: `web-${i}`, status: 'not_started', milestone_label: '',
+            explanation: r.snippet || '', weekNumber: 0,
+            title: r.title || r.url, description: r.snippet || '',
+            provider: host, difficulty: 'beginner', duration_hrs: 1,
+            resource_url: r.url, skill_tags: [], isWebResult: true,
+          }
+        }))
+      } catch { /* supplementary only - never blocks the real course grid */ }
+    }
+    loadWebSteps()
+    return () => { cancelled = true }
+  }, [path?.goal_text])
+
+  // Real course steps + real classified web resources, combined for the
+  // browsable/filterable grid only - progress stats (completedCount,
+  // totalHours, etc.) stay based on `steps` alone so web results (which
+  // aren't part of the learner's actual path) never inflate real progress.
+  const browsableItems = useMemo(() => [...steps, ...webSteps], [steps, webSteps])
+
   const handleWebSearch = async (e) => {
     e?.preventDefault()
     const q = webQuery.trim()
@@ -333,7 +372,7 @@ export default function ResourcesScreen() {
   const filtered = useMemo(() => {
     const typeFilter = CHIP_TO_TYPE[chip]
     const q = query.trim().toLowerCase()
-    return steps
+    return browsableItems
       .map((s) => ({ ...s, _type: typeOf(s).kind }))
       .filter((s) => (chip === 'Recommended' ? s.status === 'not_started' : true))
       .filter((s) => (typeFilter ? s._type === typeFilter : true))
@@ -346,7 +385,7 @@ export default function ResourcesScreen() {
         if (durationFilter === 'medium') return d > 5 && d <= 15
         return d > 15
       })
-  }, [steps, chip, query, difficultyFilter, durationFilter])
+  }, [browsableItems, chip, query, difficultyFilter, durationFilter])
 
   useEffect(() => { setVisibleCount(8) }, [chip, query, difficultyFilter, durationFilter])
 

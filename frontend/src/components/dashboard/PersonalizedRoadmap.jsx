@@ -190,19 +190,48 @@ export default function PersonalizedRoadmap({ pathData = null }) {
   // Two-way completion, persisted server-side. The backend enforces week
   // prerequisites and returns the whole recomputed roadmap, so Progress and
   // Skill insights stay in step without extra requests.
+  //
+  // Completing a task requires a real natural-language note first (see
+  // pendingCompleteTask/completeNote below) - the backend uses accumulated
+  // notes from a finished week to reconsider the NEXT not-started week's
+  // course selection (feedback_service.apply_week_feedback). Un-completing
+  // needs no note - nothing to act on there.
+  const [pendingCompleteTask, setPendingCompleteTask] = useState(null)
+  const [completeNote, setCompleteNote] = useState('')
+  const [completeNoteError, setCompleteNoteError] = useState('')
+
   const toggleTask = async (task) => {
     const isCompleted = completedTaskIds.has(task.id)
-    const result = await roadmap.toggleTask(task.id, !isCompleted)
-
+    if (!isCompleted) {
+      setPendingCompleteTask(task)
+      setCompleteNote('')
+      setCompleteNoteError('')
+      return
+    }
+    const result = await roadmap.toggleTask(task.id, false)
     if (!result.ok) {
       showToast(result.reason || 'Unable to update. Try again.')
       return
     }
-    showToast(
-      isCompleted
-        ? `Marked "${task.title}" as pending.`
-        : `🎉 Completed "${task.title}"! Progress updated.`
-    )
+    showToast(`Marked "${task.title}" as pending.`)
+  }
+
+  const confirmCompleteTask = async () => {
+    if (!completeNote.trim()) {
+      setCompleteNoteError('A quick note is required so we can improve what comes next.')
+      return
+    }
+    const task = pendingCompleteTask
+    if (!task) return
+    const result = await roadmap.toggleTask(task.id, true, completeNote.trim())
+    if (!result.ok) {
+      showToast(result.reason || 'Unable to update. Try again.')
+      setPendingCompleteTask(null)
+      return
+    }
+    setPendingCompleteTask(null)
+    setCompleteNote('')
+    showToast(`🎉 Completed "${task.title}"! Progress updated.`)
   }
 
   const toggleWhy = (taskId) => {
@@ -238,14 +267,19 @@ export default function PersonalizedRoadmap({ pathData = null }) {
     completedTaskIds.has(t.id)
   ).length
 
-  // Clean goal title for heading & cards. roadmap.path.goal_text (the real
-  // backend roadmap response) is the primary source; the pathData prop is a
-  // secondary/earlier-available source from the dashboard's own initial
-  // fetch. Never a role-specific hardcoded fallback (was "AIML Engineer
-  // Internship" regardless of the learner's actual goal) - a neutral,
-  // honest placeholder only, for the brief moment before either loads.
+  // Goal title for heading & cards. Real profile.target_role (e.g. "Data
+  // Analyst") is the primary source now - short and reliable, computed
+  // server-side by the actual profile-extraction LLM call (or the explicit
+  // role the learner picked in GoalCompass), not guessed client-side.
+  // Previously this only ever regex-stripped the FULL goal sentence (e.g.
+  // "Become a data analyst using Python and SQL for real-world BI
+  // projects") and showed all of it as the header instead of just the real
+  // target role - the regex cleanup is kept only as a fallback for the rare
+  // case target_role hasn't been set yet.
   const rawGoalText = profile?.goal_text || roadmap.path?.goal_text || pathData?.goal_text || ''
+  const targetRole = roadmap.path?.target_role || ''
   const cleanGoalTitle = useMemo(() => {
+    if (targetRole) return targetRole
     if (!rawGoalText) return 'your learning goal'
     let text = rawGoalText.split('I can study')[0].trim()
     text = text.replace(
@@ -255,7 +289,7 @@ export default function PersonalizedRoadmap({ pathData = null }) {
     text = text.charAt(0).toUpperCase() + text.slice(1)
     text = text.replace(/\.$/, '').trim()
     return text || 'your learning goal'
-  }, [rawGoalText])
+  }, [rawGoalText, targetRole])
 
   const handleNavClick = (navId) => {
     setActiveNav(navId)
@@ -778,6 +812,53 @@ export default function PersonalizedRoadmap({ pathData = null }) {
 
             </div>
           </div>
+
+      {/* Mandatory feedback note before a task completion goes through - real
+          notes get used to reconsider the next not-started week's courses
+          once the current week is fully done (see feedback_service.
+          apply_week_feedback on the backend). */}
+      {pendingCompleteTask && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4" onClick={() => setPendingCompleteTask(null)}>
+          <div
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="font-bold text-base text-[#1d1d1f] mb-1">How did this go?</h3>
+            <p className="text-sm text-[#6e6e73] mb-4">
+              Marking <span className="font-semibold text-[#1d1d1f]">"{pendingCompleteTask.title}"</span> as done.
+              A quick note helps us pick better courses for what's next.
+            </p>
+            <textarea
+              autoFocus
+              value={completeNote}
+              onChange={(e) => { setCompleteNote(e.target.value); if (completeNoteError) setCompleteNoteError('') }}
+              placeholder="e.g. This was too easy, I already knew most of it / This was perfect, more like this please / Too theoretical, I wanted more hands-on practice..."
+              rows={3}
+              className="w-full border border-[#e0e0e0] rounded-xl px-3.5 py-2.5 text-sm text-[#1d1d1f] focus:outline-none focus:border-[#0066cc] focus:ring-2 focus:ring-[#0066cc]/15 resize-none"
+            />
+            {completeNoteError && (
+              <p className="text-xs font-semibold text-red-600 mt-1.5">{completeNoteError}</p>
+            )}
+            <div className="flex items-center justify-end gap-3 mt-4">
+              <button
+                type="button"
+                onClick={() => setPendingCompleteTask(null)}
+                className="px-4 py-2 text-sm font-semibold text-[#333333] hover:text-[#1d1d1f]"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmCompleteTask}
+                disabled={!completeNote.trim()}
+                className="px-5 py-2 bg-[#0066cc] hover:bg-[#004fa3] disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-bold rounded-xl shadow-sm"
+              >
+                Mark done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Toast Notification — the global "Ask PathFinder" FAB (AIChat, mounted
           once in App.jsx) already covers the floating assistant; no per-page

@@ -34,11 +34,11 @@ export function useRoadmap() {
 
   useEffect(() => { load() }, [load])
 
-  const toggleTask = useCallback(async (stepId, completed) => {
+  const toggleTask = useCallback(async (stepId, completed, note = '') => {
     setSavingId(stepId)
     setLockMessage(null)
     try {
-      const res = await api.patch(`/api/roadmap/tasks/${stepId}`, { completed })
+      const res = await api.patch(`/api/roadmap/tasks/${stepId}`, { completed, note })
       setData(res.data) // full recomputed roadmap
       return { ok: true }
     } catch (err) {

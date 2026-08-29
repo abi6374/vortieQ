@@ -28,7 +28,10 @@ def set_task(
     payload: dict = Body(...),
     user_id: str = Depends(verify_jwt),
 ):
-    """Toggle a task complete/incomplete. Body: {"completed": true|false}.
+    """Toggle a task complete/incomplete. Body: {"completed": true|false, "note": str?}.
+
+    `note`: the learner's real feedback on this task - the frontend makes
+    this mandatory before a completion goes through. Ignored on un-complete.
 
     Returns the full recomputed roadmap so Progress, Skill insights and the
     week strip can all refresh from one response.
@@ -37,7 +40,8 @@ def set_task(
         raise HTTPException(400, "Body must include 'completed' (true or false)")
     try:
         return roadmap_service.set_task_completion(
-            step_id=step_id, user_id=user_id, completed=bool(payload["completed"])
+            step_id=step_id, user_id=user_id, completed=bool(payload["completed"]),
+            note=str(payload.get("note") or ""),
         )
     except PermissionError as e:
         # Prerequisite violation — 409 so the UI can show the lock message.

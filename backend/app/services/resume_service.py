@@ -102,6 +102,16 @@ def _calculate_fallback_confidence(evidence: str, level: str, years: int) -> int
     return max(50, min(99, score))
 
 
+MAX_TEXT_FIELD_CHARS = 500  # education/projects/suggested_goal - keep these short, real summaries
+
+
+def _clean_text_field(payload: dict, key: str, max_len: int = MAX_TEXT_FIELD_CHARS) -> str:
+    val = payload.get(key)
+    if not isinstance(val, str):
+        return ""
+    return val.strip()[:max_len]
+
+
 def _validate(payload: dict) -> dict:
     topics = payload.get("topics")
     if not isinstance(topics, list):
@@ -134,7 +144,16 @@ def _validate(payload: dict) -> dict:
             "suggested_level": level,
             "confidence_pct": conf,
         })
-    return {"topics": clean, "detected_years_experience": years}
+    return {
+        "topics": clean,
+        "detected_years_experience": years,
+        # Real, resume-grounded context beyond just skills - see resume_extract.txt.
+        # Never fabricated: the LLM is instructed to return "" when the resume
+        # doesn't actually say enough to fill these confidently.
+        "education": _clean_text_field(payload, "education"),
+        "projects": _clean_text_field(payload, "projects"),
+        "suggested_goal": _clean_text_field(payload, "suggested_goal", max_len=100),
+    }
 
 
 def extract_topics(resume_text: str) -> dict:
