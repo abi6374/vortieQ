@@ -5,25 +5,57 @@ const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(null)
+  const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
 
+  const loadProfile = async (userId) => {
+    if (!userId) {
+      setProfile(null)
+      return
+    }
+    try {
+      const { data } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle()
+      if (data) setProfile(data)
+    } catch (err) {
+      console.warn('Could not load profile:', err)
+    }
+  }
+
   useEffect(() => {
+    let mounted = true
+
+    const isOAuthCallback =
+      typeof window !== 'undefined' &&
+      (window.location.hash.includes('access_token') ||
+        window.location.search.includes('code=') ||
+        window.location.search.includes('source=github'))
+
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return
       setSession(session)
-      setLoading(false)
+      if (session?.user?.id) loadProfile(session.user.id)
+      if (session || !isOAuthCallback) {
+        setLoading(false)
+      }
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!mounted) return
       setSession(session)
+      if (session?.user?.id) loadProfile(session.user.id)
       setLoading(false)
     })
 
-    return () => subscription.unsubscribe()
+    return () => {
+      mounted = false
+      subscription.unsubscribe()
+    }
   }, [])
 
   const signIn = async (email, password) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) throw error
+    if (data?.user?.id) loadProfile(data.user.id)
     return data
   }
 
@@ -31,26 +63,57 @@ export function AuthProvider({ children }) {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { full_name: fullName } }
+      options: { data: { full_name: fullName, name: fullName } }
     })
     if (error) throw error
     return data
   }
 
   const signInWithGoogle = async () => {
-    // Requires the Google provider to be enabled in Supabase → Authentication →
-    // Providers. If it isn't, Supabase returns an error which the caller shows.
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: `${window.location.origin}/dashboard` },
     })
     if (error) throw error
+    if (data?.url) {
+      window.location.assign(data.url)
+    }
+    return data
+  }
+
+  const signInWithGithub = async () => {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'github',
+      options: {
+        redirectTo: `${window.location.origin}/onboarding?source=github`,
+        scopes: 'read:user repo user:email',
+      },
+    })
+    if (error) throw error
+    if (data?.url) {
+      window.location.assign(data.url)
+    }
     return data
   }
 
   const signOut = async () => {
     await supabase.auth.signOut()
     setSession(null)
+    setProfile(null)
+  }
+
+  const updateProfile = async (updatedData) => {
+    if (!updatedData) return
+    setProfile((prev) => ({ ...prev, ...updatedData }))
+    if (updatedData.full_name) {
+      try {
+        await supabase.auth.updateUser({
+          data: { full_name: updatedData.full_name, name: updatedData.full_name }
+        })
+      } catch (err) {
+        console.warn('Could not update auth metadata:', err)
+      }
+    }
   }
 
   const mockUser = typeof window !== 'undefined' && window.localStorage.getItem('e2e_mock_auth') ? {
@@ -62,7 +125,21 @@ export function AuthProvider({ children }) {
   const effectiveUser = session?.user || mockUser
 
   return (
-    <AuthContext.Provider value={{ session: effectiveSession, loading, signIn, signUp, signInWithGoogle, signOut, user: effectiveUser }}>
+    <AuthContext.Provider
+      value={{
+        session: effectiveSession,
+        loading,
+        profile,
+        updateProfile,
+        refreshProfile: () => effectiveUser?.id && loadProfile(effectiveUser.id),
+        signIn,
+        signUp,
+        signInWithGoogle,
+        signInWithGithub,
+        signOut,
+        user: effectiveUser
+      }}
+    >
       {children}
     </AuthContext.Provider>
   )

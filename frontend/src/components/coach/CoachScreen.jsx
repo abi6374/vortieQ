@@ -51,12 +51,12 @@ function ChatTab() {
   }
 
   return (
-    <div className="coach-chat-card bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden">
-      <div ref={bodyRef} className="flex-1 min-h-0 overflow-y-auto p-5 space-y-3 bg-[#FAFBFE]">
-        {hydrating && <p className="text-xs text-[#74819A] text-center">Loading your conversation…</p>}
+    <div className="coach-chat-card bg-white border border-[#e0e0e0] rounded-2xl overflow-hidden">
+      <div ref={bodyRef} className="flex-1 min-h-0 overflow-y-auto p-5 space-y-3 bg-[#fafcfe]">
+        {hydrating && <p className="text-xs text-[#7a7a7a] text-center">Loading your conversation…</p>}
         {!hydrating && messages.length === 0 && (
-          <div className="h-full flex flex-col items-center justify-center text-center text-[#74819A] text-sm max-w-md mx-auto">
-            <b className="block text-[#0E1B38] text-base mb-1.5">Ask PathFinder anything</b>
+          <div className="h-full flex flex-col items-center justify-center text-center text-[#7a7a7a] text-sm max-w-md mx-auto">
+            <b className="block text-[#1d1d1f] text-base mb-1.5">Ask PathFinder anything</b>
             <p className="mb-4">Why a course is in your path, what to learn next, how you're tracking against your goal — this is the same real assistant everywhere in the app, just full-page here.</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full">
               {STARTER_PROMPTS.map((p) => (
@@ -64,7 +64,7 @@ function ChatTab() {
                   key={p}
                   type="button"
                   onClick={() => send(p)}
-                  className="text-left px-3.5 py-2.5 bg-white border border-[#D8DFEB] rounded-xl text-xs sm:text-[13px] font-semibold text-[#0E1B38] hover:border-[#5B36E9] hover:bg-[#F5F1FF] transition-colors"
+                  className="text-left px-3.5 py-2.5 bg-white border border-[#e0e0e0] rounded-xl text-xs sm:text-[13px] font-semibold text-[#1d1d1f] hover:border-[#0066cc] hover:bg-[#eaf2fc] transition-colors"
                 >
                   {p}
                 </button>
@@ -77,8 +77,8 @@ function ChatTab() {
             <div
               className={`max-w-[75%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap break-words ${
                 m.role === 'user'
-                  ? 'bg-[#5B36E9] text-white rounded-br-sm'
-                  : 'bg-white text-[#0E1B38] border border-[#E5E7EB] rounded-bl-sm'
+                  ? 'bg-[#0066cc] text-white rounded-br-sm'
+                  : 'bg-white text-[#1d1d1f] border border-[#e0e0e0] rounded-bl-sm'
               }`}
             >
               {m.content}
@@ -87,10 +87,10 @@ function ChatTab() {
         ))}
         {loading && (
           <div className="flex justify-start">
-            <div className="px-4 py-3 bg-white border border-[#E5E7EB] rounded-2xl rounded-bl-sm flex gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#B9C2D4] animate-bounce" style={{ animationDelay: '0ms' }} />
-              <span className="w-1.5 h-1.5 rounded-full bg-[#B9C2D4] animate-bounce" style={{ animationDelay: '150ms' }} />
-              <span className="w-1.5 h-1.5 rounded-full bg-[#B9C2D4] animate-bounce" style={{ animationDelay: '300ms' }} />
+            <div className="px-4 py-3 bg-white border border-[#e0e0e0] rounded-2xl rounded-bl-sm flex gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#c6c6c7] animate-bounce" style={{ animationDelay: '0ms' }} />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#c6c6c7] animate-bounce" style={{ animationDelay: '150ms' }} />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#c6c6c7] animate-bounce" style={{ animationDelay: '300ms' }} />
             </div>
           </div>
         )}
@@ -103,19 +103,19 @@ function ChatTab() {
         </div>
       )}
 
-      <form onSubmit={submit} className="p-3 border-t border-[#EEF2F7] flex items-end gap-2">
+      <form onSubmit={submit} className="p-3 border-t border-[#f5f5f7] flex items-end gap-2">
         <textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) submit(e) }}
           placeholder="Ask about your path, a skill gap, or what to do next…"
           rows={1}
-          className="flex-1 resize-none border border-[#D8DFEB] rounded-xl px-3.5 py-2.5 text-sm text-[#0E1B38] focus:outline-none focus:border-[#5B36E9] focus:ring-2 focus:ring-[#5B36E9]/15 max-h-24"
+          className="flex-1 resize-none border border-[#e0e0e0] rounded-xl px-3.5 py-2.5 text-sm text-[#1d1d1f] focus:outline-none focus:border-[#0066cc] focus:ring-2 focus:ring-[#0066cc]/15 max-h-24"
         />
         <button
           type="submit"
           disabled={!input.trim() || loading}
-          className="w-10 h-10 rounded-xl bg-[#5B36E9] hover:bg-[#4826C9] disabled:opacity-40 text-white flex items-center justify-center flex-none"
+          className="w-10 h-10 rounded-xl bg-[#0066cc] hover:bg-[#004fa3] disabled:opacity-40 text-white flex items-center justify-center flex-none"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg>
         </button>
@@ -158,23 +158,23 @@ function PracticeTab() {
 
   return (
     <div className="space-y-5">
-      <form onSubmit={generate} className="bg-white border border-[#E5E7EB] rounded-2xl p-5 flex flex-col sm:flex-row gap-3 sm:items-end">
+      <form onSubmit={generate} className="bg-white border border-[#e0e0e0] rounded-2xl p-5 flex flex-col sm:flex-row gap-3 sm:items-end">
         <div className="flex-1">
-          <label className="block text-xs font-bold text-[#52617D] mb-1.5">What do you want to practice?</label>
+          <label className="block text-xs font-bold text-[#333333] mb-1.5">What do you want to practice?</label>
           <input
             type="text"
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
             placeholder="e.g. Python dictionaries, SQL joins, React hooks…"
-            className="w-full border border-[#D8DFEB] rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-[#5B36E9] focus:ring-2 focus:ring-[#5B36E9]/15"
+            className="w-full border border-[#e0e0e0] rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-[#0066cc] focus:ring-2 focus:ring-[#0066cc]/15"
           />
         </div>
         <div>
-          <label className="block text-xs font-bold text-[#52617D] mb-1.5">Questions</label>
+          <label className="block text-xs font-bold text-[#333333] mb-1.5">Questions</label>
           <select
             value={count}
             onChange={(e) => setCount(Number(e.target.value))}
-            className="border border-[#D8DFEB] rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#5B36E9]"
+            className="border border-[#e0e0e0] rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#0066cc]"
           >
             {[3, 5, 10].map((n) => <option key={n} value={n}>{n}</option>)}
           </select>
@@ -182,7 +182,7 @@ function PracticeTab() {
         <button
           type="submit"
           disabled={!topic.trim() || loading}
-          className="px-5 py-2.5 bg-[#5B36E9] hover:bg-[#4826C9] disabled:opacity-50 text-white font-bold text-sm rounded-xl whitespace-nowrap"
+          className="px-5 py-2.5 bg-[#0066cc] hover:bg-[#004fa3] disabled:opacity-50 text-white font-bold text-sm rounded-xl whitespace-nowrap"
         >
           {loading ? 'Generating…' : 'Generate practice questions'}
         </button>
@@ -193,24 +193,24 @@ function PracticeTab() {
       {questions && (
         <div className="space-y-4">
           {checked && (
-            <div className="bg-[#F5F1FF] border border-[#E4DCFD] rounded-2xl p-4 flex items-center justify-between">
-              <span className="font-bold text-[#0E1B38]">Score: {score} / {questions.length}</span>
-              <button type="button" onClick={() => { setChecked(false); setAnswers({}) }} className="text-xs font-bold text-[#5B36E9] hover:underline">
+            <div className="bg-[#eaf2fc] border border-[#dcecfd] rounded-2xl p-4 flex items-center justify-between">
+              <span className="font-bold text-[#1d1d1f]">Score: {score} / {questions.length}</span>
+              <button type="button" onClick={() => { setChecked(false); setAnswers({}) }} className="text-xs font-bold text-[#0066cc] hover:underline">
                 Try again
               </button>
             </div>
           )}
           {questions.map((q, i) => (
-            <div key={i} className="bg-white border border-[#E5E7EB] rounded-2xl p-5">
-              <p className="font-bold text-sm text-[#0E1B38] mb-3 whitespace-pre-wrap">{i + 1}. {q.question}</p>
+            <div key={i} className="bg-white border border-[#e0e0e0] rounded-2xl p-5">
+              <p className="font-bold text-sm text-[#1d1d1f] mb-3 whitespace-pre-wrap">{i + 1}. {q.question}</p>
               <div className="space-y-2">
                 {q.options.map((opt, oi) => {
                   const isSelected = answers[i] === oi
                   const isCorrect = oi === q.correct_index
-                  let style = 'border-[#D8DFEB] hover:border-[#B7A7FF]'
+                  let style = 'border-[#e0e0e0] hover:border-[#abd2fb]'
                   if (checked && isCorrect) style = 'border-[#22A06B] bg-[#ECFDF3]'
                   else if (checked && isSelected && !isCorrect) style = 'border-[#E5484D] bg-[#FFF0F0]'
-                  else if (!checked && isSelected) style = 'border-[#5B36E9] bg-[#F5F1FF]'
+                  else if (!checked && isSelected) style = 'border-[#0066cc] bg-[#eaf2fc]'
                   return (
                     <button
                       key={oi}
@@ -225,7 +225,7 @@ function PracticeTab() {
                 })}
               </div>
               {checked && q.explanation && (
-                <p className="mt-3 text-xs text-[#52617D] bg-[#F8FAFC] rounded-lg px-3 py-2">{q.explanation}</p>
+                <p className="mt-3 text-xs text-[#333333] bg-[#fafafc] rounded-lg px-3 py-2">{q.explanation}</p>
               )}
             </div>
           ))}
@@ -234,7 +234,7 @@ function PracticeTab() {
               type="button"
               onClick={() => setChecked(true)}
               disabled={Object.keys(answers).length !== questions.length}
-              className="px-5 py-2.5 bg-[#5B36E9] hover:bg-[#4826C9] disabled:opacity-40 text-white font-bold text-sm rounded-xl"
+              className="px-5 py-2.5 bg-[#0066cc] hover:bg-[#004fa3] disabled:opacity-40 text-white font-bold text-sm rounded-xl"
             >
               Check answers
             </button>
@@ -266,22 +266,22 @@ function ProjectsTab() {
 
   const DIFF_COLOR = {
     beginner: 'bg-[#ECFDF3] text-[#16A34A] border-[#D1FADF]',
-    intermediate: 'bg-[#F3EEFF] text-[#5B36E9] border-[#DDD2FF]',
+    intermediate: 'bg-[#eaf2fc] text-[#0066cc] border-[#cfe4fb]',
     advanced: 'bg-[#FFF0F0] text-[#E5484D] border-[#FECDCA]',
   }
 
   return (
     <div className="space-y-5">
-      <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5 flex items-center justify-between gap-4 flex-wrap">
+      <div className="bg-white border border-[#e0e0e0] rounded-2xl p-5 flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h3 className="font-bold text-sm text-[#0E1B38]">Project suggestion</h3>
-          <p className="text-xs text-[#74819A] mt-0.5">Built only from skills you've actually completed or are currently learning.</p>
+          <h3 className="font-bold text-sm text-[#1d1d1f]">Project suggestion</h3>
+          <p className="text-xs text-[#7a7a7a] mt-0.5">Built only from skills you've actually completed or are currently learning.</p>
         </div>
         <button
           type="button"
           onClick={generate}
           disabled={loading}
-          className="px-5 py-2.5 bg-[#5B36E9] hover:bg-[#4826C9] disabled:opacity-50 text-white font-bold text-sm rounded-xl whitespace-nowrap"
+          className="px-5 py-2.5 bg-[#0066cc] hover:bg-[#004fa3] disabled:opacity-50 text-white font-bold text-sm rounded-xl whitespace-nowrap"
         >
           {loading ? 'Thinking…' : idea ? 'Suggest another' : 'Suggest a project'}
         </button>
@@ -290,21 +290,21 @@ function ProjectsTab() {
       {error && <p className="text-sm text-[#B42318] bg-[#FDECEC] border border-[#F3B9B9] rounded-xl px-4 py-3">{error}</p>}
 
       {idea && (
-        <div className="bg-white border border-[#E5E7EB] rounded-2xl p-6">
+        <div className="bg-white border border-[#e0e0e0] rounded-2xl p-6">
           <div className="flex items-center gap-2 flex-wrap mb-2">
-            <h2 className="font-bold text-lg text-[#0E1B38]">{idea.title}</h2>
+            <h2 className="font-bold text-lg text-[#1d1d1f]">{idea.title}</h2>
             <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${DIFF_COLOR[idea.difficulty] || DIFF_COLOR.beginner}`}>
               {idea.difficulty}
             </span>
           </div>
-          <p className="text-sm text-[#52617D] leading-relaxed mb-4">{idea.description}</p>
-          <div className="flex items-center gap-4 text-xs text-[#74819A] mb-3">
+          <p className="text-sm text-[#333333] leading-relaxed mb-4">{idea.description}</p>
+          <div className="flex items-center gap-4 text-xs text-[#7a7a7a] mb-3">
             <span>⏱ ~{idea.estimated_hours}h estimated</span>
           </div>
           {idea.skills_used.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {idea.skills_used.map((s) => (
-                <span key={s} className="px-2.5 py-1 bg-[#F5F1FF] text-[#5B36E9] text-xs font-bold rounded-lg">{s}</span>
+                <span key={s} className="px-2.5 py-1 bg-[#eaf2fc] text-[#0066cc] text-xs font-bold rounded-lg">{s}</span>
               ))}
             </div>
           )}
@@ -316,33 +316,95 @@ function ProjectsTab() {
 
 export default function CoachScreen() {
   const [tab, setTab] = useState('chat')
+  const { send } = useAIChat()
+
+  const handleQuickPrompt = (prompt) => {
+    setTab('chat')
+    send(prompt)
+  }
 
   return (
     <AppShell>
-      <div className="coach-page max-w-[1000px] font-['Inter',sans-serif] text-[#172554]">
-        <header>
-          <h1 className="font-['Manrope'] font-extrabold text-2xl sm:text-[28px] text-[#0E1B38] tracking-tight">AI Coach</h1>
-          <p className="mt-0.5 text-sm text-[#52617D]">Chat, practice questions, and project ideas — all grounded in your real progress.</p>
+      <div className="w-full font-['Inter',sans-serif] text-[#1d1d1f]">
+        <header className="mb-6">
+          <h1 className="font-['Manrope'] font-extrabold text-2xl sm:text-[28px] text-[#1d1d1f] tracking-tight">AI Coach</h1>
+          <p className="mt-0.5 text-sm text-[#333333]">Chat, practice questions, and project ideas — all grounded in your real progress.</p>
         </header>
 
-        <div className="flex gap-1.5 bg-[#EEF2F7] rounded-xl p-1 w-fit">
-          {TABS.map((t) => (
-            <button
-              key={t.key}
-              type="button"
-              onClick={() => setTab(t.key)}
-              className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors ${
-                tab === t.key ? 'bg-white text-[#5B36E9] shadow-sm' : 'text-[#64748B] hover:text-[#0E1B38]'
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start w-full">
+          {/* Main Coach Column */}
+          <div className="lg:col-span-8 flex flex-col gap-4 min-w-0">
+            <div className="flex gap-1.5 bg-[#f5f5f7] rounded-xl p-1 w-fit">
+              {TABS.map((t) => (
+                <button
+                  key={t.key}
+                  type="button"
+                  onClick={() => setTab(t.key)}
+                  className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors cursor-pointer ${
+                    tab === t.key ? 'bg-white text-[#0066cc] shadow-sm' : 'text-[#6e6e73] hover:text-[#1d1d1f]'
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
 
-        {tab === 'chat' && <ChatTab />}
-        {tab === 'practice' && <PracticeTab />}
-        {tab === 'projects' && <ProjectsTab />}
+            {tab === 'chat' && <ChatTab />}
+            {tab === 'practice' && <PracticeTab />}
+            {tab === 'projects' && <ProjectsTab />}
+          </div>
+
+          {/* Right Rail: Quick Actions & Coach Context */}
+          <div className="lg:col-span-4 space-y-6">
+            {/* Quick Prompts */}
+            <div className="bg-white border border-[#e0e0e0] rounded-2xl p-5 shadow-2xs">
+              <h3 className="font-['Manrope'] font-bold text-sm text-[#1d1d1f] mb-3 flex items-center gap-2">
+                <span className="w-6 h-6 rounded-lg bg-[#eaf2fc] text-[#0066cc] flex items-center justify-center text-xs">⚡</span>
+                Suggested Questions
+              </h3>
+              <div className="space-y-2">
+                {STARTER_PROMPTS.map((p) => (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => handleQuickPrompt(p)}
+                    className="w-full text-left px-3.5 py-2.5 bg-[#fafafc] hover:bg-[#eaf2fc] border border-[#e0e0e0] hover:border-[#cfe4fb] text-xs font-semibold text-[#1d1d1f] rounded-xl transition-colors cursor-pointer"
+                  >
+                    {p} →
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Context Awareness Notice */}
+            <div className="bg-gradient-to-br from-[#fafbfc] to-[#eaf2fc] border border-[#cfe4fb] rounded-2xl p-5 shadow-2xs">
+              <h4 className="font-['Manrope'] font-bold text-sm text-[#1d1d1f] mb-1.5 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#22A06B]" />
+                Roadmap-Grounded
+              </h4>
+              <p className="text-xs text-[#333333] leading-relaxed">
+                Your AI Coach continuously inspects your completed lessons, quiz outcomes, and target roles to provide accurate, tailored answers.
+              </p>
+            </div>
+
+            {/* Study Mode Tips */}
+            <div className="bg-white border border-[#e0e0e0] rounded-2xl p-5 shadow-2xs">
+              <h4 className="font-['Manrope'] font-bold text-xs uppercase tracking-wider text-[#7a7a7a] mb-2">
+                Coaching Modes
+              </h4>
+              <ul className="text-xs text-[#333333] space-y-2">
+                <li className="flex items-start gap-2">
+                  <span className="text-[#0066cc] font-bold">•</span>
+                  <span><strong>Practice:</strong> Generate multiple-choice questions tailored to your active skills.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#0066cc] font-bold">•</span>
+                  <span><strong>Project Ideas:</strong> Get portfolio-ready project concepts with step-by-step guidance.</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
       </div>
     </AppShell>
   )

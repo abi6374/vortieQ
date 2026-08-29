@@ -8,25 +8,27 @@ import { useAuth } from '../../hooks/useAuth'
  * and an interactive dropdown containing user metadata, navigation links, and a functional Sign Out button.
  */
 export default function UserProfileDropdown({ light = false }) {
-  const { user, signOut } = useAuth()
+  const { user, profile, signOut } = useAuth()
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef(null)
 
-  // Derive user info
+  // Derive user info with profile.full_name as priority
   const fullName =
+    profile?.full_name ||
     user?.user_metadata?.full_name ||
     user?.user_metadata?.name ||
     user?.email?.split('@')?.[0] ||
     'Learner'
-  const email = user?.email || 'learner@pathfinder.ai'
-  const initials = fullName
-    .split(' ')
-    .map((w) => w[0])
-    .filter(Boolean)
-    .slice(0, 2)
-    .join('')
-    .toUpperCase() || 'P'
+  const email = profile?.email || user?.email || 'learner@pathfinder.ai'
+  const initials =
+    fullName
+      .split(' ')
+      .map((w) => w[0])
+      .filter(Boolean)
+      .slice(0, 2)
+      .join('')
+      .toUpperCase() || 'P'
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -55,19 +57,19 @@ export default function UserProfileDropdown({ light = false }) {
         onClick={() => setIsOpen((prev) => !prev)}
         className={`flex items-center gap-2.5 px-3 py-1.5 rounded-xl border transition-all cursor-pointer focus:outline-none ${
           light
-            ? 'bg-white/90 border-[#D8DFEB] hover:border-[#5B36E9] hover:bg-white text-[#0E1B38] shadow-xs'
-            : 'bg-white border-[#D8DFEB] hover:border-[#5B36E9] hover:bg-[#F5F1FF] text-[#0E1B38] shadow-xs'
+            ? 'bg-white/90 border-[#e0e0e0] hover:border-[#0066cc] hover:bg-white text-[#1d1d1f] shadow-xs'
+            : 'bg-white border-[#e0e0e0] hover:border-[#0066cc] hover:bg-[#eaf2fc] text-[#1d1d1f] shadow-xs'
         }`}
         aria-expanded={isOpen}
         aria-haspopup="true"
       >
         {/* Avatar Circle with initials */}
-        <span className="w-8 h-8 rounded-lg bg-[#5B36E9] text-white font-bold text-xs flex items-center justify-center shadow-xs flex-shrink-0">
+        <span className="w-8 h-8 rounded-lg bg-[#0066cc] text-white font-bold text-xs flex items-center justify-center shadow-xs flex-shrink-0">
           {initials}
         </span>
 
         {/* User Name */}
-        <span className="font-['Manrope'] font-bold text-xs sm:text-sm text-[#0E1B38] max-w-[130px] truncate text-left hidden sm:inline">
+        <span className="font-['Manrope'] font-bold text-xs sm:text-sm text-[#1d1d1f] max-w-[130px] truncate text-left hidden sm:inline">
           {fullName}
         </span>
 
@@ -81,8 +83,8 @@ export default function UserProfileDropdown({ light = false }) {
           strokeWidth="2.4"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className={`text-[#74819A] transition-transform duration-150 ${
-            isOpen ? 'rotate-180 text-[#5B36E9]' : ''
+          className={`text-[#7a7a7a] transition-transform duration-150 ${
+            isOpen ? 'rotate-180 text-[#0066cc]' : ''
           }`}
         >
           <path d="m6 9 6 6 6-6" />
@@ -91,93 +93,56 @@ export default function UserProfileDropdown({ light = false }) {
 
       {/* Dropdown Menu Modal */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl border border-[#E1E6F0] shadow-[0_12px_32px_rgba(25,40,75,0.14)] py-2 z-50 animate-in fade-in zoom-in-95 duration-100">
+        <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl border border-[#f0f0f0] shadow-[0_12px_32px_rgba(25,49,75,0.14)] py-2 z-50 animate-in fade-in zoom-in-95 duration-100">
           {/* User Header Details */}
-          <div className="px-4 py-3 border-b border-[#E6EAF2]">
+          <div className="px-4 py-3 border-b border-[#f0f0f0]">
             <div className="flex items-center gap-3">
-              <span className="w-10 h-10 rounded-xl bg-[#5B36E9] text-white font-extrabold text-sm flex items-center justify-center shadow-xs">
+              <span className="w-10 h-10 rounded-xl bg-[#0066cc] text-white font-extrabold text-sm flex items-center justify-center shadow-xs">
                 {initials}
               </span>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-bold text-[#0E1B38] truncate">{fullName}</p>
-                <p className="text-xs text-[#74819A] truncate">{email}</p>
+                <p className="text-sm font-bold text-[#1d1d1f] truncate">{fullName}</p>
+                <p className="text-xs text-[#7a7a7a] truncate">{email}</p>
               </div>
             </div>
             <div className="mt-2.5 flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-[#22A06B]" />
-              <span className="text-[11px] font-semibold text-[#52617D]">
+              <span className="text-[11px] font-semibold text-[#333333]">
                 Active Learner
               </span>
             </div>
           </div>
 
-          {/* Account & Settings — real pages, wired to /account and /settings */}
-          <div className="py-1 border-b border-[#E6EAF2]">
+          {/* Core Profile & Navigation Options */}
+          <div className="py-1.5">
             <button
               type="button"
-              onClick={() => { setIsOpen(false); navigate('/account') }}
-              className="w-full text-left px-4 py-2 text-xs sm:text-sm font-semibold text-[#52617D] hover:text-[#5B36E9] hover:bg-[#F5F1FF] flex items-center gap-2.5 transition-colors"
+              onClick={() => {
+                setIsOpen(false)
+                navigate('/account')
+              }}
+              className="w-full text-left px-4 py-2.5 text-xs sm:text-sm font-semibold text-[#333333] hover:text-[#0066cc] hover:bg-[#eaf2fc] flex items-center gap-3 transition-colors cursor-pointer"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
               </svg>
               <span>Account</span>
             </button>
+
             <button
               type="button"
-              onClick={() => { setIsOpen(false); navigate('/settings') }}
-              className="w-full text-left px-4 py-2 text-xs sm:text-sm font-semibold text-[#52617D] hover:text-[#5B36E9] hover:bg-[#F5F1FF] flex items-center gap-2.5 transition-colors"
+              onClick={() => {
+                setIsOpen(false)
+                navigate('/settings')
+              }}
+              className="w-full text-left px-4 py-2.5 text-xs sm:text-sm font-semibold text-[#333333] hover:text-[#0066cc] hover:bg-[#eaf2fc] flex items-center gap-3 transition-colors cursor-pointer"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6 1.65 1.65 0 0 0 10 3.09V3a2 2 0 1 1 4 0v.09A1.65 1.65 0 0 0 15 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="3" />
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6 1.65 1.65 0 0 0 10 3.09V3a2 2 0 1 1 4 0v.09A1.65 1.65 0 0 0 15 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
               </svg>
               <span>Settings</span>
-            </button>
-          </div>
-
-          {/* Quick Navigation Links */}
-          <div className="py-1 border-b border-[#E6EAF2]">
-            <button
-              type="button"
-              onClick={() => {
-                setIsOpen(false)
-                navigate('/dashboard')
-              }}
-              className="w-full text-left px-4 py-2 text-xs sm:text-sm font-semibold text-[#52617D] hover:text-[#5B36E9] hover:bg-[#F5F1FF] flex items-center gap-2.5 transition-colors"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" />
-              </svg>
-              <span>Workspace Dashboard</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setIsOpen(false)
-                navigate('/skills')
-              }}
-              className="w-full text-left px-4 py-2 text-xs sm:text-sm font-semibold text-[#52617D] hover:text-[#5B36E9] hover:bg-[#F5F1FF] flex items-center gap-2.5 transition-colors"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-              </svg>
-              <span>Skill Insights</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setIsOpen(false)
-                navigate('/progress')
-              }}
-              className="w-full text-left px-4 py-2 text-xs sm:text-sm font-semibold text-[#52617D] hover:text-[#5B36E9] hover:bg-[#F5F1FF] flex items-center gap-2.5 transition-colors"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-                <polyline points="17 6 23 6 23 12" />
-              </svg>
-              <span>Progress & Analytics</span>
             </button>
 
             <button
@@ -186,22 +151,25 @@ export default function UserProfileDropdown({ light = false }) {
                 setIsOpen(false)
                 navigate('/onboarding')
               }}
-              className="w-full text-left px-4 py-2 text-xs sm:text-sm font-semibold text-[#52617D] hover:text-[#5B36E9] hover:bg-[#F5F1FF] flex items-center gap-2.5 transition-colors"
+              className="w-full text-left px-4 py-2.5 text-xs sm:text-sm font-semibold text-[#333333] hover:text-[#0066cc] hover:bg-[#eaf2fc] flex items-center gap-3 transition-colors cursor-pointer"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10" />
                 <polygon points="16.2 7.8 10.5 10.5 7.8 16.2 13.5 13.5" fill="currentColor" />
               </svg>
-              <span>Re-calibrate Goal (Onboarding)</span>
+              <span>Re-calibrate Goal</span>
             </button>
           </div>
 
+          {/* Divider */}
+          <div className="border-t border-[#f0f0f0] my-1" />
+
           {/* Functional Sign Out */}
-          <div className="pt-1">
+          <div className="px-2 py-1">
             <button
               type="button"
               onClick={handleSignOut}
-              className="w-full text-left px-4 py-2 text-xs sm:text-sm font-bold text-red-600 hover:bg-red-50 flex items-center gap-2.5 transition-colors cursor-pointer"
+              className="w-full text-left px-3 py-2 rounded-xl text-xs sm:text-sm font-bold text-red-600 hover:bg-red-50 flex items-center gap-2.5 transition-colors cursor-pointer"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />

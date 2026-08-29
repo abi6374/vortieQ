@@ -21,10 +21,10 @@ import AppShell from '../layout/AppShell'
  *   - Weekly resource-activity sparkline — synthesized from local completions
  */
 
-const V = '#5B36E9'
-const V_DARK = '#4826C9'
-const V_SOFT = '#F5F1FF'
-const V_BORDER = '#DDD2FF'
+const V = '#0066cc'
+const V_DARK = '#004fa3'
+const V_SOFT = '#eaf2fc'
+const V_BORDER = '#cfe4fb'
 
 // ── Type mapping. We only actually have courses in the DB, so we synthesise
 // "type" from difficulty + duration to keep the reference screenshot's variety.
@@ -59,13 +59,13 @@ const TYPE_META = {
   COURSE:   { color: V,        bg: V_SOFT,        icon: 'grad' },
   PRACTICE: { color: '#0EA5E9', bg: '#ECFEFF',    icon: 'target' },
   PROJECT:  { color: '#EC4899', bg: '#FDF2F8',    icon: 'brief' },
-  DOC:      { color: '#64748B', bg: '#F1F5F9',    icon: 'book' },
+  DOC:      { color: '#6e6e73', bg: '#f5f5f5',    icon: 'book' },
 }
 
 const STYLES = `
-.rx{ --v:#5B36E9; --vd:#4826C9; --vsoft:#F5F1FF; --vsoft-2:#F8F5FF; --vbd:#DDD2FF;
-  --navy:#172554; --slate:#64748B; --muted:#94A3B8; --border:#E5E7EB; --border-l:#EEF2F7;
-  --page:#F8FAFC; --card:#fff; --green:#16A34A; --green-bg:#ECFDF3; --amber:#F59E0B;
+.rx{ --v:#0066cc; --vd:#004fa3; --vsoft:#eaf2fc; --vsoft-2:#f5faff; --vbd:#cfe4fb;
+  --navy:#1d1d1f; --slate:#6e6e73; --muted:#86868b; --border:#e0e0e0; --border-l:#f5f5f7;
+  --page:#fafafc; --card:#fff; --green:#16A34A; --green-bg:#ECFDF3; --amber:#F59E0B;
   color:var(--navy); font-family:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
   -webkit-font-smoothing:antialiased; }
 .rx *{ box-sizing:border-box; }
@@ -102,16 +102,16 @@ const STYLES = `
 /* search + filters */
 .rx-search{ display:flex; gap:10px; align-items:center; }
 .rx-search .s-in{ flex:1; display:flex; align-items:center; gap:9px; background:#fff; border:1px solid var(--border); border-radius:12px; padding:0 14px; height:44px; }
-.rx-search .s-in:focus-within{ border-color:var(--v); box-shadow:0 0 0 3px rgba(91,54,233,.15); }
+.rx-search .s-in:focus-within{ border-color:var(--v); box-shadow:0 0 0 3px rgba(0,102,204,.15); }
 .rx-search .s-in svg{ color:var(--muted); }
 .rx-search input{ border:none; outline:none; flex:1; background:none; font:400 14px/1 inherit; color:var(--navy); min-width:0; }
 .rx-search input::placeholder{ color:var(--muted); }
-.rx-search .kbd{ font-size:11px; color:var(--muted); border:1px solid var(--border); border-radius:6px; padding:2px 6px; background:#F8FAFC; }
+.rx-search .kbd{ font-size:11px; color:var(--muted); border:1px solid var(--border); border-radius:6px; padding:2px 6px; background:#fafafc; }
 .rx-filter{ display:flex; align-items:center; gap:8px; background:#fff; border:1px solid var(--border); border-radius:12px; padding:10px 14px; font-size:13.5px; font-weight:600; cursor:pointer; }
 .rx-filter:hover{ border-color:var(--vbd); }
 
 .rx-chips{ display:flex; gap:8px; flex-wrap:wrap; }
-.rx-chip{ background:#fff; border:1px solid var(--border); border-radius:999px; padding:7px 14px; font-size:13px; font-weight:600; color:#475569; cursor:pointer; }
+.rx-chip{ background:#fff; border:1px solid var(--border); border-radius:999px; padding:7px 14px; font-size:13px; font-weight:600; color:#333333; cursor:pointer; }
 .rx-chip:hover{ border-color:var(--vbd); }
 .rx-chip.on{ background:var(--v); border-color:var(--v); color:#fff; }
 
@@ -126,23 +126,23 @@ const STYLES = `
 .rx-sec-h{ display:flex; align-items:center; justify-content:space-between; margin:8px 0 12px; }
 .rx-sec-h h2{ font-family:"Manrope",sans-serif; font-size:16px; font-weight:700; margin:0; letter-spacing:-.01em; }
 .rx-sec-h .sub{ font-size:12.5px; color:var(--muted); margin:2px 0 0; }
-.rx-sort{ background:#fff; border:1px solid var(--border); border-radius:10px; padding:6px 12px; font-size:12.5px; color:#475569; cursor:pointer; }
+.rx-sort{ background:#fff; border:1px solid var(--border); border-radius:10px; padding:6px 12px; font-size:12.5px; color:#333333; cursor:pointer; }
 
 .rx-list{ display:flex; flex-direction:column; gap:10px; max-height:calc(100dvh - 300px); overflow-y:auto; padding-right:4px; }
 .rx-card{ display:grid; grid-template-columns:60px 1fr auto auto auto; gap:14px; align-items:center;
   background:#fff; border:1px solid var(--border); border-radius:14px; padding:14px 16px; transition:border-color .15s, box-shadow .15s; }
-.rx-card:hover{ border-color:var(--vbd); box-shadow:0 4px 14px rgba(91,54,233,.06); }
+.rx-card:hover{ border-color:var(--vbd); box-shadow:0 4px 14px rgba(0,102,204,.06); }
 .rx-card .r-ic{ width:44px; height:44px; border-radius:12px; display:grid; place-items:center; flex:none; }
 .rx-card .r-body{ min-width:0; }
 .rx-card .r-type{ font-size:10.5px; font-weight:700; letter-spacing:.06em; color:var(--muted); margin-bottom:3px; }
 .rx-card .r-title{ font-size:14.5px; font-weight:700; color:var(--navy); margin:0 0 4px; letter-spacing:-.01em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .rx-card .r-desc{ font-size:13px; color:var(--slate); margin:0; line-height:1.35; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; }
 .rx-card .r-tags{ display:flex; gap:6px; margin-top:6px; flex-wrap:wrap; }
-.rx-card .r-tag{ font-size:11px; padding:2.5px 8px; background:#F1F5F9; color:#475569; border-radius:999px; font-weight:600; }
+.rx-card .r-tag{ font-size:11px; padding:2.5px 8px; background:#f5f5f5; color:#333333; border-radius:999px; font-weight:600; }
 .rx-card .r-match{ text-align:right; }
 .rx-card .r-match .pct{ color:var(--green); font-weight:700; font-size:13px; }
 .rx-card .r-match .why{ font-size:11px; color:var(--muted); max-width:150px; line-height:1.3; }
-.rx-card .r-save{ width:34px; height:34px; border-radius:10px; border:1px solid var(--border); background:#fff; cursor:pointer; display:grid; place-items:center; color:#94A3B8; }
+.rx-card .r-save{ width:34px; height:34px; border-radius:10px; border:1px solid var(--border); background:#fff; cursor:pointer; display:grid; place-items:center; color:#86868b; }
 .rx-card .r-save.on{ color:var(--v); background:var(--vsoft); border-color:var(--vbd); }
 .rx-card .r-save:hover{ color:var(--v); }
 .rx-btn{ display:inline-flex; align-items:center; gap:6px; height:36px; padding:0 14px; border-radius:9px; font-size:13px; font-weight:600; cursor:pointer; border:1px solid var(--v); background:var(--v); color:#fff; }
@@ -166,13 +166,13 @@ const STYLES = `
 .rx-plan-top .lft b{ display:block; color:var(--navy); font-size:15px; }
 .rx-plan-top .rgt{ font-size:12.5px; color:var(--muted); }
 .rx-plan-top .rgt b{ color:var(--navy); font-weight:700; }
-.rx-bar{ height:8px; background:#EEF2F7; border-radius:999px; overflow:hidden; margin-bottom:14px; }
-.rx-bar > i{ display:block; height:100%; background:linear-gradient(90deg,var(--v),#764FF0); border-radius:999px; }
+.rx-bar{ height:8px; background:#f5f5f7; border-radius:999px; overflow:hidden; margin-bottom:14px; }
+.rx-bar > i{ display:block; height:100%; background:linear-gradient(90deg,var(--v),#4f9df0); border-radius:999px; }
 .rx-plan-items{ display:flex; flex-direction:column; gap:9px; }
 .rx-plan-item{ display:flex; align-items:center; gap:10px; font-size:13px; color:var(--slate); }
-.rx-plan-item .chk{ width:18px; height:18px; border-radius:50%; border:1.5px solid #CBD5E1; flex:none; display:grid; place-items:center; color:#fff; }
+.rx-plan-item .chk{ width:18px; height:18px; border-radius:50%; border:1.5px solid #d5d6d7; flex:none; display:grid; place-items:center; color:#fff; }
 .rx-plan-item.done .chk{ background:var(--green); border-color:var(--green); }
-.rx-plan-item.done{ color:var(--navy); text-decoration:line-through; text-decoration-color:#CBD5E1; }
+.rx-plan-item.done{ color:var(--navy); text-decoration:line-through; text-decoration-color:#d5d6d7; }
 .rx-plan-item .time{ margin-left:auto; font-size:11.5px; color:var(--muted); }
 .rx-continue{ margin-top:14px; display:block; width:100%; background:var(--v); color:#fff; border:none; border-radius:10px; padding:11px; font-weight:700; font-size:13.5px; cursor:pointer; }
 .rx-continue:hover{ background:var(--vd); }
@@ -382,8 +382,8 @@ export default function ResourcesScreen() {
       }
     >
     <div className="rx">{whyOpen && (
-        <div onClick={() => setWhyOpen(false)} style={{position:"fixed",inset:0,background:"rgba(23,37,84,.35)",display:"grid",placeItems:"center",zIndex:80,padding:20}}>
-          <div onClick={(e)=>e.stopPropagation()} style={{background:"#fff",border:"1px solid var(--vbd)",borderRadius:16,padding:22,maxWidth:460,width:"100%",boxShadow:"0 20px 40px rgba(25,40,75,.2)"}}>
+        <div onClick={() => setWhyOpen(false)} style={{position:"fixed",inset:0,background:"rgba(29,29,31,.35)",display:"grid",placeItems:"center",zIndex:80,padding:20}}>
+          <div onClick={(e)=>e.stopPropagation()} style={{background:"#fff",border:"1px solid var(--vbd)",borderRadius:16,padding:22,maxWidth:460,width:"100%",boxShadow:"0 20px 40px rgba(25,49,75,.2)"}}>
             <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
               <span style={{width:34,height:34,borderRadius:10,background:"var(--vsoft)",color:"var(--v)",display:"grid",placeItems:"center"}}>{I.spark}</span>
               <h3 style={{margin:0,fontFamily:"Manrope,sans-serif",fontSize:17,fontWeight:800}}>Why these resources?</h3>
@@ -432,7 +432,7 @@ export default function ResourcesScreen() {
               <div style={{display:'flex',gap:6}}>
                 {['all','beginner','intermediate','advanced'].map((d) => (
                   <button key={d} onClick={() => setDifficultyFilter(d)}
-                    style={{padding:'6px 12px',borderRadius:999,border:'1px solid '+(difficultyFilter===d?'var(--v)':'var(--border)'),background:difficultyFilter===d?'var(--vsoft)':'#fff',color:difficultyFilter===d?'var(--v)':'#475569',fontSize:12.5,fontWeight:600,cursor:'pointer',textTransform:'capitalize'}}>{d}</button>
+                    style={{padding:'6px 12px',borderRadius:999,border:'1px solid '+(difficultyFilter===d?'var(--v)':'var(--border)'),background:difficultyFilter===d?'var(--vsoft)':'#fff',color:difficultyFilter===d?'var(--v)':'#333333',fontSize:12.5,fontWeight:600,cursor:'pointer',textTransform:'capitalize'}}>{d}</button>
                 ))}
               </div>
             </div>
@@ -441,7 +441,7 @@ export default function ResourcesScreen() {
               <div style={{display:'flex',gap:6}}>
                 {[['all','Any'],['short','< 5h'],['medium','5–15h'],['long','15h+']].map(([k,l]) => (
                   <button key={k} onClick={() => setDurationFilter(k)}
-                    style={{padding:'6px 12px',borderRadius:999,border:'1px solid '+(durationFilter===k?'var(--v)':'var(--border)'),background:durationFilter===k?'var(--vsoft)':'#fff',color:durationFilter===k?'var(--v)':'#475569',fontSize:12.5,fontWeight:600,cursor:'pointer'}}>{l}</button>
+                    style={{padding:'6px 12px',borderRadius:999,border:'1px solid '+(durationFilter===k?'var(--v)':'var(--border)'),background:durationFilter===k?'var(--vsoft)':'#fff',color:durationFilter===k?'var(--v)':'#333333',fontSize:12.5,fontWeight:600,cursor:'pointer'}}>{l}</button>
                 ))}
               </div>
             </div>
@@ -551,7 +551,7 @@ export default function ResourcesScreen() {
 
             <div className="rx-panel">
               <h3>{I.spark} Find more resources</h3>
-              <p style={{ fontSize: 13, color: 'var(--slate, #52617D)', margin: '0 0 10px', lineHeight: 1.5 }}>
+              <p style={{ fontSize: 13, color: 'var(--slate, #333333)', margin: '0 0 10px', lineHeight: 1.5 }}>
                 Live web search (incl. NPTEL) to supplement the courses above.
               </p>
 
@@ -600,7 +600,7 @@ export default function ResourcesScreen() {
                   placeholder="e.g. machine learning, React, SQL..."
                   style={{
                     flex: 1, minWidth: 0, fontSize: 13, padding: '8px 10px',
-                    border: '1px solid #D8DFEB', borderRadius: 8, outline: 'none',
+                    border: '1px solid #e0e0e0', borderRadius: 8, outline: 'none',
                   }}
                 />
                 <button
@@ -621,7 +621,7 @@ export default function ResourcesScreen() {
               )}
 
               {webSearched && !webLoading && webResults.length === 0 && !webError && (
-                <p style={{ fontSize: 12.5, color: '#74819A', margin: 0 }}>No results found. Try a different search.</p>
+                <p style={{ fontSize: 12.5, color: '#7a7a7a', margin: 0 }}>No results found. Try a different search.</p>
               )}
 
               {webResults.length > 0 && (

@@ -1,22 +1,31 @@
 import React from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { useSidebar } from '../../contexts/SidebarContext'
 
 /**
- * The one PathFinder sidebar.
- *
- * Every page renders it through <AppShell> — there is no page-local copy.
- * That's what keeps the icons from changing as you navigate: the mapping
- * below is the only place these icons are defined.
- *
- * Labels are fixed product terminology and must not be renamed.
- *
- * Responsive: 240px with labels on desktop (>=1280px), a 72px icon-only rail
- * on tablet (768-1279px, via CSS on .pf-shell), hidden entirely on mobile
- * (<768px) in favor of <MobileBottomNav>.
+ * The PathFinder Sidebar (Expanded State).
+ * Features:
+ * - 72px Header: PathFinder Logo on the left, Sidebar Toggle Button right next to the name on the right.
+ * - Navigation links in vertical rhythm.
  */
 
-const V = '#5B36E9'
-const V_SOFT = '#F5F1FF'
+const V = '#0066cc'
+const V_SOFT = '#eaf2fc'
+
+export const SidebarIcon = ({ className = "w-4 h-4" }) => (
+  <svg
+    className={className}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <rect width="18" height="18" x="3" y="3" rx="4" />
+    <path d="M9 3v18" />
+  </svg>
+)
 
 // Fixed icon mapping. Do not redefine these per page.
 export const ICONS = {
@@ -53,7 +62,7 @@ export const NAV = [
   { key: 'progress',  label: 'Progress',       path: '/progress' },
   { key: 'skills',    label: 'Skill insights', path: '/skills' },
   { key: 'resources', label: 'Resources',      path: '/resources' },
-  { key: 'coach',     label: 'AI coach',       path: '/coach' }, // dedicated full page: chat + practice + project ideas
+  { key: 'coach',     label: 'AI coach',       path: '/coach' },
 ]
 
 export function activeKeyFor(pathname) {
@@ -69,56 +78,76 @@ export default function AppSidebar() {
   const navigate = useNavigate()
   const location = useLocation()
   const active = activeKeyFor(location.pathname)
+  const { setCollapsed } = useSidebar()
 
   return (
-    <aside className="pf-sidebar" style={{ padding: '20px 12px' }}>
-      <button
-        type="button"
-        onClick={() => navigate('/dashboard')}
-        className="flex items-center gap-2.5 mb-6 bg-transparent border-none cursor-pointer text-left xl:justify-start justify-center"
-        style={{ padding: '4px 4px', height: 32 }}
-        aria-label="PathFinder Home"
-      >
-        <span
-          className="grid place-items-center rounded-xl flex-none"
-          style={{ width: 34, height: 34, background: `linear-gradient(160deg,#6B47F0,${V})`, boxShadow: '0 4px 10px rgba(91,54,233,.30)' }}
+    <aside className="pf-sidebar relative z-30 flex flex-col h-full bg-white border-r border-[#f0f0f0]">
+      {/* 72px Top Header: Logo on the left, Toggle button directly next to the name */}
+      <div className="h-[72px] flex items-center justify-between px-3 border-b border-[#f0f0f0] flex-none">
+        <button
+          type="button"
+          onClick={() => navigate('/dashboard')}
+          className="flex items-center gap-2.5 bg-transparent border-none cursor-pointer text-left"
+          aria-label="PathFinder Home"
         >
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 12h4l3 8 4-16 3 8h4" />
-          </svg>
-        </span>
-        <span className="hidden xl:inline font-['Manrope'] font-extrabold text-[#0E1B38]" style={{ fontSize: 17, letterSpacing: '-.02em' }}>
-          PathFinder
-        </span>
-      </button>
+          <span
+            className="grid place-items-center rounded-xl flex-none"
+            style={{ width: 34, height: 34, background: `linear-gradient(160deg,#0071e3,${V})`, boxShadow: '0 4px 10px rgba(0,102,204,.30)' }}
+          >
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 12h4l3 8 4-16 3 8h4" />
+            </svg>
+          </span>
+          <span className="font-['Manrope'] font-extrabold text-[#1d1d1f]" style={{ fontSize: 17, letterSpacing: '-.02em' }}>
+            PathFinder
+          </span>
+        </button>
 
-      <nav className="flex flex-col gap-0.5 flex-1">
-        {NAV.map((item) => {
-          const on = active === item.key
-          return (
-            <button
-              key={item.key}
-              type="button"
-              aria-current={on ? 'page' : undefined}
-              title={item.label}
-              onClick={() => navigate(item.path)}
-              className="flex items-center gap-3 rounded-[10px] border-none cursor-pointer text-left transition-colors xl:justify-start justify-center"
-              style={{
-                padding: '9px 12px',
-                background: on ? V_SOFT : 'transparent',
-                color: on ? V : '#475569',
-                fontWeight: on ? 600 : 500,
-                fontSize: 14,
-              }}
-              onMouseEnter={(e) => { if (!on) e.currentTarget.style.background = '#FAF8FF' }}
-              onMouseLeave={(e) => { if (!on) e.currentTarget.style.background = 'transparent' }}
-            >
-              <span style={{ color: on ? V : '#64748B', display: 'flex' }}>{ICONS[item.key]}</span>
-              <span className="hidden xl:inline">{item.label}</span>
-            </button>
-          )
-        })}
-      </nav>
+        {/* Toggle button right next to name */}
+        <button
+          type="button"
+          onClick={() => setCollapsed(true)}
+          title="Hide sidebar"
+          aria-label="Hide sidebar"
+          className="relative group flex items-center justify-center w-8 h-8 rounded-lg text-[#7a7a7a] hover:text-[#0066cc] hover:bg-[#eaf2fc] border border-[#f0f0f0] hover:border-[#0066cc] transition-all cursor-pointer shadow-2xs"
+        >
+          <SidebarIcon className="w-4 h-4" />
+          <span className="pointer-events-none absolute left-full ml-2 px-2 py-1 bg-[#1d1d1f] text-white text-[11px] font-bold rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg z-50">
+            Hide sidebar
+          </span>
+        </button>
+      </div>
+
+      {/* Navigation list */}
+      <div className="p-3 flex-1 overflow-y-auto">
+        <nav className="flex flex-col gap-0.5">
+          {NAV.map((item) => {
+            const on = active === item.key
+            return (
+              <button
+                key={item.key}
+                type="button"
+                aria-current={on ? 'page' : undefined}
+                title={item.label}
+                onClick={() => navigate(item.path)}
+                className="flex items-center gap-3 rounded-[10px] border-none cursor-pointer text-left transition-colors w-full"
+                style={{
+                  padding: '9px 12px',
+                  background: on ? V_SOFT : 'transparent',
+                  color: on ? V : '#333333',
+                  fontWeight: on ? 600 : 500,
+                  fontSize: 14,
+                }}
+                onMouseEnter={(e) => { if (!on) e.currentTarget.style.background = '#fafbfc' }}
+                onMouseLeave={(e) => { if (!on) e.currentTarget.style.background = 'transparent' }}
+              >
+                <span style={{ color: on ? V : '#6e6e73', display: 'flex' }}>{ICONS[item.key]}</span>
+                <span>{item.label}</span>
+              </button>
+            )
+          })}
+        </nav>
+      </div>
     </aside>
   )
 }

@@ -2,25 +2,26 @@ import React from 'react'
 import AppSidebar from '../ui/AppSidebar'
 import TopBar from './TopBar'
 import MobileBottomNav from './MobileBottomNav'
+import { useSidebar } from '../../contexts/SidebarContext'
 
 /**
- * The single application shell shared by every authenticated PathFinder page
- * (Dashboard/Roadmap, Progress, Skill Insights, Resources, AI Coach).
- *
- * Fixed viewport layout: sidebar + top bar never scroll; only `.pf-content`
- * scrolls. The browser page itself never scrolls on desktop.
- *
- * `topBar` is page-specific content rendered on the left of the shared top
- * bar (goal selector, "View roadmap", search, ...) — the user menu on the
- * right is always the same component, added by <TopBar>.
+ * AppShell:
+ * - When expanded: 240px sidebar on left with aligned 72px header.
+ * - When collapsed: 1-column layout without empty left column; Logo + Toggle button in TopBar; centered workspace content.
  */
 export default function AppShell({ topBar = null, children, contentClassName = '' }) {
+  const { isCollapsed } = useSidebar()
+
   return (
-    <div className="pf-shell">
-      <AppSidebar />
+    <div className={`pf-shell ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
+      {!isCollapsed && <AppSidebar />}
       <div className="pf-main">
         <TopBar>{topBar}</TopBar>
-        <div className={`pf-content ${contentClassName}`}>{children}</div>
+        <div className={`pf-content ${contentClassName}`}>
+          <div className={`animate-fade-up ${isCollapsed ? 'max-w-7xl mx-auto w-full transition-all duration-300' : 'w-full'}`}>
+            {children}
+          </div>
+        </div>
       </div>
       <MobileBottomNav />
     </div>

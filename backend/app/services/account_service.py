@@ -64,9 +64,38 @@ def update_me(user_id: str, patch: dict) -> dict:
     else:
         supabase_client.table("profiles").insert({"id": user_id, **clean}).execute()
 
+    # Sync full_name to auth metadata if changed
+    if "full_name" in clean:
+        try:
+            supabase_client.auth.admin.update_user_by_id(
+                user_id, {"user_metadata": {"full_name": clean["full_name"], "name": clean["full_name"]}}
+            )
+        except Exception as e:
+            print(f"[account] auth metadata update failed: {type(e).__name__}: {e}", flush=True)
+
+    # Sync goal_text to active learning_paths row if changed
+    if "goal_text" in clean:
+        try:
+            supabase_client.table("learning_paths").update(
+                {"goal_text": clean["goal_text"]}
+            ).eq("user_id", user_id).eq("status", "active").execute()
+        except Exception as e:
+            print(f"[account] learning_paths goal_text update failed: {type(e).__name__}: {e}", flush=True)
+
     # weekly_hours lives on both profile and settings; keep them consistent.
     if "weekly_hours" in clean:
         _upsert_settings(user_id, {"weekly_hours": clean["weekly_hours"]})
+        try:
+            from app.services import roadmap_service
+            path = (
+                supabase_client.table("learning_paths").select("id")
+                .eq("user_id", user_id).eq("status", "active")
+                .order("generated_at", desc=True).limit(1).execute()
+            )
+            if path.data:
+                roadmap_service.assign_week_numbers(path.data[0]["id"], int(clean["weekly_hours"]))
+        except Exception as e:
+            print(f"[account] week re-pack failed: {type(e).__name__}: {e}", flush=True)
 
     return get_me(user_id)
 
