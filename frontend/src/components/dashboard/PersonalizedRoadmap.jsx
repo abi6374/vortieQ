@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react'
+import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import { useAIChat } from '../../contexts/AIChatContext'
 import { useRoadmap } from '../../hooks/useRoadmap'
@@ -1004,15 +1005,17 @@ export default function PersonalizedRoadmap({
               <p className="text-xs text-[#86868b]">No extra resources found for this week yet.</p>
             )}
           </div>
-
         </div>
       </div>
 
-      {/* Upgraded Task Completion Feedback Modal with 5-Star Rating */}
-      {pendingCompleteTask && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 dark:bg-black/80 backdrop-blur-xs p-4 animate-in fade-in duration-150" onClick={() => setPendingCompleteTask(null)}>
+      {/* Upgraded Task Completion Feedback Modal with 5-Star Rating (Teleported to document.body for full-screen backdrop blur) */}
+      {pendingCompleteTask && typeof document !== 'undefined' && createPortal(
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 dark:bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-200"
+          onClick={() => setPendingCompleteTask(null)}
+        >
           <div
-            className="bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl shadow-2xl w-full max-w-lg p-6 sm:p-7"
+            className="bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl shadow-2xl w-full max-w-lg p-6 sm:p-7 animate-in zoom-in-95 duration-150"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-2">
@@ -1126,14 +1129,18 @@ export default function PersonalizedRoadmap({
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
-      {/* Re-recommend / Swap Course Modal */}
-      {rerecommendTaskTarget && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 dark:bg-black/80 backdrop-blur-xs p-4 animate-in fade-in duration-150" onClick={() => !rerecommendLoading && setRerecommendTaskTarget(null)}>
+      {/* Re-recommend / Swap Course Modal (Teleported to document.body for full-screen backdrop blur) */}
+      {rerecommendTaskTarget && typeof document !== 'undefined' && createPortal(
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 dark:bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-200"
+          onClick={() => !rerecommendLoading && setRerecommendTaskTarget(null)}
+        >
           <div
-            className="bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl shadow-2xl w-full max-w-lg p-6 sm:p-7"
+            className="bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl shadow-2xl w-full max-w-lg p-6 sm:p-7 animate-in zoom-in-95 duration-150"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-2">
@@ -1240,14 +1247,16 @@ export default function PersonalizedRoadmap({
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
-      {/* Toast Notification */}
-      {toastMessage && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#1d1d1f] text-white px-5 py-2.5 rounded-xl shadow-xl text-xs sm:text-sm font-semibold animate-in fade-in slide-in-from-bottom duration-150 flex items-center gap-2">
+      {/* Toast Notification (Teleported to document.body) */}
+      {toastMessage && typeof document !== 'undefined' && createPortal(
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] bg-[#1d1d1f] text-white px-5 py-2.5 rounded-xl shadow-xl text-xs sm:text-sm font-semibold animate-in fade-in slide-in-from-bottom duration-150 flex items-center gap-2">
           <span>{toastMessage}</span>
-        </div>
+        </div>,
+        document.body
       )}
     </AppShell>
   )

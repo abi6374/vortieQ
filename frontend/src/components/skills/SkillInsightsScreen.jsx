@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react'
+import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import { useAIChat } from '../../contexts/AIChatContext'
 import AppShell from '../layout/AppShell'
@@ -1358,11 +1359,17 @@ export default function SkillInsightsScreen() {
       </div>
 
         {/* =========================================================================
-            SKILL DRILL-DOWN MODAL
+            SKILL DRILL-DOWN MODAL (Teleported to document.body)
            ========================================================================= */}
-        {selectedSkillModal && (
-          <div className="fixed inset-0 z-50 bg-[#1d1d1f]/40 dark:bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-white dark:bg-[#141A26] rounded-2xl border border-[#e0e0e0] dark:border-[#242E40] shadow-2xl max-w-md w-full p-6 relative animate-in fade-in zoom-in duration-150">
+        {selectedSkillModal && typeof document !== 'undefined' && createPortal(
+          <div
+            className="fixed inset-0 z-[9999] bg-black/60 dark:bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-150"
+            onClick={() => setSelectedSkillModal(null)}
+          >
+            <div
+              className="bg-white dark:bg-[#141A26] rounded-2xl border border-[#e0e0e0] dark:border-[#242E40] shadow-2xl max-w-md w-full p-6 relative animate-in zoom-in-95 duration-150"
+              onClick={(e) => e.stopPropagation()}
+            >
               <button
                 type="button"
                 onClick={() => setSelectedSkillModal(null)}
@@ -1422,7 +1429,8 @@ export default function SkillInsightsScreen() {
                 </button>
               </div>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
     </AppShell>
   )
