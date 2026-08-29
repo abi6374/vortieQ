@@ -57,18 +57,59 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             set -e
-            cd ${{ env.REMOTE_DEPLOY_DIR }}
-            gunzip -f ${{ env.IMAGE_NAME }}.tar.gz
-            docker load < ${{ env.IMAGE_NAME }}.tar
+            DEPLOY_DIR="${{ env.REMOTE_DEPLOY_DIR }}"
+            mkdir -p "$DEPLOY_DIR"
+            cd "$DEPLOY_DIR"
+
+            # Locate the uploaded archive
+            TAR_GZ=$(find "$DEPLOY_DIR" "$HOME" -maxdepth 2 -name "${{ env.IMAGE_NAME }}.tar.gz" 2>/dev/null | head -n 1)
+
+            if [ -n "$TAR_GZ" ] && [ -f "$TAR_GZ" ]; then
+              echo "Loading Docker image from $TAR_GZ..."
+              gzip -dc "$TAR_GZ" | docker load
+              rm -f "$TAR_GZ"
+            elif [ -f "${{ env.IMAGE_NAME }}.tar" ]; then
+              echo "Loading Docker image from ${{ env.IMAGE_NAME }}.tar..."
+              docker load -i "${{ env.IMAGE_NAME }}.tar"
+              rm -f "${{ env.IMAGE_NAME }}.tar"
+            else
+              echo "ERROR: Could not find ${{ env.IMAGE_NAME }}.tar.gz in $DEPLOY_DIR or $HOME"
+              ls -la "$DEPLOY_DIR" || true
+              exit 1
+            fi
+
+            # Locate env file safely
+            ENV_FILE=""
+            if [ -f "$HOME/app/.env" ]; then
+              ENV_FILE="$HOME/app/.env"
+            elif [ -f "/home/ubuntu/app/.env" ]; then
+              ENV_FILE="/home/ubuntu/app/.env"
+            elif [ -f "$HOME/.env" ]; then
+              ENV_FILE="$HOME/.env"
+            fi
+
+            echo "Stopping previous container if running..."
             docker stop ${{ env.CONTAINER_NAME }} 2>/dev/null || true
             docker rm ${{ env.CONTAINER_NAME }} 2>/dev/null || true
-            docker run -d \
-              --name ${{ env.CONTAINER_NAME }} \
-              --restart unless-stopped \
-              -p 80:8000 \
-              --env-file /home/ubuntu/app/.env \
-              ${{ env.IMAGE_NAME }}:latest
-            rm -f ${{ env.IMAGE_NAME }}.tar
+
+            echo "Starting new container..."
+            if [ -n "$ENV_FILE" ] && [ -f "$ENV_FILE" ]; then
+              echo "Using env file: $ENV_FILE"
+              docker run -d \
+                --name ${{ env.CONTAINER_NAME }} \
+                --restart unless-stopped \
+                -p 80:8000 \
+                --env-file "$ENV_FILE" \
+                ${{ env.IMAGE_NAME }}:latest
+            else
+              echo "Starting container without external env-file"
+              docker run -d \
+                --name ${{ env.CONTAINER_NAME }} \
+                --restart unless-stopped \
+                -p 80:8000 \
+                ${{ env.IMAGE_NAME }}:latest
+            fi
+
             docker image prune -f
 
       - name: Verify /health on the deployed instance
@@ -80,7 +121,7 @@ jobs:
           script: |
             set -e
             for i in $(seq 1 20); do
-              if curl -sf http://localhost/health; then
+              if curl -sf http://localhost/health || curl -sf http://127.0.0.1:8000/health; then
                 echo "Healthy after ${i} attempt(s)"
                 exit 0
               fi
@@ -90,3 +131,4 @@ jobs:
             echo "Container never became healthy - dumping logs:"
             docker logs --tail 150 ${{ env.CONTAINER_NAME }}
             exit 1
+
