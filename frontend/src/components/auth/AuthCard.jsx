@@ -91,7 +91,7 @@ export default function AuthCard() {
               value={fullName}
               onChange={handleChange(setFullName)}
               className={INPUT_CLASS}
-              placeholder="HackerEarth Team ? 👀"
+              placeholder="HackerEarth Team ?"
             />
           </div>
         )}
