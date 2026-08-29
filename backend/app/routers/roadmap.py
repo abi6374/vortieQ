@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException
 
 from app.middleware.auth import verify_jwt
 from app.middleware.rate_limit import rate_limit
 from app.schemas.roadmap import RerecommendSchema, TaskCompletionSchema
-from app.services import roadmap_service
+from app.services import idempotency_service, roadmap_service
 
 router = APIRouter()
 
@@ -54,17 +54,36 @@ def rerecommend_step(
     # searches PLUS an LLM call per request - an authenticated user could script
     # unbounded cost/load against it with no cap at all.
     user_id: str = Depends(rate_limit("roadmap.rerecommend", max_calls=10)),
+    idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
 ):
-    """Re-recommends a single week course based on learner preferences."""
+    """Re-recommends a single week course based on learner preferences.
+
+    Optional Idempotency-Key header: a duplicate click / retried request
+    with the SAME key replays the first real result instead of firing a
+    second live web-search+LLM call and potentially inserting a second,
+    different "new" course into the shared catalog for what the learner
+    experienced as one click ("duplicate course insertion has race/
+    duplicate risks" from the audit).
+    """
+    cached = idempotency_service.check_and_reserve(idempotency_key, user_id, "roadmap.rerecommend")
+    if cached is not None:
+        if cached["status"] >= 400:
+            raise HTTPException(cached["status"], cached["body"])
+        return cached["body"]
+
     try:
-        return roadmap_service.rerecommend_task(
+        result = roadmap_service.rerecommend_task(
             step_id=payload.step_id,
             user_id=user_id,
             preference=payload.preference,
             note=payload.note,
         )
+        idempotency_service.store_result(idempotency_key, 200, result)
+        return result
     except ValueError as e:
+        idempotency_service.store_result(idempotency_key, 400, {"detail": str(e)})
         raise HTTPException(400, str(e))
     except Exception as e:
+        idempotency_service.store_result(idempotency_key, 500, {"detail": "Re-recommendation failed"})
         raise HTTPException(500, f"Re-recommendation failed: {e}")
 

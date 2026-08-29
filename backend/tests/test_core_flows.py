@@ -249,5 +249,33 @@ def test_swap_step_with_preference_realtime_flow():
         assert res["replacement"]["id"] == "c-k8s-new"
 
 
+def test_bump_path_version_increments_and_stamps_freshness():
+    """Real-time-behavior fix: learning_paths.version/last_recomputed_at
+    (migration 008) let a client detect a stale roadmap without a blind
+    refresh timer. Called from every real path mutation."""
+    from app.services.roadmap_service import bump_path_version
+
+    mock_supabase = MagicMock()
+    mock_table = MagicMock()
+    mock_supabase.table.return_value = mock_table
+    mock_table.select.return_value.eq.return_value.execute.return_value = MagicMock(data=[{"version": 3}])
+
+    with patch("app.services.roadmap_service.supabase_client", mock_supabase):
+        bump_path_version("path-1")
+
+    update_payload = mock_table.update.call_args[0][0]
+    assert update_payload["version"] == 4
+    assert "last_recomputed_at" in update_payload
+
+
+def test_bump_path_version_never_raises_on_failure():
+    from app.services.roadmap_service import bump_path_version
+
+    mock_supabase = MagicMock()
+    mock_supabase.table.side_effect = RuntimeError("db down")
+    with patch("app.services.roadmap_service.supabase_client", mock_supabase):
+        bump_path_version("path-1")  # must not raise - this is a best-effort signal
+
+
 
 

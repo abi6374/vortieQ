@@ -12,10 +12,31 @@ Prerequisite locking is enforced HERE, server-side — the UI lock is only a
 mirror of this, so a crafted request can't complete week 5 first.
 """
 
+from datetime import datetime, timezone
+
 from app.config import supabase_client
 from app.services import web_search_service
 
 TERMINAL = ("completed", "skipped")
+
+
+def bump_path_version(path_id: str) -> None:
+    """Real-time-ish freshness signal (learning_paths.version/
+    last_recomputed_at, migration 008): a client can cheaply detect a stale
+    cached roadmap by comparing `version` instead of a blind refresh timer,
+    and every response carries a real timestamp of when the path was
+    actually last recomputed. Called from every real path mutation (task
+    completion, swap, rerecommend). Best-effort - never blocks the real
+    mutation that triggered it."""
+    try:
+        current = supabase_client.table("learning_paths").select("version").eq("id", path_id).execute()
+        next_version = (current.data[0].get("version") or 0) + 1 if current.data else 1
+        supabase_client.table("learning_paths").update({
+            "version": next_version,
+            "last_recomputed_at": datetime.now(timezone.utc).isoformat(),
+        }).eq("id", path_id).execute()
+    except Exception as e:
+        print(f"[roadmap] path version bump failed for {path_id}: {type(e).__name__}: {e}", flush=True)
 
 # ── part-splitting schema support ───────────────────────────────────────────
 # migration 002_course_parts.sql adds part_number/part_total/part_hours to
@@ -90,7 +111,7 @@ def plan_weeks_with_splits(course_specs: list[dict], weekly_hours: float = 10) -
 def _active_path(user_id: str) -> dict | None:
     r = (
         supabase_client.table("learning_paths")
-        .select("id, goal_text, status, generated_at")
+        .select("id, goal_text, status, generated_at, version, last_recomputed_at")
         .eq("user_id", user_id).eq("status", "active")
         .order("generated_at", desc=True).limit(1).execute()
     )
@@ -206,7 +227,15 @@ def get_roadmap(user_id: str) -> dict:
     target_role = (prof.data[0].get("target_role") if prof.data else "") or ""
 
     return {
-        "path": {"id": path["id"], "goal_text": path.get("goal_text"), "status": path.get("status"), "target_role": target_role},
+        "path": {
+            "id": path["id"], "goal_text": path.get("goal_text"), "status": path.get("status"),
+            "target_role": target_role,
+            # Real freshness signal (migration 008) - a client can compare
+            # `version` to detect a stale cached roadmap instead of a blind
+            # refresh timer, per the audit's real-time-behavior requirement.
+            "version": path.get("version") or 1,
+            "last_recomputed_at": path.get("last_recomputed_at"),
+        },
         "weeks": weeks,
         "current_week": current,
         "total_steps": len(steps),
@@ -358,6 +387,8 @@ def set_task_completion(
             )
         except Exception as e:
             print(f"[roadmap] study session log failed: {type(e).__name__}: {e}", flush=True)
+
+    bump_path_version(path_id)
 
     # Return the whole recomputed roadmap so every dependent view can refresh
     # from one response instead of firing extra requests.

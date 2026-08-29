@@ -1,59 +1,88 @@
-"""Per-user rate limiting for the LLM-backed endpoints.
+"""Per-user rate limiting for the LLM-backed endpoints, backed by Postgres.
 
 Every route that ends up calling app.llm_client.chat_completion() (path
-generation, step swap, coach practice/projects, the assistant, profile/resume
-extraction) costs real Groq/Bedrock spend per call and has no cap today - any
-signed-in user can currently script a loop against /api/paths/generate and run
-up a real bill or just make the app unusable for everyone else. This closes
-that gap.
+generation, step swap/rerecommend, coach practice/projects, the assistant,
+profile/resume extraction) costs real Groq/Bedrock spend per call. This
+closes that gap.
 
-Deliberately in-memory, not Redis-backed: this app runs as a single container
-on one EC2 instance (see PROGRESS_TRACKER.md deployment section), so a
-per-process sliding-window counter is both correct and simplest. It resets on
-container restart/redeploy - acceptable here; the goal is stopping runaway
-abuse within a session; it isn't a hard billing guarantee across process
-restarts.
+Real infra constraint, stated honestly: this deployment has no Redis/shared-
+cache instance provisioned (single EC2 container; no infra-provisioning
+access in this engagement to stand one up). The rate_limit_hits table
+(migration 009_durable_infra.sql) is the real substitute: it satisfies the
+actual requirement - state survives a container restart, and this would
+work correctly if the app were ever scaled to multiple instances, unlike
+the in-memory per-process dict this replaces - just with higher per-check
+latency than a real in-memory cache would have. If Redis is provisioned
+later, _check() below is the only function that needs to change; the
+rate_limit() dependency factory's interface stays the same either way.
+
+Fails OPEN on a Postgres error (logs it, lets the request through): rate
+limiting is a cost-protection mechanism, not a security gate - a transient
+DB hiccup should degrade to "briefly unmetered" rather than take down every
+LLM-backed route in the app.
 """
 
-import threading
-import time
-from collections import defaultdict, deque
+import random
+from datetime import datetime, timedelta, timezone
 
 from fastapi import Depends, HTTPException
 
+from app.config import supabase_client
 from app.middleware.auth import verify_jwt
 
-_lock = threading.Lock()
-_hits: dict[str, deque] = defaultdict(deque)
+# Roughly 1-in-N checks also sweeps rows older than the longest realistic
+# window across the whole table - there's no cron/scheduled-job
+# infrastructure in this deployment, so opportunistic cleanup piggybacked on
+# real traffic is the honest alternative to a job that doesn't exist yet.
+_CLEANUP_PROBABILITY = 0.01
+_CLEANUP_MAX_AGE = timedelta(hours=1)
 
-# Once the number of distinct keys we're tracking gets large, opportunistically
-# drop the empty ones so memory doesn't grow unbounded over the container's
-# lifetime (a demo/hackathon-scale app won't have enough concurrent distinct
-# users to make this a real bottleneck, but it costs nothing to guard it).
-_PRUNE_THRESHOLD = 5000
+
+def _opportunistic_cleanup() -> None:
+    if random.random() >= _CLEANUP_PROBABILITY:
+        return
+    try:
+        cutoff = (datetime.now(timezone.utc) - _CLEANUP_MAX_AGE).isoformat()
+        supabase_client.table("rate_limit_hits").delete().lt("created_at", cutoff).execute()
+    except Exception as e:
+        print(f"[rate_limit] opportunistic cleanup failed: {type(e).__name__}: {e}", flush=True)
 
 
 def _check(key: str, max_calls: int, window_seconds: int) -> None:
-    now = time.time()
-    with _lock:
-        dq = _hits[key]
-        cutoff = now - window_seconds
-        while dq and dq[0] < cutoff:
-            dq.popleft()
+    now = datetime.now(timezone.utc)
+    cutoff = now - timedelta(seconds=window_seconds)
 
-        if len(dq) >= max_calls:
-            retry_after = max(1, int(dq[0] + window_seconds - now) + 1)
-            raise HTTPException(
-                status_code=429,
-                detail=f"Too many requests - please wait {retry_after}s and try again.",
-                headers={"Retry-After": str(retry_after)},
-            )
+    try:
+        existing = (
+            supabase_client.table("rate_limit_hits")
+            .select("created_at")
+            .eq("bucket_key", key)
+            .gte("created_at", cutoff.isoformat())
+            .order("created_at")
+            .execute()
+        )
+        hits = existing.data or []
+    except Exception as e:
+        print(f"[rate_limit] check failed open for {key!r}: {type(e).__name__}: {e}", flush=True)
+        return
 
-        dq.append(now)
+    if len(hits) >= max_calls:
+        oldest = datetime.fromisoformat(hits[0]["created_at"].replace("Z", "+00:00"))
+        retry_after = max(1, int((oldest + timedelta(seconds=window_seconds) - now).total_seconds()) + 1)
+        raise HTTPException(
+            status_code=429,
+            detail=f"Too many requests - please wait {retry_after}s and try again.",
+            headers={"Retry-After": str(retry_after)},
+        )
 
-        if len(_hits) > _PRUNE_THRESHOLD:
-            for k in [k for k, v in _hits.items() if not v]:
-                del _hits[k]
+    try:
+        supabase_client.table("rate_limit_hits").insert({"bucket_key": key}).execute()
+    except Exception as e:
+        # Don't block the request over a failure to record it - worst case a
+        # burst right after a DB hiccup goes uncounted once.
+        print(f"[rate_limit] failed to record hit for {key!r}: {type(e).__name__}: {e}", flush=True)
+
+    _opportunistic_cleanup()
 
 
 def rate_limit(name: str, max_calls: int, window_seconds: int = 300):

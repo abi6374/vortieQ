@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Body, Depends, HTTPException
+from fastapi import APIRouter, Body, Depends, Header, HTTPException
 
 from app.middleware.rate_limit import rate_limit
 from app.schemas.feedback import FeedbackCreateSchema
-from app.services import feedback_service, path_service
+from app.services import feedback_service, idempotency_service, path_service
 
 router = APIRouter()
 
@@ -31,13 +31,29 @@ def swap_step(
     step_id: str,
     payload: dict = Body(default={}),
     user_id: str = Depends(rate_limit("steps.swap", max_calls=20)),
+    idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
 ):
     """Replace one step with an alternative. `level_hint`: 0 = same level,
-    1 = harder (the "too easy" signal). No global profile mutation happens."""
+    1 = harder (the "too easy" signal). No global profile mutation happens.
+
+    Optional Idempotency-Key header: see /rerecommend's docstring - a
+    duplicate click with the same key replays the first real swap result
+    instead of risking a second distinct replacement course for one click.
+    """
     level_hint = int(payload.get("level_hint") or 0)
+
+    cached = idempotency_service.check_and_reserve(idempotency_key, user_id, "steps.swap")
+    if cached is not None:
+        if cached["status"] >= 400:
+            raise HTTPException(cached["status"], cached["body"])
+        return cached["body"]
+
     try:
-        return path_service.swap_step(step_id, user_id, level_hint=level_hint)
+        result = path_service.swap_step(step_id, user_id, level_hint=level_hint)
+        idempotency_service.store_result(idempotency_key, 200, result)
+        return result
     except ValueError as e:
         msg = str(e)
         status = 404 if "not found" in msg.lower() else 400
+        idempotency_service.store_result(idempotency_key, status, {"detail": msg})
         raise HTTPException(status, msg)

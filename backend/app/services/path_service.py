@@ -172,6 +172,19 @@ Generate the learning path JSON now."""
 
     course_lookup = {c["id"]: c for c in courses}
 
+    # Deterministic prerequisite repair pass - "course sequencing is mostly
+    # delegated to an LLM after retrieval, without deterministic
+    # prerequisite graph validation" from the audit. Reorders (never drops
+    # or invents) courses so a real skill_prerequisites edge is never
+    # violated by two courses the LLM itself already chose for this path.
+    try:
+        from app.services import path_planner
+        milestones, _prereq_violations = path_planner.validate_and_reorder(milestones, course_lookup)
+        for note in _prereq_violations:
+            print(f"[generate_path] prerequisite reorder: {note}", flush=True)
+    except Exception as e:
+        print(f"[generate_path] prerequisite validation skipped: {type(e).__name__}: {e}", flush=True)
+
     # First pass: resolve every real (non-hallucinated) course id across all
     # milestones, in order, WITHOUT calling the LLM yet - collecting them all
     # first is what lets the next step batch every explanation into one call.
@@ -421,6 +434,8 @@ def swap_step(step_id: str, user_id: str, level_hint: int = 0) -> dict:
         user_id, path["id"], step_id,
         note=f"swapped for {replacement.get('title')} (level_hint={level_hint})",
     )
+    from app.services.roadmap_service import bump_path_version
+    bump_path_version(path["id"])
 
     return {
         "swapped": True,
@@ -712,6 +727,8 @@ Return ONLY a JSON object with this exact schema (no markdown fences, no extra k
         user_id, path["id"], step_id,
         note=f"rerecommended for {replacement.get('title')} (preference={preference}, note={note[:200]})"
     )
+    from app.services.roadmap_service import bump_path_version
+    bump_path_version(path["id"])
 
     return {
         "swapped": True,
