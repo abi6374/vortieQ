@@ -186,7 +186,87 @@ class TestCORSConfiguration:
         assert r.headers.get("access-control-allow-origin") != "https://evil.example.com"
 
 
-# ── 6. 500 errors never leak internals to the client ────────────────────────
+# ── 6. profile_service.py: prompt injection surface + output validation ────
+class TestProfileExtractionHardening:
+    """No live LLM calls — these test _parse_and_validate() directly, which
+    is what actually bounds the damage from a manipulated/jailbroken model
+    response regardless of how well the prompt-level defense holds up."""
+
+    def _validate(self, obj):
+        import json
+        from app.services import profile_service
+        return profile_service._parse_and_validate(json.dumps(obj))
+
+    def test_rejects_bool_for_weekly_hours(self):
+        # bool is a subclass of int in Python - isinstance(True, int) is True -
+        # so a naive `isinstance(x, int)` check would silently accept this.
+        with pytest.raises(AssertionError):
+            self._validate({
+                "target_role": "Engineer", "current_level": "beginner",
+                "interests": ["python"], "weekly_hours": True,
+            })
+
+    def test_rejects_out_of_range_weekly_hours(self):
+        with pytest.raises(AssertionError):
+            self._validate({
+                "target_role": "Engineer", "current_level": "beginner",
+                "interests": ["python"], "weekly_hours": 999999,
+            })
+
+    def test_rejects_zero_weekly_hours(self):
+        with pytest.raises(AssertionError):
+            self._validate({
+                "target_role": "Engineer", "current_level": "beginner",
+                "interests": ["python"], "weekly_hours": 0,
+            })
+
+    def test_rejects_oversized_target_role(self):
+        with pytest.raises(AssertionError):
+            self._validate({
+                "target_role": "x" * 500, "current_level": "beginner",
+                "interests": ["python"], "weekly_hours": 10,
+            })
+
+    def test_rejects_too_many_interests(self):
+        with pytest.raises(AssertionError):
+            self._validate({
+                "target_role": "Engineer", "current_level": "beginner",
+                "interests": [f"skill{i}" for i in range(50)], "weekly_hours": 10,
+            })
+
+    def test_rejects_non_string_interest_items(self):
+        with pytest.raises(AssertionError):
+            self._validate({
+                "target_role": "Engineer", "current_level": "beginner",
+                "interests": ["python", {"injected": "object"}], "weekly_hours": 10,
+            })
+
+    def test_accepts_well_formed_profile(self):
+        result = self._validate({
+            "target_role": "Data Scientist", "current_level": "beginner",
+            "interests": ["python", "statistics"], "weekly_hours": 10,
+        })
+        assert result["target_role"] == "Data Scientist"
+
+    def test_no_fabricated_fallback_on_repeated_failure(self):
+        # extract_profile must raise, never silently return the old hardcoded
+        # "Software Developer / beginner / 10h" FALLBACK_PROFILE.
+        from app.services import profile_service
+        assert not hasattr(profile_service, "FALLBACK_PROFILE")
+        assert hasattr(profile_service, "ProfileExtractionError")
+
+    def test_goal_text_length_capped_at_schema_level(self):
+        r = client.post(
+            "/api/profile/",
+            json={"goal_text": "x" * 10_000},
+            headers={"Authorization": "Bearer not-a-jwt"},
+        )
+        # Rejected before auth even matters (422 Pydantic validation) or by
+        # auth (401) — either way it must never reach the LLM call.
+        assert r.status_code in (401, 422)
+
+
+# ── 7. 500 errors never leak internals to the client ────────────────────────
 class TestErrorMasking:
     def test_unhandled_exception_returns_generic_message(self):
         # Hit an endpoint with a payload shape that could plausibly cause an

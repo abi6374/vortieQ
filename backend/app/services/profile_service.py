@@ -4,12 +4,26 @@ from pathlib import Path
 from app.config import supabase_client
 from app.llm_client import chat_completion
 
-FALLBACK_PROFILE = {
-    "target_role": "Software Developer",
-    "current_level": "beginner",
-    "interests": ["programming", "software development"],
-    "weekly_hours": 10,
-}
+# Hard bounds matching what profile_extract.txt itself asks the model for.
+# Enforced here too (not just trusted from the prompt) because a jailbroken
+# or simply confused model response should never be able to push an
+# out-of-range value downstream — path_service/roadmap_service both do
+# arithmetic on weekly_hours.
+_MIN_WEEKLY_HOURS = 1
+_MAX_WEEKLY_HOURS = 168  # a week has 168 hours; anything above is nonsensical
+_MAX_INTERESTS = 12
+_MAX_FIELD_LEN = 200  # target_role / each interest — reject absurd blobs
+
+
+class ProfileExtractionError(Exception):
+    """Raised when the LLM could not produce a usable profile after retrying.
+
+    Callers MUST surface this as an honest "couldn't understand your goal,
+    please rephrase" error — never substitute fabricated data. A previous
+    version of this function returned a hardcoded FALLBACK_PROFILE
+    ("Software Developer" / beginner / 10h) on total failure, which silently
+    presented invented data as if it were a real extraction.
+    """
 
 
 def _load_prompt(name: str) -> str:
@@ -34,17 +48,44 @@ def _strip_fences(raw: str) -> str:
 def _parse_and_validate(raw: str) -> dict:
     result = json.loads(_strip_fences(raw))
     assert "target_role" in result
+
+    target_role = result.get("target_role")
+    assert isinstance(target_role, str) and 0 < len(target_role) <= _MAX_FIELD_LEN
+
     assert result.get("current_level") in ["beginner", "intermediate", "advanced"]
-    assert isinstance(result.get("interests"), list)
-    assert isinstance(result.get("weekly_hours"), int)
+
+    interests = result.get("interests")
+    assert isinstance(interests, list) and 0 < len(interests) <= _MAX_INTERESTS
+    assert all(isinstance(i, str) and 0 < len(i) <= _MAX_FIELD_LEN for i in interests)
+
+    weekly_hours = result.get("weekly_hours")
+    # bool is a subclass of int in Python — isinstance(True, int) is True —
+    # so a bare `isinstance(x, int)` check would silently accept JSON
+    # true/false as a valid hour count. Excluded explicitly.
+    assert isinstance(weekly_hours, int) and not isinstance(weekly_hours, bool)
+    assert _MIN_WEEKLY_HOURS <= weekly_hours <= _MAX_WEEKLY_HOURS
+
     return result
 
 
 def extract_profile(goal_text: str) -> dict:
-    """Extract a structured profile from free-text goal via Groq LLM."""
+    """Extract a structured profile from free-text goal via Groq LLM.
+
+    Raises ProfileExtractionError if the model cannot produce a valid,
+    in-bounds profile after one retry — callers must show the user an honest
+    error, never fall back to invented data (see ProfileExtractionError).
+    """
+    # Learner text is wrapped in the same delimiter the system prompt
+    # references and told to treat it as data, not instructions — a defense
+    # against the learner's own free-text goal (or resume context folded in
+    # by the caller) trying to override the extraction instructions. Not a
+    # bulletproof guarantee against a determined jailbreak, but a real,
+    # standard mitigation layered on top of the schema/range validation
+    # above, which is what actually bounds the damage regardless.
+    wrapped = f"<<<LEARNER_TEXT>>>\n{goal_text}\n<<<END_LEARNER_TEXT>>>"
     messages = [
         {"role": "system", "content": _load_prompt("profile_extract.txt")},
-        {"role": "user", "content": goal_text},
+        {"role": "user", "content": wrapped},
     ]
 
     raw = _call_groq(messages)
@@ -59,8 +100,10 @@ def extract_profile(goal_text: str) -> dict:
         })
         try:
             return _parse_and_validate(_call_groq(messages))
-        except Exception:
-            return dict(FALLBACK_PROFILE)
+        except Exception as e:
+            raise ProfileExtractionError(
+                "Could not extract a valid profile from that text after two attempts."
+            ) from e
 
 
 def upsert_profile(user_id: str, data: dict) -> dict:
