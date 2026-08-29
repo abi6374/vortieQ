@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useAIChat } from '../../contexts/AIChatContext'
 import api from '../../lib/apiClient'
 import AppShell from '../layout/AppShell'
+import CustomSelect from '../ui/CustomSelect'
 
 /**
  * CoachScreen — the real, dedicated "AI Coach" full page.
@@ -169,15 +170,19 @@ function PracticeTab() {
             className="w-full border border-[#e0e0e0] rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-[#0066cc] focus:ring-2 focus:ring-[#0066cc]/15"
           />
         </div>
-        <div>
+        <div className="flex-none">
           <label className="block text-xs font-bold text-[#333333] mb-1.5">Questions</label>
-          <select
+          <CustomSelect
             value={count}
-            onChange={(e) => setCount(Number(e.target.value))}
-            className="border border-[#e0e0e0] rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#0066cc]"
-          >
-            {[3, 5, 10].map((n) => <option key={n} value={n}>{n}</option>)}
-          </select>
+            onChange={(val) => setCount(Number(val))}
+            options={[
+              { value: 3, label: '3 Questions', subtitle: 'Quick drill' },
+              { value: 5, label: '5 Questions', subtitle: 'Standard (Recommended)' },
+              { value: 10, label: '10 Questions', subtitle: 'Deep challenge' },
+            ]}
+            buttonClassName="w-[140px]"
+            ariaLabel="Question count"
+          />
         </div>
         <button
           type="submit"

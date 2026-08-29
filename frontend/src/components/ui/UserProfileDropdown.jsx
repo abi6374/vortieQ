@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { useAuth } from '../../hooks/useAuth'
 
 /**
@@ -10,6 +11,7 @@ import { useAuth } from '../../hooks/useAuth'
 export default function UserProfileDropdown({ light = false }) {
   const { user, profile, signOut } = useAuth()
   const navigate = useNavigate()
+  const reduce = useReducedMotion()
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef(null)
 
@@ -91,9 +93,17 @@ export default function UserProfileDropdown({ light = false }) {
         </svg>
       </button>
 
-      {/* Dropdown Menu Modal */}
-      {isOpen && (
-        <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl border border-[#f0f0f0] shadow-[0_12px_32px_rgba(25,49,75,0.14)] py-2 z-50 animate-in fade-in zoom-in-95 duration-100">
+      {/* Dropdown Menu Modal — framer-motion smooth open + close, frosted glass */}
+      <AnimatePresence>
+        {isOpen && (
+        <motion.div
+          initial={reduce ? false : { opacity: 0, y: -8, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={reduce ? { opacity: 0 } : { opacity: 0, y: -6, scale: 0.96 }}
+          transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          style={{ transformOrigin: 'top right' }}
+          className="absolute right-0 mt-2.5 w-72 bg-white border border-[#E6EAF2] shadow-[0_24px_60px_rgba(14,27,56,0.22),0_4px_16px_rgba(14,27,56,0.06)] rounded-2xl py-2 z-[100]"
+        >
           {/* User Header Details */}
           <div className="px-4 py-3 border-b border-[#f0f0f0]">
             <div className="flex items-center gap-3">
@@ -179,8 +189,9 @@ export default function UserProfileDropdown({ light = false }) {
               <span>Sign Out</span>
             </button>
           </div>
-        </div>
-      )}
+        </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

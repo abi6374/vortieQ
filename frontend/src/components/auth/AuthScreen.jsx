@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { motion, useReducedMotion } from 'framer-motion'
 import { useAuth } from '../../hooks/useAuth'
 import { supabase } from '../../lib/supabaseClient'
 
@@ -12,16 +13,31 @@ const STYLES = `
 .pfa { --violet:#0066cc; --violet-2:#0071e3; --violet-dark:#004fa3; --navy:#1d1d1f;
   --slate:#333333; --muted:#7a7a7a; --input-bd:#d3d4d5; --divider:#f0f0f0;
   --app-bd:#f0f0f0; --lav-circle:#dbeafc;
-  min-height:100vh; background:#f5f5f7; display:flex; align-items:center;
+  min-height:100vh; position:relative; overflow:hidden; display:flex; align-items:center;
   justify-content:center; padding:clamp(16px,3vw,48px);
+  background:
+    radial-gradient(1100px 680px at 8% -8%, #e1edff 0%, rgba(225,237,255,0) 55%),
+    radial-gradient(900px 560px at 112% 112%, #e8f1ff 0%, rgba(232,241,255,0) 52%),
+    #f4f6fb;
   font-family:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif; color:var(--navy); }
 .pfa *{ box-sizing:border-box; }
-.pfa .app{ width:100%; max-width:1400px; background:#fff; border:1px solid var(--app-bd);
-  border-radius:20px; box-shadow:0 14px 38px rgba(25,49,75,.12);
+/* Ambient drifting orbs for depth (disabled under reduced motion). */
+.pfa::before, .pfa::after{ content:""; position:absolute; border-radius:50%; z-index:0;
+  pointer-events:none; filter:blur(64px); opacity:.5; }
+.pfa::before{ width:520px; height:520px; left:-130px; top:-170px;
+  background:radial-gradient(circle,#b9d6ff 0%,rgba(185,214,255,0) 70%); animation:pfa-drift 22s ease-in-out infinite; }
+.pfa::after{ width:460px; height:460px; right:-130px; bottom:-160px;
+  background:radial-gradient(circle,#cbe1ff 0%,rgba(203,225,255,0) 70%); animation:pfa-drift 27s ease-in-out infinite reverse; }
+@keyframes pfa-drift{ 0%,100%{ transform:translate(0,0); } 50%{ transform:translate(30px,-24px); } }
+.pfa .app{ position:relative; z-index:1; width:100%; max-width:1400px;
+  background:rgba(255,255,255,0.86); border:1px solid rgba(255,255,255,0.7);
+  border-radius:24px;
+  box-shadow:0 30px 80px -28px rgba(20,40,80,.36), 0 2px 6px rgba(20,40,80,.06), inset 0 1px 0 rgba(255,255,255,.7);
+  -webkit-backdrop-filter:blur(30px) saturate(1.5); backdrop-filter:blur(30px) saturate(1.5);
   display:grid; grid-template-columns:43% 57%; overflow:hidden; min-height:760px; }
 .pfa .brand-panel{ position:relative; overflow:hidden; padding:clamp(36px,4vw,60px);
-  background:linear-gradient(160deg,#fff 0%,#fafcff 55%,#f5faff 100%);
-  border-right:1px solid var(--divider); display:flex; flex-direction:column; }
+  background:linear-gradient(160deg,rgba(255,255,255,0.6) 0%,rgba(234,242,252,0.5) 100%);
+  border-right:1px solid rgba(255,255,255,0.55); display:flex; flex-direction:column; }
 .pfa .path-deco{ position:absolute; inset:0; z-index:0; pointer-events:none; }
 .pfa .brand-inner{ position:relative; z-index:1; display:flex; flex-direction:column; height:100%; }
 .pfa .logo-row{ display:flex; align-items:center; gap:16px; margin-bottom:clamp(28px,5vh,56px); }
@@ -40,7 +56,8 @@ const STYLES = `
 .pfa .j-text{ font-size:clamp(16px,1.5vw,20px); font-weight:600; line-height:1.3; }
 .pfa .privacy{ display:flex; align-items:center; gap:11px; margin-top:clamp(28px,4vh,44px); color:var(--slate); font-size:17px; }
 .pfa .privacy svg{ color:var(--violet); flex:none; }
-.pfa .form-panel{ background:#fff; padding:clamp(40px,5vw,72px) clamp(28px,5vw,80px);
+.pfa .form-panel{ background:rgba(255,255,255,0.55); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+  padding:clamp(40px,5vw,72px) clamp(28px,5vw,80px);
   display:flex; flex-direction:column; align-items:center; }
 .pfa .form{ width:100%; max-width:500px; }
 .pfa .tabs{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:6px; }
@@ -123,6 +140,7 @@ export default function AuthScreen({ initialMode = 'signin' }) {
 
   const { signIn, signUp, signInWithGoogle, signInWithGithub } = useAuth()
   const navigate = useNavigate()
+  const reduce = useReducedMotion()
 
   const isCreate = mode === 'create'
   const switchMode = (m) => { setMode(m); setError(null) }
@@ -194,7 +212,12 @@ export default function AuthScreen({ initialMode = 'signin' }) {
   return (
     <div className="pfa">
       <style>{STYLES}</style>
-      <div className="app">
+      <motion.div
+        className="app"
+        initial={reduce ? false : { opacity: 0, y: 18, scale: 0.985 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+      >
         {/* LEFT */}
         <section className="brand-panel">
           <svg className="path-deco" viewBox="0 0 600 850" fill="none" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
@@ -330,7 +353,7 @@ export default function AuthScreen({ initialMode = 'signin' }) {
             </form>
           </div>
         </section>
-      </div>
+      </motion.div>
     </div>
   )
 }

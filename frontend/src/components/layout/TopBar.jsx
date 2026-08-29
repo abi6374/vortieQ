@@ -1,15 +1,16 @@
 import React, { useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import UserProfileDropdown from '../ui/UserProfileDropdown'
 import { useSidebar } from '../../contexts/SidebarContext'
 import { SidebarIcon, NAV, ICONS, activeKeyFor } from '../ui/AppSidebar'
 
 /**
  * TopBar: Fixed 72px shared top application bar.
- * When sidebar is collapsed:
- * - Shows PathFinder logo & toggle button in the 72px bar.
- * - Robust vertical hover area across the entire navbar height with debounce,
- *   making it effortless to move the cursor down and select navigation sections.
+ * Features:
+ * - Permanent z-50 stacking context so all topbar menus always float above content.
+ * - Framer-motion smooth animated navigation dropdown when collapsed.
+ * - Generous vertical hover area with 300ms debounce buffer.
  */
 export default function TopBar({ children }) {
   const navigate = useNavigate()
@@ -30,14 +31,14 @@ export default function TopBar({ children }) {
     if (hoverTimeoutRef.current) {
       clearTimeout(hoverTimeoutRef.current)
     }
-    // 300ms buffer so moving cursor down to select sections is 100% smooth and never collapses prematurely
+    // 300ms buffer so moving cursor down to select sections is 100% smooth
     hoverTimeoutRef.current = setTimeout(() => {
       setIsHoverOpen(false)
     }, 300)
   }
 
   return (
-    <header className="pf-topbar relative">
+    <header className="pf-topbar relative z-50">
       <div className="flex items-center gap-3 min-w-0 flex-1 h-full overflow-visible">
         {isCollapsed && (
           <div
@@ -87,46 +88,52 @@ export default function TopBar({ children }) {
 
             <span className="h-6 w-px bg-[#f0f0f0] mx-1 flex-none" />
 
-            {/* Hover Floating Navigation Dropdown with generous vertical hit area */}
-            {isHoverOpen && (
-              <div
-                className="absolute top-[64px] left-0 z-50 w-[230px] pt-2 animate-in fade-in slide-in-from-top-2 duration-150"
-                onMouseEnter={handleMouseEnter}
-                onMouseLeave={handleMouseLeave}
-              >
-                {/* Visual Card Container */}
-                <div className="bg-white/98 backdrop-blur-md rounded-2xl border border-[#f0f0f0] shadow-[0_18px_42px_rgba(29,29,31,0.18)] p-2">
-                  <nav className="flex flex-col gap-0.5">
-                    {NAV.map((item) => {
-                      const on = active === item.key
-                      return (
-                        <button
-                          key={item.key}
-                          type="button"
-                          onClick={() => {
-                            navigate(item.path)
-                            setIsHoverOpen(false)
-                          }}
-                          className="flex items-center gap-3 rounded-[10px] border-none cursor-pointer text-left transition-colors w-full"
-                          style={{
-                            padding: '10px 12px',
-                            background: on ? '#eaf2fc' : 'transparent',
-                            color: on ? '#0066cc' : '#333333',
-                            fontWeight: on ? 600 : 500,
-                            fontSize: 14,
-                          }}
-                          onMouseEnter={(e) => { if (!on) e.currentTarget.style.background = '#fafbfc' }}
-                          onMouseLeave={(e) => { if (!on) e.currentTarget.style.background = 'transparent' }}
-                        >
-                          <span style={{ color: on ? '#0066cc' : '#6e6e73', display: 'flex' }}>{ICONS[item.key]}</span>
-                          <span>{item.label}</span>
-                        </button>
-                      )
-                    })}
-                  </nav>
-                </div>
-              </div>
-            )}
+            {/* Hover Floating Navigation Dropdown with Framer Motion */}
+            <AnimatePresence>
+              {isHoverOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -6, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -4, scale: 0.96 }}
+                  transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                  style={{ transformOrigin: 'top left' }}
+                  className="absolute top-[64px] left-0 z-50 w-[230px] pt-2"
+                  onMouseEnter={handleMouseEnter}
+                  onMouseLeave={handleMouseLeave}
+                >
+                  <div className="bg-white rounded-2xl border border-[#E6EAF2] shadow-[0_20px_50px_rgba(14,27,56,0.18),0_4px_12px_rgba(14,27,56,0.06)] p-2">
+                    <nav className="flex flex-col gap-0.5">
+                      {NAV.map((item) => {
+                        const on = active === item.key
+                        return (
+                          <button
+                            key={item.key}
+                            type="button"
+                            onClick={() => {
+                              navigate(item.path)
+                              setIsHoverOpen(false)
+                            }}
+                            className="flex items-center gap-3 rounded-[10px] border-none cursor-pointer text-left transition-colors w-full"
+                            style={{
+                              padding: '10px 12px',
+                              background: on ? '#eaf2fc' : 'transparent',
+                              color: on ? '#0066cc' : '#333333',
+                              fontWeight: on ? 600 : 500,
+                              fontSize: 14,
+                            }}
+                            onMouseEnter={(e) => { if (!on) e.currentTarget.style.background = '#fafbfc' }}
+                            onMouseLeave={(e) => { if (!on) e.currentTarget.style.background = 'transparent' }}
+                          >
+                            <span style={{ color: on ? '#0066cc' : '#6e6e73', display: 'flex' }}>{ICONS[item.key]}</span>
+                            <span>{item.label}</span>
+                          </button>
+                        )
+                      })}
+                    </nav>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         )}
 
