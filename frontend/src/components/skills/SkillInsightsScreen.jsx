@@ -197,14 +197,17 @@ export default function SkillInsightsScreen() {
   }, [matchingSkills, topSkills])
 
   // 1. Skill Proficiency Comparison Data (Grouped Bar Chart)
-  const proficiencyData = displayedSkills.map((s) => ({
-    skill: cap(s.tag).replace(' ', '\n'),
-    name: cap(s.tag),
-    current: s.progress,
-    target: 100,
-    gap: 100 - s.progress,
-    status: statusFor(s.progress),
-  }))
+  const proficiencyData = displayedSkills.map((s) => {
+    const rawName = cap(s.tag)
+    return {
+      skill: rawName,
+      name: rawName,
+      current: s.progress,
+      target: 100,
+      gap: 100 - s.progress,
+      status: statusFor(s.progress),
+    }
+  })
 
   // 2. Radar Chart Data — same real skills, reshaped.
   const radarData = displayedSkills.slice(0, 7).map((s) => ({
@@ -321,12 +324,44 @@ export default function SkillInsightsScreen() {
     return 'bg-[#FFF0F0] dark:bg-rose-950/70 text-[#E5484D] dark:text-rose-300 border-[#FECDCA] dark:border-rose-800' // Gap red
   }
 
+  // Custom Tick for Bar Chart X-Axis with clean rotation and spacing
+  const CustomBarXAxisTick = ({ x, y, payload }) => {
+    const val = payload?.value || ''
+    const labelMap = {
+      'Machine Learning': 'Machine Learning',
+      'Business Intelligence': 'Business Intel',
+      'Visualization': 'Visualization',
+      'Deep Learning': 'Deep Learning',
+      'Scikit Learn': 'Scikit-Learn',
+      'Scikit-learn': 'Scikit-Learn',
+      'Pandas & EDA': 'Pandas & EDA',
+      'Portfolio Project': 'Portfolio',
+      'Interview Prep': 'Interview Prep',
+    }
+    const formatted = labelMap[val] || (val.length > 14 ? val.slice(0, 13) + '…' : val)
+
+    return (
+      <g transform={`translate(${x},${y})`}>
+        <text
+          x={0}
+          y={0}
+          dy={14}
+          dx={-2}
+          textAnchor="end"
+          transform="rotate(-24)"
+          className="fill-[#6e6e73] dark:fill-[#94A3B8] font-semibold text-[11px]"
+        >
+          {formatted}
+        </text>
+      </g>
+    )
+  }
+
   // Custom Bar with Target Outline
   const CustomBarWithTarget = (props) => {
-    const { x, y, width, height, value, index } = props
-    const targetVal = proficiencyData[index]?.target || 100
-    const targetHeight = 160 // Reference height inside chart
-    const targetY = 30
+    const { x, y, width, height, value } = props
+    const targetHeight = 165 // Reference height inside chart
+    const targetY = 20
     const isZero = !value || value === 0
 
     return (
@@ -359,7 +394,7 @@ export default function SkillInsightsScreen() {
         {/* Percentage Label */}
         <text
           x={x + width / 2}
-          y={isZero ? targetY + targetHeight - 8 : y - 8}
+          y={isZero ? targetY + targetHeight - 16 : y > targetY + 18 ? y - 6 : y + 14}
           fill="currentColor"
           className="fill-[#1d1d1f] dark:fill-white font-extrabold text-[11px]"
           textAnchor="middle"
@@ -673,27 +708,21 @@ export default function SkillInsightsScreen() {
                   </div>
 
                   {/* Grouped Bar Chart with Target Outline */}
-                  <div className="h-64 w-full pt-4">
+                  <div className="h-72 w-full pt-2">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart
                         data={proficiencyData}
-                        margin={{ top: 20, right: 10, left: -20, bottom: 24 }}
+                        margin={{ top: 25, right: 15, left: 5, bottom: 45 }}
                         barSize={24}
                       >
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f5f5f7" className="stroke-[#f0f0f0] dark:stroke-[#242E40]" />
                         <XAxis
                           dataKey="skill"
-                          tick={{ fill: '#94A3B8', fontSize: 11, fontWeight: 600 }}
                           axisLine={{ stroke: '#242E40' }}
                           tickLine={false}
                           interval={0}
-                          height={54}
-                          angle={-22}
-                          textAnchor="end"
-                          tickFormatter={(v) => {
-                            const map = { 'Machine Learning': 'ML', 'Deep Learning': 'DL', 'Pandas & EDA': 'Pandas', 'Portfolio Project': 'Portfolio', 'Interview Prep': 'Interview' }
-                            return map[v] || (v && v.length > 12 ? v.slice(0, 11) + '…' : v)
-                          }}
+                          height={55}
+                          tick={<CustomBarXAxisTick />}
                         />
                         <YAxis
                           domain={[0, 100]}
@@ -754,13 +783,26 @@ export default function SkillInsightsScreen() {
                     </div>
                   </div>
 
-                  <div className="h-60 w-full flex items-center justify-center pt-2">
+                  <div className="h-64 w-full flex items-center justify-center pt-2">
                     <ResponsiveContainer width="100%" height="100%">
-                      <RadarChart data={radarData} outerRadius="75%">
+                      <RadarChart data={radarData} outerRadius="56%">
                         <PolarGrid stroke="#334155" className="stroke-[#e0e0e0] dark:stroke-[#242E40]" />
                         <PolarAngleAxis
                           dataKey="skill"
-                          tick={{ fill: '#CBD5E1', fontSize: 10.5, fontWeight: 600 }}
+                          tick={{ fill: '#CBD5E1', fontSize: 10, fontWeight: 600 }}
+                          tickFormatter={(val) => {
+                            const map = {
+                              'Machine Learning': 'ML',
+                              'Business Intelligence': 'BI',
+                              'Deep Learning': 'DL',
+                              'Scikit Learn': 'Scikit',
+                              'Scikit-learn': 'Scikit',
+                              'Visualization': 'Visuals',
+                              'Pandas': 'Pandas',
+                              'Analytics': 'Analytics',
+                            }
+                            return map[val] || (val.length > 10 ? val.slice(0, 9) + '…' : val)
+                          }}
                         />
                         <PolarRadiusAxis domain={[0, 100]} tick={false} axisLine={false} />
                         <Radar
