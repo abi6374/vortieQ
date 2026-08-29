@@ -115,14 +115,22 @@ async function testAllPages() {
       }
     }
 
-    // Test Unauthenticated Auth Screen (Light & Dark)
-    console.log('Testing Unauthenticated Auth Screen (Light & Dark)...');
+    // Test Unauthenticated Auth Screen (Light & Dark, Sign In & Sign Up)
+    console.log('Testing Unauthenticated Auth Screen (Sign In & Sign Up)...');
     const authContextLight = await browser.newContext({ viewport: { width: 1440, height: 900 } });
     const authPageLight = await authContextLight.newPage();
     await authPageLight.goto('http://localhost:5173/', { waitUntil: 'domcontentloaded' });
-    await authPageLight.waitForTimeout(1000);
-    await authPageLight.screenshot({ path: path.join(SCREENSHOT_DIR, '09_auth_light.png') });
-    console.log('📸 Captured screenshot: 09_auth_light.png');
+    await authPageLight.waitForTimeout(800);
+    await authPageLight.screenshot({ path: path.join(SCREENSHOT_DIR, '09_auth_signin_light.png') });
+    console.log('📸 Captured screenshot: 09_auth_signin_light.png');
+
+    const createTabBtn = await authPageLight.getByRole('button', { name: 'Create account' }).first();
+    if (await createTabBtn.isVisible()) {
+      await createTabBtn.click();
+      await authPageLight.waitForTimeout(600);
+      await authPageLight.screenshot({ path: path.join(SCREENSHOT_DIR, '09_auth_signup_light.png') });
+      console.log('📸 Captured screenshot: 09_auth_signup_light.png');
+    }
 
     const authContextDark = await browser.newContext({ viewport: { width: 1440, height: 900 } });
     await authContextDark.addInitScript(() => {
@@ -130,9 +138,17 @@ async function testAllPages() {
     });
     const authPageDark = await authContextDark.newPage();
     await authPageDark.goto('http://localhost:5173/', { waitUntil: 'domcontentloaded' });
-    await authPageDark.waitForTimeout(1000);
-    await authPageDark.screenshot({ path: path.join(SCREENSHOT_DIR, '09_auth_dark.png') });
-    console.log('📸 Captured screenshot: 09_auth_dark.png');
+    await authPageDark.waitForTimeout(800);
+    await authPageDark.screenshot({ path: path.join(SCREENSHOT_DIR, '09_auth_signin_dark.png') });
+    console.log('📸 Captured screenshot: 09_auth_signin_dark.png');
+
+    const createTabBtnDark = await authPageDark.getByRole('button', { name: 'Create account' }).first();
+    if (await createTabBtnDark.isVisible()) {
+      await createTabBtnDark.click();
+      await authPageDark.waitForTimeout(600);
+      await authPageDark.screenshot({ path: path.join(SCREENSHOT_DIR, '09_auth_signup_dark.png') });
+      console.log('📸 Captured screenshot: 09_auth_signup_dark.png');
+    }
 
     console.log('🎉 Playwright Dark Mode & Auth Audit Completed!');
 
