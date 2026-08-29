@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.middleware.auth import verify_jwt
 from app.middleware.rate_limit import rate_limit
@@ -7,11 +7,21 @@ from app.services import conversation_service
 
 router = APIRouter()
 
+# Bounds both the LLM prompt-injection surface and per-request token cost —
+# same reasoning as ProfileCreateSchema.goal_text (see schemas/profile.py).
+# Previously these had no length cap at all, so an arbitrarily large payload
+# could reach the LLM call directly.
+_MAX_QUESTION_LEN = 4000
+_MAX_PAGE_CONTEXT_LEN = 40  # generous for the known values ('roadmap', 'progress', ...)
+
 
 class AskSchema(BaseModel):
-    question: str
+    question: str = Field(..., min_length=1, max_length=_MAX_QUESTION_LEN)
     path_id: str | None = None      # legacy callers still send this
-    page_context: str | None = None  # 'roadmap' | 'progress' | 'skills' | 'resources'
+    # 'roadmap' | 'progress' | 'skills' | 'resources' — not enforced as a
+    # strict enum (new page names shouldn't need a backend change), just
+    # length-bounded.
+    page_context: str | None = Field(default=None, max_length=_MAX_PAGE_CONTEXT_LEN)
 
 
 @router.post("/ask")
@@ -43,8 +53,8 @@ def get_conversation(user_id: str = Depends(verify_jwt)):
 
 
 class MessageSchema(BaseModel):
-    content: str
-    page_context: str | None = None
+    content: str = Field(..., min_length=1, max_length=_MAX_QUESTION_LEN)
+    page_context: str | None = Field(default=None, max_length=_MAX_PAGE_CONTEXT_LEN)
 
 
 @router.post("/messages")

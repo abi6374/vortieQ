@@ -25,12 +25,29 @@ def _strip_fences(raw: str) -> str:
     return raw.strip()
 
 
+# Same <<<LEARNER_TEXT>>> data-boundary pattern used in profile_service.py's
+# extract_profile(). goal_text/target_role here are the learner's OWN
+# free-text fields (goal_text up to 4000 chars, target_role up to 200 —
+# schema-bounded but not content-sanitized) flowing into a SECOND LLM call
+# downstream of extraction. Wrapping + the matching instruction in
+# explain.txt/explain_batch.txt/path_generate.txt is defense-in-depth against
+# a learner trying to steer the explanation/sequencing model via their own
+# stored profile text; it does not change what these calls are allowed to
+# affect (course_ids are validated against the real candidate list regardless
+# — see generate_path()).
+def _learner_block(profile: dict) -> str:
+    block = (
+        f"Learner goal: {profile.get('goal_text', '')}\n"
+        f"Target role: {profile.get('target_role', '')}\n"
+        f"Level: {profile.get('current_level', '')}"
+    )
+    return f"<<<LEARNER_TEXT>>>\n{block}\n<<<END_LEARNER_TEXT>>>"
+
+
 def generate_explanation(profile: dict, course: dict) -> str:
     """Two-sentence explanation of why this course fits this learner."""
     user_msg = (
-        f"Learner goal: {profile.get('goal_text', '')}. "
-        f"Target role: {profile.get('target_role', '')}. "
-        f"Level: {profile.get('current_level', '')}. "
+        f"{_learner_block(profile)}\n\n"
         f"Course: {course.get('title', '')} — {course.get('description', '')}"
     )
     return _call_groq(
@@ -67,9 +84,7 @@ def generate_explanations_batch(profile: dict, courses: list[dict]) -> dict[str,
         for c in courses
     ]
     user_msg = (
-        f"Learner goal: {profile.get('goal_text', '')}. "
-        f"Target role: {profile.get('target_role', '')}. "
-        f"Level: {profile.get('current_level', '')}.\n\n"
+        f"{_learner_block(profile)}\n\n"
         f"Courses:\n{json.dumps(payload, indent=2)}"
     )
     messages = [
@@ -117,8 +132,9 @@ def generate_path(user_id: str, profile: dict) -> dict:
         for c in courses
     ]
 
-    user_msg = f"""LEARNER PROFILE:
+    user_msg = f"""<<<LEARNER_TEXT>>>
 {json.dumps(profile, indent=2, default=str)}
+<<<END_LEARNER_TEXT>>>
 
 CANDIDATE COURSES (use ONLY these course IDs):
 {json.dumps(candidates_for_llm, indent=2)}
