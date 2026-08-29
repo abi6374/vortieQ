@@ -4,14 +4,18 @@ import AppShell from '../layout/AppShell'
 import CalibrationModal from './CalibrationModal'
 import LiveInterviewView from './LiveInterviewView'
 import PostInterviewDashboard from './PostInterviewDashboard'
-import { fetchInterviewQuestions, evaluateInterviewSession } from '../../lib/interviewService'
+import {
+  startInterviewSession,
+  submitInterviewAnswer,
+  finalizeInterviewSession
+} from '../../lib/interviewService'
 
 /**
  * InterviewScreen — The top-level orchestrator for the AI Interview workflow.
  *
  * Coordinates:
  * 1. Stage 1: Calibration (Camera/Mic test, track selection, consent)
- * 2. Stage 2: Live Video Call Interview (Abstract AI visualizer, PiP webcam, voice Q&A)
+ * 2. Stage 2: Live Video Call Interview with Amazon Bedrock Adaptive Questioning & Polly TTS
  * 3. Loading Stage: AI Evaluation & Diagnosis
  * 4. Stage 3: Post-Session Dashboard (Metrics, video playback, personalized roadmap actions)
  */
@@ -20,7 +24,11 @@ export default function InterviewScreen() {
 
   const [stage, setStage] = useState('calibrating') // 'calibrating' | 'live' | 'evaluating' | 'dashboard'
   const [sessionConfig, setSessionConfig] = useState(null)
+  const [sessionId, setSessionId] = useState(null)
   const [questions, setQuestions] = useState([])
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
+  const [answers, setAnswers] = useState([])
+  const [isProcessingTurn, setIsProcessingTurn] = useState(false)
   const [evaluation, setEvaluation] = useState(null)
   const [recordedBlob, setRecordedBlob] = useState(null)
   const [totalDurationSec, setTotalDurationSec] = useState(0)
@@ -30,41 +38,99 @@ export default function InterviewScreen() {
   const handleStartSession = async (config) => {
     setSessionConfig(config)
     setStage('evaluating')
-    setLoadingText('Generating Tailored Interview Questions...')
+    setLoadingText('Connecting to Amazon Bedrock & Generating Personalized First Question...')
 
     try {
-      const qList = await fetchInterviewQuestions(
+      const initData = await startInterviewSession(
         config.trackId,
         config.customTopic,
-        config.questionCount || 4
+        config.questionCount || 5
       )
-      setQuestions(qList)
+
+      setSessionId(initData.session_id)
+      setQuestions([initData.question])
+      setCurrentQuestionIndex(0)
+      setAnswers([])
+      setSessionConfig(prev => ({
+        ...prev,
+        targetRole: initData.target_role,
+        currentMilestone: initData.current_milestone
+      }))
       setStage('live')
     } catch (err) {
-      console.warn('Error initiating interview questions:', err)
+      console.warn('Error initiating interview session:', err)
       setStage('live')
     }
   }
 
-  // Stage 2 -> Stage 3: Live Interview Complete
-  const handleLiveInterviewComplete = async ({ answers, recordedBlob: blob, totalDurationSec: duration }) => {
-    setRecordedBlob(blob)
-    setTotalDurationSec(duration)
-    setStage('evaluating')
-    setLoadingText('Synthesizing Interview Performance & Identifying Skill Gaps...')
+  // Handle Turn Submission (Adaptive Bedrock Question Loop)
+  const handleAnswerSubmit = async ({ transcript, durationSec }) => {
+    setIsProcessingTurn(true)
+    const currentQ = questions[currentQuestionIndex]
+    const qNum = currentQuestionIndex + 1
+    const totalQ = sessionConfig?.questionCount || 5
+
+    const newAnswerRecord = {
+      question_id: currentQ?.id || `q${qNum}`,
+      question_number: qNum,
+      question: currentQ?.question,
+      category: currentQ?.category,
+      transcript,
+      duration_sec: durationSec
+    }
 
     try {
-      const evalResult = await evaluateInterviewSession({
+      const turnResult = await submitInterviewAnswer({
+        sessionId,
+        questionNumber: qNum,
+        totalQuestions: totalQ,
+        currentQuestion: currentQ,
+        transcript,
+        durationSec
+      })
+
+      newAnswerRecord.answer_evaluation = turnResult.answer_evaluation
+      const updatedAnswers = [...answers, newAnswerRecord]
+      setAnswers(updatedAnswers)
+
+      if (turnResult.completed || !turnResult.next_question || qNum >= totalQ) {
+        // Complete the interview session
+        await handleFinishSession(updatedAnswers)
+      } else {
+        // Append next adaptive question from Bedrock
+        setQuestions(prev => [...prev, turnResult.next_question])
+        setCurrentQuestionIndex(prev => prev + 1)
+      }
+    } catch (err) {
+      console.warn('Turn evaluation error:', err)
+      const updatedAnswers = [...answers, newAnswerRecord]
+      setAnswers(updatedAnswers)
+      if (qNum >= totalQ) {
+        await handleFinishSession(updatedAnswers)
+      }
+    } finally {
+      setIsProcessingTurn(false)
+    }
+  }
+
+  // Finalize Session -> Stage 3
+  const handleFinishSession = async (finalAnswers = answers) => {
+    setStage('evaluating')
+    setLoadingText('Synthesizing Interview Performance & Identifying Roadmap Skill Gaps...')
+
+    try {
+      const evalResult = await finalizeInterviewSession({
+        sessionId,
         trackId: sessionConfig?.trackId || 'fullstack',
-        topic: sessionConfig?.customTopic || sessionConfig?.trackId || 'Full Stack Software Engineer',
+        topic: sessionConfig?.customTopic || sessionConfig?.targetRole || 'Full Stack Software Engineer',
         questions,
-        answers,
-        durationSec: duration
+        answers: finalAnswers,
+        totalDurationSec
       })
       setEvaluation(evalResult)
       setStage('dashboard')
     } catch (err) {
-      console.error('Interview evaluation error:', err)
+      console.error('Interview finalization error:', err)
       setStage('dashboard')
     }
   }
@@ -73,6 +139,9 @@ export default function InterviewScreen() {
   const handleRestart = () => {
     setEvaluation(null)
     setRecordedBlob(null)
+    setQuestions([])
+    setAnswers([])
+    setCurrentQuestionIndex(0)
     setStage('calibrating')
   }
 
@@ -89,9 +158,17 @@ export default function InterviewScreen() {
     return (
       <LiveInterviewView
         sessionConfig={sessionConfig}
-        questions={questions}
-        onComplete={handleLiveInterviewComplete}
+        currentQuestion={questions[currentQuestionIndex]}
+        currentQuestionIndex={currentQuestionIndex}
+        totalQuestions={sessionConfig?.questionCount || 5}
+        onAnswerSubmit={handleAnswerSubmit}
+        onFinalize={({ recordedBlob: blob, totalDurationSec: dur }) => {
+          setRecordedBlob(blob)
+          setTotalDurationSec(dur)
+          handleFinishSession(answers)
+        }}
         onExit={handleExit}
+        isProcessingTurn={isProcessingTurn}
       />
     )
   }
@@ -115,7 +192,7 @@ export default function InterviewScreen() {
           {loadingText}
         </h2>
         <p className="text-xs text-slate-400 max-w-sm leading-relaxed">
-          Evaluating technical criteria, measuring filler words, computing clarity scores, and mapping gaps to your learning roadmap.
+          Evaluating technical depth, measuring filler words, diagnosing skill gaps, and mapping actionable next steps to your learning roadmap.
         </p>
       </div>
     )
@@ -128,7 +205,7 @@ export default function InterviewScreen() {
         evaluation={evaluation}
         recordedBlob={recordedBlob}
         trackId={sessionConfig?.trackId}
-        topic={sessionConfig?.customTopic}
+        topic={sessionConfig?.customTopic || sessionConfig?.targetRole}
         totalDurationSec={totalDurationSec}
         onRestart={handleRestart}
       />
