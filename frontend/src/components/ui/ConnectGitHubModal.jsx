@@ -86,14 +86,9 @@ export default function ConnectGitHubModal({ isOpen, onClose, onConnected, onRem
             </svg>
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#38BDF8] bg-sky-950/80 px-2 py-0.5 rounded-full border border-sky-800/70 shadow-2xs">
-                ✨ Roadmap Booster
-              </span>
-              <h3 className="font-['Manrope'] font-bold text-sm sm:text-base text-white">
-                Connect GitHub for calibrated project recommendations
-              </h3>
-            </div>
+            <h3 className="font-['Manrope'] font-bold text-sm sm:text-base text-white">
+              Connect GitHub for calibrated project recommendations
+            </h3>
             <p className="text-xs text-[#94A3B8] mt-1 leading-relaxed">
               We evaluate your repositories and stack to skip beginner tutorials and suggest advanced capstones matching your real coding experience.
             </p>

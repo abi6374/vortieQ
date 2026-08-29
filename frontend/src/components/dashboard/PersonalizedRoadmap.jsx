@@ -5,6 +5,7 @@ import { useRoadmap } from '../../hooks/useRoadmap'
 import { useAuth } from '../../hooks/useAuth'
 import { supabase } from '../../lib/supabaseClient'
 import AppShell from '../layout/AppShell'
+import ConnectGitHubModal from '../ui/ConnectGitHubModal'
 
 /**
  * PersonalizedRoadmap
@@ -17,6 +18,7 @@ import AppShell from '../layout/AppShell'
  * - Interactive bottom milestone strip where clicking any milestone switches to its tasks
  * - Top-right user profile pill with dropdown info and sign out
  * - Floating AI Coach with context-aware responses
+ * - Non-blocking top GitHub Roadmap Booster banner
  */
 export default function PersonalizedRoadmap({
   pathData,
@@ -42,6 +44,30 @@ export default function PersonalizedRoadmap({
 
   // Modals for other views (Resources, etc.)
   const [activeModal, setActiveModal] = useState(null)
+  const [showGitHubModal, setShowGitHubModal] = useState(false)
+
+  // Scoped ref for "Remind me later" within this page mount
+  const remindLaterDismissedRef = useRef(false)
+
+  // Prompt Google / Email users to link GitHub if not yet linked and not permanently dismissed
+  useEffect(() => {
+    if (!user) return
+    const userId = user.id
+    const hasGitHub =
+      user.app_metadata?.provider?.includes('github') ||
+      user.user_metadata?.user_name ||
+      profile?.github_username
+    const preference = localStorage.getItem(`pf_github_preference_${userId}`)
+
+    if (!hasGitHub && preference !== 'no_github' && preference !== 'connected' && !remindLaterDismissedRef.current) {
+      const timer = setTimeout(() => {
+        if (!remindLaterDismissedRef.current) {
+          setShowGitHubModal(true)
+        }
+      }, 1200)
+      return () => clearTimeout(timer)
+    }
+  }, [user, profile])
 
   // Auto-expand the first NOT-YET-DONE real task's "Why this task?" panel ONCE by default
   const initializedWhyRef = useRef(false)
@@ -274,6 +300,17 @@ export default function PersonalizedRoadmap({
           Personalized roadmap calibrated from your skills and weekly availability.
         </p>
       </div>
+
+      {/* GitHub Recommendation Booster Top Banner (Non-blocking, zero screen blackout) */}
+      <ConnectGitHubModal
+        isOpen={showGitHubModal}
+        onClose={() => setShowGitHubModal(false)}
+        onRemindLater={() => { remindLaterDismissedRef.current = true }}
+        onConnected={(ghData) => {
+          setToastMessage(`GitHub synced! Calibrated ${ghData.topics?.length || 0} skills & portfolio depth.`)
+          setTimeout(() => setToastMessage(null), 3500)
+        }}
+      />
 
       {/* 3 Top Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-6 mb-6">
