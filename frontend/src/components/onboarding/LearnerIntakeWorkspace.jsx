@@ -328,20 +328,28 @@ export default function LearnerIntakeWorkspace({
             {/* Inline Username Switcher */}
             {showUsernameInput && (
               <form onSubmit={handleCustomSync} className="pt-2 border-t border-[#E6EAF2] dark:border-[#24334A] flex items-center gap-2">
-                <span className="text-xs text-[#74819A] dark:text-[#94A3B8] font-mono">github.com/</span>
-                <input
-                  type="text"
-                  value={customUsername}
-                  onChange={(e) => setCustomUsername(e.target.value)}
-                  placeholder="Enter GitHub username (e.g. your_handle)"
-                  className="flex-1 bg-white dark:bg-[#1A2536] border border-[#D8DFEB] dark:border-[#2D3F59] rounded-lg px-2.5 py-1 text-xs text-[#0E1B38] dark:text-[#F8FAFC] focus:border-[#0066cc] outline-none"
-                />
+                <div className="flex-1 flex items-center bg-white dark:bg-[#0B0F17] border border-[#D8DFEB] dark:border-[#2D3F59] rounded-full p-1 pl-3.5 shadow-2xs focus-within:border-[#0066cc] dark:focus-within:border-[#38BDF8] focus-within:ring-2 focus-within:ring-[#0066cc]/15 transition-all">
+                  <span className="text-[#888888] dark:text-[#94A3B8] text-xs font-mono font-bold mr-1 select-none">
+                    github.com/
+                  </span>
+                  <input
+                    type="text"
+                    value={customUsername}
+                    onChange={(e) => setCustomUsername(e.target.value)}
+                    placeholder="your-username"
+                    className="bg-transparent border-0 border-none outline-none focus:outline-none focus:ring-0 text-xs text-[#0E1B38] dark:text-[#F8FAFC] placeholder-[#888888] dark:placeholder-[#64748B] w-full flex-1"
+                    style={{ border: 'none', outline: 'none', boxShadow: 'none' }}
+                  />
+                </div>
                 <button
                   type="submit"
                   disabled={!customUsername.trim()}
-                  className="px-3 py-1 bg-[#0E1B38] dark:bg-[#0066CC] hover:bg-black dark:hover:bg-[#0052A3] text-white text-xs font-bold rounded-lg transition-colors cursor-pointer disabled:opacity-40"
+                  className="px-3.5 py-1.5 bg-[#0066CC] hover:bg-[#0052A3] text-white text-xs font-bold rounded-full transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 shadow-2xs active:scale-95 flex-none"
                 >
-                  Sync Repos
+                  <span>Sync Repos</span>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+                  </svg>
                 </button>
               </form>
             )}
@@ -350,31 +358,38 @@ export default function LearnerIntakeWorkspace({
 
         {/* Sync Prompt if no GitHub data loaded yet */}
         {!githubData && !githubLoading && (
-          <div className="mt-4 bg-[#F8FAFD] dark:bg-[#141C2B] border border-[#E1E6F0] dark:border-[#24334A] rounded-xl p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
-            <div className="flex items-center gap-2">
-              <span className="w-6 h-6 rounded-md bg-[#181717] dark:bg-[#1E293B] text-white flex items-center justify-center flex-none text-xs">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+          <div className="mt-4 bg-[#F8FAFD] dark:bg-[#141C2B] border border-[#E1E6F0] dark:border-[#24334A] rounded-2xl sm:rounded-full p-2 sm:px-4 sm:py-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <span className="w-7 h-7 rounded-full bg-[#181717] dark:bg-[#1E293B] text-white flex items-center justify-center flex-none text-xs shadow-2xs">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
                   <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
                 </svg>
               </span>
-              <p className="text-xs text-[#52617D] dark:text-[#94A3B8]">
+              <p className="text-xs text-[#52617D] dark:text-[#94A3B8] font-medium leading-tight truncate">
                 Have a GitHub profile? Connect your handle to automatically import your repos & stack.
               </p>
             </div>
-            <form onSubmit={handleCustomSync} className="flex items-center gap-1.5 w-full sm:w-auto">
+            <form onSubmit={handleCustomSync} className="flex items-center bg-white dark:bg-[#0B0F17] border border-[#D8DFEB] dark:border-[#2D3F59] rounded-full p-1 pl-3.5 shadow-2xs focus-within:border-[#0066cc] dark:focus-within:border-[#38BDF8] focus-within:ring-2 focus-within:ring-[#0066cc]/15 transition-all w-full sm:w-auto min-w-[220px]">
+              <span className="text-[#888888] dark:text-[#94A3B8] text-xs font-mono font-bold mr-1 select-none">
+                @
+              </span>
               <input
                 type="text"
                 value={customUsername}
                 onChange={(e) => setCustomUsername(e.target.value)}
-                placeholder="GitHub handle"
-                className="bg-white dark:bg-[#1A2536] border border-[#D8DFEB] dark:border-[#2D3F59] rounded-lg px-2.5 py-1 text-xs text-[#0E1B38] dark:text-[#F8FAFC] focus:border-[#0066cc] outline-none max-w-[140px]"
+                placeholder="github-handle"
+                className="bg-transparent border-0 border-none outline-none focus:outline-none focus:ring-0 text-xs text-[#0E1B38] dark:text-[#F8FAFC] placeholder-[#888888] dark:placeholder-[#64748B] w-full flex-1"
+                style={{ border: 'none', outline: 'none', boxShadow: 'none' }}
               />
               <button
                 type="submit"
                 disabled={!customUsername.trim()}
-                className="px-3 py-1 bg-[#181717] dark:bg-[#0066CC] hover:bg-black dark:hover:bg-[#0052A3] text-white text-xs font-bold rounded-lg transition-colors cursor-pointer disabled:opacity-40 flex-none"
+                className="px-3.5 py-1.5 bg-[#0066CC] hover:bg-[#0052A3] text-white text-xs font-bold rounded-full transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 shadow-2xs active:scale-95 flex-none"
               >
-                Sync
+                <span>Sync</span>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+                </svg>
               </button>
             </form>
           </div>
