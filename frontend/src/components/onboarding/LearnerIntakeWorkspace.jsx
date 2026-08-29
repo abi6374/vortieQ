@@ -27,9 +27,21 @@ function avgConfidence(topics) {
  * High-fidelity Step 1 Intake Workspace for PathFinder.
  * Designed to fit seamlessly inside the unified 5-step Onboarding layout with SetupSidebar.
  */
-export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSkip, githubData, githubLoading }) {
+export default function LearnerIntakeWorkspace({
+  onExtracted,
+  onChatSubmit,
+  onSkip,
+  githubData,
+  githubLoading,
+  authenticatedUsername = '',
+  onSyncGithub,
+}) {
   // Selection mode: 'resume' (default selected) or 'chat'
   const [selectedMethod, setSelectedMethod] = useState('resume')
+
+  // Per-user GitHub username state
+  const [customUsername, setCustomUsername] = useState(authenticatedUsername || '')
+  const [showUsernameInput, setShowUsernameInput] = useState(false)
 
   // Resume upload state
   const [file, setFile] = useState(null)
@@ -61,10 +73,17 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
         ...EMPTY_DRAFT,
         skills: topics.map((t) => t.name).join(', '),
         confidence: confStr,
-        summary: `Imported ${githubData.github_projects?.length || topics.length} repositories with ${githubData.top_languages?.join(', ') || 'modern stacks'}. Detected ${topics.length} skills (~${avgConfidence(topics)} confidence).`,
+        summary: `Imported ${githubData.github_projects?.length || topics.length} repositories for ${customUsername || authenticatedUsername || 'your profile'} with ${githubData.top_languages?.join(', ') || 'modern stacks'}. Detected ${topics.length} skills (~${avgConfidence(topics)} confidence).`,
       })
     }
-  }, [githubData])
+  }, [githubData, customUsername, authenticatedUsername])
+
+  const handleCustomSync = (e) => {
+    e?.preventDefault()
+    if (!customUsername.trim()) return
+    onSyncGithub?.(customUsername.trim())
+    setShowUsernameInput(false)
+  }
 
   // Review & Edit Modal state
   const [isEditingDraft, setIsEditingDraft] = useState(false)
@@ -236,37 +255,102 @@ export default function LearnerIntakeWorkspace({ onExtracted, onChatSubmit, onSk
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
             </svg>
-            <span>Analyzing your GitHub repositories, commit velocity, and stacks...</span>
+            <span>Analyzing repositories, commit velocity, and stacks for {customUsername || 'your profile'}...</span>
           </div>
         )}
 
         {githubData?.topics && githubData.topics.length > 0 && !githubLoading && (
-          <div className="mt-4 bg-[#fafafb] border border-[#e6e6e7] rounded-xl p-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-[#181717] text-white flex items-center justify-center flex-none">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                  <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
-                </svg>
+          <div className="mt-4 bg-[#F8FAFD] border border-[#DCE4F0] rounded-xl p-3.5 flex flex-col gap-3 shadow-2xs">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-[#181717] text-white flex items-center justify-center flex-none">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-[#0E1B38] flex items-center gap-1.5 flex-wrap">
+                    <span>GitHub: @{customUsername || authenticatedUsername || 'Connected User'}</span>
+                    <span className="bg-[#ECFDF3] text-[#22A06B] text-[11px] px-2 py-0.5 rounded-full font-bold">
+                      {githubData.github_projects?.length || 0} Repos Synced
+                    </span>
+                  </p>
+                  <p className="text-[12px] text-[#52617D] mt-0.5">
+                    Stack: {githubData.top_languages?.join(', ') || 'Python, TypeScript'} · Experience: ~{githubData.detected_years_experience || 1} yrs
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-xs font-bold text-[#1d1d1f] flex items-center gap-1.5">
-                  <span>GitHub Profile Connected</span>
-                  <span className="bg-[#ECFDF3] text-[#22A06B] text-[11px] px-2 py-0.5 rounded-full font-bold">
-                    {githubData.github_projects?.length || 0} Repos Synced
-                  </span>
-                </p>
-                <p className="text-[12px] text-[#333333] mt-0.5">
-                  Stack: {githubData.top_languages?.join(', ') || 'Python, TypeScript'} · Experience: ~{githubData.detected_years_experience || 1} yrs
-                </p>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowUsernameInput((v) => !v)}
+                  className="px-2.5 py-1.5 border border-[#D8DFEB] hover:bg-white text-[#52617D] text-xs font-semibold rounded-lg transition-colors cursor-pointer"
+                >
+                  {showUsernameInput ? 'Hide' : 'Switch GitHub User'}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleContinue}
+                  className="px-3.5 py-1.5 bg-[#5B36E9] hover:bg-[#4826C9] text-white text-xs font-bold rounded-lg shadow-xs transition-colors cursor-pointer flex-none"
+                >
+                  Continue with this Stack →
+                </button>
               </div>
             </div>
-            <button
-              type="button"
-              onClick={handleContinue}
-              className="px-3.5 py-1.5 bg-[#0066cc] hover:bg-[#004fa3] text-white text-xs font-bold rounded-lg shadow-xs transition-colors cursor-pointer flex-none"
-            >
-              Continue with GitHub Stack →
-            </button>
+
+            {/* Inline Username Switcher */}
+            {showUsernameInput && (
+              <form onSubmit={handleCustomSync} className="pt-2 border-t border-[#E6EAF2] flex items-center gap-2">
+                <span className="text-xs text-[#74819A] font-mono">github.com/</span>
+                <input
+                  type="text"
+                  value={customUsername}
+                  onChange={(e) => setCustomUsername(e.target.value)}
+                  placeholder="Enter GitHub username (e.g. your_handle)"
+                  className="flex-1 bg-white border border-[#D8DFEB] rounded-lg px-2.5 py-1 text-xs text-[#0E1B38] focus:border-[#5B36E9] outline-none"
+                />
+                <button
+                  type="submit"
+                  disabled={!customUsername.trim()}
+                  className="px-3 py-1 bg-[#0E1B38] hover:bg-black text-white text-xs font-bold rounded-lg transition-colors cursor-pointer disabled:opacity-40"
+                >
+                  Sync Repos
+                </button>
+              </form>
+            )}
+          </div>
+        )}
+
+        {/* Sync Prompt if no GitHub data loaded yet */}
+        {!githubData && !githubLoading && (
+          <div className="mt-4 bg-[#F8FAFD] border border-[#E1E6F0] rounded-xl p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
+            <div className="flex items-center gap-2">
+              <span className="w-6 h-6 rounded-md bg-[#181717] text-white flex items-center justify-center flex-none text-xs">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                  <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+                </svg>
+              </span>
+              <p className="text-xs text-[#52617D]">
+                Have a GitHub profile? Connect your handle to automatically import your repos & stack.
+              </p>
+            </div>
+            <form onSubmit={handleCustomSync} className="flex items-center gap-1.5 w-full sm:w-auto">
+              <input
+                type="text"
+                value={customUsername}
+                onChange={(e) => setCustomUsername(e.target.value)}
+                placeholder="GitHub handle"
+                className="bg-white border border-[#D8DFEB] rounded-lg px-2.5 py-1 text-xs text-[#0E1B38] focus:border-[#5B36E9] outline-none max-w-[140px]"
+              />
+              <button
+                type="submit"
+                disabled={!customUsername.trim()}
+                className="px-3 py-1 bg-[#181717] hover:bg-black text-white text-xs font-bold rounded-lg transition-colors cursor-pointer disabled:opacity-40 flex-none"
+              >
+                Sync
+              </button>
+            </form>
           </div>
         )}
       </div>

@@ -87,6 +87,9 @@ export function AuthProvider({ children }) {
       options: {
         redirectTo: `${window.location.origin}/onboarding?source=github`,
         scopes: 'read:user repo user:email',
+        queryParams: {
+          prompt: 'consent',
+        },
       },
     })
     if (error) throw error

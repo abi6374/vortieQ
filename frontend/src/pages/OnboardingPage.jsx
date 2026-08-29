@@ -52,28 +52,33 @@ export default function OnboardingPage() {
       window.location.search.includes('source=github')
 
     if (isGithubUser && !githubData) {
-      setGithubLoading(true)
-      api.post('/api/profile/github', {
-        token: session?.provider_token,
-        username: user?.user_metadata?.user_name || user?.user_metadata?.preferred_username,
-      })
-        .then((res) => {
-          if (res?.data) {
-            setGithubData(res.data)
-            if (res.data.topics && res.data.topics.length > 0) {
-              setResumeTopics(res.data.topics)
-              setDetectedYears(res.data.detected_years_experience || 0)
-            }
-          }
-        })
-        .catch((err) => {
-          console.warn('[Onboarding] GitHub profile ingestion note:', err)
-        })
-        .finally(() => {
-          setGithubLoading(false)
-        })
+      const targetUser = user?.user_metadata?.user_name || user?.user_metadata?.preferred_username
+      handleSyncGithub(targetUser)
     }
   }, [session, user])
+
+  const handleSyncGithub = async (customUsername) => {
+    const targetUsername = (customUsername || user?.user_metadata?.user_name || user?.user_metadata?.preferred_username || '').trim()
+    if (!targetUsername && !session?.provider_token) return
+    setGithubLoading(true)
+    try {
+      const res = await api.post('/api/profile/github', {
+        token: session?.provider_token,
+        username: targetUsername || undefined,
+      })
+      if (res?.data) {
+        setGithubData(res.data)
+        if (res.data.topics && res.data.topics.length > 0) {
+          setResumeTopics(res.data.topics)
+          setDetectedYears(res.data.detected_years_experience || 0)
+        }
+      }
+    } catch (err) {
+      console.warn('[Onboarding] GitHub profile ingestion note:', err)
+    } finally {
+      setGithubLoading(false)
+    }
+  }
 
   // Freeze the Goal Compass page (pointer + keyboard) while the overlay is open.
   useEffect(() => {
@@ -208,6 +213,8 @@ export default function OnboardingPage() {
           <LearnerIntakeWorkspace
             githubData={githubData}
             githubLoading={githubLoading}
+            authenticatedUsername={user?.user_metadata?.user_name || user?.user_metadata?.preferred_username || ''}
+            onSyncGithub={handleSyncGithub}
             onExtracted={handleResumeExtracted}
             onChatSubmit={handleChatIntake}
             onSkip={() => setPhase('topics')}

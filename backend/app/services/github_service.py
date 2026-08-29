@@ -72,21 +72,26 @@ def _classify_project_complexity(repo: Dict[str, Any], languages: Dict[str, int]
 
 async def fetch_github_repos(token: Optional[str] = None, username: Optional[str] = None) -> List[Dict[str, Any]]:
     """Fetches user repositories from GitHub REST API."""
-    headers = {"Accept": "application/vnd.github+json"}
+    headers = {"Accept": "application/vnd.github+json", "User-Agent": "PathFinder-AI-App"}
     if token:
         headers["Authorization"] = f"Bearer {token}"
     
-    url = f"{GITHUB_API_BASE}/user/repos?per_page=100&sort=updated" if token else f"{GITHUB_API_BASE}/users/{username}/repos?per_page=100&sort=updated"
+    if username:
+        url = f"{GITHUB_API_BASE}/users/{username.strip()}/repos?per_page=100&sort=updated"
+    elif token:
+        url = f"{GITHUB_API_BASE}/user/repos?per_page=100&sort=updated"
+    else:
+        return []
     
-    async with httpx.AsyncClient(timeout=10.0) as client:
+    async with httpx.AsyncClient(timeout=12.0) as client:
         try:
             resp = await client.get(url, headers=headers)
             if resp.status_code == 200:
                 return resp.json()
-            print(f"[github_service] API responded with status {resp.status_code}: {resp.text}", flush=True)
+            print(f"[github_service] API error ({url}): {resp.status_code} {resp.text}", flush=True)
             return []
         except Exception as exc:
-            print(f"[github_service] Failed to fetch repos: {exc}", flush=True)
+            print(f"[github_service] Failed to fetch repos for {username or 'authenticated user'}: {exc}", flush=True)
             return []
 
 
