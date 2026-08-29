@@ -7,8 +7,8 @@ export function AuthProvider({ children }) {
   const isDevBypass = typeof window !== 'undefined' && (localStorage.getItem('pf_dev_bypass') === 'true' || localStorage.getItem('e2e_mock_auth') === 'true')
   const defaultUser = isDevBypass ? {
     id: 'demo-user-1',
-    email: 'demo@pathfinder.io',
-    user_metadata: { full_name: 'Alex Rivera', name: 'Alex Rivera' }
+    email: 'hcltech@pathfinder.io',
+    user_metadata: { full_name: 'HCL Tech', name: 'HCL Tech' }
   } : null
   const [session, setSession] = useState(defaultUser ? { user: defaultUser, access_token: 'demo-token' } : null)
   const [profile, setProfile] = useState(defaultUser ? { id: 'demo-user-1', target_role: 'Data Analyst', weekly_hours: 10 } : null)
@@ -62,8 +62,8 @@ export function AuthProvider({ children }) {
       if (!session && typeof window !== 'undefined' && (localStorage.getItem('pf_dev_bypass') === 'true' || localStorage.getItem('e2e_mock_auth') === 'true')) {
         const mockUser = {
           id: 'demo-user-1',
-          email: 'demo@pathfinder.io',
-          user_metadata: { full_name: 'Alex Rivera', name: 'Alex Rivera' }
+          email: 'hcltech@pathfinder.io',
+          user_metadata: { full_name: 'HCL Tech', name: 'HCL Tech' }
         }
         setSession({ user: mockUser, access_token: 'demo-token' })
         setProfile({ id: 'demo-user-1', target_role: 'Data Analyst', weekly_hours: 10 })
@@ -167,19 +167,32 @@ export function AuthProvider({ children }) {
   // auth.identities, so it's on; if this ever starts failing with a
   // "manual linking is disabled" error, that's the toggle to check).
   const linkGithub = async () => {
-    const { data, error } = await supabase.auth.linkIdentity({
-      provider: 'github',
-      options: {
-        redirectTo: `${window.location.origin}/account?github_linked=true`,
-        scopes: 'read:user repo user:email',
-        queryParams: { prompt: 'consent' },
-      },
-    })
-    if (error) throw error
-    if (data?.url) {
-      window.location.assign(data.url)
+    try {
+      const { data, error } = await supabase.auth.linkIdentity({
+        provider: 'github',
+        options: {
+          redirectTo: `${window.location.origin}/account?github_linked=true`,
+          scopes: 'read:user repo user:email',
+          queryParams: { prompt: 'consent' },
+        },
+      })
+      if (error) throw error
+      if (data?.url) {
+        window.location.assign(data.url)
+      }
+      return data
+    } catch (err) {
+      // Real, actionable message instead of Supabase's raw error - the
+      // username-sync path (already on this same screen/modal) still works
+      // regardless of this project setting, so point there rather than
+      // leaving the learner stuck on a cryptic OAuth failure.
+      if (err?.message?.toLowerCase().includes('manual linking is disabled')) {
+        throw new Error(
+          'GitHub OAuth linking is currently disabled in this project\'s settings. Please use the username sync option above instead.'
+        )
+      }
+      throw err
     }
-    return data
   }
 
   const signOut = async () => {
@@ -204,8 +217,8 @@ export function AuthProvider({ children }) {
 
   const mockUser = typeof window !== 'undefined' && (window.localStorage.getItem('e2e_mock_auth') || window.localStorage.getItem('pf_dev_bypass')) ? {
     id: "11111111-1111-1111-1111-111111111111",
-    email: "alex.chen@pathfinder.ai",
-    user_metadata: { full_name: "Alex Chen", name: "Alex Chen" }
+    email: "hcltech@pathfinder.ai",
+    user_metadata: { full_name: "HCL Tech", name: "HCL Tech" }
   } : null
   const effectiveSession = session || (mockUser ? { user: mockUser } : null)
   const effectiveUser = session?.user || mockUser

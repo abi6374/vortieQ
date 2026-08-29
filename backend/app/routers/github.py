@@ -3,11 +3,13 @@ import re
 from fastapi import APIRouter, Depends, HTTPException, Body
 from typing import Optional, Dict, Any
 
-from app.middleware.auth import verify_jwt_optional
+from app.config import supabase_client
+from app.middleware.auth import verify_jwt, verify_jwt_optional
 from app.services.github_service import (
     fetch_github_repos,
     analyze_github_repositories,
     GitHubRateLimitedError,
+    GitHubUserNotFoundError,
 )
 from app.services.profile_service import upsert_profile
 
@@ -59,6 +61,11 @@ async def ingest_github_profile(
 
     try:
         repos = await fetch_github_repos(token=token, username=username)
+    except GitHubUserNotFoundError:
+        raise HTTPException(
+            status_code=404,
+            detail=f"GitHub user '@{username}' was not found. Please check the handle.",
+        )
     except GitHubRateLimitedError:
         # Previously this fell through to an empty repo list, which
         # analyze_github_repositories() then reported as a confident
@@ -73,15 +80,51 @@ async def ingest_github_profile(
 
     analysis = analyze_github_repositories(repos)
 
-    # If authenticated, persist the derived ratings and detected years —
-    # always under user_id from the verified JWT, never from the request body.
+    # If authenticated, persist the derived ratings, detected years, AND the
+    # username/repo summary — always under user_id from the verified JWT,
+    # never from the request body. github_username/github_repos_summary are
+    # the single source of truth for "which GitHub account is connected"
+    # (see migration 004_github_profile_link.sql) — previously this only
+    # ever lived in scattered, unsynced places (localStorage per browser,
+    # onboarding's own component state), which is exactly why the Account
+    # page and the onboarding intake screen could disagree about which
+    # handle was connected.
     if user_id:
         try:
-            upsert_profile(user_id, {
+            update = {
                 "topic_ratings": analysis["topics"],
                 "detected_years_experience": analysis["detected_years_experience"],
-            })
+            }
+            # Only known for the username-based path — the token/OAuth path
+            # (no explicit username) still gets its topics/years persisted
+            # above, it just can't set a handle it was never given.
+            if username:
+                update["github_username"] = username
+                update["github_repos_summary"] = analysis["github_projects"]
+            upsert_profile(user_id, update)
         except Exception as exc:
             print(f"[github router] Note on profile persistence: {exc}", flush=True)
 
     return analysis
+
+
+@router.delete("")
+def disconnect_github(user_id: str = Depends(verify_jwt)):
+    """Unlinks GitHub from the caller's own profile (Google/email users only
+    — see the frontend, which hides this for a native GitHub login since
+    that's their primary sign-in identity, not an optional add-on).
+
+    Deliberately does NOT touch topic_ratings/detected_years_experience:
+    those can also come from a resume upload, and this endpoint has no way
+    to tell which entries came from GitHub vs. a resume — wiping them here
+    would risk destroying real resume-derived skill data for a learner who
+    used both, the same class of bug fixed in upsert_profile (silently
+    overwriting real data because a caller only meant to touch one thing).
+    Only github_username and github_repos_summary are exclusively
+    GitHub-sourced, so only those are cleared.
+    """
+    supabase_client.table("profiles").update({
+        "github_username": None,
+        "github_repos_summary": None,
+    }).eq("id", user_id).execute()
+    return {"ok": True, "message": "GitHub disconnected successfully"}

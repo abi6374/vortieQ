@@ -61,11 +61,12 @@ export default {
         },
       },
       fontFamily: {
-        // SF Pro is Apple's system font; Inter is the documented open
-        // substitute (DESIGN.md "Note on Font Substitutes").
-        sans: ['"SF Pro Display"', '"SF Pro Text"', 'Inter', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
-        display: ['"SF Pro Display"', 'Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
-        manrope: ['Inter', '-apple-system', 'sans-serif'],
+        // SF Pro is Apple's system font; Inter is the documented open substitute
+        sans: ['"Plus Jakarta Sans"', 'Inter', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
+        display: ['"Big Shoulders Display"', '"Bebas Neue"', 'Inter', 'sans-serif'],
+        balboa: ['"Bebas Neue"', '"Big Shoulders Display"', 'sans-serif'],
+        shadow: ['"Shadows Into Light"', '"Caveat"', 'cursive'],
+        manrope: ['Manrope', 'Inter', '-apple-system', 'sans-serif'],
         mono: ['"SF Mono"', 'ui-monospace', '"JetBrains Mono"', 'monospace'],
       },
       letterSpacing: {

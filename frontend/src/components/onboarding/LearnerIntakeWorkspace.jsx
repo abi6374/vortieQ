@@ -33,6 +33,7 @@ export default function LearnerIntakeWorkspace({
   onSkip,
   githubData,
   githubLoading,
+  githubSyncError = '',
   authenticatedUsername = '',
   onSyncGithub,
 }) {
@@ -140,9 +141,14 @@ export default function LearnerIntakeWorkspace({
       summary: `In your own words: "${userNotes.slice(0, 220)}${userNotes.length > 220 ? '…' : ''}"`,
     })
 
-    if (onChatSubmit) {
-      onChatSubmit(userNotes)
-    }
+    // Deliberately does NOT call onChatSubmit here. It used to fire on every
+    // single message send, which silently advanced the WHOLE onboarding
+    // wizard straight past this screen (skipping Assess Skills too) the
+    // instant a learner sent their first message - bypassing the AI Profile
+    // Draft entirely along with the visible "Continue" button and its
+    // validation. Sending a message now only updates the draft preview;
+    // onChatSubmit only fires from handleContinue below, once the learner
+    // has actually reviewed the draft and clicked Continue.
   }
 
   // Handle Continue button action
@@ -195,14 +201,24 @@ export default function LearnerIntakeWorkspace({
       if (userNotes) {
         onChatSubmit?.(userNotes)
       } else if (githubData?.topics && githubData.topics.length > 0) {
-        // GitHub data present - resume/chat is optional!
-        onExtracted(githubData.topics, githubData.detected_years_experience || 0)
+        // GitHub data present - resume/chat is optional! Pass through any
+        // edits the learner made in "Review and edit" (education/projects/
+        // goal) too - previously only (topics, years) were forwarded here,
+        // so anything typed into the edit modal for a GitHub-only learner
+        // was silently discarded the moment they clicked Continue.
+        onExtracted(
+          githubData.topics, githubData.detected_years_experience || 0,
+          profileDraft?.education || '', profileDraft?.projects || '', profileDraft?.goal || ''
+        )
       } else {
         setContinueError('Tell PathFinder a bit about yourself in the chat box before continuing.')
       }
     } else if (githubData?.topics && githubData.topics.length > 0) {
       // Direct pass-through for GitHub users without mandatory resume
-      onExtracted(githubData.topics, githubData.detected_years_experience || 0)
+      onExtracted(
+        githubData.topics, githubData.detected_years_experience || 0,
+        profileDraft?.education || '', profileDraft?.projects || '', profileDraft?.goal || ''
+      )
     } else {
       setContinueError('Upload a resume or describe your background in the chat box before continuing.')
     }
@@ -257,6 +273,12 @@ export default function LearnerIntakeWorkspace({
             </svg>
             <span>Analyzing repositories, commit velocity, and stacks for {customUsername || 'your profile'}...</span>
           </div>
+        )}
+
+        {githubSyncError && !githubLoading && (
+          <p className="mt-4 text-xs font-semibold text-red-600 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800/60 rounded-lg px-3.5 py-2.5">
+            {githubSyncError}
+          </p>
         )}
 
         {githubData?.topics && githubData.topics.length > 0 && !githubLoading && (
@@ -756,7 +778,8 @@ export default function LearnerIntakeWorkspace({
         <button
           type="button"
           onClick={handleContinue}
-          disabled={uploading}
+          disabled={uploading || !profileDraft}
+          title={!profileDraft ? 'Upload a resume, connect GitHub, or describe your background first' : undefined}
           className="w-[160px] h-[48px] bg-[#0066cc] hover:bg-[#004fa3] active:scale-[0.99] text-white font-bold rounded-xl shadow-[0_4px_14px_rgba(0,102,204,0.35)] transition-all flex items-center justify-center text-[15px] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {uploading ? (

@@ -5,15 +5,17 @@ services/github_service.py, main.py — plus two follow-up rounds:
 profile_service.py (prompt-injection hardening, section 6) and
 path_service.py/conversation_service.py/routers/assistant.py (prompt-injection
 boundary-wrapping for profile fields re-interpolated into further LLM calls,
-section 8). No live network calls (GitHub API is mocked) and no live Supabase
-writes — these test the code paths in isolation so they run in CI without
-secrets or network access.
+section 8), and GitHub 404 handling + disconnect endpoint (section 9 — real
+404 vs. rate-limit vs. generic error, and the DELETE /api/profile/github
+unlink route). No live network calls (GitHub API is mocked) and no live
+Supabase writes — these test the code paths in isolation so they run in CI
+without secrets or network access.
 
 Run: cd backend && pytest tests/test_security_and_integrity.py -v
 """
 
 import time
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import jwt
 import pytest
@@ -158,8 +160,10 @@ class TestGitHubRateLimitHandling:
             assert r.status_code == 429
 
     def test_generic_api_error_degrades_to_empty_not_crash(self):
-        # A non-200, non-403/429 response (e.g. 404 unknown user) should not
-        # crash the worker — degrades to an honest "no data" result.
+        # A non-200, non-403/429, non-404 response (e.g. a transient 500 from
+        # GitHub) should not crash the worker — degrades to an honest "no
+        # data" result. (A real 404 is now its own distinguishable error —
+        # see TestGitHubUserNotFound below — this covers everything else.)
         with patch(
             "app.routers.github.fetch_github_repos",
             new=AsyncMock(return_value=[]),
@@ -167,6 +171,63 @@ class TestGitHubRateLimitHandling:
             r = client.post("/api/profile/github", json={"username": "definitely-not-a-real-user-xyz"})
             assert r.status_code == 200
             assert r.json()["topics"] == []
+
+
+# ── 4b. GitHub 404 (nonexistent user) — no fabricated data ──────────────────
+class TestGitHubUserNotFound:
+    def test_nonexistent_username_surfaces_as_404_with_exact_message(self):
+        # Same fabrication class as the rate-limit fix above: a real 404
+        # (username doesn't exist) must never be silently coerced into an
+        # empty repo list, which analyze_github_repositories([]) would then
+        # confidently report as "beginner, 0 years experience" — fabricated
+        # data about a learner whose handle was just misspelled.
+        from app.services.github_service import GitHubUserNotFoundError
+
+        with patch(
+            "app.routers.github.fetch_github_repos",
+            new=AsyncMock(side_effect=GitHubUserNotFoundError("nonexistent-user-99999")),
+        ):
+            r = client.post("/api/profile/github", json={"username": "nonexistent-user-99999"})
+            assert r.status_code == 404
+            assert r.json()["detail"] == (
+                "GitHub user '@nonexistent-user-99999' was not found. Please check the handle."
+            )
+
+
+# ── 4c. GitHub disconnect — auth required, scoped to GitHub-only fields ─────
+class TestGitHubDisconnect:
+    def test_disconnect_requires_auth(self):
+        r = client.delete("/api/profile/github")
+        assert r.status_code in (401, 403)
+
+    def test_disconnect_clears_only_github_fields(self):
+        mock_supabase = MagicMock()
+        mock_table = MagicMock()
+        mock_supabase.table.return_value = mock_table
+        mock_table.update.return_value.eq.return_value.execute.return_value = MagicMock(data=[{"id": "u1"}])
+
+        expired = jwt.encode(
+            {
+                "sub": "11111111-1111-1111-1111-111111111111",
+                "aud": "authenticated",
+                "iat": int(time.time()),
+                "exp": int(time.time()) + 3600,
+            },
+            settings.SUPABASE_JWT_SECRET,
+            algorithm="HS256",
+        )
+        with patch("app.routers.github.supabase_client", mock_supabase):
+            r = client.delete("/api/profile/github", headers={"Authorization": f"Bearer {expired}"})
+        assert r.status_code == 200
+        assert r.json() == {"ok": True, "message": "GitHub disconnected successfully"}
+
+        update_payload = mock_table.update.call_args[0][0]
+        assert update_payload == {"github_username": None, "github_repos_summary": None}
+        # Must NEVER touch topic_ratings/detected_years_experience here - those
+        # can also come from a resume upload, and this endpoint can't tell
+        # which entries are GitHub-sourced (see the docstring on the route).
+        assert "topic_ratings" not in update_payload
+        assert "detected_years_experience" not in update_payload
 
 
 # ── 5. CORS allowlist (no wildcard + credentials) ───────────────────────────

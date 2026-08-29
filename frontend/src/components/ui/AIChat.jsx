@@ -1,13 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useAIChat } from '../../contexts/AIChatContext'
+import { useAuth } from '../../hooks/useAuth'
 
 /**
  * The one and only "Ask PathFinder" assistant. Mounted once at app-shell level,
- * bottom-right, on every authenticated page except AI Coach itself (that page
- * IS the full conversation, so the floating trigger would be redundant).
- * Reads the shared conversation from AIChatContext so the thread is identical
- * everywhere.
+ * bottom-right, on authenticated dashboard/inner pages.
+ * Never appears on the Signup/Landing/Onboarding pages or full AI Coach page.
  */
 
 const V = '#0066cc'
@@ -84,6 +83,7 @@ const SUGGESTIONS = [
 
 export default function AIChat() {
   const { isOpen, setIsOpen, messages, send, loading, hydrating, error, setError, pageContext } = useAIChat()
+  const { user } = useAuth()
   const [input, setInput] = useState('')
   const bodyRef = useRef(null)
   const taRef = useRef(null)
@@ -109,8 +109,18 @@ export default function AIChat() {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit() }
   }
 
-  // The AI Coach & AI Interview pages handle their own focus — no floating trigger there.
-  if (location.pathname.startsWith('/coach') || location.pathname.startsWith('/interview')) return null
+  // The chatbot must NOT appear on the Signup/Landing page, onboarding, full AI coach page, or live AI interview,
+  // and must only appear after the dashboard / inner workspace is active.
+  const isExcludedPath =
+    location.pathname === '/' ||
+    location.pathname.startsWith('/auth') ||
+    location.pathname.startsWith('/login') ||
+    location.pathname.startsWith('/register') ||
+    location.pathname.startsWith('/onboarding') ||
+    location.pathname.startsWith('/coach') ||
+    location.pathname.startsWith('/interview')
+
+  if (!user || isExcludedPath) return null
 
   if (!isOpen) {
     return (

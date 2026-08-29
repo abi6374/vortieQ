@@ -6,6 +6,7 @@ import { AIChatProvider } from './contexts/AIChatContext'
 import { SidebarProvider } from './contexts/SidebarContext'
 import AIChat from './components/ui/AIChat'
 import ProtectedRoute from './components/auth/ProtectedRoute'
+import AuthScreen from './components/auth/AuthScreen'
 import LandingPage from './pages/LandingPage'
 import OnboardingPage from './pages/OnboardingPage'
 import RoadmapPage from './pages/RoadmapPage'
@@ -29,6 +30,9 @@ export default function App() {
             <AIChatProvider>
             <Routes>
               <Route path="/" element={<LandingPage />} />
+              <Route path="/auth" element={<AuthScreen />} />
+              <Route path="/login" element={<AuthScreen />} />
+              <Route path="/register" element={<AuthScreen />} />
               <Route
                 path="/onboarding"
                 element={

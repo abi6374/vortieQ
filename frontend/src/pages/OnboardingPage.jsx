@@ -33,6 +33,7 @@ export default function OnboardingPage() {
   const [targetRoleOverride, setTargetRoleOverride] = useState('')
   const [githubData, setGithubData] = useState(null)
   const [githubLoading, setGithubLoading] = useState(false)
+  const [githubSyncError, setGithubSyncError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
   const [genStatus, setGenStatus] = useState('loading') // 'loading' | 'success' | 'error'
@@ -61,6 +62,7 @@ export default function OnboardingPage() {
     const targetUsername = (customUsername || user?.user_metadata?.user_name || user?.user_metadata?.preferred_username || '').trim()
     if (!targetUsername && !session?.provider_token) return
     setGithubLoading(true)
+    setGithubSyncError('')
     try {
       const res = await api.post('/api/profile/github', {
         token: session?.provider_token,
@@ -74,7 +76,14 @@ export default function OnboardingPage() {
         }
       }
     } catch (err) {
+      // Previously this only console.warn'd - a nonexistent username or a
+      // rate-limit both failed completely silently, with no way for the
+      // learner to tell why nothing happened. Surface the backend's real
+      // detail (e.g. "GitHub user '@x' was not found...") instead.
       console.warn('[Onboarding] GitHub profile ingestion note:', err)
+      setGithubSyncError(
+        err?.response?.data?.detail || 'Could not sync your GitHub profile. Please try again.'
+      )
     } finally {
       setGithubLoading(false)
     }
@@ -213,6 +222,7 @@ export default function OnboardingPage() {
           <LearnerIntakeWorkspace
             githubData={githubData}
             githubLoading={githubLoading}
+            githubSyncError={githubSyncError}
             authenticatedUsername={user?.user_metadata?.user_name || user?.user_metadata?.preferred_username || ''}
             onSyncGithub={handleSyncGithub}
             onExtracted={handleResumeExtracted}

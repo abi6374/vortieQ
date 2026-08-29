@@ -60,22 +60,20 @@ export default function AuthCard() {
         <button
           type="button"
           onClick={() => switchTab('signin')}
-          className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
-            !isSignUp
+          className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${!isSignUp
               ? 'bg-indigo-600 text-white'
               : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-          }`}
+            }`}
         >
           Sign In
         </button>
         <button
           type="button"
           onClick={() => switchTab('signup')}
-          className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
-            isSignUp
+          className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${isSignUp
               ? 'bg-indigo-600 text-white'
               : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-          }`}
+            }`}
         >
           Sign Up
         </button>
@@ -93,7 +91,7 @@ export default function AuthCard() {
               value={fullName}
               onChange={handleChange(setFullName)}
               className={INPUT_CLASS}
-              placeholder="Alex Smith"
+              placeholder="HackerEarth Team ?"
             />
           </div>
         )}

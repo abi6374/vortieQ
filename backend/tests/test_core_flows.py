@@ -111,6 +111,30 @@ def test_partial_upsert_never_wipes_untouched_fields():
             )
 
 
+def test_upsert_profile_persists_github_username_and_repos():
+    """routers/github.py's username-based sync path passes github_username
+    and github_repos_summary (migration 004_github_profile_link.sql) -
+    verify upsert_profile actually forwards them, as the single source of
+    truth for "which GitHub account is connected" (previously scattered
+    across localStorage keys and onboarding-only component state)."""
+    mock_supabase = MagicMock()
+    mock_table = MagicMock()
+    mock_supabase.table.return_value = mock_table
+    mock_table.upsert.return_value.execute.return_value = MagicMock(data=[{"id": "user-123"}])
+
+    with patch("app.services.profile_service.supabase_client", mock_supabase):
+        upsert_profile("user-123", {
+            "topic_ratings": [],
+            "detected_years_experience": 3,
+            "github_username": "octocat",
+            "github_repos_summary": [{"name": "Hello-World", "language": "Python"}],
+        })
+
+        called_payload = mock_table.upsert.call_args[0][0]
+        assert called_payload["github_username"] == "octocat"
+        assert called_payload["github_repos_summary"] == [{"name": "Hello-World", "language": "Python"}]
+
+
 def test_web_search_ranking_and_graceful_fallback():
     """Verify search ranking prioritizes preferred course domains."""
     sample_results = [
