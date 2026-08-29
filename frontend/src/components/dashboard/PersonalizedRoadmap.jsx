@@ -500,8 +500,8 @@ export default function PersonalizedRoadmap({ pathData = null }) {
                       <div key={task.id} className="space-y-2">
                         <div className={`border rounded-xl p-3.5 sm:p-4 flex items-center justify-between gap-3 transition-colors ${
                           isCompleted
-                            ? 'border-[#22A06B]/30 bg-[#F6FEF9]'
-                            : 'border-[#e0e0e0] bg-white hover:border-[#0066cc]/40'
+                            ? 'border-[#22A06B]/30 dark:border-[#22A06B]/40 bg-[#F6FEF9] dark:bg-[#10221A]'
+                            : 'border-[#e0e0e0] dark:border-[#242E40] bg-white dark:bg-[#141A26] hover:border-[#0066cc]/40 dark:hover:border-[#38BDF8]/40'
                         }`}>
                           <div className="flex items-center gap-3.5 min-w-0">
                             {/* Checkbox button */}
@@ -511,7 +511,7 @@ export default function PersonalizedRoadmap({ pathData = null }) {
                               className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0 cursor-pointer ${
                                 isCompleted
                                   ? 'bg-[#22A06B] border-[#22A06B] text-white shadow-xs'
-                                  : 'border-[#d2d2d7] hover:border-[#0066cc]'
+                                  : 'border-[#d2d2d7] dark:border-[#334155] hover:border-[#0066cc] dark:hover:border-[#38BDF8]'
                               }`}
                               aria-label="Toggle task completion"
                             >
@@ -523,7 +523,7 @@ export default function PersonalizedRoadmap({ pathData = null }) {
                             </button>
 
                             {/* Task Icon / Emoji */}
-                            <span className="w-9 h-9 rounded-lg bg-[#eaf2fc] text-[#0066cc] flex items-center justify-center flex-none font-bold text-sm">
+                            <span className="w-9 h-9 rounded-lg bg-[#eaf2fc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] border border-[#cfe4fb] dark:border-[#242E40] flex items-center justify-center flex-none font-bold text-sm">
                               {task.skill_tags?.[0]?.toLowerCase().includes('python')
                                 ? '🐍'
                                 : task.skill_tags?.[0]?.toLowerCase().includes('stat')
@@ -537,15 +537,15 @@ export default function PersonalizedRoadmap({ pathData = null }) {
 
                             {/* Title & Subtitle */}
                             <div className="min-w-0">
-                              <h4 className={`font-bold text-sm text-[#1d1d1f] truncate flex items-center gap-1.5 ${isCompleted ? 'line-through opacity-60' : ''}`}>
+                              <h4 className={`font-bold text-sm text-[#1d1d1f] dark:text-white truncate flex items-center gap-1.5 ${isCompleted ? 'line-through opacity-60' : ''}`}>
                                 <span className="truncate">{task.title}</span>
                                 {task.partTotal > 1 && (
-                                  <span className="flex-none text-[10px] font-bold text-[#0066cc] bg-[#eaf2fc] px-1.5 py-0.5 rounded-full no-underline">
+                                  <span className="flex-none text-[10px] font-bold text-[#0066cc] dark:text-[#38BDF8] bg-[#eaf2fc] dark:bg-[#1E293B] px-1.5 py-0.5 rounded-full no-underline border border-[#cfe4fb] dark:border-[#242E40]">
                                     Part {task.partNumber}/{task.partTotal}
                                   </span>
                                 )}
                               </h4>
-                              <p className="text-xs text-[#7a7a7a] mt-0.5 truncate">
+                              <p className="text-xs text-[#7a7a7a] dark:text-[#94A3B8] mt-0.5 truncate">
                                 {task.subtitle}
                               </p>
                             </div>
@@ -554,7 +554,7 @@ export default function PersonalizedRoadmap({ pathData = null }) {
                           {/* Right Controls */}
                           <div className="flex items-center gap-3 flex-shrink-0">
                             <span
-                              className="text-xs font-semibold text-[#0066cc] bg-[#eaf2fc] px-2.5 py-1 rounded-lg"
+                              className="text-xs font-semibold text-[#0066cc] dark:text-[#38BDF8] bg-[#eaf2fc] dark:bg-[#1E293B] border border-[#cfe4fb] dark:border-[#242E40] px-2.5 py-1 rounded-lg"
                               title={task.partTotal > 1 ? `${task.duration_hrs}h this week of ${task.fullDurationHrs}h total` : undefined}
                             >
                               {task.duration_hrs} hrs
@@ -562,7 +562,7 @@ export default function PersonalizedRoadmap({ pathData = null }) {
                             <button
                               type="button"
                               onClick={() => toggleWhy(task.id)}
-                              className="text-xs font-semibold text-[#0066cc] hover:underline whitespace-nowrap cursor-pointer"
+                              className="text-xs font-semibold text-[#0066cc] dark:text-[#38BDF8] hover:underline whitespace-nowrap cursor-pointer"
                             >
                               Why this?
                             </button>
@@ -571,7 +571,7 @@ export default function PersonalizedRoadmap({ pathData = null }) {
                                 href={task.resource_url}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="px-2.5 py-1 bg-white border border-[#e0e0e0] hover:border-[#0066cc] hover:text-[#0066cc] rounded-lg text-xs font-semibold text-[#333333] transition-colors"
+                                className="px-2.5 py-1 bg-white dark:bg-[#0E131E] border border-[#e0e0e0] dark:border-[#242E40] hover:border-[#0066cc] dark:hover:border-[#38BDF8] hover:text-[#0066cc] dark:hover:text-[#38BDF8] rounded-lg text-xs font-semibold text-[#333333] dark:text-[#CBD5E1] transition-colors"
                               >
                                 Open ↗
                               </a>

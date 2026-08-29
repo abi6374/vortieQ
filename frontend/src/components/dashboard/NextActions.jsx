@@ -12,14 +12,14 @@ import FeedbackButtons from './FeedbackButtons'
  *   onRefresh - function, called after feedback so the dashboard re-fetches
  */
 const DIFFICULTY_STYLES = {
-  beginner: 'bg-emerald-100 text-emerald-700',
-  intermediate: 'bg-amber-100 text-amber-700',
-  advanced: 'bg-rose-100 text-rose-700',
+  beginner: 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800',
+  intermediate: 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800',
+  advanced: 'bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800',
 }
 
 function DifficultyBadge({ difficulty }) {
   if (!difficulty) return null
-  const style = DIFFICULTY_STYLES[String(difficulty).toLowerCase()] || 'bg-gray-100 text-gray-600'
+  const style = DIFFICULTY_STYLES[String(difficulty).toLowerCase()] || 'bg-gray-100 dark:bg-[#1E293B] text-gray-600 dark:text-[#CBD5E1] border border-gray-200 dark:border-[#242E40]'
   return (
     <span className={`rounded-full px-2 py-0.5 text-xs font-semibold capitalize ${style}`}>
       {difficulty}
@@ -33,17 +33,17 @@ export default function NextActions({ steps = [], pathId, onRefresh }) {
   return (
     <section className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-bold text-gray-800">Up Next</h3>
+        <h3 className="text-lg font-bold text-gray-800 dark:text-white">Up Next</h3>
         {visibleSteps.length > 0 && (
-          <span className="text-xs font-semibold text-gray-400">
+          <span className="text-xs font-semibold text-gray-400 dark:text-[#94A3B8]">
             {visibleSteps.length} recommended
           </span>
         )}
       </div>
 
       {visibleSteps.length === 0 ? (
-        <div className="bg-white rounded-2xl shadow p-8 text-center">
-          <p className="text-base font-medium text-gray-600">
+        <div className="bg-white dark:bg-[#141A26] border border-gray-100 dark:border-[#242E40] rounded-2xl shadow p-8 text-center">
+          <p className="text-base font-medium text-gray-600 dark:text-[#CBD5E1]">
             🎉 You're all caught up! View your full roadmap for more.
           </p>
         </div>
@@ -54,18 +54,18 @@ export default function NextActions({ steps = [], pathId, onRefresh }) {
             return (
               <article
                 key={step.id}
-                className="bg-white rounded-2xl shadow p-5 transition-shadow hover:shadow-md"
+                className="bg-white dark:bg-[#141A26] border border-gray-100 dark:border-[#242E40] rounded-2xl shadow p-5 transition-shadow hover:shadow-md"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0">
-                    <h4 className="font-bold text-gray-900 leading-snug">
+                    <h4 className="font-bold text-gray-900 dark:text-white leading-snug">
                       {course.title || 'Recommended course'}
                     </h4>
-                    <div className="mt-1.5 flex flex-wrap items-center gap-2 text-sm text-gray-500">
-                      {course.provider && <span>{course.provider}</span>}
+                    <div className="mt-1.5 flex flex-wrap items-center gap-2 text-sm text-gray-500 dark:text-[#94A3B8]">
+                      {course.provider && <span className="font-medium text-gray-700 dark:text-[#CBD5E1]">{course.provider}</span>}
                       <DifficultyBadge difficulty={course.difficulty} />
                       {course.duration_hrs != null && (
-                        <span className="text-gray-400">· {course.duration_hrs} hrs</span>
+                        <span className="text-gray-400 dark:text-[#64748B]">· {course.duration_hrs} hrs</span>
                       )}
                     </div>
                   </div>
@@ -74,14 +74,14 @@ export default function NextActions({ steps = [], pathId, onRefresh }) {
                       href={course.resource_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="shrink-0 text-sm font-medium text-indigo-600 hover:text-indigo-700 hover:underline"
+                      className="shrink-0 text-sm font-medium text-indigo-600 dark:text-[#38BDF8] hover:text-indigo-700 dark:hover:text-[#7DD3FC] hover:underline"
                     >
                       Open ↗
                     </a>
                   )}
                 </div>
 
-                <hr className="my-4 border-gray-100" />
+                <hr className="my-4 border-gray-100 dark:border-[#1E2638]" />
 
                 <FeedbackButtons stepId={step.id} stepStatus={step.status} onFeedbackGiven={onRefresh} />
               </article>

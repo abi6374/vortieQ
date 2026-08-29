@@ -70,6 +70,21 @@ const STYLES = `
   -webkit-font-smoothing:antialiased; }
 .rx *{ box-sizing:border-box; }
 
+/* Stat icons light mode */
+.rx-stat .s-ic { width:38px; height:38px; border-radius:10px; display:grid; place-items:center; flex:none; }
+.rx-stat .s-ic.ic-star { background: #eaf2fc; color: #0066cc; border: 1px solid #cfe4fb; }
+.rx-stat .s-ic.ic-check { background: #ECFDF3; color: #16A34A; border: 1px solid #B7E7C9; }
+.rx-stat .s-ic.ic-saved { background: #EFF6FF; color: #3B82F6; border: 1px solid #DBEAFE; }
+.rx-stat .s-ic.ic-time { background: #FFF7E6; color: #F59E0B; border: 1px solid #FDE68A; }
+
+/* Course/Resource icons light mode */
+.rx-card .r-ic { width:44px; height:44px; border-radius:12px; display:grid; place-items:center; flex:none; }
+.rx-card .r-ic.ic-course, .rx-card .r-ic.ic-video { background: #eaf2fc; color: #0066cc; border: 1px solid #cfe4fb; }
+.rx-card .r-ic.ic-article { background: #EFF6FF; color: #3B82F6; border: 1px solid #DBEAFE; }
+.rx-card .r-ic.ic-practice { background: #ECFEFF; color: #0EA5E9; border: 1px solid #CFFAFE; }
+.rx-card .r-ic.ic-project { background: #FDF2F8; color: #EC4899; border: 1px solid #FCE7F3; }
+.rx-card .r-ic.ic-doc { background: #f5f5f5; color: #6e6e73; border: 1px solid #e5e5e5; }
+
 /* ── Dark Mode Overrides ─── */
 html.dark .rx {
   --navy: #F9FAFB;
@@ -97,13 +112,69 @@ html.dark .rx-search .s-in {
   border-color: #242E40 !important;
   color: #F9FAFB !important;
 }
-html.dark .rx-picked {
-  background: linear-gradient(160deg, #141A26, #0E131E) !important;
-  border-color: #242E40 !important;
+
+/* Stat strip icon boxes in dark mode */
+html.dark .rx-stat .s-ic.ic-star {
+  background: rgba(56, 189, 248, 0.15) !important;
+  color: #38BDF8 !important;
+  border: 1px solid rgba(56, 189, 248, 0.35) !important;
 }
+html.dark .rx-stat .s-ic.ic-check {
+  background: rgba(34, 197, 94, 0.15) !important;
+  color: #4ADE80 !important;
+  border: 1px solid rgba(34, 197, 94, 0.35) !important;
+}
+html.dark .rx-stat .s-ic.ic-saved {
+  background: rgba(96, 165, 250, 0.15) !important;
+  color: #60A5FA !important;
+  border: 1px solid rgba(96, 165, 250, 0.35) !important;
+}
+html.dark .rx-stat .s-ic.ic-time {
+  background: rgba(245, 158, 11, 0.15) !important;
+  color: #FBBF24 !important;
+  border: 1px solid rgba(245, 158, 11, 0.35) !important;
+}
+
+/* Course and Resource icons in dark mode */
+html.dark .rx-card .r-ic.ic-course,
+html.dark .rx-card .r-ic.ic-video {
+  background: rgba(56, 189, 248, 0.15) !important;
+  color: #38BDF8 !important;
+  border: 1px solid rgba(56, 189, 248, 0.35) !important;
+}
+html.dark .rx-card .r-ic.ic-article {
+  background: rgba(96, 165, 250, 0.15) !important;
+  color: #60A5FA !important;
+  border: 1px solid rgba(96, 165, 250, 0.35) !important;
+}
+html.dark .rx-card .r-ic.ic-practice {
+  background: rgba(14, 165, 233, 0.15) !important;
+  color: #38BDF8 !important;
+  border: 1px solid rgba(14, 165, 233, 0.35) !important;
+}
+html.dark .rx-card .r-ic.ic-project {
+  background: rgba(244, 114, 182, 0.15) !important;
+  color: #F472B6 !important;
+  border: 1px solid rgba(244, 114, 182, 0.35) !important;
+}
+html.dark .rx-card .r-ic.ic-doc {
+  background: rgba(148, 163, 184, 0.15) !important;
+  color: #CBD5E1 !important;
+  border: 1px solid rgba(148, 163, 184, 0.35) !important;
+}
+
 html.dark .rx-insight {
   background: linear-gradient(160deg, #142036, #0E131E) !important;
   border-color: #242E40 !important;
+}
+html.dark .rx-card .r-type {
+  color: #38BDF8 !important;
+}
+html.dark .rx-card .r-title {
+  color: #FFFFFF !important;
+}
+html.dark .rx-card .r-desc {
+  color: #94A3B8 !important;
 }
 html.dark .rx-card .r-tag {
   background: #0E131E !important;
@@ -114,6 +185,19 @@ html.dark .rx-card .r-save {
   background: #0E131E !important;
   border-color: #242E40 !important;
   color: #94A3B8 !important;
+}
+html.dark .rx-saved-item .s-ic {
+  background: rgba(56, 189, 248, 0.15) !important;
+  color: #38BDF8 !important;
+  border: 1px solid rgba(56, 189, 248, 0.25) !important;
+}
+html.dark .rx-plan-item .chk {
+  border-color: #334155 !important;
+  background: #0E131E !important;
+}
+html.dark .rx-plan-item.done .chk {
+  background: #16A34A !important;
+  border-color: #16A34A !important;
 }
 html.dark .rx-btn.ghost {
   background: #141A26 !important;
@@ -337,7 +421,31 @@ export default function ResourcesScreen() {
           .eq('user_id', user.id).eq('status', 'active')
           .order('generated_at', { ascending: false }).limit(1)
         const p = paths?.[0]
-        if (!p) { if (!cancelled) { setPath(null); setLoading(false) } return }
+        if (!p) {
+          const { data: allCourses } = await supabase.from('courses').select('*').limit(20)
+          if (!cancelled && allCourses && allCourses.length > 0) {
+            setSteps(allCourses.map((c, i) => ({
+              id: c.id || `course-${i}`,
+              status: 'not_started',
+              milestone_label: 'Catalog',
+              explanation: c.description || '',
+              seq: i + 1,
+              weekNumber: 1,
+              title: c.title,
+              description: c.description,
+              provider: c.provider,
+              difficulty: c.difficulty || 'beginner',
+              duration_hrs: c.duration_hrs || 10,
+              resource_url: c.resource_url,
+              skill_tags: c.skill_tags || [],
+            })))
+            setPath({ goal_text: 'AIML Engineer & Data Analytics' })
+          } else if (!cancelled) {
+            setPath(null)
+          }
+          if (!cancelled) setLoading(false)
+          return
+        }
         const { data: rows } = await supabase
           .from('path_steps')
           .select('id, sequence_order, status, milestone_label, explanation, week_number, courses(id, title, description, provider, difficulty, duration_hrs, resource_url, skill_tags)')
@@ -488,13 +596,13 @@ export default function ResourcesScreen() {
       }
     >
     <div className="rx">{whyOpen && (
-        <div onClick={() => setWhyOpen(false)} style={{position:"fixed",inset:0,background:"rgba(29,29,31,.35)",display:"grid",placeItems:"center",zIndex:80,padding:20}}>
-          <div onClick={(e)=>e.stopPropagation()} style={{background:"#fff",border:"1px solid var(--vbd)",borderRadius:16,padding:22,maxWidth:460,width:"100%",boxShadow:"0 20px 40px rgba(25,49,75,.2)"}}>
+        <div onClick={() => setWhyOpen(false)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.6)",display:"grid",placeItems:"center",zIndex:80,padding:20}}>
+          <div onClick={(e)=>e.stopPropagation()} className="bg-white dark:bg-[#141A26] border border-[#cfe4fb] dark:border-[#242E40]" style={{borderRadius:16,padding:22,maxWidth:460,width:"100%",boxShadow:"0 20px 40px rgba(0,0,0,.4)"}}>
             <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
-              <span style={{width:34,height:34,borderRadius:10,background:"var(--vsoft)",color:"var(--v)",display:"grid",placeItems:"center"}}>{I.spark}</span>
-              <h3 style={{margin:0,fontFamily:"Manrope,sans-serif",fontSize:17,fontWeight:800}}>Why these resources?</h3>
+              <span className="s-ic ic-star" style={{width:34,height:34,borderRadius:10,display:"grid",placeItems:"center"}}>{I.spark}</span>
+              <h3 style={{margin:0,fontFamily:"Manrope,sans-serif",fontSize:17,fontWeight:800}} className="text-[#1d1d1f] dark:text-white">Why these resources?</h3>
             </div>
-            <p style={{margin:0,fontSize:13.5,color:"var(--slate)",lineHeight:1.55}}>
+            <p style={{margin:0,fontSize:13.5,lineHeight:1.55}} className="text-[#6e6e73] dark:text-[#94A3B8]">
               PathFinder ranks these against your active roadmap: your target role, current level, weekly hours, completed courses, and per-topic skill gaps. Courses you have already completed are excluded. The current week’s prerequisites push closest-fit resources to the top.
             </p>
             <button onClick={() => setWhyOpen(false)} style={{marginTop:16,background:"var(--v)",border:"none",color:"#fff",padding:"9px 16px",borderRadius:10,fontWeight:700,fontSize:13,cursor:"pointer"}}>Got it</button>
@@ -510,18 +618,6 @@ export default function ResourcesScreen() {
           </div>
         </header>
 
-        {path && (
-          <section className="rx-picked">
-            <span className="p-ic">{I.spark}</span>
-            <div className="p-body">
-              <h3>Picked for you</h3>
-              <p>These resources match your current roadmap, skill gaps, and learning progress.</p>
-            </div>
-            <span className="p-meta">Week {roadmap.currentWeek || 1} · {(steps.find((s)=>s.status!=='completed')?.milestone_label) || 'Foundations'}</span>
-            <button type="button" onClick={() => setWhyOpen(true)} style={{background:"none",border:"none",padding:0,color:"var(--v)",fontSize:13,fontWeight:600,cursor:"pointer"}}>Why these resources? →</button>
-          </section>
-        )}
-
         <div className="rx-search">
           <div className="s-in">{I.search}<input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search courses, videos, articles, documentation, practice..." /><span className="kbd">⌘ K</span></div>
           <button className="rx-filter" onClick={() => setShowFilters((v) => !v)}>{I.slider}Filters{showFilters ? " ▾" : ""}</button>
@@ -532,7 +628,7 @@ export default function ResourcesScreen() {
         </div>
 
         {showFilters && (
-          <div style={{background:'#fff',border:'1px solid var(--border)',borderRadius:12,padding:'14px 16px',display:'flex',gap:22,flexWrap:'wrap',alignItems:'flex-end'}}>
+          <div className="bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40]" style={{borderRadius:12,padding:'14px 16px',display:'flex',gap:22,flexWrap:'wrap',alignItems:'flex-end'}}>
             <div>
               <div style={{fontSize:11.5,fontWeight:700,letterSpacing:.05,color:'var(--muted)',textTransform:'uppercase',marginBottom:6}}>Difficulty</div>
               <div style={{display:'flex',gap:6}}>
@@ -557,10 +653,10 @@ export default function ResourcesScreen() {
         )}
 
         <div className="rx-stats">
-          <div className="rx-stat"><span className="s-ic" style={{ background: V_SOFT, color: V }}>{I.star}</span><div><div className="s-num">{Math.max(0, steps.length - completedCount)}</div><div className="s-lbl">Recommended</div></div></div>
-          <div className="rx-stat"><span className="s-ic" style={{ background: '#ECFDF3', color: '#16A34A' }}>{I.check}</span><div><div className="s-num">{completedCount}</div><div className="s-lbl">Completed</div></div></div>
-          <div className="rx-stat"><span className="s-ic" style={{ background: '#EFF6FF', color: '#3B82F6' }}>{I.bookmark(true)}</span><div><div className="s-num">{saved.size}</div><div className="s-lbl">Saved</div></div></div>
-          <div className="rx-stat"><span className="s-ic" style={{ background: '#FFF7E6', color: '#F59E0B' }}>{I.clock}</span><div><div className="s-num">{completedHrs.toFixed(1)} hrs</div><div className="s-lbl">Learning time</div></div></div>
+          <div className="rx-stat"><span className="s-ic ic-star">{I.star}</span><div><div className="s-num">{Math.max(0, steps.length - completedCount)}</div><div className="s-lbl">Recommended</div></div></div>
+          <div className="rx-stat"><span className="s-ic ic-check">{I.check}</span><div><div className="s-num">{completedCount}</div><div className="s-lbl">Completed</div></div></div>
+          <div className="rx-stat"><span className="s-ic ic-saved">{I.bookmark(true)}</span><div><div className="s-num">{saved.size}</div><div className="s-lbl">Saved</div></div></div>
+          <div className="rx-stat"><span className="s-ic ic-time">{I.clock}</span><div><div className="s-num">{completedHrs.toFixed(1)} hrs</div><div className="s-lbl">Learning time</div></div></div>
         </div>
 
         <div className="rx-body">
@@ -588,7 +684,7 @@ export default function ResourcesScreen() {
                   const label = isDone ? 'Review' : t.label
                   return (
                     <div key={s.id} className="rx-card">
-                      <span className="r-ic" style={{ background: meta.bg, color: meta.color }}>{I[meta.icon]}</span>
+                      <span className={`r-ic ic-${t.kind.toLowerCase()}`}>{I[meta.icon]}</span>
                       <div className="r-body">
                         <div className="r-type">{t.kind}</div>
                         <h4 className="r-title" title={s.title}>{s.title}</h4>
@@ -704,9 +800,10 @@ export default function ResourcesScreen() {
                   value={webQuery}
                   onChange={(e) => setWebQuery(e.target.value)}
                   placeholder="e.g. machine learning, React, SQL..."
+                  className="bg-white dark:bg-[#0E131E] border border-[#e0e0e0] dark:border-[#242E40] text-[#1d1d1f] dark:text-white"
                   style={{
                     flex: 1, minWidth: 0, fontSize: 13, padding: '8px 10px',
-                    border: '1px solid #e0e0e0', borderRadius: 8, outline: 'none',
+                    borderRadius: 8, outline: 'none',
                   }}
                 />
                 <button
@@ -776,7 +873,7 @@ export default function ResourcesScreen() {
                 <div className="rx-saved-list">
                   {recent.map((s) => (
                     <div key={s.id} className="rx-saved-item">
-                      <span className="s-ic" style={{ background: '#ECFDF3', color: '#16A34A' }}>{I.check}</span>
+                      <span className="s-ic ic-check">{I.check}</span>
                       <div className="s-body">
                         <div className="s-t">{s.title}</div>
                         <div className="s-m">Completed · {s.duration_hrs}h</div>
