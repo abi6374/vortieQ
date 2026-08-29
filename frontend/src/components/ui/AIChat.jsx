@@ -109,8 +109,8 @@ export default function AIChat() {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit() }
   }
 
-  // The AI Coach page IS the full conversation — no floating trigger there.
-  if (location.pathname.startsWith('/coach')) return null
+  // The AI Coach & AI Interview pages handle their own focus — no floating trigger there.
+  if (location.pathname.startsWith('/coach') || location.pathname.startsWith('/interview')) return null
 
   if (!isOpen) {
     return (

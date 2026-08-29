@@ -123,7 +123,12 @@ export default function TopBar({ children }) {
                             <span className={`flex ${on ? 'text-[#0066cc] dark:text-[#38BDF8]' : 'text-[#6e6e73] dark:text-[#94A3B8]'}`}>
                               {ICONS[item.key]}
                             </span>
-                            <span>{item.label}</span>
+                            <span className="flex-1">{item.label}</span>
+                            {item.badge && (
+                              <span className="px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md bg-[#0066cc]/10 text-[#0066cc] dark:bg-[#38BDF8]/20 dark:text-[#38BDF8]">
+                                {item.badge}
+                              </span>
+                            )}
                           </button>
                         )
                       })}

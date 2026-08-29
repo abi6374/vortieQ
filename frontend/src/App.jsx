@@ -16,6 +16,7 @@ import ResourcesPage from './pages/ResourcesPage'
 import AccountPage from './pages/AccountPage'
 import SettingsPage from './pages/SettingsPage'
 import CoachPage from './pages/CoachPage'
+import InterviewPage from './pages/InterviewPage'
 
 import BackToTop from './components/ui/BackToTop'
 
@@ -97,6 +98,14 @@ export default function App() {
                 element={
                   <ProtectedRoute>
                     <ResourcesPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/interview"
+                element={
+                  <ProtectedRoute>
+                    <InterviewPage />
                   </ProtectedRoute>
                 }
               />
