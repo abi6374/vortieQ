@@ -70,6 +70,73 @@ const STYLES = `
   -webkit-font-smoothing:antialiased; }
 .rx *{ box-sizing:border-box; }
 
+/* ── Dark Mode Overrides ─── */
+html.dark .rx {
+  --navy: #F9FAFB;
+  --slate: #94A3B8;
+  --muted: #64748B;
+  --border: #242E40;
+  --border-l: #1E2638;
+  --page: #0B0E14;
+  --card: #141A26;
+  --vsoft: #1E293B;
+  --vsoft-2: #101622;
+  --vbd: #242E40;
+  --green-bg: rgba(22, 163, 74, 0.15);
+}
+html.dark .rx-card,
+html.dark .rx-panel,
+html.dark .rx-stat,
+html.dark .rx-goal,
+html.dark .rx-view-road,
+html.dark .rx-filter,
+html.dark .rx-chip,
+html.dark .rx-sort,
+html.dark .rx-search .s-in {
+  background: #141A26 !important;
+  border-color: #242E40 !important;
+  color: #F9FAFB !important;
+}
+html.dark .rx-picked {
+  background: linear-gradient(160deg, #141A26, #0E131E) !important;
+  border-color: #242E40 !important;
+}
+html.dark .rx-insight {
+  background: linear-gradient(160deg, #142036, #0E131E) !important;
+  border-color: #242E40 !important;
+}
+html.dark .rx-card .r-tag {
+  background: #0E131E !important;
+  color: #CBD5E1 !important;
+  border: 1px solid #1E2638 !important;
+}
+html.dark .rx-card .r-save {
+  background: #0E131E !important;
+  border-color: #242E40 !important;
+  color: #94A3B8 !important;
+}
+html.dark .rx-btn.ghost {
+  background: #141A26 !important;
+  border-color: #38BDF8 !important;
+  color: #38BDF8 !important;
+}
+html.dark .rx-chip.on {
+  background: #0066cc !important;
+  border-color: #0066cc !important;
+  color: #ffffff !important;
+}
+html.dark .rx-search input {
+  color: #F9FAFB !important;
+}
+html.dark .rx-search .kbd {
+  background: #0E131E !important;
+  border-color: #242E40 !important;
+  color: #94A3B8 !important;
+}
+html.dark .rx-bar {
+  background: #1E2638 !important;
+}
+
 /* ── Main column (lives inside AppShell's .pf-content) ─── */
 .rx-main{ display:flex; flex-direction:column; gap:22px; min-width:0; }
 

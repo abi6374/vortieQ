@@ -500,14 +500,14 @@ export default function SkillInsightsScreen() {
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex items-start gap-3.5">
             {/* Purple Icon Badge */}
-            <div className="w-11 h-11 rounded-2xl bg-[#eaf2fc] border border-[#dcecfd] text-[#0066cc] flex items-center justify-center flex-none shadow-sm mt-0.5">
+            <div className="w-11 h-11 rounded-2xl bg-[#eaf2fc] dark:bg-[#1E293B] border border-[#dcecfd] dark:border-[#242E40] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center flex-none shadow-sm mt-0.5">
               <Lightbulb className="w-6 h-6" strokeWidth={2.2} />
             </div>
             <div>
-              <h1 className="font-['Manrope'] font-extrabold text-2xl sm:text-[30px] lg:text-[32px] text-[#1d1d1f] tracking-tight leading-tight">
+              <h1 className="font-['Manrope'] font-extrabold text-2xl sm:text-[30px] lg:text-[32px] text-[#1d1d1f] dark:text-white tracking-tight leading-tight">
                 Skill Insights
               </h1>
-              <p className="mt-0.5 text-xs sm:text-[14px] text-[#333333]">
+              <p className="mt-0.5 text-xs sm:text-[14px] text-[#333333] dark:text-[#94A3B8]">
                 Understand your strengths, find gaps and focus on what to learn next.
               </p>
             </div>
@@ -515,14 +515,14 @@ export default function SkillInsightsScreen() {
 
           {/* Right Side: Real Goal & Last Updated (live-computed, so "now") */}
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 lg:self-center">
-            <div className="flex items-center gap-2 px-3.5 py-2 bg-white border border-[#e0e0e0] rounded-xl text-xs font-bold text-[#1d1d1f] shadow-sm max-w-xs">
-              <Target className="w-4 h-4 text-[#0066cc] flex-none" strokeWidth={2.2} />
+            <div className="flex items-center gap-2 px-3.5 py-2 bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-xl text-xs font-bold text-[#1d1d1f] dark:text-white shadow-sm max-w-xs">
+              <Target className="w-4 h-4 text-[#0066cc] dark:text-[#38BDF8] flex-none" strokeWidth={2.2} />
               <span className="truncate">
                 {roadmap.path?.goal_text ? `Goal: ${roadmap.path.goal_text.split('.')[0]}` : 'No active goal yet'}
               </span>
             </div>
 
-            <span className="text-xs font-medium text-[#7a7a7a] self-center sm:self-auto">
+            <span className="text-xs font-medium text-[#7a7a7a] dark:text-[#94A3B8] self-center sm:self-auto">
               Last updated: {new Date().toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
             </span>
           </div>
@@ -537,28 +537,28 @@ export default function SkillInsightsScreen() {
           <div className="pf-glass-card p-5 sm:p-6 shadow-sm flex flex-col justify-between">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="w-7 h-7 rounded-xl bg-[#eaf2fc] text-[#0066cc] flex items-center justify-center flex-none shadow-xs">
+                <span className="w-7 h-7 rounded-xl bg-[#eaf2fc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center flex-none shadow-xs">
                   <BarChart3 className="w-3.5 h-3.5" />
                 </span>
-                <span className="text-xs font-bold text-[#333333]">Overall Skill Readiness</span>
+                <span className="text-xs font-bold text-[#333333] dark:text-[#CBD5E1]">Overall Skill Readiness</span>
               </div>
               <Info
-                className="w-3.5 h-3.5 text-[#86868b] cursor-pointer hover:text-[#0066cc]"
+                className="w-3.5 h-3.5 text-[#86868b] dark:text-[#64748B] cursor-pointer hover:text-[#0066cc] dark:hover:text-[#38BDF8]"
                 title="Calculated from assessments, completed learning activities, practice performance, and skill progress."
               />
             </div>
 
             <div className="flex items-baseline gap-3 my-3">
-              <span className="font-['Manrope'] font-extrabold text-2xl sm:text-[28px] text-[#1d1d1f] tracking-tight leading-none">
+              <span className="font-['Manrope'] font-extrabold text-2xl sm:text-[28px] text-[#1d1d1f] dark:text-white tracking-tight leading-none">
                 {roadmap.percent}%
               </span>
-              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#22A06B] bg-[#ECFDF3] px-2 py-0.5 rounded-full border border-[#D1FADF]">
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#22A06B] dark:text-emerald-400 bg-[#ECFDF3] dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-[#D1FADF] dark:border-emerald-800/60">
                 <TrendingUp className="w-3 h-3" />
                 <span>{roadmap.completedSteps} of {roadmap.totalSteps} steps</span>
               </span>
             </div>
 
-            <div className="w-full bg-[#eef2f6] h-2 rounded-full overflow-hidden">
+            <div className="w-full bg-[#eef2f6] dark:bg-[#1E2638] h-2 rounded-full overflow-hidden">
               <div className="bg-gradient-to-r from-[#0066cc] to-[#38bdf8] h-full rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(0,102,204,0.4)]" style={{ width: `${roadmap.percent}%` }} />
             </div>
           </div>
@@ -567,23 +567,23 @@ export default function SkillInsightsScreen() {
           <div className="pf-glass-card p-5 sm:p-6 shadow-sm flex flex-col justify-between">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="w-7 h-7 rounded-xl bg-[#ECFDF3] text-[#22A06B] flex items-center justify-center flex-none shadow-xs">
+                <span className="w-7 h-7 rounded-xl bg-[#ECFDF3] dark:bg-emerald-950/40 text-[#22A06B] dark:text-emerald-400 flex items-center justify-center flex-none shadow-xs">
                   <CheckCircle className="w-3.5 h-3.5" />
                 </span>
-                <span className="text-xs font-bold text-[#333333]">Skills Mastered</span>
+                <span className="text-xs font-bold text-[#333333] dark:text-[#CBD5E1]">Skills Mastered</span>
               </div>
-              <span className="text-[11px] font-bold text-[#7a7a7a]">
+              <span className="text-[11px] font-bold text-[#7a7a7a] dark:text-[#94A3B8]">
                 {totalSkillsCount ? Math.round((masteredSkillsCount / totalSkillsCount) * 100) : 0}%
               </span>
             </div>
 
             <div className="my-3">
-              <span className="font-['Manrope'] font-extrabold text-2xl sm:text-[28px] text-[#1d1d1f] tracking-tight leading-none">
+              <span className="font-['Manrope'] font-extrabold text-2xl sm:text-[28px] text-[#1d1d1f] dark:text-white tracking-tight leading-none">
                 {masteredSkillsCount} / {totalSkillsCount}
               </span>
             </div>
 
-            <div className="w-full bg-[#eef2f6] h-2 rounded-full overflow-hidden">
+            <div className="w-full bg-[#eef2f6] dark:bg-[#1E2638] h-2 rounded-full overflow-hidden">
               <div className="bg-[#22A06B] h-full rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(34,160,107,0.4)]" style={{ width: `${totalSkillsCount ? (masteredSkillsCount / totalSkillsCount) * 100 : 0}%` }} />
             </div>
           </div>
@@ -592,21 +592,21 @@ export default function SkillInsightsScreen() {
           <div className="pf-glass-card p-5 sm:p-6 shadow-sm flex flex-col justify-between">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="w-7 h-7 rounded-xl bg-[#FFF7E6] text-[#D88700] flex items-center justify-center flex-none shadow-xs">
+                <span className="w-7 h-7 rounded-xl bg-[#FFF7E6] dark:bg-amber-950/40 text-[#D88700] dark:text-amber-400 flex items-center justify-center flex-none shadow-xs">
                   <Hourglass className="w-3.5 h-3.5" />
                 </span>
-                <span className="text-xs font-bold text-[#333333]">Skills In Progress</span>
+                <span className="text-xs font-bold text-[#333333] dark:text-[#CBD5E1]">Skills In Progress</span>
               </div>
-              <span className="text-[11px] font-bold text-[#D88700]">{inProgressSkillsCount > 0 ? 'Keep going!' : '—'}</span>
+              <span className="text-[11px] font-bold text-[#D88700] dark:text-amber-400">{inProgressSkillsCount > 0 ? 'Keep going!' : '—'}</span>
             </div>
 
             <div className="my-3">
-              <span className="font-['Manrope'] font-extrabold text-2xl sm:text-[28px] text-[#1d1d1f] tracking-tight leading-none">
+              <span className="font-['Manrope'] font-extrabold text-2xl sm:text-[28px] text-[#1d1d1f] dark:text-white tracking-tight leading-none">
                 {inProgressSkillsCount}
               </span>
             </div>
 
-            <div className="w-full bg-[#eef2f6] h-2 rounded-full overflow-hidden">
+            <div className="w-full bg-[#eef2f6] dark:bg-[#1E2638] h-2 rounded-full overflow-hidden">
               <div className="bg-[#D88700] h-full rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(216,135,0,0.4)]" style={{ width: `${totalSkillsCount ? (inProgressSkillsCount / totalSkillsCount) * 100 : 0}%` }} />
             </div>
           </div>
@@ -615,21 +615,21 @@ export default function SkillInsightsScreen() {
           <div className="pf-glass-card p-5 sm:p-6 shadow-sm flex flex-col justify-between">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="w-7 h-7 rounded-xl bg-[#eaf2fc] text-[#5B8DEF] flex items-center justify-center flex-none shadow-xs">
+                <span className="w-7 h-7 rounded-xl bg-[#eaf2fc] dark:bg-blue-950/40 text-[#5B8DEF] dark:text-blue-400 flex items-center justify-center flex-none shadow-xs">
                   <BookOpen className="w-3.5 h-3.5" />
                 </span>
-                <span className="text-xs font-bold text-[#333333]">Skills to Learn</span>
+                <span className="text-xs font-bold text-[#333333] dark:text-[#CBD5E1]">Skills to Learn</span>
               </div>
-              <span className="text-[11px] font-bold text-[#5B8DEF]">{toLearnSkillsCount > 0 ? 'Focus recommended' : '—'}</span>
+              <span className="text-[11px] font-bold text-[#5B8DEF] dark:text-blue-400">{toLearnSkillsCount > 0 ? 'Focus recommended' : '—'}</span>
             </div>
 
             <div className="my-3">
-              <span className="font-['Manrope'] font-extrabold text-2xl sm:text-[28px] text-[#1d1d1f] tracking-tight leading-none">
+              <span className="font-['Manrope'] font-extrabold text-2xl sm:text-[28px] text-[#1d1d1f] dark:text-white tracking-tight leading-none">
                 {toLearnSkillsCount}
               </span>
             </div>
 
-            <div className="w-full bg-[#eef2f6] h-2 rounded-full overflow-hidden">
+            <div className="w-full bg-[#eef2f6] dark:bg-[#1E2638] h-2 rounded-full overflow-hidden">
               <div className="bg-[#5B8DEF] h-full rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(91,141,239,0.4)]" style={{ width: `${totalSkillsCount ? (toLearnSkillsCount / totalSkillsCount) * 100 : 0}%` }} />
             </div>
           </div>
@@ -644,27 +644,27 @@ export default function SkillInsightsScreen() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6">
               
               {/* CARD 1: Skill Proficiency Comparison (5.5 of 12 cols or 6 cols) */}
-              <div className="lg:col-span-6 bg-white border border-[#e0e0e0] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+              <div className="lg:col-span-6 bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
                 <div>
-                  <div className="flex items-center justify-between pb-3 border-b border-[#f5f5f7]">
+                  <div className="flex items-center justify-between pb-3 border-b border-[#f5f5f7] dark:border-[#1E2638]">
                     <div className="flex items-center gap-2">
-                      <h2 className="font-['Manrope'] font-bold text-base text-[#1d1d1f]">
+                      <h2 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">
                         Skill Proficiency Comparison
                       </h2>
                       <Info
-                        className="w-3.5 h-3.5 text-[#86868b] cursor-pointer hover:text-[#0066cc]"
+                        className="w-3.5 h-3.5 text-[#86868b] dark:text-[#64748B] cursor-pointer hover:text-[#0066cc] dark:hover:text-[#38BDF8]"
                         title="Current completion compared with full completion of the steps assigned for each skill in your roadmap."
                       />
                     </div>
 
                     {/* Chart Legend */}
-                    <div className="flex items-center gap-4 text-xs font-medium text-[#333333]">
+                    <div className="flex items-center gap-4 text-xs font-medium text-[#333333] dark:text-[#CBD5E1]">
                       <div className="flex items-center gap-1.5">
-                        <span className="w-2.5 h-2.5 rounded-full bg-[#0066cc]" />
+                        <span className="w-2.5 h-2.5 rounded-full bg-[#0066cc] dark:bg-[#38BDF8]" />
                         <span>Your Level</span>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <span className="w-3.5 border-t-2 border-dashed border-[#d2d2d7]" />
+                        <span className="w-3.5 border-t-2 border-dashed border-[#d2d2d7] dark:border-[#64748B]" />
                         <span>Target Level (Internship)</span>
                       </div>
                     </div>
@@ -678,11 +678,11 @@ export default function SkillInsightsScreen() {
                         margin={{ top: 20, right: 10, left: -20, bottom: 20 }}
                         barSize={24}
                       >
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f5f5f7" />
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f5f5f7" className="dark:opacity-10" />
                         <XAxis
                           dataKey="skill"
-                          tick={{ fill: '#333333', fontSize: 10.5, fontWeight: 600 }}
-                          axisLine={{ stroke: '#f0f0f0' }}
+                          tick={{ fill: '#64748B', fontSize: 10.5, fontWeight: 600 }}
+                          axisLine={{ stroke: '#242E40' }}
                           tickLine={false}
                           interval={0}
                           height={54}
@@ -697,7 +697,7 @@ export default function SkillInsightsScreen() {
                           domain={[0, 100]}
                           ticks={[0, 20, 40, 60, 80, 100]}
                           tickFormatter={(val) => `${val}%`}
-                          tick={{ fill: '#7a7a7a', fontSize: 10, fontWeight: 600 }}
+                          tick={{ fill: '#64748B', fontSize: 10, fontWeight: 600 }}
                           axisLine={false}
                           tickLine={false}
                         />
@@ -707,7 +707,7 @@ export default function SkillInsightsScreen() {
                             if (active && payload && payload.length) {
                               const d = payload[0].payload
                               return (
-                                <div className="bg-[#1d1d1f] text-white p-2.5 rounded-xl shadow-xl text-xs space-y-1">
+                                <div className="bg-[#1d1d1f] dark:bg-[#0E131E] text-white p-2.5 rounded-xl shadow-xl text-xs space-y-1">
                                   <div className="font-bold border-b border-gray-700 pb-1 text-[#dbeafc]">{d.name || d.skill}</div>
                                   <div className="flex justify-between gap-4">
                                     <span className="text-gray-300">Your Level:</span>
@@ -738,15 +738,15 @@ export default function SkillInsightsScreen() {
               </div>
 
               {/* CARD 2: Skill Radar (3.5 of 12 cols) */}
-              <div className="lg:col-span-3 bg-white border border-[#e0e0e0] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+              <div className="lg:col-span-3 bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
                 <div>
-                  <div className="flex items-center justify-between pb-3 border-b border-[#f5f5f7]">
+                  <div className="flex items-center justify-between pb-3 border-b border-[#f5f5f7] dark:border-[#1E2638]">
                     <div className="flex items-center gap-2">
-                      <h2 className="font-['Manrope'] font-bold text-base text-[#1d1d1f]">
+                      <h2 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">
                         Skill Radar
                       </h2>
                       <Info
-                        className="w-3.5 h-3.5 text-[#86868b] cursor-pointer hover:text-[#0066cc]"
+                        className="w-3.5 h-3.5 text-[#86868b] dark:text-[#64748B] cursor-pointer hover:text-[#0066cc] dark:hover:text-[#38BDF8]"
                         title="Multidimensional visualization of technical competencies vs role benchmarks."
                       />
                     </div>
@@ -755,10 +755,10 @@ export default function SkillInsightsScreen() {
                   <div className="h-60 w-full flex items-center justify-center pt-2">
                     <ResponsiveContainer width="100%" height="100%">
                       <RadarChart data={radarData} outerRadius="75%">
-                        <PolarGrid stroke="#f0f0f0" />
+                        <PolarGrid stroke="#f0f0f0" className="dark:opacity-15" />
                         <PolarAngleAxis
                           dataKey="skill"
-                          tick={{ fill: '#333333', fontSize: 10, fontWeight: 600 }}
+                          tick={{ fill: '#64748B', fontSize: 10, fontWeight: 600 }}
                         />
                         <PolarRadiusAxis domain={[0, 100]} tick={false} axisLine={false} />
                         <Radar
@@ -783,28 +783,28 @@ export default function SkillInsightsScreen() {
                 </div>
 
                 {/* Radar Legend */}
-                <div className="flex items-center justify-center gap-4 text-xs font-medium text-[#333333] pt-2 border-t border-[#f5f5f7]">
+                <div className="flex items-center justify-center gap-4 text-xs font-medium text-[#333333] dark:text-[#CBD5E1] pt-2 border-t border-[#f5f5f7] dark:border-[#1E2638]">
                   <div className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#0066cc]" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#0066cc] dark:bg-[#38BDF8]" />
                     <span>Your Level</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#c3c4c5]" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#c3c4c5] dark:bg-[#64748B]" />
                     <span>Target Level</span>
                   </div>
                 </div>
               </div>
 
               {/* CARD 3: Top Skill Gaps (3 of 12 cols) */}
-              <div className="lg:col-span-3 bg-white border border-[#e0e0e0] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+              <div className="lg:col-span-3 bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
                 <div>
-                  <div className="flex items-center justify-between pb-3 border-b border-[#f5f5f7]">
+                  <div className="flex items-center justify-between pb-3 border-b border-[#f5f5f7] dark:border-[#1E2638]">
                     <div className="flex items-center gap-2">
-                      <h2 className="font-['Manrope'] font-bold text-base text-[#1d1d1f]">
+                      <h2 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">
                         Top Skill Gaps
                       </h2>
                       <Info
-                        className="w-3.5 h-3.5 text-[#86868b] cursor-pointer hover:text-[#0066cc]"
+                        className="w-3.5 h-3.5 text-[#86868b] dark:text-[#64748B] cursor-pointer hover:text-[#0066cc] dark:hover:text-[#38BDF8]"
                         title="Difference between your current proficiency and the target proficiency for this career goal."
                       />
                     </div>
@@ -813,7 +813,7 @@ export default function SkillInsightsScreen() {
                   {/* Actionable Gap Rows — real skills, ranked by real gap */}
                   <div className="space-y-3 mt-3">
                     {topGaps.length === 0 && (
-                      <p className="text-[11px] text-[#7a7a7a] italic">No gaps yet — generate a path to see this.</p>
+                      <p className="text-[11px] text-[#7a7a7a] dark:text-[#94A3B8] italic">No gaps yet — generate a path to see this.</p>
                     )}
                     {topGaps.map((gap) => {
                       const GapIcon = gap.icon
@@ -821,22 +821,22 @@ export default function SkillInsightsScreen() {
                       return (
                         <div
                           key={gap.title}
-                          className="p-3 rounded-xl border border-[#f5f5f7] hover:border-[#0066cc] hover:bg-[#fafafb] cursor-pointer transition-all flex items-center justify-between"
+                          className="p-3 rounded-xl border border-[#f5f5f7] dark:border-[#1E2638] hover:border-[#0066cc] dark:hover:border-[#38BDF8] hover:bg-[#fafafb] dark:hover:bg-[#0E131E] cursor-pointer transition-all flex items-center justify-between"
                           onClick={() => setSelectedSkillModal(gap)}
                         >
                           <div className="flex items-center gap-2.5">
-                            <span className="w-8 h-8 rounded-lg bg-[#eaf2fc] text-[#0066cc] flex items-center justify-center flex-none">
+                            <span className="w-8 h-8 rounded-lg bg-[#eaf2fc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center flex-none">
                               <GapIcon className="w-4 h-4" />
                             </span>
                             <div>
-                              <h4 className="font-bold text-xs text-[#1d1d1f]">{gap.title}</h4>
-                              <p className="text-[11px] text-[#7a7a7a]">Current {gap.current} → Target {gap.target}</p>
+                              <h4 className="font-bold text-xs text-[#1d1d1f] dark:text-white">{gap.title}</h4>
+                              <p className="text-[11px] text-[#7a7a7a] dark:text-[#94A3B8]">Current {gap.current} → Target {gap.target}</p>
                             </div>
                           </div>
                           <span className={`px-2 py-0.5 rounded-md font-bold text-[10px] border ${
                             isHigh
-                              ? 'bg-[#FFF0F0] text-[#E5484D] border-[#FECDCA]'
-                              : 'bg-[#FFF7E6] text-[#D88700] border-[#FEE4B2]'
+                              ? 'bg-[#FFF0F0] dark:bg-rose-950/40 text-[#E5484D] dark:text-rose-400 border-[#FECDCA] dark:border-rose-800/60'
+                              : 'bg-[#FFF7E6] dark:bg-amber-950/40 text-[#D88700] dark:text-amber-400 border-[#FEE4B2] dark:border-amber-800/60'
                           }`}>
                             {gap.priority}
                           </span>
@@ -858,15 +858,15 @@ export default function SkillInsightsScreen() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6">
               
               {/* CARD 1: Learning Trend (Large, 5.5 of 12 cols) */}
-              <div className="lg:col-span-6 bg-white border border-[#e0e0e0] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+              <div className="lg:col-span-6 bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
                 <div>
-                  <div className="flex items-center justify-between pb-3 border-b border-[#f5f5f7]">
+                  <div className="flex items-center justify-between pb-3 border-b border-[#f5f5f7] dark:border-[#1E2638]">
                     <div className="flex items-center gap-2">
-                      <h2 className="font-['Manrope'] font-bold text-base text-[#1d1d1f]">
+                      <h2 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">
                         Learning Trend
                       </h2>
                       <Info
-                        className="w-3.5 h-3.5 text-[#86868b] cursor-pointer hover:text-[#0066cc]"
+                        className="w-3.5 h-3.5 text-[#86868b] dark:text-[#64748B] cursor-pointer hover:text-[#0066cc] dark:hover:text-[#38BDF8]"
                         title="Skill readiness evolution across consecutive study weeks."
                       />
                     </div>
@@ -876,14 +876,14 @@ export default function SkillInsightsScreen() {
                       <button
                         type="button"
                         onClick={() => setIsTrendDropdownOpen((v) => !v)}
-                        className="flex items-center gap-1.5 px-3 py-1 bg-[#f5f5f7] border border-[#f0f0f0] rounded-lg text-xs font-semibold text-[#1d1d1f] hover:bg-gray-100"
+                        className="flex items-center gap-1.5 px-3 py-1 bg-[#f5f5f7] dark:bg-[#1E293B] border border-[#f0f0f0] dark:border-[#242E40] rounded-lg text-xs font-semibold text-[#1d1d1f] dark:text-white hover:bg-gray-100 dark:hover:bg-[#242E40]"
                       >
                         <span>{trendTimeframe}</span>
-                        <ChevronDown className="w-3.5 h-3.5 text-[#7a7a7a]" />
+                        <ChevronDown className="w-3.5 h-3.5 text-[#7a7a7a] dark:text-[#94A3B8]" />
                       </button>
 
                       {isTrendDropdownOpen && (
-                        <div className="absolute right-0 mt-1 w-32 bg-white rounded-lg border border-[#e0e0e0] shadow-lg p-1 z-20">
+                        <div className="absolute right-0 mt-1 w-32 bg-white dark:bg-[#141A26] rounded-lg border border-[#e0e0e0] dark:border-[#242E40] shadow-lg p-1 z-20">
                           {['Last 4 Weeks', 'Last 8 Weeks', 'All Time'].map((tf) => (
                             <button
                               key={tf}
@@ -892,7 +892,7 @@ export default function SkillInsightsScreen() {
                                 setTrendTimeframe(tf)
                                 setIsTrendDropdownOpen(false)
                               }}
-                              className="w-full text-left px-2.5 py-1.5 text-xs font-medium hover:bg-[#eaf2fc] hover:text-[#0066cc] rounded"
+                              className="w-full text-left px-2.5 py-1.5 text-xs font-medium hover:bg-[#eaf2fc] dark:hover:bg-[#1E293B] hover:text-[#0066cc] dark:hover:text-[#38BDF8] rounded"
                             >
                               {tf}
                             </button>
@@ -912,18 +912,18 @@ export default function SkillInsightsScreen() {
                             <stop offset="95%" stopColor="#0066cc" stopOpacity={0.0} />
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f5f5f7" />
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f5f5f7" className="dark:opacity-10" />
                         <XAxis
                           dataKey="week"
-                          tick={{ fill: '#333333', fontSize: 11, fontWeight: 600 }}
-                          axisLine={{ stroke: '#f0f0f0' }}
+                          tick={{ fill: '#64748B', fontSize: 11, fontWeight: 600 }}
+                          axisLine={{ stroke: '#242E40' }}
                           tickLine={false}
                         />
                         <YAxis
                           domain={[0, 100]}
                           ticks={[0, 20, 40, 60, 80, 100]}
                           tickFormatter={(v) => `${v}%`}
-                          tick={{ fill: '#7a7a7a', fontSize: 10, fontWeight: 600 }}
+                          tick={{ fill: '#64748B', fontSize: 10, fontWeight: 600 }}
                           axisLine={false}
                           tickLine={false}
                         />
@@ -931,7 +931,7 @@ export default function SkillInsightsScreen() {
                           content={({ active, payload }) => {
                             if (active && payload && payload.length) {
                               return (
-                                <div className="bg-[#1d1d1f] text-white px-2.5 py-1.5 rounded-lg text-xs font-bold shadow-lg">
+                                <div className="bg-[#1d1d1f] dark:bg-[#0E131E] text-white px-2.5 py-1.5 rounded-lg text-xs font-bold shadow-lg">
                                   {payload[0].payload.week}: {payload[0].value}% Readiness
                                 </div>
                               )
@@ -961,9 +961,9 @@ export default function SkillInsightsScreen() {
 
                 {/* Green Insight Banner at bottom */}
                 {trendData.length > 1 && (
-                  <div className="mt-3 p-3 bg-[#ECFDF3] border border-[#D1FADF] rounded-xl flex items-center gap-2.5">
-                    <CheckCircle className="w-4 h-4 text-[#22A06B] flex-none" />
-                    <p className="text-xs font-semibold text-[#1d1d1f]">
+                  <div className="mt-3 p-3 bg-[#ECFDF3] dark:bg-emerald-950/40 border border-[#D1FADF] dark:border-emerald-800/60 rounded-xl flex items-center gap-2.5">
+                    <CheckCircle className="w-4 h-4 text-[#22A06B] dark:text-emerald-400 flex-none" />
+                    <p className="text-xs font-semibold text-[#1d1d1f] dark:text-white">
                       {(() => {
                         const gain = trendData[trendData.length - 1].readiness - trendData[0].readiness
                         return gain > 0
@@ -976,15 +976,15 @@ export default function SkillInsightsScreen() {
               </div>
 
               {/* CARD 2: Skill Category Breakdown (Donut Chart, 3.5 of 12 cols) */}
-              <div className="lg:col-span-3 bg-white border border-[#e0e0e0] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+              <div className="lg:col-span-3 bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
                 <div>
-                  <div className="flex items-center justify-between pb-2 border-b border-[#f5f5f7]">
+                  <div className="flex items-center justify-between pb-2 border-b border-[#f5f5f7] dark:border-[#1E2638]">
                     <div className="flex items-center gap-2">
-                      <h2 className="font-['Manrope'] font-bold text-base text-[#1d1d1f]">
+                      <h2 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">
                         Skill Category Breakdown
                       </h2>
                       <Info
-                        className="w-3.5 h-3.5 text-[#86868b] cursor-pointer hover:text-[#0066cc]"
+                        className="w-3.5 h-3.5 text-[#86868b] dark:text-[#64748B] cursor-pointer hover:text-[#0066cc] dark:hover:text-[#38BDF8]"
                         title="Distribution of learning content and assessments by domain."
                       />
                     </div>
@@ -1013,7 +1013,7 @@ export default function SkillInsightsScreen() {
                             if (active && payload && payload.length) {
                               const d = payload[0].payload
                               return (
-                                <div className="bg-[#1d1d1f] text-white px-2 py-1 rounded-md text-xs font-bold">
+                                <div className="bg-[#1d1d1f] dark:bg-[#0E131E] text-white px-2 py-1 rounded-md text-xs font-bold">
                                   {d.name}: {d.value}%
                                 </div>
                               )
@@ -1026,24 +1026,24 @@ export default function SkillInsightsScreen() {
 
                     {/* Centered real overall readiness */}
                     <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                      <span className="font-['Manrope'] font-extrabold text-xl text-[#1d1d1f] leading-none">
+                      <span className="font-['Manrope'] font-extrabold text-xl text-[#1d1d1f] dark:text-white leading-none">
                         {roadmap.percent}%
                       </span>
-                      <span className="text-[10px] font-semibold text-[#7a7a7a] uppercase tracking-wider mt-0.5">
+                      <span className="text-[10px] font-semibold text-[#7a7a7a] dark:text-[#94A3B8] uppercase tracking-wider mt-0.5">
                         Overall
                       </span>
                     </div>
                   </div>
 
                   {/* Clean Legend */}
-                  <div className="grid grid-cols-2 gap-x-2 gap-y-1.5 text-[11px] font-medium text-[#333333] pt-2 border-t border-[#f5f5f7]">
+                  <div className="grid grid-cols-2 gap-x-2 gap-y-1.5 text-[11px] font-medium text-[#333333] dark:text-[#CBD5E1] pt-2 border-t border-[#f5f5f7] dark:border-[#1E2638]">
                     {categoryData.map((item) => (
                       <div key={item.name} className="flex items-center justify-between pr-1">
                         <div className="flex items-center gap-1.5 truncate">
                           <span className="w-2 h-2 rounded-full flex-none" style={{ backgroundColor: item.color }} />
                           <span className="truncate">{item.name}</span>
                         </div>
-                        <span className="font-bold text-[#1d1d1f]">{item.value}%</span>
+                        <span className="font-bold text-[#1d1d1f] dark:text-white">{item.value}%</span>
                       </div>
                     ))}
                   </div>
@@ -1051,15 +1051,15 @@ export default function SkillInsightsScreen() {
               </div>
 
               {/* CARD 3: Recommended Focus (Actionable Card, 3 of 12 cols) */}
-              <div className="lg:col-span-3 bg-white border border-[#e0e0e0] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+              <div className="lg:col-span-3 bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
                 <div>
-                  <div className="flex items-center justify-between pb-2 border-b border-[#f5f5f7]">
+                  <div className="flex items-center justify-between pb-2 border-b border-[#f5f5f7] dark:border-[#1E2638]">
                     <div className="flex items-center gap-2">
-                      <h2 className="font-['Manrope'] font-bold text-base text-[#1d1d1f]">
+                      <h2 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">
                         Recommended Focus
                       </h2>
                       <Info
-                        className="w-3.5 h-3.5 text-[#86868b] cursor-pointer hover:text-[#0066cc]"
+                        className="w-3.5 h-3.5 text-[#86868b] dark:text-[#64748B] cursor-pointer hover:text-[#0066cc] dark:hover:text-[#38BDF8]"
                         title="AI-prioritized roadmap steps based on your current skill gaps."
                       />
                     </div>
@@ -1067,10 +1067,10 @@ export default function SkillInsightsScreen() {
 
                   {/* Priority Banner (Green Surface) — real biggest gap */}
                   {biggestGap && (
-                    <div className="mt-2.5 p-2.5 rounded-xl bg-[#ECFDF3] border border-[#D1FADF] flex items-start gap-2">
-                      <Shield className="w-4 h-4 text-[#22A06B] flex-none mt-0.5" />
-                      <p className="text-[11px] font-bold text-[#1d1d1f] leading-tight">
-                        Next Priority: Complete <span className="text-[#0066cc]">{cap(biggestGap.tag)}</span> to close your biggest real gap
+                    <div className="mt-2.5 p-2.5 rounded-xl bg-[#ECFDF3] dark:bg-emerald-950/40 border border-[#D1FADF] dark:border-emerald-800/60 flex items-start gap-2">
+                      <Shield className="w-4 h-4 text-[#22A06B] dark:text-emerald-400 flex-none mt-0.5" />
+                      <p className="text-[11px] font-bold text-[#1d1d1f] dark:text-white leading-tight">
+                        Next Priority: Complete <span className="text-[#0066cc] dark:text-[#38BDF8]">{cap(biggestGap.tag)}</span> to close your biggest real gap
                       </p>
                     </div>
                   )}
@@ -1078,28 +1078,28 @@ export default function SkillInsightsScreen() {
                   {/* Real next 3 not-started roadmap steps */}
                   <div className="space-y-3 mt-3">
                     {recommendedFocus.length === 0 && (
-                      <p className="text-[11px] text-[#7a7a7a] italic">You're all caught up on your roadmap!</p>
+                      <p className="text-[11px] text-[#7a7a7a] dark:text-[#94A3B8] italic">You're all caught up on your roadmap!</p>
                     )}
                     {recommendedFocus.map((item) => {
                       const ItemIcon = item.icon
                       return (
                         <div
                           key={item.title}
-                          className="p-3 rounded-xl border border-[#f5f5f7] hover:border-[#0066cc] hover:bg-[#fafafb] cursor-pointer transition-all flex items-center justify-between group"
+                          className="p-3 rounded-xl border border-[#f5f5f7] dark:border-[#1E2638] hover:border-[#0066cc] dark:hover:border-[#38BDF8] hover:bg-[#fafafb] dark:hover:bg-[#0E131E] cursor-pointer transition-all flex items-center justify-between group"
                           onClick={() => navigate('/dashboard')}
                         >
                           <div className="flex items-center gap-2.5">
-                            <span className="w-7 h-7 rounded-lg bg-[#eaf2fc] text-[#0066cc] flex items-center justify-center flex-none">
+                            <span className="w-7 h-7 rounded-lg bg-[#eaf2fc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center flex-none">
                               <ItemIcon className="w-3.5 h-3.5" />
                             </span>
                             <div>
-                              <h4 className="font-bold text-xs text-[#1d1d1f] group-hover:text-[#0066cc]">
+                              <h4 className="font-bold text-xs text-[#1d1d1f] dark:text-white group-hover:text-[#0066cc] dark:group-hover:text-[#38BDF8]">
                                 {item.title}
                               </h4>
-                              <p className="text-[10px] text-[#7a7a7a]">{item.subtitle}</p>
+                              <p className="text-[10px] text-[#7a7a7a] dark:text-[#94A3B8]">{item.subtitle}</p>
                             </div>
                           </div>
-                          <ChevronRight className="w-4 h-4 text-[#7a7a7a] group-hover:text-[#0066cc] transition-transform group-hover:translate-x-0.5" />
+                          <ChevronRight className="w-4 h-4 text-[#7a7a7a] dark:text-[#94A3B8] group-hover:text-[#0066cc] dark:group-hover:text-[#38BDF8] transition-transform group-hover:translate-x-0.5" />
                         </div>
                       )
                     })}
@@ -1113,14 +1113,14 @@ export default function SkillInsightsScreen() {
                 SECONDARY DEEP ANALYTICS & AI INSIGHTS
                 (Heatmap Matrix, Learning Velocity, Time Spent, Strengths, AI Insight)
                --------------------------------------------------------------------- */}
-            <div className="pt-6 border-t border-[#f0f0f0] space-y-6">
+            <div className="pt-6 border-t border-[#f0f0f0] dark:border-[#1E2638] space-y-6">
               
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
                 <div>
-                  <h3 className="font-['Manrope'] font-bold text-lg text-[#1d1d1f]">
+                  <h3 className="font-['Manrope'] font-bold text-lg text-[#1d1d1f] dark:text-white">
                     Skill Matrix & Diagnostic Intelligence
                   </h3>
-                  <p className="text-xs text-[#7a7a7a]">
+                  <p className="text-xs text-[#7a7a7a] dark:text-[#94A3B8]">
                     Granular breakdown of competence tiers, learning velocity, and active AI recommendations.
                   </p>
                 </div>
@@ -1130,8 +1130,8 @@ export default function SkillInsightsScreen() {
                     onClick={() => setActiveTab('overview')}
                     className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                       activeTab === 'overview'
-                        ? 'bg-[#0066cc] text-white shadow-sm'
-                        : 'bg-[#f5f5f7] text-[#333333] hover:text-[#1d1d1f]'
+                        ? 'bg-[#0066cc] dark:bg-[#38BDF8] text-white dark:text-[#0E131E] shadow-sm'
+                        : 'bg-[#f5f5f7] dark:bg-[#1E293B] text-[#333333] dark:text-[#CBD5E1] hover:text-[#1d1d1f] dark:hover:text-white'
                     }`}
                   >
                     Intelligence Grid
@@ -1141,8 +1141,8 @@ export default function SkillInsightsScreen() {
                     onClick={() => setActiveTab('heatmap')}
                     className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                       activeTab === 'heatmap'
-                        ? 'bg-[#0066cc] text-white shadow-sm'
-                        : 'bg-[#f5f5f7] text-[#333333] hover:text-[#1d1d1f]'
+                        ? 'bg-[#0066cc] dark:bg-[#38BDF8] text-white dark:text-[#0E131E] shadow-sm'
+                        : 'bg-[#f5f5f7] dark:bg-[#1E293B] text-[#333333] dark:text-[#CBD5E1] hover:text-[#1d1d1f] dark:hover:text-white'
                     }`}
                   >
                     Skill-Gap Heatmap
@@ -1152,22 +1152,22 @@ export default function SkillInsightsScreen() {
 
               {activeTab === 'heatmap' ? (
                 /* SKILL GAP HEATMAP MATRIX */
-                <div className="bg-white border border-[#e0e0e0] rounded-2xl p-6 shadow-sm">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="font-bold text-sm text-[#1d1d1f]">
+                <div className="bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-6 shadow-sm">
+                  <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+                    <span className="font-bold text-sm text-[#1d1d1f] dark:text-white">
                       Tiered Skill-Gap Matrix (Foundations → Intermediate → Advanced)
                     </span>
-                    <div className="flex items-center gap-3 text-[11px] font-semibold">
-                      <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded bg-[#ECFDF3] border border-[#D1FADF]" /> Strong (≥75%)</span>
-                      <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded bg-[#FFF7E6] border border-[#FEE4B2]" /> Developing (50–74%)</span>
-                      <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded bg-[#FFF0F0] border border-[#FECDCA]" /> Priority Gap (&lt;50%)</span>
+                    <div className="flex items-center gap-3 text-[11px] font-semibold text-[#333333] dark:text-[#CBD5E1]">
+                      <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded bg-[#ECFDF3] dark:bg-emerald-950/40 border border-[#D1FADF] dark:border-emerald-800/60" /> Strong (≥75%)</span>
+                      <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded bg-[#FFF7E6] dark:bg-amber-950/40 border border-[#FEE4B2] dark:border-amber-800/60" /> Developing (50–74%)</span>
+                      <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded bg-[#FFF0F0] dark:bg-rose-950/40 border border-[#FECDCA] dark:border-rose-800/60" /> Priority Gap (&lt;50%)</span>
                     </div>
                   </div>
 
                   <div className="overflow-x-auto">
                     <table className="w-full text-xs text-left">
                       <thead>
-                        <tr className="border-b border-[#f0f0f0] text-[#7a7a7a]">
+                        <tr className="border-b border-[#f0f0f0] dark:border-[#1E2638] text-[#7a7a7a] dark:text-[#94A3B8]">
                           <th className="py-2.5 px-3 font-bold">Tier Level</th>
                           {heatmapSkills.map((s) => (
                             <th key={s.tag} className="py-2.5 px-3 font-bold text-center">{cap(s.tag)}</th>
@@ -1176,14 +1176,14 @@ export default function SkillInsightsScreen() {
                       </thead>
                       <tbody>
                         {heatmapData.map((row) => (
-                          <tr key={row.level} className="border-b border-[#f5f5f7]">
-                            <td className="py-3 px-3 font-bold text-[#1d1d1f]">{row.level}</td>
+                          <tr key={row.level} className="border-b border-[#f5f5f7] dark:border-[#1E2638]">
+                            <td className="py-3 px-3 font-bold text-[#1d1d1f] dark:text-white">{row.level}</td>
                             {heatmapSkills.map((s) => {
                               const val = row[s.tag]
                               return (
                                 <td key={s.tag} className="py-3 px-3 text-center">
                                   {val === null ? (
-                                    <span className="text-[#c3c4c5]">—</span>
+                                    <span className="text-[#c3c4c5] dark:text-[#64748B]">—</span>
                                   ) : (
                                     <span className={`inline-block px-3 py-1 rounded-lg border font-bold ${getHeatmapColor(val)}`}>
                                       {val}%
@@ -1203,17 +1203,17 @@ export default function SkillInsightsScreen() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6">
                   
                   {/* Card 1: Learning Velocity */}
-                  <div className="bg-white border border-[#e0e0e0] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
+                  <div className="bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-bold text-[#7a7a7a] uppercase tracking-wider">
+                        <span className="text-xs font-bold text-[#7a7a7a] dark:text-[#94A3B8] uppercase tracking-wider">
                           Learning Pace
                         </span>
                       </div>
-                      <h4 className="font-['Manrope'] font-extrabold text-2xl text-[#1d1d1f]">
+                      <h4 className="font-['Manrope'] font-extrabold text-2xl text-[#1d1d1f] dark:text-white">
                         {stepsPerWeek} steps / week
                       </h4>
-                      <p className="text-[11px] text-[#333333] mt-0.5 font-medium">
+                      <p className="text-[11px] text-[#333333] dark:text-[#CBD5E1] mt-0.5 font-medium">
                         {roadmap.completedSteps} steps done over {roadmap.currentWeek} week{roadmap.currentWeek === 1 ? '' : 's'}
                       </p>
                     </div>
@@ -1228,19 +1228,19 @@ export default function SkillInsightsScreen() {
                   </div>
 
                   {/* Card 2: Time Spent by Category */}
-                  <div className="bg-white border border-[#e0e0e0] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
+                  <div className="bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-bold text-[#7a7a7a] uppercase tracking-wider">
+                        <span className="text-xs font-bold text-[#7a7a7a] dark:text-[#94A3B8] uppercase tracking-wider">
                           Time Spent
                         </span>
-                        <span className="text-[11px] font-bold text-[#0066cc]">{totalRealHours.toFixed(1)} hrs</span>
+                        <span className="text-[11px] font-bold text-[#0066cc] dark:text-[#38BDF8]">{totalRealHours.toFixed(1)} hrs</span>
                       </div>
                       <div className="space-y-1.5 mt-2">
                         {timeSpentData.map((item) => (
                           <div key={item.name} className="flex justify-between text-[11px]">
-                            <span className="text-[#333333]">{item.name}</span>
-                            <span className="font-bold text-[#1d1d1f]">{item.value}% ({item.hours})</span>
+                            <span className="text-[#333333] dark:text-[#CBD5E1]">{item.name}</span>
+                            <span className="font-bold text-[#1d1d1f] dark:text-white">{item.value}% ({item.hours})</span>
                           </div>
                         ))}
                       </div>
@@ -1248,41 +1248,41 @@ export default function SkillInsightsScreen() {
                   </div>
 
                   {/* Card 3: Top Strengths */}
-                  <div className="bg-white border border-[#e0e0e0] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
+                  <div className="bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-bold text-[#7a7a7a] uppercase tracking-wider">
+                        <span className="text-xs font-bold text-[#7a7a7a] dark:text-[#94A3B8] uppercase tracking-wider">
                           Top Strengths
                         </span>
-                        <span className="text-[10px] font-bold text-[#22A06B]">{strengthsList.length} Skill{strengthsList.length === 1 ? '' : 's'} Strong</span>
+                        <span className="text-[10px] font-bold text-[#22A06B] dark:text-emerald-400">{strengthsList.length} Skill{strengthsList.length === 1 ? '' : 's'} Strong</span>
                       </div>
                       <div className="space-y-1.5 mt-2">
                         {strengthsList.length === 0 && (
-                          <p className="text-[11px] text-[#7a7a7a] italic">Complete some steps to see your strengths here.</p>
+                          <p className="text-[11px] text-[#7a7a7a] dark:text-[#94A3B8] italic">Complete some steps to see your strengths here.</p>
                         )}
                         {strengthsList.slice(0, 4).map((s) => (
                           <div key={s.name} className="flex items-center justify-between text-[11px]">
-                            <span className="text-[#1d1d1f] font-semibold truncate">{s.rank}. {s.name}</span>
-                            <span className="text-[#22A06B] font-bold flex-none">{s.score}%</span>
+                            <span className="text-[#1d1d1f] dark:text-white font-semibold truncate">{s.rank}. {s.name}</span>
+                            <span className="text-[#22A06B] dark:text-emerald-400 font-bold flex-none">{s.score}%</span>
                           </div>
                         ))}
                       </div>
                     </div>
                     {strengthsList.length > 0 && (
-                      <div className="mt-2 text-[10px] text-[#22A06B] font-bold bg-[#ECFDF3] px-2 py-1 rounded-lg text-center">
+                      <div className="mt-2 text-[10px] text-[#22A06B] dark:text-emerald-400 font-bold bg-[#ECFDF3] dark:bg-emerald-950/40 border border-[#D1FADF] dark:border-emerald-800/60 px-2 py-1 rounded-lg text-center">
                         Great job! Build on these strengths.
                       </div>
                     )}
                   </div>
 
                   {/* Card 4: AI-Powered PathFinder Explanation */}
-                  <div className="bg-[#eaf2fc] border border-[#dcecfd] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
+                  <div className="bg-[#eaf2fc] dark:bg-[#1E293B] border border-[#dcecfd] dark:border-[#242E40] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
                     <div>
-                      <div className="flex items-center gap-1.5 text-[#0066cc] mb-1.5">
+                      <div className="flex items-center gap-1.5 text-[#0066cc] dark:text-[#38BDF8] mb-1.5">
                         <Sparkles className="w-4 h-4" />
                         <span className="text-xs font-bold font-['Manrope']">PathFinder insight</span>
                       </div>
-                      <p className="text-[11px] text-[#333333] leading-relaxed">
+                      <p className="text-[11px] text-[#333333] dark:text-[#CBD5E1] leading-relaxed">
                         {topStrength && biggestGap && topStrength.name !== biggestGap.name ? (
                           <>Your strongest foundation is <strong>{topStrength.name}</strong>, while <strong>{biggestGap.name}</strong> is your biggest real gap right now. Focus there next to keep your roadmap moving.</>
                         ) : topStrength ? (
@@ -1299,7 +1299,7 @@ export default function SkillInsightsScreen() {
                         openAICoach()
                         sendToAICoach(biggestGap ? `Why should I prioritize ${cap(biggestGap.tag)}?` : 'What should I focus on next?')
                       }}
-                      className="mt-3 text-xs font-bold text-[#0066cc] hover:underline flex items-center gap-1 self-start"
+                      className="mt-3 text-xs font-bold text-[#0066cc] dark:text-[#38BDF8] hover:underline flex items-center gap-1 self-start cursor-pointer"
                     >
                       <span>Ask PathFinder why</span>
                       <span>→</span>
@@ -1316,39 +1316,39 @@ export default function SkillInsightsScreen() {
             SKILL DRILL-DOWN MODAL
            ========================================================================= */}
         {selectedSkillModal && (
-          <div className="fixed inset-0 z-50 bg-[#1d1d1f]/40 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl border border-[#e0e0e0] shadow-2xl max-w-md w-full p-6 relative animate-in fade-in zoom-in duration-150">
+          <div className="fixed inset-0 z-50 bg-[#1d1d1f]/40 dark:bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-[#141A26] rounded-2xl border border-[#e0e0e0] dark:border-[#242E40] shadow-2xl max-w-md w-full p-6 relative animate-in fade-in zoom-in duration-150">
               <button
                 type="button"
                 onClick={() => setSelectedSkillModal(null)}
-                className="absolute top-4 right-4 text-[#7a7a7a] hover:text-[#1d1d1f] text-sm font-bold w-6 h-6 flex items-center justify-center"
+                className="absolute top-4 right-4 text-[#7a7a7a] dark:text-[#94A3B8] hover:text-[#1d1d1f] dark:hover:text-white text-sm font-bold w-6 h-6 flex items-center justify-center cursor-pointer"
               >
                 ✕
               </button>
               
-              <div className="flex items-center gap-2 text-xs font-bold text-[#0066cc] bg-[#eaf2fc] px-2.5 py-1 rounded-md w-fit mb-3">
+              <div className="flex items-center gap-2 text-xs font-bold text-[#0066cc] dark:text-[#38BDF8] bg-[#eaf2fc] dark:bg-[#1E293B] px-2.5 py-1 rounded-md w-fit mb-3">
                 <span>Skill Deep-Dive</span>
               </div>
 
-              <h3 className="font-['Manrope'] font-bold text-xl text-[#1d1d1f]">
+              <h3 className="font-['Manrope'] font-bold text-xl text-[#1d1d1f] dark:text-white">
                 {selectedSkillModal.title}
               </h3>
-              <p className="text-xs text-[#333333] mt-1 mb-4">
+              <p className="text-xs text-[#333333] dark:text-[#94A3B8] mt-1 mb-4">
                 {selectedSkillModal.desc}
               </p>
 
-              <div className="grid grid-cols-3 gap-3 p-3 bg-[#fafafb] rounded-xl border border-[#f0f0f0] text-center mb-4">
+              <div className="grid grid-cols-3 gap-3 p-3 bg-[#fafafb] dark:bg-[#0E131E] rounded-xl border border-[#f0f0f0] dark:border-[#242E40] text-center mb-4">
                 <div>
-                  <span className="text-[10px] text-[#7a7a7a] font-bold block">CURRENT</span>
-                  <span className="text-base font-extrabold text-[#1d1d1f]">{selectedSkillModal.current}</span>
+                  <span className="text-[10px] text-[#7a7a7a] dark:text-[#94A3B8] font-bold block">CURRENT</span>
+                  <span className="text-base font-extrabold text-[#1d1d1f] dark:text-white">{selectedSkillModal.current}</span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-[#7a7a7a] font-bold block">TARGET</span>
-                  <span className="text-base font-extrabold text-[#0066cc]">{selectedSkillModal.target}</span>
+                  <span className="text-[10px] text-[#7a7a7a] dark:text-[#94A3B8] font-bold block">TARGET</span>
+                  <span className="text-base font-extrabold text-[#0066cc] dark:text-[#38BDF8]">{selectedSkillModal.target}</span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-[#7a7a7a] font-bold block">PRIORITY</span>
-                  <span className="text-xs font-extrabold text-[#E5484D]">{selectedSkillModal.priority}</span>
+                  <span className="text-[10px] text-[#7a7a7a] dark:text-[#94A3B8] font-bold block">PRIORITY</span>
+                  <span className="text-xs font-extrabold text-[#E5484D] dark:text-rose-400">{selectedSkillModal.priority}</span>
                 </div>
               </div>
 
@@ -1359,7 +1359,7 @@ export default function SkillInsightsScreen() {
                     setSelectedSkillModal(null)
                     navigate('/progress')
                   }}
-                  className="flex-1 py-2.5 bg-[#0066cc] hover:bg-[#004fa3] text-white font-bold text-xs rounded-xl shadow-md transition-all"
+                  className="flex-1 py-2.5 bg-[#0066cc] hover:bg-[#004fa3] text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer"
                 >
                   Start Focused Practice
                 </button>
@@ -1371,7 +1371,7 @@ export default function SkillInsightsScreen() {
                     openAICoach()
                     sendToAICoach(`Explain key study topics for ${skillName}`)
                   }}
-                  className="px-4 py-2.5 border border-[#0066cc] text-[#0066cc] hover:bg-[#eaf2fc] font-bold text-xs rounded-xl transition-all"
+                  className="px-4 py-2.5 border border-[#0066cc] dark:border-[#38BDF8] text-[#0066cc] dark:text-[#38BDF8] hover:bg-[#eaf2fc] dark:hover:bg-[#1E293B] font-bold text-xs rounded-xl transition-all cursor-pointer"
                 >
                   Ask Coach ✨
                 </button>

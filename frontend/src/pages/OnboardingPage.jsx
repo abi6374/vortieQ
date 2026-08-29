@@ -207,7 +207,7 @@ export default function OnboardingPage() {
   // Step 1: High-fidelity desktop learner intake screen with unified 5-step sidebar
   if (phase === 'intake' || phase === 'resume') {
     return (
-      <div className="min-h-screen flex" style={{ background: '#f5f5f7' }}>
+      <div className="min-h-screen flex bg-[#f5f5f7] dark:bg-[#0B0E14]">
         <SetupSidebar current={1} />
         <div className="flex-1 flex flex-col items-center justify-start px-4 py-8 lg:py-10 overflow-y-auto">
           <LearnerIntakeWorkspace
@@ -227,7 +227,7 @@ export default function OnboardingPage() {
   // Step 2: The "Assess skills" step
   if (phase === 'topics') {
     return (
-      <div className="min-h-screen flex" style={{ background: '#f5f5f7' }}>
+      <div className="min-h-screen flex bg-[#f5f5f7] dark:bg-[#0B0E14]">
         <SetupSidebar current={2} />
         <div className="flex-1 flex flex-col items-center justify-start px-4 py-8 lg:py-10 overflow-y-auto">
           <AssessSkills
@@ -246,7 +246,7 @@ export default function OnboardingPage() {
   if (phase === 'goalcompass' || phase === 'generating') {
     return (
       <>
-        <div ref={bgRef} className="min-h-screen flex" style={{ background: '#f5f5f7' }}>
+        <div ref={bgRef} className="min-h-screen flex bg-[#f5f5f7] dark:bg-[#0B0E14]">
           <SetupSidebar current={3} />
           <div className="flex-1 flex flex-col items-center justify-start px-4 py-8 lg:py-10 overflow-y-auto">
             <GoalCompass
@@ -276,7 +276,7 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen flex" style={{ background: '#f5f5f7' }}>
+    <div className="min-h-screen flex bg-[#f5f5f7] dark:bg-[#0B0E14]">
       <SetupSidebar current={1} />
       <div className="flex-1 flex flex-col items-center justify-start px-4 py-8 lg:py-10 overflow-y-auto">
         <div className="w-full max-w-[1140px] flex justify-center">

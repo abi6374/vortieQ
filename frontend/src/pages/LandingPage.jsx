@@ -23,14 +23,10 @@ export default function LandingPage() {
           .limit(1)
 
         if (cancelled) return
-        if (paths && paths.length > 0) {
-          navigate('/dashboard', { replace: true })
-        } else {
-          navigate('/onboarding', { replace: true })
-        }
+        navigate('/dashboard', { replace: true })
       } catch {
         if (!cancelled) {
-          navigate('/onboarding', { replace: true })
+          navigate('/dashboard', { replace: true })
         }
       }
     }

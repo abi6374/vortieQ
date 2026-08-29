@@ -61,7 +61,8 @@ let _redirecting = false
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error?.response?.status === 401 && typeof window !== 'undefined' && !_redirecting) {
+    const isBypass = typeof window !== 'undefined' && (window.localStorage.getItem('e2e_mock_auth') === 'true' || window.localStorage.getItem('pf_dev_bypass') === 'true')
+    if (error?.response?.status === 401 && typeof window !== 'undefined' && !_redirecting && !isBypass) {
       _redirecting = true
       try { await supabase.auth.signOut() } catch {}
       const path = window.location.pathname

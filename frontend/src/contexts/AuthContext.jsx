@@ -4,9 +4,15 @@ import { supabase } from '../lib/supabaseClient'
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
-  const [session, setSession] = useState(null)
-  const [profile, setProfile] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const isDevBypass = typeof window !== 'undefined' && (localStorage.getItem('pf_dev_bypass') === 'true' || localStorage.getItem('e2e_mock_auth') === 'true')
+  const defaultUser = isDevBypass ? {
+    id: 'demo-user-1',
+    email: 'demo@pathfinder.io',
+    user_metadata: { full_name: 'Alex Rivera', name: 'Alex Rivera' }
+  } : null
+  const [session, setSession] = useState(defaultUser ? { user: defaultUser, access_token: 'demo-token' } : null)
+  const [profile, setProfile] = useState(defaultUser ? { id: 'demo-user-1', target_role: 'Data Analyst', weekly_hours: 10 } : null)
+  const [loading, setLoading] = useState(!isDevBypass)
   const [oauthError, setOauthError] = useState(null)
 
   const loadProfile = async (userId) => {
@@ -53,6 +59,17 @@ export function AuthProvider({ children }) {
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!mounted) return
+      if (!session && typeof window !== 'undefined' && (localStorage.getItem('pf_dev_bypass') === 'true' || localStorage.getItem('e2e_mock_auth') === 'true')) {
+        const mockUser = {
+          id: 'demo-user-1',
+          email: 'demo@pathfinder.io',
+          user_metadata: { full_name: 'Alex Rivera', name: 'Alex Rivera' }
+        }
+        setSession({ user: mockUser, access_token: 'demo-token' })
+        setProfile({ id: 'demo-user-1', target_role: 'Data Analyst', weekly_hours: 10 })
+        setLoading(false)
+        return
+      }
       setSession(session)
       if (session?.user?.id) loadProfile(session.user.id)
       if (session || !isOAuthCallback) {
@@ -62,6 +79,9 @@ export function AuthProvider({ children }) {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!mounted) return
+      if (!session && typeof window !== 'undefined' && (localStorage.getItem('pf_dev_bypass') === 'true' || localStorage.getItem('e2e_mock_auth') === 'true')) {
+        return
+      }
       setSession(session)
       if (session?.user?.id) await loadProfile(session.user.id)
       if (session || event === 'SIGNED_IN' || event === 'USER_UPDATED' || !isOAuthCallback) {
@@ -182,20 +202,22 @@ export function AuthProvider({ children }) {
     }
   }
 
-  const mockUser = typeof window !== 'undefined' && window.localStorage.getItem('e2e_mock_auth') ? {
+  const mockUser = typeof window !== 'undefined' && (window.localStorage.getItem('e2e_mock_auth') || window.localStorage.getItem('pf_dev_bypass')) ? {
     id: "11111111-1111-1111-1111-111111111111",
     email: "alex.chen@pathfinder.ai",
     user_metadata: { full_name: "Alex Chen", name: "Alex Chen" }
   } : null
   const effectiveSession = session || (mockUser ? { user: mockUser } : null)
   const effectiveUser = session?.user || mockUser
+  const effectiveProfile = profile || (mockUser ? { id: mockUser.id, target_role: 'Data Analyst', weekly_hours: 10, goal_text: 'Become a Data Analyst with Python and SQL' } : null)
+  const effectiveLoading = mockUser ? false : loading
 
   return (
     <AuthContext.Provider
       value={{
         session: effectiveSession,
-        loading,
-        profile,
+        loading: effectiveLoading,
+        profile: effectiveProfile,
         updateProfile,
         refreshProfile: () => effectiveUser?.id && loadProfile(effectiveUser.id),
         signIn,

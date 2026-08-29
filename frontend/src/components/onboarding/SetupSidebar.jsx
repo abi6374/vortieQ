@@ -18,48 +18,18 @@ const STEPS = [
   { n: 5, label: 'Track progress' },
 ]
 
-const V = '#0066cc'
-const GREEN = '#22A06B'
-
 export default function SetupSidebar({ current = 1 }) {
   return (
-    <aside
-      className="hidden md:block flex-none"
-      style={{
-        width: 270,
-        borderRight: '1px solid #f0f0f0',
-        padding: '36px 28px',
-        background: 'linear-gradient(180deg, #FFFFFF 0%, #f9fcff 100%)',
-      }}
-    >
+    <aside className="hidden md:block flex-none w-[270px] border-r border-[#f0f0f0] dark:border-[#1E2638] p-7 bg-gradient-to-b from-white to-[#f9fcff] dark:from-[#0E131E] dark:to-[#0B0E14] transition-colors">
       {/* Brand Header */}
       <div className="flex items-center gap-3 mb-10">
-        <span
-          className="grid place-items-center rounded-xl text-white flex-shrink-0"
-          style={{
-            width: 38,
-            height: 38,
-            background: 'linear-gradient(135deg, #0071e3, #0066cc)',
-            boxShadow: '0 4px 14px rgba(0, 102, 204, 0.35)',
-          }}
-        >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#fff"
-            strokeWidth="2.4"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M3 12h4l3 8 4-16 3 8h4" />
+        <span className="grid place-items-center rounded-xl text-white flex-shrink-0 w-[38px] height-[38px] bg-gradient-to-br from-[#0071e3] to-[#0066cc] shadow-[0_4px_14px_rgba(0,102,204,0.35)] p-2">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="9" />
+            <polygon points="16 8 10.5 10.5 8 16 13.5 13.5" fill="#fff" stroke="none" />
           </svg>
         </span>
-        <span
-          className="font-['Manrope'] font-extrabold text-[#1d1d1f]"
-          style={{ fontSize: 21, letterSpacing: '-0.02em' }}
-        >
+        <span className="font-['Manrope'] font-extrabold text-[#1d1d1f] dark:text-white text-xl tracking-tight">
           PathFinder
         </span>
       </div>
@@ -74,68 +44,35 @@ export default function SetupSidebar({ current = 1 }) {
           return (
             <li
               key={s.n}
-              className="relative grid"
-              style={{
-                gridTemplateColumns: '36px 1fr',
-                gap: 14,
-                paddingBottom: last ? 0 : 36,
-              }}
+              className="relative grid grid-cols-[36px_1fr] gap-3.5"
+              style={{ paddingBottom: last ? 0 : 36 }}
             >
               {/* Connecting vertical line */}
               {!last && (
                 <span
-                  className="absolute"
-                  style={{
-                    left: 17,
-                    top: 36,
-                    bottom: 0,
-                    width: 2,
-                    background: done
-                      ? `linear-gradient(180deg, ${GREEN}, ${V})`
+                  className={`absolute left-[17px] top-9 bottom-0 w-[2px] ${
+                    done
+                      ? 'bg-gradient-to-b from-[#22A06B] to-[#0066cc]'
                       : active
-                      ? `linear-gradient(180deg, ${V}, #e6e6e6)`
-                      : '#e9e9e9',
-                  }}
+                      ? 'bg-gradient-to-b from-[#0066cc] to-[#e6e6e6] dark:to-[#242E40]'
+                      : 'bg-[#e9e9e9] dark:bg-[#1E2638]'
+                  }`}
                 />
               )}
 
               {/* Step Circle Indicator */}
               <span
-                className="grid place-items-center rounded-full font-bold z-10 transition-all"
-                style={{
-                  width: 36,
-                  height: 36,
-                  fontSize: 14,
-                  border: `2px solid ${
-                    done ? GREEN : active ? V : '#e6e6e6'
-                  }`,
-                  background: done
-                    ? '#ECFDF3'
+                className={`grid place-items-center rounded-full font-bold z-10 text-sm transition-all w-9 h-9 border-2 ${
+                  done
+                    ? 'border-[#22A06B] bg-[#ECFDF3] dark:bg-emerald-950/40 text-[#22A06B] dark:text-emerald-400'
                     : active
-                    ? V
-                    : '#FFFFFF',
-                  color: done
-                    ? GREEN
-                    : active
-                    ? '#FFFFFF'
-                    : '#7a7a7a',
-                  boxShadow: active
-                    ? '0 4px 14px rgba(0, 102, 204, 0.40)'
-                    : 'none',
-                }}
+                    ? 'border-[#0066cc] dark:border-[#38BDF8] bg-[#0066cc] dark:bg-[#38BDF8] text-white dark:text-slate-900 shadow-[0_4px_14px_rgba(0,102,204,0.40)]'
+                    : 'border-[#e6e6e6] dark:border-[#242E40] bg-white dark:bg-[#141A26] text-[#7a7a7a] dark:text-[#94A3B8]'
+                }`}
               >
                 {done ? (
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M20 6 9 17l-5-5" />
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
                   </svg>
                 ) : (
                   s.n
@@ -143,24 +80,26 @@ export default function SetupSidebar({ current = 1 }) {
               </span>
 
               {/* Step Label & Subtitle */}
-              <div style={{ marginTop: 3 }}>
+              <div className="mt-0.5 min-w-0">
                 <div
-                  className="font-bold text-[#1d1d1f]"
-                  style={{
-                    fontSize: 15,
-                    color: active ? V : done ? '#1d1d1f' : '#333333',
-                    fontWeight: active ? 700 : done ? 650 : 500,
-                  }}
+                  className={`text-[15px] font-bold ${
+                    active
+                      ? 'text-[#0066cc] dark:text-[#38BDF8]'
+                      : done
+                      ? 'text-[#1d1d1f] dark:text-white'
+                      : 'text-[#555555] dark:text-[#94A3B8]'
+                  }`}
                 >
                   {s.label}
                 </div>
                 <div
-                  style={{
-                    fontSize: 12.5,
-                    marginTop: 2,
-                    fontWeight: 600,
-                    color: done ? GREEN : active ? V : '#86868b',
-                  }}
+                  className={`text-[12.5px] mt-0.5 font-semibold ${
+                    done
+                      ? 'text-[#22A06B] dark:text-emerald-400'
+                      : active
+                      ? 'text-[#0066cc] dark:text-[#38BDF8]'
+                      : 'text-[#86868b] dark:text-[#64748B]'
+                  }`}
                 >
                   {done ? 'Completed' : active ? 'In progress' : 'Upcoming'}
                 </div>

@@ -1,21 +1,20 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabaseClient'
 import PersonalizedRoadmap from '../components/dashboard/PersonalizedRoadmap'
 
 export default function DashboardPage() {
   const [path, setPath] = useState(null)
   const [loading, setLoading] = useState(true)
+  const { user, session } = useAuth()
   const navigate = useNavigate()
 
   async function fetchDashboardData() {
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-
-      if (!session?.user?.id) {
-        navigate('/')
+      const activeUser = session?.user || user
+      if (!activeUser?.id) {
+        setLoading(false)
         return
       }
 
@@ -28,17 +27,13 @@ export default function DashboardPage() {
             courses ( id, title, provider, difficulty, skill_tags, duration_hrs, resource_url )
           )
         `)
-        .eq('user_id', session.user.id)
+        .eq('user_id', activeUser.id)
         .eq('status', 'active')
         .order('generated_at', { ascending: false })
         .limit(1)
 
       if (paths && paths.length > 0) {
         setPath(paths[0])
-      } else {
-        // If user has not created a path yet, take them to onboarding
-        navigate('/onboarding')
-        return
       }
     } catch (err) {
       console.warn('Dashboard fetch note:', err)
@@ -49,7 +44,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     fetchDashboardData()
-  }, [])
+  }, [session, user])
 
   if (loading) {
     return (

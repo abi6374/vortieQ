@@ -625,18 +625,18 @@ export default function LearnerIntakeWorkspace({
       </div>
 
       {/* Bottom Profile-Understanding Panel */}
-      <div className="mx-6 sm:mx-10 bg-[#f9fcff]/90 border border-[#ddedfe] rounded-2xl p-4 sm:p-5 my-3">
+      <div className="mx-6 sm:mx-10 bg-[#f9fcff]/90 dark:bg-[#101622] border border-[#ddedfe] dark:border-[#242E40] rounded-2xl p-4 sm:p-5 my-3 shadow-xs">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-center">
           
           {/* Left Column: 5 Compact Chips */}
           <div className="lg:col-span-7 xl:col-span-8">
-            <h3 className="font-bold text-[#1d1d1f] text-[14.5px] mb-2.5">
+            <h3 className="font-bold text-[#1d1d1f] dark:text-white text-[14.5px] mb-2.5">
               What PathFinder will understand
             </h3>
             
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
-              <div className="h-[42px] bg-white border border-[#f0f0f0] rounded-xl px-2.5 flex items-center gap-1.5 text-[#1d1d1f] text-[12.5px] font-semibold shadow-xs hover:border-[#0066cc] transition-all">
-                <span className="text-[#0066cc] flex-shrink-0">
+              <div className="h-[42px] bg-white dark:bg-[#141A26] border border-[#f0f0f0] dark:border-[#242E40] rounded-xl px-2.5 flex items-center gap-1.5 text-[#1d1d1f] dark:text-[#F9FAFB] text-[12.5px] font-semibold shadow-xs hover:border-[#0066cc] dark:hover:border-[#38BDF8] transition-all">
+                <span className="text-[#0066cc] dark:text-[#38BDF8] flex-shrink-0">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-2.04z" />
                     <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-2.04z" />
@@ -645,8 +645,8 @@ export default function LearnerIntakeWorkspace({
                 <span className="truncate">Skills</span>
               </div>
 
-              <div className="h-[42px] bg-white border border-[#f0f0f0] rounded-xl px-2.5 flex items-center gap-1.5 text-[#1d1d1f] text-[12.5px] font-semibold shadow-xs hover:border-[#0066cc] transition-all">
-                <span className="text-[#0066cc] flex-shrink-0">
+              <div className="h-[42px] bg-white dark:bg-[#141A26] border border-[#f0f0f0] dark:border-[#242E40] rounded-xl px-2.5 flex items-center gap-1.5 text-[#1d1d1f] dark:text-[#F9FAFB] text-[12.5px] font-semibold shadow-xs hover:border-[#0066cc] dark:hover:border-[#38BDF8] transition-all">
+                <span className="text-[#0066cc] dark:text-[#38BDF8] flex-shrink-0">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
                     <path d="M6 12v5c3 3 9 3 12 0v-5" />
@@ -655,8 +655,8 @@ export default function LearnerIntakeWorkspace({
                 <span className="truncate">Education</span>
               </div>
 
-              <div className="h-[42px] bg-white border border-[#f0f0f0] rounded-xl px-2.5 flex items-center gap-1.5 text-[#1d1d1f] text-[12.5px] font-semibold shadow-xs hover:border-[#0066cc] transition-all">
-                <span className="text-[#0066cc] flex-shrink-0">
+              <div className="h-[42px] bg-white dark:bg-[#141A26] border border-[#f0f0f0] dark:border-[#242E40] rounded-xl px-2.5 flex items-center gap-1.5 text-[#1d1d1f] dark:text-[#F9FAFB] text-[12.5px] font-semibold shadow-xs hover:border-[#0066cc] dark:hover:border-[#38BDF8] transition-all">
+                <span className="text-[#0066cc] dark:text-[#38BDF8] flex-shrink-0">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
                   </svg>
@@ -664,8 +664,8 @@ export default function LearnerIntakeWorkspace({
                 <span className="truncate">Projects</span>
               </div>
 
-              <div className="h-[42px] bg-white border border-[#f0f0f0] rounded-xl px-2.5 flex items-center gap-1.5 text-[#1d1d1f] text-[12.5px] font-semibold shadow-xs hover:border-[#0066cc] transition-all">
-                <span className="text-[#0066cc] flex-shrink-0">
+              <div className="h-[42px] bg-white dark:bg-[#141A26] border border-[#f0f0f0] dark:border-[#242E40] rounded-xl px-2.5 flex items-center gap-1.5 text-[#1d1d1f] dark:text-[#F9FAFB] text-[12.5px] font-semibold shadow-xs hover:border-[#0066cc] dark:hover:border-[#38BDF8] transition-all">
+                <span className="text-[#0066cc] dark:text-[#38BDF8] flex-shrink-0">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
                     <polyline points="17 6 23 6 23 12" />
@@ -674,8 +674,8 @@ export default function LearnerIntakeWorkspace({
                 <span className="truncate">Confidence</span>
               </div>
 
-              <div className="h-[42px] bg-white border border-[#f0f0f0] rounded-xl px-2.5 flex items-center gap-1.5 text-[#1d1d1f] text-[12.5px] font-semibold shadow-xs hover:border-[#0066cc] transition-all">
-                <span className="text-[#0066cc] flex-shrink-0">
+              <div className="h-[42px] bg-white dark:bg-[#141A26] border border-[#f0f0f0] dark:border-[#242E40] rounded-xl px-2.5 flex items-center gap-1.5 text-[#1d1d1f] dark:text-[#F9FAFB] text-[12.5px] font-semibold shadow-xs hover:border-[#0066cc] dark:hover:border-[#38BDF8] transition-all">
+                <span className="text-[#0066cc] dark:text-[#38BDF8] flex-shrink-0">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="12" cy="12" r="10" />
                     <circle cx="12" cy="12" r="6" />
@@ -688,9 +688,9 @@ export default function LearnerIntakeWorkspace({
           </div>
 
           {/* Right Column: AI Profile Draft */}
-          <div className="lg:col-span-5 xl:col-span-4 lg:border-l lg:border-[#f0f0f0] lg:pl-5">
-            <div className="flex items-center gap-1.5 text-[#1d1d1f] font-bold text-[14.5px]">
-              <span className="text-[#0066cc]">
+          <div className="lg:col-span-5 xl:col-span-4 lg:border-l lg:border-[#f0f0f0] dark:lg:border-[#242E40] lg:pl-5">
+            <div className="flex items-center gap-1.5 text-[#1d1d1f] dark:text-white font-bold text-[14.5px]">
+              <span className="text-[#0066cc] dark:text-[#38BDF8]">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 2L14.4 7.6L20 10L14.4 12.4L12 18L9.6 12.4L4 10L9.6 7.6L12 2Z" />
                 </svg>
@@ -698,7 +698,7 @@ export default function LearnerIntakeWorkspace({
               <span>AI Profile Draft</span>
             </div>
 
-            <p className="text-[13px] text-[#333333] leading-relaxed mt-1">
+            <p className="text-[13px] text-[#333333] dark:text-[#94A3B8] leading-relaxed mt-1">
               {profileDraft?.summary
                 ? `"${profileDraft.summary}"`
                 : 'Upload a resume or start describing your background — your real profile draft will appear here.'}
@@ -711,7 +711,7 @@ export default function LearnerIntakeWorkspace({
                 setEditFormData({ ...EMPTY_DRAFT, ...profileDraft })
                 setIsEditingDraft(true)
               }}
-              className="mt-2 text-[#0066cc] text-[12.5px] font-bold inline-flex items-center gap-1.5 hover:underline cursor-pointer focus:outline-none disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:no-underline"
+              className="mt-2 text-[#0066cc] dark:text-[#38BDF8] text-[12.5px] font-bold inline-flex items-center gap-1.5 hover:underline cursor-pointer focus:outline-none disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:no-underline"
             >
               <svg
                 width="13"
@@ -735,16 +735,16 @@ export default function LearnerIntakeWorkspace({
       {/* Continue-blocking validation, shown right above the footer */}
       {continueError && (
         <div className="mx-6 sm:mx-10 -mt-1 mb-2">
-          <p className="text-xs font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg px-3.5 py-2">
+          <p className="text-xs font-semibold text-red-600 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800/60 rounded-lg px-3.5 py-2">
             {continueError}
           </p>
         </div>
       )}
 
       {/* Footer Controls */}
-      <div className="h-[76px] px-6 sm:px-10 border-t border-[#f0f0f0] flex items-center justify-between">
-        <div className="flex items-center gap-2 text-[13.5px] font-medium text-[#333333]">
-          <span className="text-[#22A06B]">
+      <div className="h-[76px] px-6 sm:px-10 border-t border-[#f0f0f0] dark:border-[#1E2638] flex items-center justify-between">
+        <div className="flex items-center gap-2 text-[13.5px] font-medium text-[#333333] dark:text-[#94A3B8]">
+          <span className="text-[#22A06B] dark:text-emerald-400">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
               <path d="m9 12 2 2 4-4" />
@@ -775,20 +775,20 @@ export default function LearnerIntakeWorkspace({
 
       {/* Edit Modal */}
       {isEditingDraft && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-[#e0e0e0] animate-in fade-in zoom-in duration-150">
-            <div className="flex items-center justify-between pb-4 border-b border-[#f0f0f0]">
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-[#141A26] rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-[#e0e0e0] dark:border-[#242E40] animate-in fade-in zoom-in duration-150">
+            <div className="flex items-center justify-between pb-4 border-b border-[#f0f0f0] dark:border-[#242E40]">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-[#dbeafc] text-[#0066cc] flex items-center justify-center">
+                <div className="w-8 h-8 rounded-lg bg-[#dbeafc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 2L14.4 7.6L20 10L14.4 12.4L12 18L9.6 12.4L4 10L9.6 7.6L12 2Z" />
                   </svg>
                 </div>
-                <h3 className="text-lg font-bold text-[#1d1d1f]">Edit AI Profile Draft</h3>
+                <h3 className="text-lg font-bold text-[#1d1d1f] dark:text-white">Edit AI Profile Draft</h3>
               </div>
               <button
                 onClick={() => setIsEditingDraft(false)}
-                className="text-[#7a7a7a] hover:text-[#1d1d1f] text-xl font-bold p-1"
+                className="text-[#7a7a7a] hover:text-[#1d1d1f] dark:hover:text-white text-xl font-bold p-1"
               >
                 ✕
               </button>
@@ -796,59 +796,59 @@ export default function LearnerIntakeWorkspace({
 
             <div className="space-y-4 py-4 text-left">
               <div>
-                <label className="block text-xs font-bold text-[#1d1d1f] uppercase tracking-wider mb-1">
+                <label className="block text-xs font-bold text-[#1d1d1f] dark:text-[#CBD5E1] uppercase tracking-wider mb-1">
                   Skills & Tools
                 </label>
                 <input
                   type="text"
                   value={editFormData.skills}
                   onChange={(e) => setEditFormData({ ...editFormData, skills: e.target.value })}
-                  className="w-full bg-[#fbfbfb] border border-[#e0e0e0] rounded-xl px-3.5 py-2.5 text-sm text-[#1d1d1f] focus:border-[#0066cc] outline-none"
+                  className="w-full bg-[#fbfbfb] dark:bg-[#0E131E] border border-[#e0e0e0] dark:border-[#242E40] rounded-xl px-3.5 py-2.5 text-sm text-[#1d1d1f] dark:text-white focus:border-[#0066cc] dark:focus:border-[#38BDF8] outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#1d1d1f] uppercase tracking-wider mb-1">
+                <label className="block text-xs font-bold text-[#1d1d1f] dark:text-[#CBD5E1] uppercase tracking-wider mb-1">
                   Education & Background
                 </label>
                 <input
                   type="text"
                   value={editFormData.education}
                   onChange={(e) => setEditFormData({ ...editFormData, education: e.target.value })}
-                  className="w-full bg-[#fbfbfb] border border-[#e0e0e0] rounded-xl px-3.5 py-2.5 text-sm text-[#1d1d1f] focus:border-[#0066cc] outline-none"
+                  className="w-full bg-[#fbfbfb] dark:bg-[#0E131E] border border-[#e0e0e0] dark:border-[#242E40] rounded-xl px-3.5 py-2.5 text-sm text-[#1d1d1f] dark:text-white focus:border-[#0066cc] dark:focus:border-[#38BDF8] outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#1d1d1f] uppercase tracking-wider mb-1">
+                <label className="block text-xs font-bold text-[#1d1d1f] dark:text-[#CBD5E1] uppercase tracking-wider mb-1">
                   Projects Mentioned
                 </label>
                 <input
                   type="text"
                   value={editFormData.projects}
                   onChange={(e) => setEditFormData({ ...editFormData, projects: e.target.value })}
-                  className="w-full bg-[#fbfbfb] border border-[#e0e0e0] rounded-xl px-3.5 py-2.5 text-sm text-[#1d1d1f] focus:border-[#0066cc] outline-none"
+                  className="w-full bg-[#fbfbfb] dark:bg-[#0E131E] border border-[#e0e0e0] dark:border-[#242E40] rounded-xl px-3.5 py-2.5 text-sm text-[#1d1d1f] dark:text-white focus:border-[#0066cc] dark:focus:border-[#38BDF8] outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#1d1d1f] uppercase tracking-wider mb-1">
+                <label className="block text-xs font-bold text-[#1d1d1f] dark:text-[#CBD5E1] uppercase tracking-wider mb-1">
                   Career Goal & Target
                 </label>
                 <input
                   type="text"
                   value={editFormData.goal}
                   onChange={(e) => setEditFormData({ ...editFormData, goal: e.target.value })}
-                  className="w-full bg-[#fbfbfb] border border-[#e0e0e0] rounded-xl px-3.5 py-2.5 text-sm text-[#1d1d1f] focus:border-[#0066cc] outline-none"
+                  className="w-full bg-[#fbfbfb] dark:bg-[#0E131E] border border-[#e0e0e0] dark:border-[#242E40] rounded-xl px-3.5 py-2.5 text-sm text-[#1d1d1f] dark:text-white focus:border-[#0066cc] dark:focus:border-[#38BDF8] outline-none"
                 />
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#f0f0f0]">
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#f0f0f0] dark:border-[#242E40]">
               <button
                 type="button"
                 onClick={() => setIsEditingDraft(false)}
-                className="px-4 py-2 text-sm font-semibold text-[#333333] hover:text-[#1d1d1f]"
+                className="px-4 py-2 text-sm font-semibold text-[#333333] dark:text-[#CBD5E1] hover:text-[#1d1d1f] dark:hover:text-white"
               >
                 Cancel
               </button>

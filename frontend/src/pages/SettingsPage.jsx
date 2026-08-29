@@ -10,8 +10,8 @@ import api from '../lib/apiClient'
  */
 
 const V = '#0066cc'
-const FIELD = 'w-full rounded-xl border border-[#e0e0e0] bg-white px-3.5 py-2.5 text-[14.5px] text-[#1d1d1f] outline-none focus:border-[#0066cc] focus:ring-[3px] focus:ring-[#0066cc]/20 transition-colors'
-const LABEL = 'block text-[13.5px] font-semibold text-[#1d1d1f] mb-1.5'
+const FIELD = 'w-full rounded-xl border border-[#e0e0e0] dark:border-[#242E40] bg-white dark:bg-[#0E131E] px-3.5 py-2.5 text-[14.5px] text-[#1d1d1f] dark:text-white outline-none focus:border-[#0066cc] dark:focus:border-[#38BDF8] focus:ring-[3px] focus:ring-[#0066cc]/20 transition-colors'
+const LABEL = 'block text-[13.5px] font-semibold text-[#1d1d1f] dark:text-[#CBD5E1] mb-1.5'
 
 function Toggle({ checked, onChange, label, hint }) {
   return (
@@ -22,7 +22,7 @@ function Toggle({ checked, onChange, label, hint }) {
         aria-checked={checked}
         onClick={() => onChange(!checked)}
         className="relative rounded-full flex-none transition-colors mt-0.5 cursor-pointer"
-        style={{ width: 42, height: 24, background: checked ? V : '#e0e0e0' }}
+        style={{ width: 42, height: 24, background: checked ? V : '#94A3B8' }}
       >
         <span
           className="absolute rounded-full bg-white transition-all shadow-xs"
@@ -30,8 +30,8 @@ function Toggle({ checked, onChange, label, hint }) {
         />
       </button>
       <span>
-        <span className="block text-[14px] font-semibold text-[#1d1d1f]">{label}</span>
-        {hint && <span className="block text-[12.5px] text-[#7a7a7a] mt-0.5">{hint}</span>}
+        <span className="block text-[14px] font-semibold text-[#1d1d1f] dark:text-white">{label}</span>
+        {hint && <span className="block text-[12.5px] text-[#7a7a7a] dark:text-[#94A3B8] mt-0.5">{hint}</span>}
       </span>
     </label>
   )
@@ -97,19 +97,19 @@ export default function SettingsPage() {
 
   return (
     <AppShell>
-      <div className="w-full font-['Inter',sans-serif] text-[#1d1d1f]">
+      <div className="w-full font-['Inter',sans-serif] text-[#1d1d1f] dark:text-white">
         {/* Page Header */}
         <header className="mb-6">
-          <h1 className="font-['Manrope'] font-extrabold text-2xl sm:text-3xl text-[#1d1d1f] tracking-tight">
+          <h1 className="font-['Manrope'] font-extrabold text-2xl sm:text-3xl text-[#1d1d1f] dark:text-white tracking-tight">
             Preferences & Settings
           </h1>
-          <p className="text-sm sm:text-base text-[#333333] mt-1">
+          <p className="text-sm sm:text-base text-[#333333] dark:text-[#94A3B8] mt-1">
             Study schedule, preferred content formats, notifications, and AI recommendation rules.
           </p>
         </header>
 
         {loading || !s ? (
-          <div className="p-8 text-center text-[#7a7a7a] text-sm bg-white rounded-2xl border border-[#e0e0e0]">
+          <div className="p-8 text-center text-[#7a7a7a] dark:text-[#94A3B8] text-sm bg-white dark:bg-[#141A26] rounded-2xl border border-[#e0e0e0] dark:border-[#242E40]">
             Loading settings…
           </div>
         ) : (
@@ -117,9 +117,9 @@ export default function SettingsPage() {
             {/* Primary Left Column: 8 cols on desktop */}
             <div className="lg:col-span-8 space-y-6">
               {/* Study Preferences Card */}
-              <section className="bg-white border border-[#e0e0e0] rounded-2xl p-6 shadow-2xs">
+              <section className="bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-6 shadow-2xs">
                 <div className="flex items-center gap-3 mb-5">
-                  <span className="w-9 h-9 rounded-xl bg-[#eaf2fc] text-[#0066cc] flex items-center justify-center flex-none">
+                  <span className="w-9 h-9 rounded-xl bg-[#eaf2fc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center flex-none">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
                       <line x1="16" y1="2" x2="16" y2="6" />
@@ -128,10 +128,10 @@ export default function SettingsPage() {
                     </svg>
                   </span>
                   <div>
-                    <h2 className="font-['Manrope'] font-bold text-[16px] text-[#1d1d1f]">
+                    <h2 className="font-['Manrope'] font-bold text-[16px] text-[#1d1d1f] dark:text-white">
                       Study Schedule & Pacing
                     </h2>
-                    <p className="text-xs text-[#7a7a7a]">
+                    <p className="text-xs text-[#7a7a7a] dark:text-[#94A3B8]">
                       Updating weekly study hours automatically recalibrates milestone timelines
                     </p>
                   </div>
@@ -178,7 +178,7 @@ export default function SettingsPage() {
                       { value: 'harder', label: 'Fast-track & Rigorous', subtitle: 'Intensive curriculum' },
                     ]}
                     className="w-full"
-                    buttonClassName="w-full py-2.5 bg-white border-[#e0e0e0] text-[#1d1d1f]"
+                    buttonClassName="w-full py-2.5 bg-white dark:bg-[#0E131E] border-[#e0e0e0] dark:border-[#242E40] text-[#1d1d1f] dark:text-white"
                     menuClassName="w-full"
                     ariaLabel="Difficulty progression"
                   />
@@ -186,9 +186,9 @@ export default function SettingsPage() {
               </section>
 
               {/* Resource Formats */}
-              <section className="bg-white border border-[#e0e0e0] rounded-2xl p-6 shadow-2xs">
+              <section className="bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-6 shadow-2xs">
                 <div className="flex items-center gap-3 mb-4">
-                  <span className="w-9 h-9 rounded-xl bg-[#eaf2fc] text-[#0066cc] flex items-center justify-center flex-none">
+                  <span className="w-9 h-9 rounded-xl bg-[#eaf2fc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center flex-none">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z" />
                       <path d="M6 6h10" />
@@ -196,10 +196,10 @@ export default function SettingsPage() {
                     </svg>
                   </span>
                   <div>
-                    <h2 className="font-['Manrope'] font-bold text-[16px] text-[#1d1d1f]">
+                    <h2 className="font-['Manrope'] font-bold text-[16px] text-[#1d1d1f] dark:text-white">
                       Preferred Content Formats
                     </h2>
-                    <p className="text-xs text-[#7a7a7a]">
+                    <p className="text-xs text-[#7a7a7a] dark:text-[#94A3B8]">
                       Select the medium you learn best with. The algorithm will prioritize these.
                     </p>
                   </div>
@@ -213,12 +213,11 @@ export default function SettingsPage() {
                         key={f}
                         type="button"
                         onClick={() => toggleFormat(f)}
-                        className="rounded-xl px-4 py-2 text-[13px] font-bold border transition-all capitalize cursor-pointer shadow-xs"
-                        style={
+                        className={`rounded-xl px-4 py-2 text-[13px] font-bold border transition-all capitalize cursor-pointer shadow-xs ${
                           on
-                            ? { background: V, borderColor: V, color: '#fff' }
-                            : { background: '#fff', borderColor: '#e0e0e0', color: '#333333' }
-                        }
+                            ? 'bg-[#0066cc] border-[#0066cc] text-white'
+                            : 'bg-white dark:bg-[#0E131E] border-[#e0e0e0] dark:border-[#242E40] text-[#333333] dark:text-[#CBD5E1] hover:border-[#0066cc] dark:hover:border-[#38BDF8]'
+                        }`}
                       >
                         {on ? `✓ ${f}` : `+ ${f}`}
                       </button>
@@ -228,25 +227,25 @@ export default function SettingsPage() {
               </section>
 
               {/* Notifications & AI Assistant Preferences */}
-              <section className="bg-white border border-[#e0e0e0] rounded-2xl p-6 shadow-2xs">
+              <section className="bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-6 shadow-2xs">
                 <div className="flex items-center gap-3 mb-4">
-                  <span className="w-9 h-9 rounded-xl bg-[#eaf2fc] text-[#0066cc] flex items-center justify-center flex-none">
+                  <span className="w-9 h-9 rounded-xl bg-[#eaf2fc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center flex-none">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
                       <path d="M13.73 21a2 2 0 0 1-3.46 0" />
                     </svg>
                   </span>
                   <div>
-                    <h2 className="font-['Manrope'] font-bold text-[16px] text-[#1d1d1f]">
+                    <h2 className="font-['Manrope'] font-bold text-[16px] text-[#1d1d1f] dark:text-white">
                       Notifications & Proactive AI
                     </h2>
-                    <p className="text-xs text-[#7a7a7a]">
+                    <p className="text-xs text-[#7a7a7a] dark:text-[#94A3B8]">
                       Control how PathFinder keeps you accountable and engaged
                     </p>
                   </div>
                 </div>
 
-                <div className="divide-y divide-[#f5f5f7]">
+                <div className="divide-y divide-[#f5f5f7] dark:divide-[#1E2638]">
                   <Toggle
                     checked={!!s.email_notifications}
                     label="Email Progress Summaries"
@@ -269,14 +268,14 @@ export default function SettingsPage() {
               </section>
 
               {error && (
-                <p className="text-[13.5px] text-[#B42318] bg-[#FDECEC] border border-[#F3B9B9] rounded-xl px-4 py-2.5">
+                <p className="text-[13.5px] text-[#B42318] dark:text-red-400 bg-[#FDECEC] dark:bg-red-950/40 border border-[#F3B9B9] dark:border-red-800/60 rounded-xl px-4 py-2.5">
                   {error}
                 </p>
               )}
 
               <div className="h-6 flex items-center gap-2">
                 {saving && (
-                  <span className="text-[13px] text-[#7a7a7a] flex items-center gap-1.5">
+                  <span className="text-[13px] text-[#7a7a7a] dark:text-[#94A3B8] flex items-center gap-1.5">
                     <svg className="w-3.5 h-3.5 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                       <circle cx="12" cy="12" r="10" strokeWidth="3" strokeDasharray="30" strokeLinecap="round" />
                     </svg>
@@ -284,7 +283,7 @@ export default function SettingsPage() {
                   </span>
                 )}
                 {toast && !saving && (
-                  <span className="text-[13.5px] font-semibold text-[#16A34A] flex items-center gap-1.5">
+                  <span className="text-[13.5px] font-semibold text-[#16A34A] dark:text-emerald-400 flex items-center gap-1.5">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M20 6 9 17l-5-5" />
                     </svg>
@@ -297,36 +296,36 @@ export default function SettingsPage() {
             {/* Right Rail Context & Summary: 4 cols on desktop */}
             <div className="lg:col-span-4 space-y-6">
               {/* Preferences Summary Card */}
-              <div className="bg-white border border-[#e0e0e0] rounded-2xl p-6 shadow-2xs">
-                <h3 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] mb-4">
+              <div className="bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-6 shadow-2xs">
+                <h3 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white mb-4">
                   Profile Configuration
                 </h3>
 
                 <div className="space-y-3.5 text-xs">
-                  <div className="flex justify-between items-center py-1 border-b border-[#f5f5f7]">
-                    <span className="text-[#7a7a7a]">Weekly Target</span>
-                    <span className="font-bold text-[#1d1d1f]">
+                  <div className="flex justify-between items-center py-1 border-b border-[#f5f5f7] dark:border-[#1E2638]">
+                    <span className="text-[#7a7a7a] dark:text-[#94A3B8]">Weekly Target</span>
+                    <span className="font-bold text-[#1d1d1f] dark:text-white">
                       {s.weekly_hours || 10} hours / week
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-center py-1 border-b border-[#f5f5f7]">
-                    <span className="text-[#7a7a7a]">Pacing Mode</span>
-                    <span className="font-bold text-[#0066cc] bg-[#eaf2fc] px-2.5 py-1 rounded-lg capitalize">
+                  <div className="flex justify-between items-center py-1 border-b border-[#f5f5f7] dark:border-[#1E2638]">
+                    <span className="text-[#7a7a7a] dark:text-[#94A3B8]">Pacing Mode</span>
+                    <span className="font-bold text-[#0066cc] dark:text-[#38BDF8] bg-[#eaf2fc] dark:bg-[#1E293B] px-2.5 py-1 rounded-lg capitalize">
                       {s.difficulty_preference || 'Adaptive'}
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-center py-1 border-b border-[#f5f5f7]">
-                    <span className="text-[#7a7a7a]">Active Formats</span>
-                    <span className="font-semibold text-[#1d1d1f]">
+                  <div className="flex justify-between items-center py-1 border-b border-[#f5f5f7] dark:border-[#1E2638]">
+                    <span className="text-[#7a7a7a] dark:text-[#94A3B8]">Active Formats</span>
+                    <span className="font-semibold text-[#1d1d1f] dark:text-white">
                       {(s.preferred_formats || []).length} types selected
                     </span>
                   </div>
 
                   <div className="flex justify-between items-center py-1">
-                    <span className="text-[#7a7a7a]">AI Assistant</span>
-                    <span className="font-semibold text-[#22A06B]">
+                    <span className="text-[#7a7a7a] dark:text-[#94A3B8]">AI Assistant</span>
+                    <span className="font-semibold text-[#22A06B] dark:text-emerald-400">
                       {s.ai_suggestions ? 'Active & Calibrated' : 'Muted'}
                     </span>
                   </div>
@@ -334,9 +333,9 @@ export default function SettingsPage() {
               </div>
 
               {/* Dynamic Re-calibration Insight */}
-              <div className="bg-gradient-to-br from-[#fafbfc] to-[#eaf2fc] border border-[#cfe4fb] rounded-2xl p-5 shadow-2xs">
+              <div className="bg-gradient-to-br from-[#fafbfc] to-[#eaf2fc] dark:from-[#141A26] dark:to-[#101622] border border-[#cfe4fb] dark:border-[#242E40] rounded-2xl p-5 shadow-2xs">
                 <div className="flex items-start gap-3">
-                  <span className="w-8 h-8 rounded-xl bg-white text-[#0066cc] flex items-center justify-center flex-none shadow-2xs">
+                  <span className="w-8 h-8 rounded-xl bg-white dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center flex-none shadow-2xs">
                     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <circle cx="12" cy="12" r="10" />
                       <path d="M12 16v-4" />
@@ -344,10 +343,10 @@ export default function SettingsPage() {
                     </svg>
                   </span>
                   <div>
-                    <h4 className="font-['Manrope'] font-bold text-sm text-[#1d1d1f]">
+                    <h4 className="font-['Manrope'] font-bold text-sm text-[#1d1d1f] dark:text-white">
                       Adaptive Re-calibration
                     </h4>
-                    <p className="text-xs text-[#333333] mt-1 leading-relaxed">
+                    <p className="text-xs text-[#333333] dark:text-[#94A3B8] mt-1 leading-relaxed">
                       Whenever you adjust study hours or formats, your learning roadmap automatically re-organizes weekly modules without losing completed tasks.
                     </p>
                   </div>
