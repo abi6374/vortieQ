@@ -472,8 +472,7 @@ export default function PersonalizedRoadmap({
         onClose={() => setShowGitHubModal(false)}
         onRemindLater={() => { remindLaterDismissedRef.current = true }}
         onConnected={(ghData) => {
-          setToastMessage(`GitHub synced! Calibrated ${ghData.topics?.length || 0} skills & portfolio depth.`)
-          setTimeout(() => setToastMessage(null), 3500)
+          // GitHub connection & calibration state is displayed directly inside the banner with the green tick mark
         }}
       />
 
