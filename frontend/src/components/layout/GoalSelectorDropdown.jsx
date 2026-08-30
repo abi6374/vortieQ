@@ -120,7 +120,7 @@ export default function GoalSelectorDropdown({
       >
         <CalendarDays className="w-4 h-4 text-[#0066cc] dark:text-[#38BDF8] flex-none" />
         <div className="flex flex-col text-left min-w-0 flex-1">
-          <span className="font-bold text-[#1d1d1f] dark:text-white leading-tight truncate">
+          <span className="font-bold text-[#1d1d1f] dark:text-white leading-tight truncate font-['Manrope']">
             {currentGoalTitle}
           </span>
           <span className="text-[10px] text-[#6e6e73] dark:text-[#94A3B8] font-medium leading-tight truncate mt-0.5">
@@ -146,7 +146,7 @@ export default function GoalSelectorDropdown({
             className="absolute left-0 top-full mt-1.5 z-50 w-72 sm:w-80 bg-white dark:bg-[#141A26] border border-[#E6EAF2] dark:border-[#242E40] shadow-[0_20px_48px_rgba(14,27,56,0.18),0_4px_12px_rgba(14,27,56,0.06)] dark:shadow-[0_20px_48px_rgba(0,0,0,0.6)] rounded-2xl p-1.5 overflow-hidden"
             role="listbox"
           >
-            <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[#7a7a7a] dark:text-[#94A3B8] border-b border-[#f0f0f0] dark:border-[#1E2638] mb-1">
+            <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[#7a7a7a] dark:text-[#94A3B8] border-b border-[#f0f0f0] dark:border-[#1E2638] mb-1 font-['Manrope']">
               Your Learning Roadmaps ({displayPaths.length})
             </div>
 
@@ -171,7 +171,7 @@ export default function GoalSelectorDropdown({
                     }`}
                   >
                     <div className="min-w-0 flex-1">
-                      <div className="truncate leading-tight">{title}</div>
+                      <div className="truncate leading-tight font-['Manrope'] font-bold">{title}</div>
                       <div className="text-[10px] font-normal text-[#7a7a7a] dark:text-[#94A3B8] mt-0.5 truncate">
                         {pathItem.timeframe ? `Target: ${pathItem.timeframe}` : 'Target: Ongoing Pace'}
                         {pathItem.generated_at && ` · ${new Date(pathItem.generated_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}`}

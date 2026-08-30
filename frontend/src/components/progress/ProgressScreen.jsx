@@ -368,11 +368,8 @@ export default function ProgressScreen() {
         {/* -----------------------------------------------------------------------
             HEADER ROW: Title + Subtitle
            ----------------------------------------------------------------------- */}
-        {/* -----------------------------------------------------------------------
-            HEADER ROW: Title + Subtitle
-           ----------------------------------------------------------------------- */}
         <header className="mb-6">
-          <h1 className="font-['Inter'] font-extrabold text-2xl sm:text-[28px] text-[#1d1d1f] dark:text-white tracking-tight leading-tight">
+          <h1 className="font-['Manrope'] font-extrabold text-2xl sm:text-[28px] text-[#1d1d1f] dark:text-white tracking-tight leading-tight">
             Progress
           </h1>
           <p className="mt-1 text-xs sm:text-[13px] text-[#6e6e73] dark:text-[#94A3B8]">
@@ -380,18 +377,18 @@ export default function ProgressScreen() {
           </p>
         </header>
 
-        <div className="space-y-7">
+        <div className="space-y-7 font-['Inter',sans-serif]">
         {/* -----------------------------------------------------------------------
             HERO OVERVIEW PROGRESS CARD (68% Prominent Card)
            ----------------------------------------------------------------------- */}
         <section className="bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-6 lg:p-7 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6 hover:border-[#cfe4fb] dark:hover:border-[#242E40] transition-all">
           {/* Left Column Text */}
           <div className="space-y-2 max-w-xl">
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#0066cc] dark:text-[#38BDF8] bg-[#eaf2fc] dark:bg-sky-950/70 px-2.5 py-1 rounded-md border border-[#cfe4fb] dark:border-sky-800/60">
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#0066cc] dark:text-[#38BDF8] bg-[#eaf2fc] dark:bg-sky-950/70 px-2.5 py-1 rounded-md border border-[#cfe4fb] dark:border-sky-800/60 font-['Manrope']">
               ROADMAP PROGRESS
             </span>
             <div className="flex items-baseline gap-3 pt-1">
-              <span className="font-['Inter'] font-extrabold text-4xl sm:text-5xl text-[#1d1d1f] dark:text-white tracking-tight">
+              <span className="font-['Manrope'] font-extrabold text-4xl sm:text-5xl text-[#1d1d1f] dark:text-white tracking-tight">
                 {roadmap.percent}%
               </span>
               {onTrack && (
@@ -453,7 +450,7 @@ export default function ProgressScreen() {
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="font-['Inter'] font-extrabold text-2xl text-[#1d1d1f] dark:text-white">
+                <span className="font-['Manrope'] font-extrabold text-2xl text-[#1d1d1f] dark:text-white">
                   {roadmap.percent}%
                 </span>
                 <span className="text-[10px] font-semibold text-[#6e6e73] dark:text-[#94A3B8]">
@@ -487,7 +484,7 @@ export default function ProgressScreen() {
               </span>
             </div>
             <div className="my-2.5">
-              <span className="font-['Inter'] font-extrabold text-3xl text-[#1d1d1f] dark:text-white tracking-tight">
+              <span className="font-['Manrope'] font-extrabold text-3xl text-[#1d1d1f] dark:text-white tracking-tight">
                 {roadmap.percent}%
               </span>
             </div>
@@ -505,7 +502,7 @@ export default function ProgressScreen() {
               </span>
             </div>
             <div className="my-2.5">
-              <span className="font-['Inter'] font-extrabold text-3xl text-[#1d1d1f] dark:text-white tracking-tight">
+              <span className="font-['Manrope'] font-extrabold text-3xl text-[#1d1d1f] dark:text-white tracking-tight">
                 {masteredSkillCount} / {totalSkillCount}
               </span>
             </div>
@@ -523,7 +520,7 @@ export default function ProgressScreen() {
               </span>
             </div>
             <div className="my-2.5">
-              <span className="font-['Inter'] font-extrabold text-3xl text-[#1d1d1f] dark:text-white tracking-tight">
+              <span className="font-['Manrope'] font-extrabold text-3xl text-[#1d1d1f] dark:text-white tracking-tight">
                 {Math.round(((streak.minutes_total || 0) / 60) * 10) / 10} hrs
               </span>
             </div>
@@ -541,7 +538,7 @@ export default function ProgressScreen() {
               </span>
             </div>
             <div className="my-2.5">
-              <span className="font-['Inter'] font-extrabold text-3xl text-[#1d1d1f] dark:text-white tracking-tight">
+              <span className="font-['Manrope'] font-extrabold text-3xl text-[#1d1d1f] dark:text-white tracking-tight">
                 {streak.current_streak} days
               </span>
             </div>
@@ -566,7 +563,7 @@ export default function ProgressScreen() {
             <section className="bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-6 shadow-sm hover:border-[#cfe4fb] dark:hover:border-[#242E40] transition-all">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-[#f5f5f7] dark:border-[#1E2638] gap-2">
                 <div>
-                  <h2 className="font-['Inter'] font-bold text-base text-[#1d1d1f] dark:text-white">
+                  <h2 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">
                     Learning progress
                   </h2>
                   <p className="text-xs text-[#6e6e73] dark:text-[#94A3B8] mt-0.5">
@@ -664,7 +661,7 @@ export default function ProgressScreen() {
             <section className="bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-6 shadow-sm hover:border-[#cfe4fb] dark:hover:border-[#242E40] transition-all">
               <div className="pb-3 border-b border-[#f5f5f7] dark:border-[#1E2638] flex items-center justify-between">
                 <div>
-                  <h2 className="font-['Inter'] font-bold text-base text-[#1d1d1f] dark:text-white">
+                  <h2 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">
                     Skill progress
                   </h2>
                   <p className="text-xs text-[#6e6e73] dark:text-[#94A3B8] mt-0.5">
@@ -700,7 +697,7 @@ export default function ProgressScreen() {
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-xs sm:text-sm font-extrabold text-[#1d1d1f] dark:text-white">{skill.progress}%</span>
+                          <span className="text-xs sm:text-sm font-extrabold text-[#1d1d1f] dark:text-white font-['Manrope']">{skill.progress}%</span>
                           <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-bold border ${skill.statusColor}`}>
                             {skill.status}
                           </span>
@@ -729,10 +726,10 @@ export default function ProgressScreen() {
                   </span>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h2 className="font-['Inter'] font-bold text-base text-[#1d1d1f] dark:text-white">
+                      <h2 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">
                         Learning streak
                       </h2>
-                      <span className="font-extrabold text-sm text-[#0066cc] dark:text-[#38BDF8]">{streak.current_streak} days</span>
+                      <span className="font-extrabold text-sm text-[#0066cc] dark:text-[#38BDF8] font-['Manrope']">{streak.current_streak} days</span>
                     </div>
                     <p className="text-xs text-[#6e6e73] dark:text-[#94A3B8]">
                       {streak.current_streak > 0
@@ -779,7 +776,7 @@ export default function ProgressScreen() {
             {/* CARD D: Roadmap Milestones Timeline */}
             <section className="bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-6 shadow-sm hover:border-[#cfe4fb] dark:hover:border-[#242E40] transition-all">
               <div className="pb-4 border-b border-[#f5f5f7] dark:border-[#1E2638]">
-                <h2 className="font-['Inter'] font-bold text-base text-[#1d1d1f] dark:text-white">
+                <h2 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">
                   Roadmap milestones
                 </h2>
                 <p className="text-xs text-[#6e6e73] dark:text-[#94A3B8] mt-0.5">
@@ -847,7 +844,7 @@ export default function ProgressScreen() {
             <section className="bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-6 shadow-sm hover:border-[#cfe4fb] dark:hover:border-[#242E40] transition-all">
               <div className="pb-4 border-b border-[#f5f5f7] dark:border-[#1E2638] flex items-center justify-between">
                 <div>
-                  <h2 className="font-['Inter'] font-bold text-base text-[#1d1d1f] dark:text-white">
+                  <h2 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">
                     Recent activity
                   </h2>
                   <p className="text-xs text-[#6e6e73] dark:text-[#94A3B8] mt-0.5">
@@ -879,7 +876,7 @@ export default function ProgressScreen() {
                       </div>
                     </div>
 
-                    <span className="text-[11px] font-bold text-[#16A34A] dark:text-emerald-300 bg-[#ECFDF3] dark:bg-emerald-950/70 px-2 py-0.5 rounded-md border border-[#D1FADF] dark:border-emerald-800">
+                    <span className="text-[11px] font-bold text-[#16A34A] dark:text-emerald-300 bg-[#ECFDF3] dark:bg-emerald-950/70 px-2 py-0.5 rounded-md border border-[#D1FADF] dark:border-emerald-800 font-['Manrope']">
                       {act.progressChange}
                     </span>
                   </div>
@@ -898,18 +895,18 @@ export default function ProgressScreen() {
             <section className="bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-5 shadow-sm hover:border-[#cfe4fb] dark:hover:border-[#242E40] transition-all">
               <div className="pb-3 border-b border-[#f5f5f7] dark:border-[#1E2638]">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-['Inter'] font-bold text-sm text-[#1d1d1f] dark:text-white">
+                  <h3 className="font-['Manrope'] font-bold text-sm text-[#1d1d1f] dark:text-white">
                     Weekly activity
                   </h3>
                   {streak.current_streak > 0 && (
-                    <span className="text-[11px] font-bold text-[#0066cc] dark:text-[#38BDF8] bg-[#eaf2fc] dark:bg-sky-950/70 px-2 py-0.5 rounded-full border border-[#cfe4fb] dark:border-sky-800/60">
+                    <span className="text-[11px] font-bold text-[#0066cc] dark:text-[#38BDF8] bg-[#eaf2fc] dark:bg-sky-950/70 px-2 py-0.5 rounded-full border border-[#cfe4fb] dark:border-sky-800/60 font-['Manrope']">
                       {streak.current_streak}-day streak
                     </span>
                   )}
                 </div>
                 <p className="text-xs text-[#6e6e73] dark:text-[#94A3B8] mt-0.5">Hours spent learning</p>
                 <div className="flex items-baseline gap-2 mt-2">
-                  <span className="font-['Inter'] font-extrabold text-2xl text-[#1d1d1f] dark:text-white">
+                  <span className="font-['Manrope'] font-extrabold text-2xl text-[#1d1d1f] dark:text-white">
                     {weeklyHoursTotal} hrs
                   </span>
                   <span className="text-xs text-[#6e6e73] dark:text-[#94A3B8]">This week</span>
@@ -940,8 +937,8 @@ export default function ProgressScreen() {
                           const d = payload[0].payload
                           return (
                             <div className="bg-[#1d1d1f] dark:bg-[#0E131E] border border-gray-700 dark:border-[#242E40] p-2 rounded-md shadow-xl text-[11px] text-white">
-                              <div className="font-bold text-white">{d.day}</div>
-                              <div className="text-[#38BDF8] font-bold">{d.hours} hours</div>
+                              <div className="font-bold text-white font-['Manrope']">{d.day}</div>
+                              <div className="text-[#38BDF8] font-bold font-['Manrope']">{d.hours} hours</div>
                             </div>
                           )
                         }
@@ -962,7 +959,7 @@ export default function ProgressScreen() {
             <section className="bg-[#f5faff] dark:bg-[#141E30] border border-[#cfe4fb] dark:border-[#233550] rounded-2xl p-5 shadow-sm">
               <div className="flex items-center gap-2 text-[#0066cc] dark:text-[#38BDF8] mb-2">
                 <Sparkles className="w-4 h-4" />
-                <h3 className="font-['Inter'] font-bold text-xs uppercase tracking-wider text-[#0066cc] dark:text-[#38BDF8]">
+                <h3 className="font-['Manrope'] font-bold text-xs uppercase tracking-wider text-[#0066cc] dark:text-[#38BDF8]">
                   PathFinder insight
                 </h3>
               </div>
@@ -982,7 +979,7 @@ export default function ProgressScreen() {
             {/* RIGHT CARD 3: Next Best Actions (01, 02, 03) */}
             <section className="bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-5 shadow-sm hover:border-[#cfe4fb] dark:hover:border-[#242E40] transition-all">
               <div className="pb-3 border-b border-[#f5f5f7] dark:border-[#1E2638]">
-                <h3 className="font-['Inter'] font-bold text-sm text-[#1d1d1f] dark:text-white">
+                <h3 className="font-['Manrope'] font-bold text-sm text-[#1d1d1f] dark:text-white">
                   Your next best actions
                 </h3>
                 <p className="text-xs text-[#6e6e73] dark:text-[#94A3B8] mt-0.5">Recommended tasks for today</p>
@@ -1005,7 +1002,7 @@ export default function ProgressScreen() {
                           {act.id}
                         </span>
                         <div>
-                          <h4 className="font-bold text-xs text-[#1d1d1f] dark:text-[#F9FAFB]">{act.title}</h4>
+                          <h4 className="font-bold text-xs text-[#1d1d1f] dark:text-[#F9FAFB] font-['Manrope']">{act.title}</h4>
                           <span className="text-[10px] text-[#6e6e73] dark:text-[#94A3B8] font-medium">{act.duration}</span>
                         </div>
                       </div>
@@ -1029,7 +1026,7 @@ export default function ProgressScreen() {
               <div>
                 <div className="flex items-center justify-between text-xs font-bold mb-1">
                   <span className="text-[#1d1d1f] dark:text-[#F9FAFB]">Roadmap status</span>
-                  <span className="text-[#0066cc] dark:text-[#38BDF8]">{roadmap.percent}% complete</span>
+                  <span className="text-[#0066cc] dark:text-[#38BDF8] font-['Manrope']">{roadmap.percent}% complete</span>
                 </div>
                 <div className="w-full bg-[#f5f5f7] dark:bg-[#1E2638] h-2 rounded-full overflow-hidden">
                   <div className="bg-[#0066cc] dark:bg-[#38BDF8] h-full rounded-full" style={{ width: roadmap.percent + '%' }} />
@@ -1043,7 +1040,7 @@ export default function ProgressScreen() {
               <div>
                 <div className="flex items-center justify-between text-xs font-bold mb-1">
                   <span className="text-[#1d1d1f] dark:text-[#F9FAFB]">This week's goal</span>
-                  <span className="text-[#16A34A] dark:text-[#34D399]">17.4 / 20 hrs (87%)</span>
+                  <span className="text-[#16A34A] dark:text-[#34D399] font-['Manrope']">17.4 / 20 hrs (87%)</span>
                 </div>
                 <div className="w-full bg-[#f5f5f7] dark:bg-[#1E2638] h-2 rounded-full overflow-hidden">
                   <div className="bg-[#16A34A] dark:bg-emerald-400 h-full rounded-full" style={{ width: '87%' }} />
@@ -1063,11 +1060,11 @@ export default function ProgressScreen() {
               <div className="space-y-2 text-xs">
                 <div className="flex items-center justify-between">
                   <span className="text-[#6e6e73] dark:text-[#94A3B8]">Primary skill gap:</span>
-                  <span className="font-bold text-[#F59E0B] dark:text-amber-400">Statistics (55%)</span>
+                  <span className="font-bold text-[#F59E0B] dark:text-amber-400 font-['Manrope']">Statistics (55%)</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-[#6e6e73] dark:text-[#94A3B8]">Next milestone:</span>
-                  <span className="font-bold text-[#0066cc] dark:text-[#38BDF8]">Statistics checkpoint (This week)</span>
+                  <span className="font-bold text-[#0066cc] dark:text-[#38BDF8] font-['Manrope']">Statistics checkpoint (This week)</span>
                 </div>
               </div>
             </section>
