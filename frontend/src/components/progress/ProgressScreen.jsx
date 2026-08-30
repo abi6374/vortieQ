@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAIChat } from '../../contexts/AIChatContext'
 import {
@@ -11,45 +11,26 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip as RechartsTooltip,
-  RadarChart,
-  Radar,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
 } from 'recharts'
 import {
-  Rocket,
   TrendingUp,
-  Radar as RadarIcon,
-  NotebookTabs,
-  MessageCircle,
-  CalendarDays,
   MapPinned,
-  CheckCircle2,
+  Check,
   BadgeCheck,
   Clock3,
   Flame,
   BarChart3,
   Code2,
   Brain,
-  Briefcase,
   Flag,
   ArrowRight,
   Sparkles,
   Lock,
-  Trophy,
-  Info,
   ChevronDown,
   ChevronRight,
-  Search,
-  Check,
-  X,
-  Target,
   Layers,
   FileText,
   Activity,
-  Play,
-  RotateCcw,
 } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import AppShell from '../layout/AppShell'
@@ -59,112 +40,71 @@ import { useStreak } from '../../hooks/useStreak'
 
 /**
  * PathFinder High-Fidelity Progress Page
- * Matches the exact design language, layout, tokens, typography, and card hierarchy
- * of the PathFinder platform reference.
- *
- * Core Features:
- * - Desktop Layout (Sidebar 220px, Header, Hero Overview, 4 KPI cards)
- * - 65% / 35% Main Analytics Grid
- * - Line/Area Chart: Roadmap Progress over 8 weeks
- * - Weekly Activity Bar Chart: 17.4 hrs with daily breakdown
- * - Skill Progress list with progress bars, statuses, and hover states
- * - Skill Profile Radar Chart
- * - 5-Week Activity Heatmap with streak counters
- * - Milestone Timeline (Completed, In Progress, Upcoming)
- * - AI Progress Insight Card ("PathFinder insight")
- * - Next Best Actions (01, 02, 03)
- * - Recent Activity list
- * - Achievements badges (Unlocked & Locked)
- * - Right-Side Roadmap Status & Goal panel
- * - Floating AI Coach with interactive chat drawer
+ * Clean, responsive dashboard tracking learning momentum, skills growth, and roadmap milestones.
  */
-
 export default function ProgressScreen() {
   const navigate = useNavigate()
-  const { open: openAICoach, send: sendToAICoach } = useAIChat()
-  const { user, signOut } = useAuth()
+  const { open: openAICoach } = useAIChat()
+  const { user } = useAuth()
 
-  // Navigation tab state
-  const [activeNav, setActiveNav] = useState('progress')
-  // Real KPIs — roadmap %, streak days and weekly hours come from the
-  // backend rather than hardcoded literals.
+  // Real KPIs & hooks
   const roadmap = useRoadmap()
   const streak = useStreak()
-  const hoursLoggedThisWeek = Math.round(((streak.minutes_this_week || 0) / 60) * 10) / 10
+  const weeklyHoursTotal = Math.round(((streak.minutes_this_week || 0) / 60) * 10) / 10
 
-  // Timeframe filter state
+  // Timeframe filter & view logs state
   const [progressTimeframe, setProgressTimeframe] = useState('8 weeks')
   const [isTimeframeOpen, setIsTimeframeOpen] = useState(false)
-  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
-
-  // Interactive Task / Action Modal state
-
-  // Navigation handler
-  const handleNavClick = (navId) => {
-    setActiveNav(navId)
-    if (navId === 'roadmap') {
-      navigate('/dashboard')
-    } else if (navId === 'skills') {
-      navigate('/skills')
-    } else if (navId === 'resources') {
-      navigate('/dashboard')
-    } else if (navId === 'coach') {
-      openAICoach()
-    }
-  }
+  const [showAllLogs, setShowAllLogs] = useState(false)
 
   // ---------------------------------------------------------------------------
-  // DATASETS
+  // 1. Roadmap Progress Over Time (Area Chart Data) - Dynamic with exact weeks
   // ---------------------------------------------------------------------------
+  const progressTimelineData = useMemo(() => {
+    const allWeeks = roadmap.weeks || []
+    if (!allWeeks.length) return []
 
-  // Real derived stats used by the hero card above the charts.
-  const weeksCompletedCount = roadmap.weeks.filter((w) => w.is_complete).length
-  const onTrack = (() => {
-    const totalWeeks = roadmap.weeks.length
-    if (!totalWeeks || !roadmap.currentWeek) return false
-    const expectedPercent = (roadmap.currentWeek / totalWeeks) * 100
-    return roadmap.percent >= expectedPercent * 0.85
-  })()
+    let sliceCount = allWeeks.length
+    if (progressTimeframe === '4 weeks') sliceCount = 4
+    else if (progressTimeframe === '8 weeks') sliceCount = 8
+    else if (progressTimeframe === '12 weeks') sliceCount = 12
 
-  // 1. Roadmap Progress Over Time (Area Chart) — REAL, derived from roadmap.weeks.
-  // Each point is cumulative completion (steps done in weeks 1..N / total steps
-  // in the whole roadmap), so it's an honest reflection of the learner's real
-  // progress against their real week count — not a fixed "8 weeks" fiction.
-  // There's no historical snapshot table, so this can't show what completion
-  // looked like on a past calendar date; it shows real completion mapped onto
-  // the roadmap's own week axis, which is the closest real signal available.
-  const progressTimelineData = (() => {
+    const selectedWeeks = allWeeks.slice(0, Math.min(sliceCount, allWeeks.length))
     const totalAll = roadmap.totalSteps || 0
-    let cumulativeDone = 0
-    let prevProgress = 0
-    return roadmap.weeks.map((w) => {
-      cumulativeDone += w.completed_steps || 0
-      const progress = totalAll ? Math.round((cumulativeDone / totalAll) * 100) : 0
-      const delta = progress - prevProgress
-      prevProgress = progress
+
+    return selectedWeeks.map((w, index) => {
+      const previousWeeksSteps = allWeeks.slice(0, index + 1)
+      const currentCumulative = previousWeeksSteps.reduce((acc, curr) => acc + (curr.completed_steps || 0), 0)
+      const progress = totalAll ? Math.round((currentCumulative / totalAll) * 100) : 0
+      const weekPct = w.total_steps ? Math.round(((w.completed_steps || 0) / w.total_steps) * 100) : 0
+      const prevDone = previousWeeksSteps.slice(0, index).reduce((acc, curr) => acc + (curr.completed_steps || 0), 0)
+      const delta = totalAll ? Math.round(((currentCumulative - prevDone) / totalAll) * 100) : 0
+
       return {
         week: `Week ${w.week_number}`,
+        weekNumber: w.week_number,
         progress,
+        weekCompletion: weekPct,
+        completedTasks: `${w.completed_steps || 0} of ${w.total_steps || 0} tasks done`,
         change: `${delta >= 0 ? '+' : ''}${delta}%`,
       }
     })
-  })()
+  }, [roadmap.weeks, roadmap.totalSteps, progressTimeframe])
 
-  // 2. Weekly Learning Activity (Bar Chart) — REAL, from streak.daily_minutes_this_week
-  // (backend: study_sessions rows summed per day, this calendar week). There's
-  // no stored historical average across weeks, so the old "+15% vs avg" style
-  // comparison per day can't be computed honestly - dropped rather than faked.
+  // ---------------------------------------------------------------------------
+  // 2. Weekly Activity Bar Chart Data (Mon..Sun)
+  // ---------------------------------------------------------------------------
   const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
   const weeklyActivityData = (streak.daily_minutes_this_week || []).map((d, i) => ({
     day: DAY_LABELS[i] || d.date,
-    hours: Math.round((d.minutes / 60) * 10) / 10,
+    hours: Math.round(((d.minutes || 0) / 60) * 10) / 10,
   }))
-  const weeklyHoursTotal = Math.round(((streak.minutes_this_week || 0) / 60) * 10) / 10
+  const maxDayHours = Math.max(...weeklyActivityData.map((d) => d.hours), 4)
+  const yAxisMax = Math.max(4, Math.ceil(maxDayHours * 1.25))
 
-  // 3 & 4. Core Skills Development + Skill Profile Radar — REAL, derived from
-  // roadmap.allSteps' real skill_tags and completion status. There's no
-  // stored "category" taxonomy per tag, so that label is dropped rather than
-  // invented; icon is a cosmetic lookup only, not a data field.
+  // ---------------------------------------------------------------------------
+  // 3. Core Skills Development & Mastery
+  // ---------------------------------------------------------------------------
   const SKILL_ICON_MAP = [
     [/python|programming/i, Code2],
     [/statistic|sql|analy/i, BarChart3],
@@ -181,22 +121,38 @@ export default function ProgressScreen() {
     return { status: 'Upcoming', color: 'bg-[#f5f5f7] dark:bg-[#18181D] text-[#6e6e73] dark:text-[#CBD5E1] border-[#e9e9e9] dark:border-[#27272F]' }
   }
 
-  const skillTagStats = {}
-  roadmap.allSteps.forEach((step) => {
-    ;(step.skill_tags || []).forEach((tag) => {
-      if (!skillTagStats[tag]) skillTagStats[tag] = { total: 0, done: 0 }
-      skillTagStats[tag].total += 1
-      if (step.completed) skillTagStats[tag].done += 1
+  const skillTagStats = useMemo(() => {
+    const stats = {}
+    roadmap.allSteps.forEach((step) => {
+      ;(step.skill_tags || []).forEach((tag) => {
+        const clean = (tag || '').trim()
+        if (!clean) return
+        if (!stats[clean]) stats[clean] = { total: 0, done: 0 }
+        stats[clean].total += 1
+        if (step.completed || step.status === 'completed') {
+          stats[clean].done += 1
+        }
+      })
     })
-  })
-  const allSkills = Object.entries(skillTagStats)
-    .map(([tag, s]) => ({ tag, total: s.total, progress: Math.round((s.done / s.total) * 100) }))
-  const rankedSkills = [...allSkills].sort((a, b) => b.total - a.total).slice(0, 6)
+    return stats
+  }, [roadmap.allSteps])
 
-  // "Mastered" = a real skill tag where every real step referencing it is
-  // complete (100%), used by the "Skills mastered" KPI card below.
-  const masteredSkillCount = allSkills.filter((s) => s.progress >= 100).length
+  const allSkills = useMemo(() => {
+    return Object.entries(skillTagStats).map(([tag, s]) => ({
+      tag,
+      total: s.total,
+      done: s.done,
+      progress: s.total ? Math.round((s.done / s.total) * 100) : 0,
+    }))
+  }, [skillTagStats])
+
+  const rankedSkills = useMemo(() => {
+    return [...allSkills].sort((a, b) => b.total - a.total).slice(0, 6)
+  }, [allSkills])
+
+  const masteredSkillCount = allSkills.filter((s) => s.total > 0 && s.done >= s.total).length
   const totalSkillCount = allSkills.length
+  const skillsMasteredPct = totalSkillCount ? Math.round((masteredSkillCount / totalSkillCount) * 100) : 0
 
   const cap = (s) => s.replace(/[-_]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
 
@@ -212,9 +168,9 @@ export default function ProgressScreen() {
     }
   })
 
-  // 5. 5-Week Mini Activity Heatmap Matrix (7 days x 5 weeks) — REAL, from
-  // streak.daily_minutes_35d (real study_sessions minutes, chronological).
-  // Intensity: 0 (gray), 1 (very light), 2 (light), 3 (medium), 4 (strong purple)
+  // ---------------------------------------------------------------------------
+  // 4. 5-Week Activity Heatmap
+  // ---------------------------------------------------------------------------
   const minutesToIntensity = (mins) => {
     if (mins <= 0) return 0
     if (mins < 30) return 1
@@ -231,25 +187,22 @@ export default function ProgressScreen() {
   const getHeatmapColor = (intensity) => {
     switch (intensity) {
       case 4:
-        return 'bg-[#0066cc] dark:bg-[#C9D0D6]'
+        return 'bg-[#0066cc] dark:bg-[#38BDF8]'
       case 3:
-        return 'bg-[#61a9f5] dark:bg-[#A1A1AA]'
+        return 'bg-[#61a9f5] dark:bg-[#38BDF8]/75'
       case 2:
-        return 'bg-[#a1ccfb] dark:bg-[#71717A]'
+        return 'bg-[#a1ccfb] dark:bg-[#38BDF8]/50'
       case 1:
-        return 'bg-[#dcecfe] dark:bg-[#3F3F46]'
+        return 'bg-[#dcecfe] dark:bg-[#38BDF8]/25'
       default:
         return 'bg-[#f5f5f7] dark:bg-[#18181D]'
     }
   }
 
-  // 6. Roadmap Milestones Timeline
-  // 6. Roadmap Milestones Timeline — REAL, grouped from roadmap.weeks by
-  // milestone_label (a milestone can span multiple weeks). Dates for
-  // completed milestones use the real latest completed_at among that
-  // milestone's steps; everything else shows its real week range instead of
-  // an invented "Estimated: N weeks".
-  const milestones = (() => {
+  // ---------------------------------------------------------------------------
+  // 5. Roadmap Milestones Timeline
+  // ---------------------------------------------------------------------------
+  const milestones = useMemo(() => {
     const order = []
     const byLabel = new Map()
     roadmap.weeks.forEach((w) => {
@@ -297,13 +250,45 @@ export default function ProgressScreen() {
 
       return { title: g.title, status, date, progress }
     })
-  })()
+  }, [roadmap.weeks, roadmap.allSteps])
 
-  // 7. Next Best Actions — REAL, the learner's actual next not-started steps,
-  // in real sequence order. "desc" uses the step's real Groq-generated
-  // explanation instead of an invented practice-question description.
+  // ---------------------------------------------------------------------------
+  // 6. Recent Activity Logs & Full History
+  // ---------------------------------------------------------------------------
+  const relativeDay = (iso) => {
+    if (!iso) return ''
+    const d = new Date(iso)
+    const days = Math.floor((new Date().setHours(0, 0, 0, 0) - new Date(d).setHours(0, 0, 0, 0)) / 86400000)
+    if (days <= 0) return 'Today'
+    if (days === 1) return 'Yesterday'
+    return `${days} days ago`
+  }
+
+  const allRecentActivities = useMemo(() => {
+    const perStepPercent = roadmap.totalSteps ? Math.round((1 / roadmap.totalSteps) * 100) : 0
+    return roadmap.allSteps
+      .filter((s) => s.completed || s.status === 'completed')
+      .sort((a, b) => {
+        const timeA = a.completed_at ? new Date(a.completed_at).getTime() : 0
+        const timeB = b.completed_at ? new Date(b.completed_at).getTime() : 0
+        return timeB - timeA
+      })
+      .map((s, idx) => ({
+        id: s.step_id || `act-${idx}`,
+        title: s.title,
+        time: relativeDay(s.completed_at) || 'Completed recently',
+        progressChange: `+${Math.max(1, perStepPercent)}%`,
+        type: 'completed',
+      }))
+  }, [roadmap.allSteps, roadmap.totalSteps])
+
+  const displayedActivities = showAllLogs ? allRecentActivities : allRecentActivities.slice(0, 4)
+
+  // ---------------------------------------------------------------------------
+  // 7. Next Best Actions & Dynamic Goals
+  // ---------------------------------------------------------------------------
   const nextActions = roadmap.allSteps
-    .filter((s) => s.status === 'not_started')
+    .filter((s) => !s.completed && s.status !== 'completed')
     .sort((a, b) => (a.sequence_order || 0) - (b.sequence_order || 0))
     .slice(0, 3)
     .map((s, i) => ({
@@ -316,24 +301,8 @@ export default function ProgressScreen() {
       icon: iconFor((s.skill_tags || [])[0] || ''),
     }))
 
-  // 8. Recent Activity Timeline
-  // 8. Recent Activity Timeline — REAL, the learner's actually-completed
-  // steps, most recent first. "progressChange" is each step's real
-  // fractional contribution to overall roadmap progress (1/totalSteps),
-  // not an invented number.
-  const perStepPercent = roadmap.totalSteps ? Math.round((1 / roadmap.totalSteps) * 100) : 0
-  const relativeDay = (iso) => {
-    if (!iso) return ''
-    const d = new Date(iso)
-    const days = Math.floor((new Date().setHours(0, 0, 0, 0) - new Date(d).setHours(0, 0, 0, 0)) / 86400000)
-    if (days <= 0) return 'Today'
-    if (days === 1) return 'Yesterday'
-    return `${days} days ago`
-  }
-  const recentActivities = roadmap.allSteps
-    .filter((s) => s.completed && s.completed_at)
-    .sort((a, b) => new Date(b.completed_at) - new Date(a.completed_at))
-    .slice(0, 4)
+  const targetWeeklyHours = roadmap.path?.weekly_hours || 20
+  const weeklyGoalPct = Math.min(100, Math.round((weeklyHoursTotal / targetWeeklyHours) * 100))
 
   return (
     <AppShell
@@ -341,19 +310,16 @@ export default function ProgressScreen() {
       streakCount={streak.current_streak}
       topBar={
         <div className="flex items-center gap-3">
-          {/* Top Bar Path Switcher Dropdown */}
           <GoalSelectorDropdown
             activePath={roadmap.path}
             onSelectPath={(p) => {
               if (p?.id) navigate(`/roadmap/${p.id}`)
             }}
           />
-
-          {/* Outlined Button: "View roadmap" */}
           <button
             type="button"
             onClick={() => roadmap.path?.id ? navigate(`/roadmap/${roadmap.path.id}`) : navigate('/dashboard')}
-            className="flex items-center gap-2 px-3.5 sm:px-4 py-2 border border-[#0066cc] dark:border-[#27272F] text-[#0066cc] dark:text-[#C9D0D6] hover:bg-[#0066cc] dark:hover:bg-[#18181D] hover:text-white dark:hover:text-white rounded-xl text-xs font-bold transition-all shadow-2xs active:scale-[0.98] flex-none cursor-pointer"
+            className="flex items-center gap-2 px-3.5 sm:px-4 py-2 border border-[#0066cc] dark:border-[#27272F] text-[#0066cc] dark:text-[#38BDF8] hover:bg-[#0066cc] dark:hover:bg-[#18181D] hover:text-white dark:hover:text-white rounded-xl text-xs font-bold transition-all shadow-2xs active:scale-[0.98] flex-none cursor-pointer"
           >
             <MapPinned className="w-4 h-4" />
             <span className="hidden sm:inline">View roadmap</span>
@@ -361,121 +327,26 @@ export default function ProgressScreen() {
         </div>
       }
     >
-        {/* -----------------------------------------------------------------------
-            HEADER ROW: Title + Subtitle
-           ----------------------------------------------------------------------- */}
-        <header className="mb-6">
-          <h1 className="font-['Manrope'] font-extrabold text-2xl sm:text-[28px] text-[#1d1d1f] dark:text-white tracking-tight leading-tight">
-            Progress
-          </h1>
-          <p className="mt-1 text-xs sm:text-[13px] text-[#6e6e73] dark:text-[#94A3B8]">
-            Track your learning momentum, skill growth, and roadmap readiness.
-          </p>
-        </header>
+      {/* HEADER ROW */}
+      <header className="mb-6">
+        <h1 className="font-['Manrope'] font-extrabold text-2xl sm:text-[28px] text-[#1d1d1f] dark:text-white tracking-tight leading-tight">
+          Progress
+        </h1>
+        <p className="mt-1 text-xs sm:text-[13px] text-[#6e6e73] dark:text-[#94A3B8]">
+          Track your learning momentum, skill growth, and roadmap readiness.
+        </p>
+      </header>
 
-        <div className="space-y-7 font-['Inter',sans-serif]">
-        {/* -----------------------------------------------------------------------
-            HERO OVERVIEW PROGRESS CARD (68% Prominent Card)
-           ----------------------------------------------------------------------- */}
-        <section className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-6 lg:p-7 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6 hover:border-[#cfe4fb] dark:hover:border-[#27272F] transition-all">
-          {/* Left Column Text */}
-          <div className="space-y-2 max-w-xl">
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#0066cc] dark:text-[#C9D0D6] bg-[#eaf2fc] dark:bg-[#18181D] px-2.5 py-1 rounded-md border border-[#cfe4fb] dark:border-[rgba(201,208,214,0.2)] font-['Manrope']">
-              ROADMAP PROGRESS
-            </span>
-            <div className="flex items-baseline gap-3 pt-1">
-              <span className="font-['Manrope'] font-extrabold text-4xl sm:text-5xl text-[#1d1d1f] dark:text-white tracking-tight">
-                {roadmap.percent}%
-              </span>
-              {onTrack && (
-                <span className="inline-flex items-center gap-1 text-xs font-bold text-[#16A34A] dark:text-emerald-300 bg-[#ECFDF3] dark:bg-emerald-950/70 px-2.5 py-0.5 rounded-full border border-[#D1FADF] dark:border-emerald-800">
-                  <Check className="w-3.5 h-3.5" />
-                  <span>On track</span>
-                </span>
-              )}
-            </div>
-            <p className="text-xs sm:text-sm text-[#6e6e73] dark:text-[#94A3B8] font-medium leading-relaxed">
-              {roadmap.path?.goal_text
-                ? <>Working toward: <strong className="text-[#1d1d1f] dark:text-white">{roadmap.path.goal_text.split('.')[0]}</strong>. {roadmap.completedSteps} of {roadmap.totalSteps} steps completed so far.</>
-                : 'Generate a learning path to start tracking real progress here.'}
-            </p>
-            <div className="pt-2 flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => navigate('/dashboard')}
-                className="px-4 py-2 bg-[#0066cc] hover:bg-[#004fa3] text-white text-xs font-bold rounded-lg shadow-sm transition-all"
-              >
-                Continue Week {roadmap.currentWeek}
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate('/skills')}
-                className="px-4 py-2 bg-white dark:bg-[#18181D] border border-[#e0e0e0] dark:border-[#27272F] hover:border-[#cfe4fb] text-[#0066cc] dark:text-[#C9D0D6] text-xs font-bold rounded-lg transition-all"
-              >
-                View skill gaps →
-              </button>
-            </div>
-          </div>
-
-          {/* Right Column Circular Progress Visualization */}
-          <div className="flex items-center gap-6 self-center md:self-auto pr-2">
-            <div className="relative w-32 h-32 flex-none flex items-center justify-center">
-              <svg className="w-full h-full transform -rotate-90" viewBox="0 0 120 120">
-                {/* Track Circle */}
-                <circle
-                  cx="60"
-                  cy="60"
-                  r="48"
-                  stroke="#f5f5f7"
-                  className="stroke-[#f0f0f0] dark:stroke-[#202026]"
-                  strokeWidth="10"
-                  fill="transparent"
-                />
-                {/* Active Arc */}
-                <circle
-                  cx="60"
-                  cy="60"
-                  r="48"
-                  stroke="#0066cc"
-                  className="stroke-[#0066cc] dark:stroke-[#C9D0D6]"
-                  strokeWidth="10"
-                  strokeDasharray={`${2 * Math.PI * 48}`}
-                  strokeDashoffset={`${2 * Math.PI * 48 * (1 - roadmap.percent / 100)}`}
-                  strokeLinecap="round"
-                  fill="transparent"
-                />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="font-['Manrope'] font-extrabold text-2xl text-[#1d1d1f] dark:text-white">
-                  {roadmap.percent}%
-                </span>
-                <span className="text-[10px] font-semibold text-[#6e6e73] dark:text-[#94A3B8]">
-                  Overall
-                </span>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <span className="text-xs font-bold text-[#1d1d1f] dark:text-white">Overall roadmap</span>
-              <span className="text-[11px] text-[#6e6e73] dark:text-[#94A3B8]">{weeksCompletedCount} of {roadmap.weeks.length} weeks completed</span>
-              <div className="inline-flex items-center gap-1 text-[11px] font-bold text-[#0066cc] dark:text-[#C9D0D6] bg-[#eaf2fc] dark:bg-[#18181D] px-2 py-0.5 rounded-full w-fit">
-                <TrendingUp className="w-3 h-3" />
-                <span>{roadmap.completedSteps} of {roadmap.totalSteps} steps done</span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* -----------------------------------------------------------------------
-            FOUR KPI METRIC CARDS (With clean spacing and dark-themed icons)
-           ----------------------------------------------------------------------- */}
+      <div className="space-y-7 font-['Inter',sans-serif]">
+        
+        {/* FOUR KPI METRIC CARDS */}
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5" aria-label="KPI Cards">
           
           {/* Card 1: Learning Progress */}
-          <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-5 shadow-sm flex flex-col justify-between hover:border-[#cfe4fb] dark:hover:border-[#C9D0D6] transition-all">
+          <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-5 shadow-sm flex flex-col justify-between hover:border-[#cfe4fb] dark:hover:border-[#38BDF8] transition-all">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-[#6e6e73] dark:text-[#94A3B8]">Learning progress</span>
-              <span className="w-8 h-8 rounded-xl bg-[#eaf2fc] dark:bg-[#18181D] text-[#0066cc] dark:text-[#C9D0D6] border border-[#cfe4fb] dark:border-[rgba(201,208,214,0.2)] flex items-center justify-center shadow-xs">
+              <span className="w-8 h-8 rounded-xl bg-[#eaf2fc] dark:bg-[#18181D] text-[#0066cc] dark:text-[#38BDF8] border border-[#cfe4fb] dark:border-[#27272F] flex items-center justify-center shadow-xs">
                 <TrendingUp className="w-4 h-4" />
               </span>
             </div>
@@ -490,7 +361,7 @@ export default function ProgressScreen() {
           </div>
 
           {/* Card 2: Skills Mastered */}
-          <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-5 shadow-sm flex flex-col justify-between hover:border-[#cfe4fb] dark:hover:border-[#C9D0D6] transition-all">
+          <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-5 shadow-sm flex flex-col justify-between hover:border-[#cfe4fb] dark:hover:border-[#38BDF8] transition-all">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-[#6e6e73] dark:text-[#94A3B8]">Skills mastered</span>
               <span className="w-8 h-8 rounded-xl bg-[#ECFDF3] dark:bg-emerald-950/70 text-[#16A34A] dark:text-emerald-400 border border-[#D1FADF] dark:border-emerald-800/60 flex items-center justify-center shadow-xs">
@@ -503,12 +374,12 @@ export default function ProgressScreen() {
               </span>
             </div>
             <span className="text-xs font-semibold text-[#6e6e73] dark:text-[#CBD5E1]">
-              {totalSkillCount ? Math.round((masteredSkillCount / totalSkillCount) * 100) : 0}% complete
+              {skillsMasteredPct}% complete {rankedSkills.filter((s) => s.progress > 0 && s.progress < 100).length > 0 ? `(${rankedSkills.filter((s) => s.progress > 0 && s.progress < 100).length} in progress)` : ''}
             </span>
           </div>
 
           {/* Card 3: Learning Time */}
-          <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-5 shadow-sm flex flex-col justify-between hover:border-[#cfe4fb] dark:hover:border-[#C9D0D6] transition-all">
+          <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-5 shadow-sm flex flex-col justify-between hover:border-[#cfe4fb] dark:hover:border-[#38BDF8] transition-all">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-[#6e6e73] dark:text-[#94A3B8]">Learning time</span>
               <span className="w-8 h-8 rounded-xl bg-[#FFF7E6] dark:bg-amber-950/70 text-[#F59E0B] dark:text-amber-400 border border-[#FEE4B2] dark:border-amber-800/60 flex items-center justify-center shadow-xs">
@@ -520,13 +391,13 @@ export default function ProgressScreen() {
                 {Math.round(((streak.minutes_total || 0) / 60) * 10) / 10} hrs
               </span>
             </div>
-            <span className="text-xs font-bold text-[#0066cc] dark:text-[#C9D0D6]">
+            <span className="text-xs font-bold text-[#0066cc] dark:text-[#38BDF8]">
               {weeklyHoursTotal} hrs this week
             </span>
           </div>
 
           {/* Card 4: Learning Streak */}
-          <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-5 shadow-sm flex flex-col justify-between hover:border-[#cfe4fb] dark:hover:border-[#C9D0D6] transition-all">
+          <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-5 shadow-sm flex flex-col justify-between hover:border-[#cfe4fb] dark:hover:border-[#38BDF8] transition-all">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-[#6e6e73] dark:text-[#94A3B8]">Learning streak</span>
               <span className="w-8 h-8 rounded-xl bg-[#FFF5EB] dark:bg-orange-950/70 text-[#F97316] dark:text-orange-400 border border-[#FED7AA] dark:border-orange-800/60 flex items-center justify-center shadow-xs">
@@ -545,17 +416,13 @@ export default function ProgressScreen() {
 
         </section>
 
-        {/* -----------------------------------------------------------------------
-            MAIN PROGRESS ANALYTICS SECTION (65% Left Column, 35% Right Column)
-           ----------------------------------------------------------------------- */}
+        {/* MAIN PROGRESS ANALYTICS SECTION (65% Left Column, 35% Right Column) */}
         <div className="grid grid-cols-1 pf-progress-grid gap-5">
 
-          {/* =====================================================================
-              LEFT COLUMN (~1.7fr)
-             ===================================================================== */}
+          {/* LEFT COLUMN */}
           <div className="space-y-6 min-w-0">
             
-            {/* CARD A: Learning Progress Over Time (Line/Area Chart) */}
+            {/* CARD A: Learning Progress Over Time (Dynamic Area Chart) */}
             <section className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-6 shadow-sm hover:border-[#cfe4fb] dark:hover:border-[#27272F] transition-all">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-[#f5f5f7] dark:border-[#202026] gap-2">
                 <div>
@@ -563,7 +430,7 @@ export default function ProgressScreen() {
                     Learning progress
                   </h2>
                   <p className="text-xs text-[#6e6e73] dark:text-[#94A3B8] mt-0.5">
-                    Your roadmap completion over the last 8 weeks
+                    Your roadmap completion over {progressTimeframe.toLowerCase()} ({progressTimelineData.length} weeks)
                   </p>
                 </div>
 
@@ -572,7 +439,7 @@ export default function ProgressScreen() {
                   <button
                     type="button"
                     onClick={() => setIsTimeframeOpen((v) => !v)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[#fafafc] dark:bg-[#18181D] border border-[#e0e0e0] dark:border-[#27272F] rounded-lg text-xs font-semibold text-[#1d1d1f] dark:text-white hover:bg-gray-100 dark:hover:bg-[#27272F] transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[#fafafc] dark:bg-[#18181D] border border-[#e0e0e0] dark:border-[#27272F] rounded-lg text-xs font-semibold text-[#1d1d1f] dark:text-white hover:bg-gray-100 dark:hover:bg-[#27272F] transition-colors cursor-pointer"
                   >
                     <span>{progressTimeframe}</span>
                     <ChevronDown className="w-3.5 h-3.5 text-[#6e6e73] dark:text-[#94A3B8]" />
@@ -580,7 +447,7 @@ export default function ProgressScreen() {
 
                   {isTimeframeOpen && (
                     <div className="absolute right-0 mt-1 w-32 bg-white dark:bg-[#121216] rounded-lg border border-[#e0e0e0] dark:border-[#27272F] shadow-xl p-1 z-20">
-                      {['4 weeks', '8 weeks', 'All time'].map((tf) => (
+                      {['4 weeks', '8 weeks', '12 weeks', 'All weeks'].map((tf) => (
                         <button
                           key={tf}
                           type="button"
@@ -588,7 +455,11 @@ export default function ProgressScreen() {
                             setProgressTimeframe(tf)
                             setIsTimeframeOpen(false)
                           }}
-                          className="w-full text-left px-2.5 py-1.5 text-xs font-medium text-[#1d1d1f] dark:text-white hover:bg-[#eaf2fc] dark:hover:bg-[#18181D] hover:text-[#0066cc] dark:hover:text-[#C9D0D6] rounded"
+                          className={`w-full text-left px-2.5 py-1.5 text-xs font-medium rounded transition-colors cursor-pointer ${
+                            progressTimeframe === tf
+                              ? 'bg-[#eaf2fc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] font-bold'
+                              : 'text-[#1d1d1f] dark:text-white hover:bg-gray-100 dark:hover:bg-[#18181D]'
+                          }`}
                         >
                           {tf}
                         </button>
@@ -598,62 +469,70 @@ export default function ProgressScreen() {
                 </div>
               </div>
 
-              {/* Area Chart Container */}
+              {/* Area Chart Container with exact week indices and interval={0} */}
               <div className="h-64 w-full pt-4 relative">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={progressTimelineData} margin={{ top: 10, right: 15, left: -20, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="silverGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#C9D0D6" stopOpacity={0.35} />
-                        <stop offset="95%" stopColor="#C9D0D6" stopOpacity={0.0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f5f5f7" className="stroke-[#f0f0f0] dark:stroke-[#27272F]" />
-                    <XAxis
-                      dataKey="week"
-                      tick={{ fill: '#94A3B8', fontSize: 11, fontWeight: 500 }}
-                      axisLine={{ stroke: '#27272F' }}
-                      tickLine={false}
-                    />
-                    <YAxis
-                      domain={[0, 100]}
-                      ticks={[0, 20, 40, 60, 80, 100]}
-                      tickFormatter={(val) => `${val}%`}
-                      tick={{ fill: '#94A3B8', fontSize: 10, fontWeight: 500 }}
-                      axisLine={false}
-                      tickLine={false}
-                    />
-                    <RechartsTooltip
-                      content={({ active, payload }) => {
-                        if (active && payload && payload.length) {
-                          const d = payload[0].payload
-                          return (
-                            <div className="bg-[#1d1d1f] dark:bg-[#0E0E12] border border-gray-700 dark:border-[#27272F] p-2.5 rounded-lg shadow-xl text-xs space-y-1 text-white">
-                              <div className="font-bold text-white">{d.week}</div>
-                              <div className="text-[#C9D0D6] font-extrabold">{d.progress}% Roadmap Complete</div>
-                              <div className="text-emerald-400 text-[10px] font-semibold">{d.change} from previous week</div>
-                            </div>
-                          )
-                        }
-                        return null
-                      }}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="progress"
-                      stroke="#C9D0D6"
-                      strokeWidth={2.5}
-                      fillOpacity={1}
-                      fill="url(#silverGradient)"
-                      dot={{ fill: '#C9D0D6', stroke: '#0E0E12', strokeWidth: 2, r: 4 }}
-                      activeDot={{ fill: '#C9D0D6', stroke: '#ffffff', strokeWidth: 2, r: 6 }}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
+                {progressTimelineData.length === 0 ? (
+                  <div className="h-full flex items-center justify-center text-xs text-[#6e6e73] dark:text-[#94A3B8]">
+                    No roadmap weeks available yet.
+                  </div>
+                ) : (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={progressTimelineData} margin={{ top: 10, right: 15, left: -20, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="progressGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#0066cc" stopOpacity={0.35} />
+                          <stop offset="95%" stopColor="#0066cc" stopOpacity={0.0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f5f5f7" className="stroke-[#f0f0f0] dark:stroke-[#27272F]" />
+                      <XAxis
+                        dataKey="week"
+                        interval={0}
+                        tick={{ fill: '#94A3B8', fontSize: 10, fontWeight: 600 }}
+                        axisLine={{ stroke: '#27272F' }}
+                        tickLine={false}
+                      />
+                      <YAxis
+                        domain={[0, 100]}
+                        ticks={[0, 20, 40, 60, 80, 100]}
+                        tickFormatter={(val) => `${val}%`}
+                        tick={{ fill: '#94A3B8', fontSize: 10, fontWeight: 500 }}
+                        axisLine={false}
+                        tickLine={false}
+                      />
+                      <RechartsTooltip
+                        content={({ active, payload }) => {
+                          if (active && payload && payload.length) {
+                            const d = payload[0].payload
+                            return (
+                              <div className="bg-[#1d1d1f] dark:bg-[#0E0E12] border border-gray-700 dark:border-[#27272F] p-3 rounded-xl shadow-xl text-xs space-y-1 text-white">
+                                <div className="font-bold text-white text-sm">{d.week} · {d.completedTasks}</div>
+                                <div className="text-[#38BDF8] font-extrabold">{d.progress}% Cumulative Roadmap Done</div>
+                                <div className="text-gray-300 text-[11px]">Week Completion: {d.weekCompletion}% ({d.change} delta)</div>
+                              </div>
+                            )
+                          }
+                          return null
+                        }}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="progress"
+                        stroke="#0066cc"
+                        className="dark:stroke-[#38BDF8]"
+                        strokeWidth={2.5}
+                        fillOpacity={1}
+                        fill="url(#progressGrad)"
+                        dot={{ fill: '#0066cc', stroke: '#ffffff', strokeWidth: 2, r: 4 }}
+                        activeDot={{ fill: '#0066cc', stroke: '#38BDF8', strokeWidth: 2, r: 6 }}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                )}
               </div>
             </section>
 
-            {/* CARD B: Skill Progress List (Full Width) */}
+            {/* CARD B: Skill Progress List */}
             <section className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-6 shadow-sm hover:border-[#cfe4fb] dark:hover:border-[#27272F] transition-all">
               <div className="pb-3 border-b border-[#f5f5f7] dark:border-[#202026] flex items-center justify-between">
                 <div>
@@ -667,7 +546,7 @@ export default function ProgressScreen() {
                 <button
                   type="button"
                   onClick={() => navigate('/skills')}
-                  className="text-xs font-bold text-[#0066cc] dark:text-[#C9D0D6] hover:underline inline-flex items-center gap-1"
+                  className="text-xs font-bold text-[#0066cc] dark:text-[#38BDF8] hover:underline inline-flex items-center gap-1 cursor-pointer"
                 >
                   <span>View all skill insights</span>
                   <ChevronRight className="w-3.5 h-3.5" />
@@ -675,41 +554,46 @@ export default function ProgressScreen() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mt-4">
-                {skillsData.map((skill) => {
-                  const IconComp = skill.icon
-                  return (
-                    <div
-                      key={skill.id}
-                      className="group p-3.5 rounded-xl bg-[#fafafc] dark:bg-[#0E0E12] border border-[#f5f5f7] dark:border-[#202026] hover:border-[#0066cc] dark:hover:border-[#C9D0D6] transition-all cursor-pointer flex flex-col justify-between gap-2.5"
-                      onClick={() => navigate('/skills')}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2.5">
-                          <span className="w-7 h-7 rounded-lg bg-[#eaf2fc] dark:bg-[#18181D] text-[#0066cc] dark:text-[#C9D0D6] border border-[#cfe4fb] dark:border-[#27272F] flex items-center justify-center flex-none">
-                            <IconComp className="w-4 h-4" />
-                          </span>
-                          <span className="font-bold text-xs sm:text-sm text-[#1d1d1f] dark:text-white group-hover:text-[#0066cc] dark:group-hover:text-[#C9D0D6] transition-colors">
-                            {skill.name}
-                          </span>
+                {skillsData.length === 0 ? (
+                  <div className="col-span-2 py-8 text-center text-xs text-[#6e6e73] dark:text-[#94A3B8]">
+                    No skills data tracked yet.
+                  </div>
+                ) : (
+                  skillsData.map((skill) => {
+                    const IconComp = skill.icon
+                    return (
+                      <div
+                        key={skill.id}
+                        className="group p-3.5 rounded-xl bg-[#fafafc] dark:bg-[#0E0E12] border border-[#f5f5f7] dark:border-[#202026] hover:border-[#0066cc] dark:hover:border-[#38BDF8] transition-all cursor-pointer flex flex-col justify-between gap-2.5"
+                        onClick={() => navigate('/skills')}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2.5">
+                            <span className="w-7 h-7 rounded-lg bg-[#eaf2fc] dark:bg-[#18181D] text-[#0066cc] dark:text-[#38BDF8] border border-[#cfe4fb] dark:border-[#27272F] flex items-center justify-center flex-none">
+                              <IconComp className="w-4 h-4" />
+                            </span>
+                            <span className="font-bold text-xs sm:text-sm text-[#1d1d1f] dark:text-white group-hover:text-[#0066cc] dark:group-hover:text-[#38BDF8] transition-colors">
+                              {skill.name}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs sm:text-sm font-extrabold text-[#1d1d1f] dark:text-white font-['Manrope']">{skill.progress}%</span>
+                            <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-bold border ${skill.statusColor}`}>
+                              {skill.status}
+                            </span>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs sm:text-sm font-extrabold text-[#1d1d1f] dark:text-white font-['Manrope']">{skill.progress}%</span>
-                          <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-bold border ${skill.statusColor}`}>
-                            {skill.status}
-                          </span>
-                        </div>
-                      </div>
 
-                      {/* 6px Rounded Progress Bar */}
-                      <div className="w-full bg-[#f5f5f7] dark:bg-[#202026] h-2 rounded-full overflow-hidden">
-                        <div
-                          className="bg-[#0066cc] dark:bg-[#C9D0D6] h-full rounded-full transition-all duration-500"
-                          style={{ width: `${skill.progress}%` }}
-                        />
+                        <div className="w-full bg-[#f5f5f7] dark:bg-[#202026] h-2 rounded-full overflow-hidden">
+                          <div
+                            className="bg-[#0066cc] dark:bg-[#38BDF8] h-full rounded-full transition-all duration-500"
+                            style={{ width: `${skill.progress}%` }}
+                          />
+                        </div>
                       </div>
-                    </div>
-                  )
-                })}
+                    )
+                  })
+                )}
               </div>
             </section>
 
@@ -725,7 +609,7 @@ export default function ProgressScreen() {
                       <h2 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">
                         Learning streak
                       </h2>
-                      <span className="font-extrabold text-sm text-[#0066cc] dark:text-[#C9D0D6] font-['Manrope']">{streak.current_streak} days</span>
+                      <span className="font-extrabold text-sm text-[#0066cc] dark:text-[#38BDF8] font-['Manrope']">{streak.current_streak} days</span>
                     </div>
                     <p className="text-xs text-[#6e6e73] dark:text-[#94A3B8]">
                       {streak.current_streak > 0
@@ -737,13 +621,13 @@ export default function ProgressScreen() {
 
                 <div className="flex items-center gap-4 text-xs font-semibold text-[#6e6e73] dark:text-[#CBD5E1]">
                   <span>{streak.current_streak} day current streak</span>
-                  <span className="text-[#0066cc] dark:text-[#C9D0D6]">{streak.best_streak} day best streak</span>
+                  <span className="text-[#0066cc] dark:text-[#38BDF8]">{streak.best_streak} day best streak</span>
                 </div>
               </div>
 
               {/* 5-Week Mini Heatmap Matrix */}
               <div className="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="flex gap-2 overflow-x-auto pb-1">
+                <div className="flex gap-2 overflow-x-auto pb-1 pf-custom-scrollbar">
                   {heatmapWeeks.map((week, wIdx) => (
                     <div key={wIdx} className="flex flex-col gap-1.5">
                       {week.map((intensity, dIdx) => (
@@ -757,7 +641,7 @@ export default function ProgressScreen() {
                   ))}
                 </div>
 
-                <div className="p-3.5 bg-[#f5faff] dark:bg-[#18181D] border border-[#cfe4fb] dark:border-[#27272F] rounded-xl text-xs text-[#004fa3] dark:text-[#C9D0D6] font-medium leading-relaxed max-w-xs shadow-xs">
+                <div className="p-3.5 bg-[#f5faff] dark:bg-[#18181D] border border-[#cfe4fb] dark:border-[#27272F] rounded-xl text-xs text-[#004fa3] dark:text-[#CBD5E1] font-medium leading-relaxed max-w-xs shadow-xs">
                   {streak.current_streak > 0 && streak.current_streak >= streak.best_streak ? (
                     <>🔥 You're on your <strong>best streak yet</strong> — keep it going!</>
                   ) : streak.current_streak > 0 ? (
@@ -769,122 +653,9 @@ export default function ProgressScreen() {
               </div>
             </section>
 
-            {/* CARD D: Roadmap Milestones Timeline */}
-            <section className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-6 shadow-sm hover:border-[#cfe4fb] dark:hover:border-[#27272F] transition-all">
-              <div className="pb-4 border-b border-[#f5f5f7] dark:border-[#202026]">
-                <h2 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">
-                  Roadmap milestones
-                </h2>
-                <p className="text-xs text-[#6e6e73] dark:text-[#94A3B8] mt-0.5">
-                  Key achievements on your path{roadmap.path?.goal_text ? ` toward ${roadmap.path.goal_text.split('.')[0]}` : ''}
-                </p>
-              </div>
-
-              <div className="space-y-3 mt-5">
-                {milestones.map((m) => {
-                  const isCompleted = m.status === 'completed'
-                  const isInProgress = m.status === 'in_progress'
-                  const isLocked = m.status === 'locked'
-
-                  return (
-                    <div key={m.title} className="flex items-center gap-3.5 relative">
-                      {/* Left Icon Node */}
-                      {isCompleted ? (
-                        <span className="w-8 h-8 rounded-full bg-[#ECFDF3] dark:bg-emerald-950/70 text-[#16A34A] dark:text-emerald-400 flex items-center justify-center flex-none border border-[#D1FADF] dark:border-emerald-800/60 shadow-sm">
-                          <Check className="w-4 h-4" />
-                        </span>
-                      ) : isInProgress ? (
-                        <span className="w-8 h-8 rounded-full bg-[#eaf2fc] dark:bg-[#18181D] text-[#0066cc] dark:text-[#C9D0D6] flex items-center justify-center flex-none border-2 border-[#0066cc] dark:border-[#C9D0D6] shadow-sm animate-pulse">
-                          <Flag className="w-3.5 h-3.5" />
-                        </span>
-                      ) : (
-                        <span className="w-8 h-8 rounded-full bg-[#fafafc] dark:bg-[#18181D] text-[#86868b] dark:text-[#94A3B8] flex items-center justify-center flex-none border border-[#e9e9e9] dark:border-[#27272F]">
-                          <Lock className="w-3.5 h-3.5" />
-                        </span>
-                      )}
-
-                      {/* Content */}
-                      <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3.5 rounded-xl bg-[#fafafc] dark:bg-[#0E0E12] border border-[#f5f5f7] dark:border-[#202026] hover:border-[#cfe4fb] dark:hover:border-[#27272F] transition-colors">
-                        <div>
-                          <h4 className={`font-bold text-xs sm:text-sm ${isInProgress ? 'text-[#0066cc] dark:text-[#C9D0D6]' : isCompleted ? 'text-[#1d1d1f] dark:text-white' : 'text-[#475569] dark:text-[#CBD5E1]'}`}>
-                            {m.title}
-                          </h4>
-                          <span className="text-[11px] text-[#6e6e73] dark:text-[#94A3B8] font-medium">{m.date}</span>
-                        </div>
-
-                        <div className="flex-none">
-                          {isCompleted && (
-                            <span className="px-2.5 py-1 rounded-md bg-[#ECFDF3] dark:bg-emerald-950/70 text-[#16A34A] dark:text-emerald-300 border border-[#D1FADF] dark:border-emerald-800 text-[10px] font-bold">
-                              Completed
-                            </span>
-                          )}
-                          {isInProgress && (
-                            <span className="px-2.5 py-1 rounded-md bg-[#eaf2fc] dark:bg-[#18181D] text-[#0066cc] dark:text-[#C9D0D6] border border-[#cfe4fb] dark:border-[rgba(201,208,214,0.2)] text-[10px] font-bold">
-                              In Progress ({m.progress}%)
-                            </span>
-                          )}
-                          {isLocked && (
-                            <span className="px-2.5 py-1 rounded-md bg-[#f5f5f5] dark:bg-[#18181D] text-[#6e6e73] dark:text-[#94A3B8] border border-[#e5e5e5] dark:border-[#27272F] text-[10px] font-bold">
-                              Upcoming
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </section>
-
-            {/* CARD E: Recent Activity List */}
-            <section className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-6 shadow-sm hover:border-[#cfe4fb] dark:hover:border-[#27272F] transition-all">
-              <div className="pb-4 border-b border-[#f5f5f7] dark:border-[#202026] flex items-center justify-between">
-                <div>
-                  <h2 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">
-                    Recent activity
-                  </h2>
-                  <p className="text-xs text-[#6e6e73] dark:text-[#94A3B8] mt-0.5">
-                    Completed tasks and learning sessions
-                  </p>
-                </div>
-                <span className="text-xs font-bold text-[#0066cc] dark:text-[#C9D0D6] cursor-pointer hover:underline">
-                  View full log
-                </span>
-              </div>
-
-              <div className="space-y-3 mt-4">
-                {recentActivities.map((act) => (
-                  <div
-                    key={act.id}
-                    className="flex items-center justify-between p-3 rounded-xl bg-[#fafafc] dark:bg-[#0E0E12] border border-[#f5f5f7] dark:border-[#202026] hover:bg-white dark:hover:bg-[#121216] hover:border-[#cfe4fb] dark:hover:border-[#27272F] transition-all"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className={`w-7 h-7 rounded-full flex items-center justify-center flex-none ${
-                        act.type === 'completed'
-                          ? 'bg-[#ECFDF3] dark:bg-emerald-950/70 text-[#16A34A] dark:text-emerald-400 border border-[#D1FADF] dark:border-emerald-800/60'
-                          : 'bg-[#eaf2fc] dark:bg-[#18181D] text-[#0066cc] dark:text-[#C9D0D6] border border-[#cfe4fb] dark:border-[rgba(201,208,214,0.2)]'
-                      }`}>
-                        {act.type === 'completed' ? <Check className="w-3.5 h-3.5" /> : <Play className="w-3 h-3" />}
-                      </span>
-                      <div>
-                        <h4 className="font-bold text-xs text-[#1d1d1f] dark:text-white">{act.title}</h4>
-                        <p className="text-[11px] text-[#6e6e73] dark:text-[#94A3B8]">{act.time}</p>
-                      </div>
-                    </div>
-
-                    <span className="text-[11px] font-bold text-[#16A34A] dark:text-emerald-300 bg-[#ECFDF3] dark:bg-emerald-950/70 px-2 py-0.5 rounded-md border border-[#D1FADF] dark:border-emerald-800 font-['Manrope']">
-                      {act.progressChange}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </section>
-
           </div>
 
-          {/* =====================================================================
-              RIGHT COLUMN / CONTEXTUAL PANEL (approx 4 of 12 cols, ~35% width)
-             ===================================================================== */}
+          {/* RIGHT COLUMN */}
           <div className="space-y-6 min-w-0">
             
             {/* RIGHT CARD 1: Weekly Activity Bar Chart */}
@@ -895,7 +666,7 @@ export default function ProgressScreen() {
                     Weekly activity
                   </h3>
                   {streak.current_streak > 0 && (
-                    <span className="text-[11px] font-bold text-[#0066cc] dark:text-[#C9D0D6] bg-[#eaf2fc] dark:bg-[#18181D] px-2 py-0.5 rounded-full border border-[#cfe4fb] dark:border-[rgba(201,208,214,0.2)] font-['Manrope']">
+                    <span className="text-[11px] font-bold text-[#0066cc] dark:text-[#38BDF8] bg-[#eaf2fc] dark:bg-[#18181D] px-2 py-0.5 rounded-full border border-[#cfe4fb] dark:border-[rgba(201,208,214,0.2)] font-['Manrope']">
                       {streak.current_streak}-day streak
                     </span>
                   )}
@@ -909,20 +680,21 @@ export default function ProgressScreen() {
                 </div>
               </div>
 
-              {/* Compact Bar Chart */}
+              {/* Dynamic Scaling Bar Chart */}
               <div className="h-36 w-full pt-3">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={weeklyActivityData} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f5f5f7" className="stroke-[#f0f0f0] dark:stroke-[#27272F]" />
                     <XAxis
                       dataKey="day"
-                      tick={{ fill: '#94A3B8', fontSize: 10, fontWeight: 500 }}
+                      tick={{ fill: '#94A3B8', fontSize: 10, fontWeight: 600 }}
                       axisLine={{ stroke: '#27272F' }}
                       tickLine={false}
                     />
                     <YAxis
-                      ticks={[0, 2, 4]}
-                      tickFormatter={(val) => `${val}h`}
+                      domain={[0, yAxisMax]}
+                      tickCount={4}
+                      tickFormatter={(val) => `${Math.round(val)}h`}
                       tick={{ fill: '#94A3B8', fontSize: 9 }}
                       axisLine={false}
                       tickLine={false}
@@ -932,9 +704,9 @@ export default function ProgressScreen() {
                         if (active && payload && payload.length) {
                           const d = payload[0].payload
                           return (
-                            <div className="bg-[#1d1d1f] dark:bg-[#0E0E12] border border-gray-700 dark:border-[#27272F] p-2 rounded-md shadow-xl text-[11px] text-white">
+                            <div className="bg-[#1d1d1f] dark:bg-[#0E0E12] border border-gray-700 dark:border-[#27272F] p-2.5 rounded-lg shadow-xl text-xs space-y-1 text-white">
                               <div className="font-bold text-white font-['Manrope']">{d.day}</div>
-                              <div className="text-[#C9D0D6] font-bold font-['Manrope']">{d.hours} hours</div>
+                              <div className="text-[#38BDF8] font-bold font-['Manrope']">{d.hours} hours logged</div>
                             </div>
                           )
                         }
@@ -943,7 +715,8 @@ export default function ProgressScreen() {
                     />
                     <Bar
                       dataKey="hours"
-                      fill="#C9D0D6"
+                      fill="#0066cc"
+                      className="dark:fill-[#38BDF8]"
                       radius={[4, 4, 0, 0]}
                     />
                   </BarChart>
@@ -953,21 +726,23 @@ export default function ProgressScreen() {
 
             {/* RIGHT CARD 2: AI Progress Insight Card ("PathFinder insight") */}
             <section className="bg-[#f5faff] dark:bg-[#18181D] border border-[#cfe4fb] dark:border-[#27272F] rounded-2xl p-5 shadow-sm">
-              <div className="flex items-center gap-2 text-[#0066cc] dark:text-[#C9D0D6] mb-2">
+              <div className="flex items-center gap-2 text-[#0066cc] dark:text-[#38BDF8] mb-2">
                 <Sparkles className="w-4 h-4" />
-                <h3 className="font-['Manrope'] font-bold text-xs uppercase tracking-wider text-[#0066cc] dark:text-[#C9D0D6]">
+                <h3 className="font-['Manrope'] font-bold text-xs uppercase tracking-wider text-[#0066cc] dark:text-[#38BDF8]">
                   PathFinder insight
                 </h3>
               </div>
               <p className="text-xs text-[#004fa3] dark:text-[#CBD5E1] leading-relaxed">
-                You're progressing well in Python and data analysis, but <strong className="text-[#004fa3] dark:text-[#C9D0D6]">Statistics</strong> is currently your biggest skill gap. Strengthening descriptive statistics this week will keep your roadmap on track for Machine Learning.
+                {roadmap.percent >= 50
+                  ? "You have solid momentum! Tackling your hands-on deployment and interview prep steps next will maximize your career readiness."
+                  : "Focus on finishing this week's active milestone tasks to keep your pace steady and unlock advanced modules on schedule."}
               </p>
               <button
                 type="button"
                 onClick={() => navigate('/skills')}
-                className="mt-3 text-xs font-bold text-[#0066cc] dark:text-[#C9D0D6] hover:underline inline-flex items-center gap-1"
+                className="mt-3 text-xs font-bold text-[#0066cc] dark:text-[#38BDF8] hover:underline inline-flex items-center gap-1 cursor-pointer"
               >
-                <span>View recommended resources</span>
+                <span>View recommended skill resources</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </section>
@@ -991,10 +766,10 @@ export default function ProgressScreen() {
                   return (
                     <div
                       key={act.id}
-                      className="p-3 rounded-xl bg-[#fafafc] dark:bg-[#0E0E12] border border-[#f5f5f7] dark:border-[#202026] hover:border-[#0066cc] dark:hover:border-[#C9D0D6] transition-all flex items-center justify-between gap-2"
+                      className="p-3 rounded-xl bg-[#fafafc] dark:bg-[#0E0E12] border border-[#f5f5f7] dark:border-[#202026] hover:border-[#0066cc] dark:hover:border-[#38BDF8] transition-all flex items-center justify-between gap-2"
                     >
                       <div className="flex items-start gap-2.5">
-                        <span className="font-mono text-xs font-extrabold text-[#0066cc] dark:text-[#C9D0D6] mt-0.5">
+                        <span className="font-mono text-xs font-extrabold text-[#0066cc] dark:text-[#38BDF8] mt-0.5">
                           {act.id}
                         </span>
                         <div>
@@ -1006,7 +781,7 @@ export default function ProgressScreen() {
                       <button
                         type="button"
                         onClick={() => navigate('/dashboard')}
-                        className="px-3 py-1 bg-[#0066cc] hover:bg-[#004fa3] text-white text-[11px] font-bold rounded-lg transition-colors flex-none"
+                        className="px-3 py-1 bg-[#0066cc] hover:bg-[#004fa3] text-white text-[11px] font-bold rounded-lg transition-colors flex-none cursor-pointer"
                       >
                         {act.buttonLabel}
                       </button>
@@ -1016,35 +791,44 @@ export default function ProgressScreen() {
               </div>
             </section>
 
-            {/* RIGHT CARD 4: Contextual Roadmap Status Panel */}
+            {/* RIGHT CARD 4: Contextual Roadmap Status Panel (Dynamic Weekly Goal) */}
             <section className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-5 shadow-sm hover:border-[#cfe4fb] dark:hover:border-[#27272F] transition-all space-y-4">
               {/* Item 1: Roadmap status */}
               <div>
                 <div className="flex items-center justify-between text-xs font-bold mb-1">
                   <span className="text-[#1d1d1f] dark:text-[#F8FAFC]">Roadmap status</span>
-                  <span className="text-[#0066cc] dark:text-[#C9D0D6] font-['Manrope']">{roadmap.percent}% complete</span>
+                  <span className="text-[#0066cc] dark:text-[#38BDF8] font-['Manrope']">{roadmap.percent}% complete</span>
                 </div>
                 <div className="w-full bg-[#f5f5f7] dark:bg-[#202026] h-2 rounded-full overflow-hidden">
-                  <div className="bg-[#0066cc] dark:bg-[#C9D0D6] h-full rounded-full" style={{ width: roadmap.percent + '%' }} />
+                  <div className="bg-[#0066cc] dark:bg-[#38BDF8] h-full rounded-full transition-all duration-500" style={{ width: roadmap.percent + '%' }} />
                 </div>
-                <p className="text-[11px] text-[#6e6e73] dark:text-[#94A3B8] mt-1">You're on track for your February 2027 target.</p>
+                <p className="text-[11px] text-[#6e6e73] dark:text-[#94A3B8] mt-1 font-medium">
+                  {roadmap.completedSteps} of {roadmap.totalSteps} steps completed.
+                </p>
               </div>
 
               <hr className="border-[#f5f5f7] dark:border-[#202026]" />
 
-              {/* Item 2: This week's goal */}
+              {/* Item 2: Dynamic This week's goal */}
               <div>
                 <div className="flex items-center justify-between text-xs font-bold mb-1">
                   <span className="text-[#1d1d1f] dark:text-[#F8FAFC]">This week's goal</span>
-                  <span className="text-[#16A34A] dark:text-[#34D399] font-['Manrope']">17.4 / 20 hrs (87%)</span>
+                  <span className={`font-['Manrope'] font-bold ${weeklyGoalPct >= 100 ? 'text-[#16A34A] dark:text-emerald-400' : 'text-[#0066cc] dark:text-[#38BDF8]'}`}>
+                    {weeklyHoursTotal} / {targetWeeklyHours} hrs ({weeklyGoalPct}%)
+                  </span>
                 </div>
                 <div className="w-full bg-[#f5f5f7] dark:bg-[#202026] h-2 rounded-full overflow-hidden">
-                  <div className="bg-[#16A34A] dark:bg-emerald-400 h-full rounded-full" style={{ width: '87%' }} />
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ${
+                      weeklyGoalPct >= 100 ? 'bg-[#16A34A] dark:bg-emerald-400' : 'bg-[#0066cc] dark:bg-[#38BDF8]'
+                    }`}
+                    style={{ width: `${weeklyGoalPct}%` }}
+                  />
                 </div>
                 <button
                   type="button"
                   onClick={() => navigate('/dashboard')}
-                  className="mt-2 w-full py-1.5 bg-[#eaf2fc] dark:bg-[#18181D] text-[#0066cc] dark:text-[#C9D0D6] hover:bg-[#0066cc] hover:text-white text-xs font-bold rounded-lg transition-colors"
+                  className="mt-2 w-full py-1.5 bg-[#eaf2fc] dark:bg-[#18181D] text-[#0066cc] dark:text-[#38BDF8] hover:bg-[#0066cc] hover:text-white text-xs font-bold rounded-lg transition-colors cursor-pointer"
                 >
                   Continue learning
                 </button>
@@ -1052,15 +836,15 @@ export default function ProgressScreen() {
 
               <hr className="border-[#f5f5f7] dark:border-[#202026]" />
 
-              {/* Item 3: Skill gap & Next milestone */}
+              {/* Item 3: Current Week Context */}
               <div className="space-y-2 text-xs">
                 <div className="flex items-center justify-between">
-                  <span className="text-[#6e6e73] dark:text-[#94A3B8]">Primary skill gap:</span>
-                  <span className="font-bold text-[#F59E0B] dark:text-amber-400 font-['Manrope']">Statistics (55%)</span>
+                  <span className="text-[#6e6e73] dark:text-[#94A3B8]">Active step:</span>
+                  <span className="font-bold text-[#0066cc] dark:text-[#38BDF8] font-['Manrope']">Week {roadmap.currentWeek}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-[#6e6e73] dark:text-[#94A3B8]">Next milestone:</span>
-                  <span className="font-bold text-[#0066cc] dark:text-[#C9D0D6] font-['Manrope']">Statistics checkpoint (This week)</span>
+                  <span className="text-[#6e6e73] dark:text-[#94A3B8]">Weeks finished:</span>
+                  <span className="font-bold text-[#16A34A] dark:text-emerald-400 font-['Manrope']">{roadmap.weeks.filter(w => w.is_complete).length} of {roadmap.weeks.length}</span>
                 </div>
               </div>
             </section>
@@ -1068,7 +852,143 @@ export default function ProgressScreen() {
           </div>
 
         </div>
+
+        {/* -----------------------------------------------------------------------
+            BOTTOM 2-COLUMN SECTION: Roadmap Milestones & Recent Activity (Side-by-Side)
+           ----------------------------------------------------------------------- */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+          {/* Left: Roadmap Milestones */}
+          <section className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-6 shadow-sm flex flex-col justify-between hover:border-[#cfe4fb] dark:hover:border-[#27272F] transition-all">
+            <div>
+              <div className="pb-4 border-b border-[#f5f5f7] dark:border-[#202026]">
+                <h2 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">
+                  Roadmap milestones
+                </h2>
+                <p className="text-xs text-[#6e6e73] dark:text-[#94A3B8] mt-0.5">
+                  Key milestones configured on your roadmap ({milestones.length} total)
+                </p>
+              </div>
+
+              <div className="space-y-3 mt-4 max-h-[380px] overflow-y-auto pr-1 pf-custom-scrollbar">
+                {milestones.length === 0 ? (
+                  <div className="py-12 text-center text-xs text-[#6e6e73] dark:text-[#94A3B8]">
+                    No milestones found on your current path.
+                  </div>
+                ) : (
+                  milestones.map((m) => {
+                    const isCompleted = m.status === 'completed'
+                    const isInProgress = m.status === 'in_progress'
+                    const isLocked = m.status === 'locked'
+
+                    return (
+                      <div key={m.title} className="flex items-center gap-3.5 relative">
+                        {isCompleted ? (
+                          <span className="w-8 h-8 rounded-full bg-[#ECFDF3] dark:bg-emerald-950/70 text-[#16A34A] dark:text-emerald-400 flex items-center justify-center flex-none border border-[#D1FADF] dark:border-emerald-800/60 shadow-sm">
+                            <Check className="w-4 h-4" />
+                          </span>
+                        ) : isInProgress ? (
+                          <span className="w-8 h-8 rounded-full bg-[#eaf2fc] dark:bg-[#18181D] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center flex-none border-2 border-[#0066cc] dark:border-[#38BDF8] shadow-sm animate-pulse">
+                            <Flag className="w-3.5 h-3.5" />
+                          </span>
+                        ) : (
+                          <span className="w-8 h-8 rounded-full bg-[#fafafc] dark:bg-[#18181D] text-[#86868b] dark:text-[#94A3B8] flex items-center justify-center flex-none border border-[#e9e9e9] dark:border-[#27272F]">
+                            <Lock className="w-3.5 h-3.5" />
+                          </span>
+                        )}
+
+                        <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl bg-[#fafafc] dark:bg-[#0E0E12] border border-[#f5f5f7] dark:border-[#202026] hover:border-[#cfe4fb] dark:hover:border-[#27272F] transition-colors">
+                          <div className="min-w-0">
+                            <h4 className={`font-bold text-xs sm:text-sm truncate ${isInProgress ? 'text-[#0066cc] dark:text-[#38BDF8]' : isCompleted ? 'text-[#1d1d1f] dark:text-white' : 'text-[#475569] dark:text-[#CBD5E1]'}`}>
+                              {m.title}
+                            </h4>
+                            <span className="text-[11px] text-[#6e6e73] dark:text-[#94A3B8] font-medium">{m.date}</span>
+                          </div>
+
+                          <div className="flex-none">
+                            {isCompleted && (
+                              <span className="px-2.5 py-1 rounded-md bg-[#ECFDF3] dark:bg-emerald-950/70 text-[#16A34A] dark:text-emerald-300 border border-[#D1FADF] dark:border-emerald-800 text-[10px] font-bold">
+                                Completed
+                              </span>
+                            )}
+                            {isInProgress && (
+                              <span className="px-2.5 py-1 rounded-md bg-[#eaf2fc] dark:bg-[#18181D] text-[#0066cc] dark:text-[#38BDF8] border border-[#cfe4fb] dark:border-[#27272F] text-[10px] font-bold">
+                                In Progress ({m.progress}%)
+                              </span>
+                            )}
+                            {isLocked && (
+                              <span className="px-2.5 py-1 rounded-md bg-[#f5f5f5] dark:bg-[#18181D] text-[#6e6e73] dark:text-[#94A3B8] border border-[#e5e5e5] dark:border-[#27272F] text-[10px] font-bold">
+                                Upcoming
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })
+                )}
+              </div>
+            </div>
+          </section>
+
+          {/* Right: Recent Activity Card */}
+          <section className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-6 shadow-sm flex flex-col justify-between hover:border-[#cfe4fb] dark:hover:border-[#27272F] transition-all">
+            <div>
+              <div className="pb-4 border-b border-[#f5f5f7] dark:border-[#202026] flex items-center justify-between">
+                <div>
+                  <h2 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">
+                    Recent activity
+                  </h2>
+                  <p className="text-xs text-[#6e6e73] dark:text-[#94A3B8] mt-0.5">
+                    Completed tasks and learning sessions
+                  </p>
+                </div>
+                {allRecentActivities.length > 4 && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllLogs((v) => !v)}
+                    className="text-xs font-bold text-[#0066cc] dark:text-[#38BDF8] hover:underline cursor-pointer"
+                  >
+                    {showAllLogs ? 'Show recent (4)' : 'View full log'}
+                  </button>
+                )}
+              </div>
+
+              {/* Scrollable container when full log is viewed */}
+              <div className={`space-y-3 mt-4 ${showAllLogs ? 'max-h-[380px] overflow-y-auto pr-1 pf-custom-scrollbar' : ''}`}>
+                {displayedActivities.length === 0 ? (
+                  <div className="py-12 text-center text-xs text-[#6e6e73] dark:text-[#94A3B8]">
+                    No completed activities yet. Check off your first task on the Roadmap!
+                  </div>
+                ) : (
+                  displayedActivities.map((act) => (
+                    <div
+                      key={act.id}
+                      className="flex items-center justify-between p-3 rounded-xl bg-[#fafafc] dark:bg-[#0E0E12] border border-[#f5f5f7] dark:border-[#202026] hover:bg-white dark:hover:bg-[#121216] hover:border-[#cfe4fb] dark:hover:border-[#27272F] transition-all"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="w-7 h-7 rounded-full flex items-center justify-center flex-none bg-[#ECFDF3] dark:bg-emerald-950/70 text-[#16A34A] dark:text-emerald-400 border border-[#D1FADF] dark:border-emerald-800/60">
+                          <Check className="w-3.5 h-3.5" />
+                        </span>
+                        <div>
+                          <h4 className="font-bold text-xs text-[#1d1d1f] dark:text-white">{act.title}</h4>
+                          <p className="text-[11px] text-[#6e6e73] dark:text-[#94A3B8]">{act.time}</p>
+                        </div>
+                      </div>
+
+                      <span className="text-[11px] font-bold text-[#16A34A] dark:text-emerald-300 bg-[#ECFDF3] dark:bg-emerald-950/70 px-2 py-0.5 rounded-md border border-[#D1FADF] dark:border-emerald-800 font-['Manrope']">
+                        {act.progressChange}
+                      </span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </section>
+
         </div>
+
+      </div>
     </AppShell>
   )
 }
