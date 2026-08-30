@@ -511,7 +511,7 @@ html.dark [class*="text-gray-900"] {
 }
 
 html.dark p,
-html.dark span:not([class*="font-shadow"]):not([class*="text-[#0066cc]"]):not([class*="text-[#0066CC]"]):not([class*="dark:text-[#0066cc]"]):not([class*="dark:text-[#0066CC]"]):not([class*="text-[#22A06B]"]):not([class*="text-red-"]):not([class*="text-emerald-"]):not([class*="text-amber-"]):not([class*="text-blue-"]):not([class*="text-white"]):not([class*="text-[#FBBF24]"]):not([class*="text-transparent"]):not([class*="bg-clip-text"]),
+html.dark span:not([class*="font-shadow"]):not([class*="text-[#0066cc]"]):not([class*="text-[#0066CC]"]):not([class*="dark:text-[#0066cc]"]):not([class*="dark:text-[#0066CC]"]):not([class*="text-[#22A06B]"]):not([class*="text-red-"]):not([class*="text-emerald-"]):not([class*="text-amber-"]):not([class*="text-blue-"]):not([class*="text-white"]):not([class*="text-[#FBBF24]"]):not([class*="text-transparent"]):not([class*="bg-clip-text"]):not([class*="text-black"]):not([class*="dark:text-black"]):not([class*="text-[#000000]"]):not([class*="dark:text-[#000000]"]):not([class*="text-[#09090B]"]):not([class*="dark:text-[#09090B]"]),
 html.dark label,
 html.dark [class*="text-[#333333]"],
 html.dark [class*="text-[#444444]"],
@@ -519,6 +519,25 @@ html.dark [class*="text-[#555555]"],
 html.dark [class*="text-slate-700"],
 html.dark [class*="text-gray-700"] {
   color: #E2E8F0 !important;
+}
+
+/* Explicit Black Text Overrides in Dark Mode (e.g. Silver/White Pill Buttons) */
+html.dark .text-black,
+html.dark [class*="text-black"],
+html.dark [class*="dark:text-black"],
+html.dark [class*="dark:text-[#000000]"],
+html.dark [class*="dark:text-[#09090B]"] {
+  color: #000000 !important;
+}
+
+html.dark [class*="dark:bg-[#C9D0D6]"],
+html.dark [class*="dark:bg-[#CBD5E1]"] {
+  color: #000000 !important;
+}
+
+html.dark [class*="dark:bg-[#C9D0D6]"] span,
+html.dark [class*="dark:bg-[#CBD5E1]"] span {
+  color: #000000 !important;
 }
 
 html.dark [class*="text-[#7a7a7a]"],

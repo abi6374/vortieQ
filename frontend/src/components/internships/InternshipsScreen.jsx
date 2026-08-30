@@ -52,7 +52,7 @@ function ApplyConfirmModal({ internship, onConfirm, onSaveForLater, onClose }) {
           <button
             type="button"
             onClick={() => onConfirm(internship.id, 'applied')}
-            className="w-full py-2.5 px-4 rounded-xl bg-[#0066cc] hover:bg-[#004fa3] dark:bg-[#C9D0D6] dark:hover:bg-[#CBD5E1] text-white dark:text-[#09090B] font-bold text-xs text-center transition-all shadow-sm cursor-pointer"
+            className="w-full py-2.5 px-4 rounded-xl bg-[#0066cc] hover:bg-[#004fa3] dark:bg-[#C9D0D6] dark:hover:bg-[#CBD5E1] text-white dark:text-black dark:!text-black font-bold text-xs text-center transition-all shadow-sm cursor-pointer"
           >
             ✓ Yes, I Submitted My Application
           </button>
@@ -181,9 +181,9 @@ function InternshipDetailModal({ internship, applied, onVisitBoard, onToggleTrac
             <button
               type="button"
               onClick={() => onVisitBoard(internship)}
-              className="flex-1 py-3 rounded-xl bg-[#0066cc] hover:bg-[#004fa3] dark:bg-[#C9D0D6] dark:hover:bg-[#CBD5E1] text-white dark:text-[#09090B] font-bold text-sm text-center transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+              className="flex-1 py-3 rounded-xl bg-[#0066cc] hover:bg-[#004fa3] dark:bg-[#C9D0D6] dark:hover:bg-[#CBD5E1] text-white dark:text-black dark:!text-black font-bold text-sm text-center transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
             >
-              <span>Apply on Official Board ↗</span>
+              <span className="text-white dark:text-black dark:!text-black font-bold">Apply on Official Board ↗</span>
             </button>
             <button
               type="button"
@@ -275,9 +275,9 @@ function InternshipCard({ internship, applied, onVisitBoard, onToggleTrack, onVi
           <button
             type="button"
             onClick={e => { e.stopPropagation(); onVisitBoard(internship) }}
-            className="px-3 py-1.5 rounded-xl font-bold text-xs bg-[#0066cc] hover:bg-[#004fa3] dark:bg-[#C9D0D6] dark:hover:bg-[#CBD5E1] text-white dark:text-[#09090B] shadow-sm flex items-center gap-1 cursor-pointer"
+            className="px-3 py-1.5 rounded-xl font-bold text-xs bg-[#0066cc] hover:bg-[#004fa3] dark:bg-[#C9D0D6] dark:hover:bg-[#CBD5E1] text-white dark:text-black dark:!text-black shadow-sm flex items-center gap-1 cursor-pointer"
           >
-            <span>Apply on Website ↗</span>
+            <span className="text-white dark:text-black dark:!text-black font-bold">Apply on Website ↗</span>
           </button>
           {applied ? (
             <button

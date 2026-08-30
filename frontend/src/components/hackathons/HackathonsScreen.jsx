@@ -51,7 +51,7 @@ function RegisterConfirmModal({ hackathon, onConfirm, onSaveInterest, onClose })
           <button
             type="button"
             onClick={() => onConfirm(hackathon.id, 'registered')}
-            className="w-full py-2.5 px-4 rounded-xl bg-[#0066cc] hover:bg-[#004fa3] dark:bg-[#C9D0D6] dark:hover:bg-[#CBD5E1] text-white dark:text-[#09090B] font-bold text-xs text-center transition-all shadow-sm cursor-pointer"
+            className="w-full py-2.5 px-4 rounded-xl bg-[#0066cc] hover:bg-[#004fa3] dark:bg-[#C9D0D6] dark:hover:bg-[#CBD5E1] text-white dark:text-black dark:!text-black font-bold text-xs text-center transition-all shadow-sm cursor-pointer"
           >
             ✓ Yes, I Registered
           </button>
@@ -194,9 +194,9 @@ function HackathonDetailModal({ hackathon, registered, onVisitSite, onToggleRegi
             <button
               type="button"
               onClick={() => onVisitSite(hackathon)}
-              className="flex-1 py-3 px-5 rounded-xl bg-[#0066cc] hover:bg-[#004fa3] dark:bg-[#C9D0D6] dark:hover:bg-[#CBD5E1] text-white dark:text-[#09090B] font-bold text-sm text-center shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
+              className="flex-1 py-3 px-5 rounded-xl bg-[#0066cc] hover:bg-[#004fa3] dark:bg-[#C9D0D6] dark:hover:bg-[#CBD5E1] text-white dark:text-black dark:!text-black font-bold text-sm text-center shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
-              <span>{hackathon.status === 'ended' ? 'View Event Details ↗' : 'Register on Official Website ↗'}</span>
+              <span className="text-white dark:text-black dark:!text-black font-bold">{hackathon.status === 'ended' ? 'View Event Details ↗' : 'Register on Official Website ↗'}</span>
             </button>
             <button
               type="button"
@@ -298,9 +298,9 @@ function HackathonCard({ hackathon, registered, onVisitSite, onToggleRegister, o
         <button
           type="button"
           onClick={e => { e.stopPropagation(); onVisitSite(hackathon) }}
-          className="flex-1 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer bg-[#0066cc] hover:bg-[#004fa3] dark:bg-[#C9D0D6] dark:hover:bg-[#CBD5E1] text-white dark:text-[#09090B] shadow-sm flex items-center justify-center gap-1"
+          className="flex-1 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer bg-[#0066cc] hover:bg-[#004fa3] dark:bg-[#C9D0D6] dark:hover:bg-[#CBD5E1] text-white dark:text-black dark:!text-black shadow-sm flex items-center justify-center gap-1"
         >
-          <span>{hackathon.status === 'ended' ? 'View Details ↗' : 'Register on Website ↗'}</span>
+          <span className="text-white dark:text-black dark:!text-black font-bold">{hackathon.status === 'ended' ? 'View Details ↗' : 'Register on Website ↗'}</span>
         </button>
         {registered ? (
           <button
