@@ -710,7 +710,7 @@ export default function ResourcesScreen() {
                       </div>
                       <button className={`r-save ${saved.has(s.id) ? 'on' : ''}`} onClick={() => toggleSave(s.id)} aria-label="Save">{I.bookmark(saved.has(s.id))}</button>
                       {isSafeUrl(s.resource_url) ? (
-                        <a className={`rx-btn ${isDone ? 'done' : 'ghost'}`} href={s.resource_url} target="_blank" rel="noreferrer">{label}</a>
+                        <a className={`rx-btn ${isDone ? 'done' : 'ghost'}`} href={s.resource_url} target="_blank" rel="noopener noreferrer">{label}</a>
                       ) : (
                         <button className={`rx-btn ${isDone ? 'done' : 'ghost'}`} disabled title="Link unavailable" style={{opacity:.5,cursor:"not-allowed"}}>{label}</button>
                       )}
@@ -786,7 +786,7 @@ export default function ResourcesScreen() {
                           key={r.url}
                           href={r.url}
                           target="_blank"
-                          rel="noreferrer"
+                          rel="noopener noreferrer"
                           className="rx-saved-item"
                           style={{ textDecoration: 'none', cursor: 'pointer' }}
                         >
@@ -844,7 +844,7 @@ export default function ResourcesScreen() {
                       key={r.url}
                       href={r.url}
                       target="_blank"
-                      rel="noreferrer"
+                      rel="noopener noreferrer"
                       className="rx-saved-item"
                       style={{ textDecoration: 'none', cursor: 'pointer' }}
                     >

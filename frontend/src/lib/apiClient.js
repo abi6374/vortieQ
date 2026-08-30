@@ -83,4 +83,24 @@ api.interceptors.response.use(
   }
 )
 
+// One fresh key per user-initiated mutation (a real click - Generate My
+// Path, Mark Done, Too Easy/Too Hard, Swap, Re-recommend), NOT per HTTP
+// retry - lets the matching backend idempotency_service collapse a
+// double-submit (a fast double-click before a button disables, a browser
+// retrying a slow request, or a genuine "the first call actually
+// succeeded but the client thought it failed" case) into one real
+// mutation instead of double-creating a row, double-applying a mastery
+// update, or inserting two different "new" resources for one logical
+// action. Shared here (rather than re-implemented at each call site) so
+// every mutating call in the app uses the exact same generation logic.
+export function genIdempotencyKey() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID()
+  }
+  // Fallback for a non-secure-context/older browser where
+  // crypto.randomUUID is unavailable - still unique enough for
+  // de-duplicating a single click.
+  return `idem-${Date.now()}-${Math.random().toString(36).slice(2)}`
+}
+
 export default api

@@ -1,23 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import api from '../lib/apiClient'
-
-// One fresh key per user-initiated mutation (a real click of Mark Done /
-// Too Easy / Too Hard / Swap / Re-recommend), NOT per HTTP retry - lets the
-// backend (idempotency_service, see PATCH /roadmap/tasks/{id} and POST
-// /roadmap/rerecommend) collapse a double-submit (a fast double-click
-// before the button disables, or the browser retrying a slow request) into
-// one real mutation instead of double-applying a mastery-evidence write or
-// inserting two different "new" courses for one logical action. Previously
-// these routes accepted an Idempotency-Key header but the frontend never
-// sent one, so the protection existed but was never actually exercised.
-function genIdempotencyKey() {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    return crypto.randomUUID()
-  }
-  // Fallback for a non-secure-context/older browser where crypto.randomUUID
-  // is unavailable - still unique enough for de-duplicating a single click.
-  return `idem-${Date.now()}-${Math.random().toString(36).slice(2)}`
-}
+import api, { genIdempotencyKey } from '../lib/apiClient'
 
 /**
  * The single source of truth for roadmap state.

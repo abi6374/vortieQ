@@ -10,7 +10,7 @@ import AssessSkills from '../components/onboarding/AssessSkills'
 import GoalCompass from '../components/onboarding/GoalCompass'
 import SetupSidebar from '../components/onboarding/SetupSidebar'
 import NavBar from '../components/ui/NavBar'
-import api from '../lib/apiClient'
+import api, { genIdempotencyKey } from '../lib/apiClient'
 
 /**
  * Onboarding is a wizard with multiple entry lanes:
@@ -39,6 +39,19 @@ export default function OnboardingPage() {
   const [genStatus, setGenStatus] = useState('loading') // 'loading' | 'success' | 'error'
   const [pendingPathId, setPendingPathId] = useState(null)
   const lastPlanArgs = useRef(null)
+  // Stable across a retry of the SAME submission (retryPlan re-invokes
+  // runPlan with the same args after an apparent failure) - generated
+  // once per NEW attempt, cleared on success, so the backend's
+  // Idempotency-Key check (POST /api/paths/generate) can actually
+  // recognize "the first call already succeeded, replay that result"
+  // instead of every retry looking like a brand-new distinct request.
+  const planIdempotencyKey = useRef(null)
+  // Same reasoning as planIdempotencyKey, for the separate goal-chat ->
+  // confirm -> generate flow (handleConfirm) - stable across repeated
+  // clicks of "Confirm" on the same extracted profile, cleared when the
+  // learner goes back to edit their goal (a genuinely new attempt) or
+  // once generation succeeds.
+  const confirmIdempotencyKey = useRef(null)
   const bgRef = useRef(null)
 
   const { session, user } = useAuth()
@@ -138,6 +151,21 @@ export default function OnboardingPage() {
 
   // ------------- Goal Compass "Create my learning plan"
   const runPlan = async (goalTextInput, weeklyHours, targetRoleOverrideInput = '') => {
+    const prev = lastPlanArgs.current
+    const isSameSubmission = prev
+      && prev.goalTextInput === goalTextInput
+      && prev.weeklyHours === weeklyHours
+      && prev.targetRoleOverrideInput === targetRoleOverrideInput
+    if (!isSameSubmission) {
+      // A genuinely different submission (the user went back and edited
+      // their goal, not just clicking Retry on the same one) must get a
+      // fresh key - reusing the old one would make the backend replay a
+      // stale result for the wrong goal text.
+      planIdempotencyKey.current = null
+    }
+    if (!planIdempotencyKey.current) {
+      planIdempotencyKey.current = genIdempotencyKey()
+    }
     lastPlanArgs.current = { goalTextInput, weeklyHours, targetRoleOverrideInput }
     if (targetRoleOverrideInput) setTargetRoleOverride(targetRoleOverrideInput)
     setError(null)
@@ -162,7 +190,10 @@ export default function OnboardingPage() {
       const roleOverride = targetRoleOverrideInput || targetRoleOverride
       if (roleOverride) body.target_role_override = roleOverride
       await api.post('/api/profile/', body)
-      const result = await api.post('/api/paths/generate', {})
+      const result = await api.post('/api/paths/generate', {}, {
+        headers: { 'Idempotency-Key': planIdempotencyKey.current },
+      })
+      planIdempotencyKey.current = null  // this attempt succeeded - a future click is a genuinely new one
       setPendingPathId(result.data.path_id)
       setGenStatus('success')
     } catch (err) {
@@ -200,8 +231,14 @@ export default function OnboardingPage() {
   const handleConfirm = async () => {
     setError(null)
     setPhase('generating')
+    if (!confirmIdempotencyKey.current) {
+      confirmIdempotencyKey.current = genIdempotencyKey()
+    }
     try {
-      const result = await api.post('/api/paths/generate', {})
+      const result = await api.post('/api/paths/generate', {}, {
+        headers: { 'Idempotency-Key': confirmIdempotencyKey.current },
+      })
+      confirmIdempotencyKey.current = null  // succeeded - a future confirm is a genuinely new attempt
       navigate(`/roadmap/${result.data.path_id}`)
     } catch (err) {
       setError('Path generation failed. Please try again.')
@@ -210,6 +247,7 @@ export default function OnboardingPage() {
   }
 
   const handleEditGoal = () => {
+    confirmIdempotencyKey.current = null  // going back to edit is a genuinely new attempt once they re-confirm
     setPhase('chat')
     setExtractedProfile(null)
   }

@@ -746,7 +746,7 @@ export default function PersonalizedRoadmap({
                           <a
                             href={task.resource_url}
                             target="_blank"
-                            rel="noreferrer"
+                            rel="noopener noreferrer"
                             className="px-2.5 py-1 bg-white dark:bg-[#1E293B] border border-[#e0e0e0] dark:border-[#242E40] hover:border-[#0066cc] dark:hover:border-[#38BDF8] hover:text-[#0066cc] dark:hover:text-[#38BDF8] rounded-lg text-xs font-semibold text-[#333333] dark:text-white transition-colors"
                           >
                             Open ↗
@@ -998,7 +998,7 @@ export default function PersonalizedRoadmap({
                 <a
                   href={currentWeekData.webResources[0].url}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   className="px-3.5 py-1.5 bg-white dark:bg-[#141A26] border border-[#0066cc] dark:border-[#38BDF8] text-[#0066cc] dark:text-[#38BDF8] hover:bg-[#0066cc] hover:text-white rounded-lg text-xs font-bold transition-all shadow-2xs flex-none"
                 >
                   Open
