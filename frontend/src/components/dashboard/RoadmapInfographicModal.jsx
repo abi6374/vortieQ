@@ -1,4 +1,5 @@
 import React, { useRef, useState, useMemo } from 'react'
+import { createPortal } from 'react-dom'
 import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
 
@@ -712,11 +713,17 @@ export default function RoadmapInfographicModal({
     }
   }
 
-  if (!isOpen) return null
+  if (!isOpen || typeof document === 'undefined') return null
 
-  return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-2 sm:p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-[#0E131E] w-full max-w-5xl h-[94vh] rounded-3xl border border-[#e0e0e0] dark:border-[#202B3C] shadow-2xl flex flex-col overflow-hidden">
+  return createPortal(
+    <div 
+      className="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-white dark:bg-[#0E131E] w-full max-w-5xl h-[88vh] sm:h-[90vh] rounded-3xl border border-[#e0e0e0] dark:border-[#202B3C] shadow-2xl flex flex-col overflow-hidden relative z-10"
+        onClick={(e) => e.stopPropagation()}
+      >
         
         {/* MODAL CONTROLS HEADER */}
         <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-[#f0f0f0] dark:border-[#1E2638] bg-white dark:bg-[#0E131E] flex-none z-20">
@@ -936,6 +943,7 @@ export default function RoadmapInfographicModal({
         </div>
 
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
