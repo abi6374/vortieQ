@@ -26,16 +26,22 @@ function normalizeLevel(l) {
   return LEVEL_KEYS.includes(k) ? k : 'basic'
 }
 
-function confidenceFor(chosen, suggested, baseConfidence) {
-  const base = typeof baseConfidence === 'number' && baseConfidence >= 30 && baseConfidence <= 100
-    ? baseConfidence
-    : 82
-  const dist = LEVEL_KEYS.indexOf(chosen) - LEVEL_KEYS.indexOf(suggested)
-  if (dist === 0) return base
-  if (dist < 0) {
-    return Math.min(99, base + Math.abs(dist) * 4)
-  }
-  return Math.max(35, base - dist * 14)
+// A skill's confidence_pct is REAL evidence (from a resume/GitHub extraction
+// that already ran), never invented client-side. It only stays attached to
+// the currently-chosen level while that level matches what was actually
+// detected — the moment the learner picks a different level than the one
+// the evidence supported, that's a self-correction, and we stop claiming a
+// percentage we no longer have evidence for. The backend
+// (mastery_service._apply_topics) already applies its own documented
+// per-source default uncertainty (0.5 for self_assessment) whenever no real
+// confidence_pct is sent, so omitting it here is the correct contract, not
+// a gap to paper over.
+function isInferredAtLevel(topic, chosenLevel) {
+  return typeof topic.confidence_pct === 'number' && normalizeLevel(topic.suggested_level) === chosenLevel
+}
+
+function confidencePctFor(topic, chosenLevel) {
+  return isInferredAtLevel(topic, chosenLevel) ? topic.confidence_pct : null
 }
 
 function Radio({ on, small }) {
@@ -63,7 +69,7 @@ function Radio({ on, small }) {
 function SkillLevelPanel({ topic, level, onLevel }) {
   const [open, setOpen] = useState(true)
   const suggested = normalizeLevel(topic.suggested_level)
-  const pct = confidenceFor(level, suggested, topic.confidence_pct)
+  const pct = confidencePctFor(topic, level)
 
   return (
     <section className="rounded-2xl border border-[#e6e6e6] dark:border-[#202B3C] bg-white dark:bg-[#101726] shadow-sm overflow-hidden transition-colors">
@@ -79,10 +85,16 @@ function SkillLevelPanel({ topic, level, onLevel }) {
           {topic.name}
         </span>
         <span className="flex-1" />
-        <span className="flex items-baseline gap-1.5">
-          <span className="font-extrabold tabular-nums text-[#0066cc] dark:text-[#38BDF8]" style={{ fontSize: 20 }}>{pct}%</span>
-          <span className="text-xs sm:text-sm text-[#494949] dark:text-[#94A3B8]">confidence</span>
-        </span>
+        {pct !== null ? (
+          <span className="flex items-baseline gap-1.5">
+            <span className="font-extrabold tabular-nums text-[#0066cc] dark:text-[#38BDF8]" style={{ fontSize: 20 }}>{pct}%</span>
+            <span className="text-xs sm:text-sm text-[#494949] dark:text-[#94A3B8]">inferred</span>
+          </span>
+        ) : (
+          <span className="text-[11px] font-bold uppercase tracking-wide text-[#7a7a7a] dark:text-[#94A3B8] bg-[#f2f2f2] dark:bg-[#1A2536] px-2.5 py-1 rounded-full">
+            Self-reported
+          </span>
+        )}
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
@@ -127,7 +139,11 @@ function SkillLevelPanel({ topic, level, onLevel }) {
                     <Radio on={active} small />
                   </span>
                   <span className={`block text-[11.5px] mt-1 leading-snug ${active ? 'text-[#494949] dark:text-[#94A3B8]' : 'text-[#86868b] dark:text-[#64748B]'}`}>
-                    {suggested === key ? 'Matches your resume' : LEVEL_META[key].blurb}
+                    {/* Only claim a match to real evidence when there actually is
+                        a confidence_pct backing it (resume/GitHub extraction) -
+                        a manually self-reported skill's default "basic" level
+                        must never be mislabeled as something we detected. */}
+                    {suggested === key && typeof topic.confidence_pct === 'number' ? 'Matches what we detected' : LEVEL_META[key].blurb}
                   </span>
                 </button>
               )
@@ -158,21 +174,13 @@ function SkillLevelPanel({ topic, level, onLevel }) {
 
 export default function AssessSkills({ topics = [], detectedYears = 0, onContinue, onBack, onSkip }) {
   const [method, setMethod] = useState('skills') // 'skills' | 'level'
-  const [currentTopics, setCurrentTopics] = useState(() => {
-    if (topics && topics.length > 0) return topics
-    return [
-      { name: 'Python', suggested_level: 'intermediate', confidence_pct: 82 },
-      { name: 'SQL', suggested_level: 'basic', confidence_pct: 75 },
-      { name: 'Data Analysis', suggested_level: 'basic', confidence_pct: 70 },
-    ]
-  })
+  // No fabricated defaults: a learner with zero detected skills (no resume,
+  // no GitHub, goal-text-only intake) sees an honest empty state below,
+  // never a fake "Python / SQL / Data Analysis" starter set.
+  const [currentTopics, setCurrentTopics] = useState(() => topics || [])
 
   const [levels, setLevels] = useState(() =>
-    Object.fromEntries((topics.length > 0 ? topics : [
-      { name: 'Python', suggested_level: 'intermediate' },
-      { name: 'SQL', suggested_level: 'basic' },
-      { name: 'Data Analysis', suggested_level: 'basic' },
-    ]).map((t) => [t.name, normalizeLevel(t.suggested_level)]))
+    Object.fromEntries((topics || []).map((t) => [t.name, normalizeLevel(t.suggested_level)]))
   )
 
   const [newSkillInput, setNewSkillInput] = useState('')
@@ -187,14 +195,18 @@ export default function AssessSkills({ topics = [], detectedYears = 0, onContinu
       setNewSkillInput('')
       return
     }
+    // Manually added skills carry no suggested_level or confidence_pct -
+    // there is no evidence behind them yet beyond the learner's own word.
+    // They default to "Basic" (a neutral, non-presumptuous starting point,
+    // never "Intermediate" as if something had been detected) and the
+    // learner is expected to adjust the level themselves; the UI marks
+    // these "Self-reported" rather than attaching an invented percentage.
     const newTopic = {
       name: trimmed,
-      suggested_level: 'intermediate',
-      confidence_pct: 80,
-      evidence: 'Added during skill calibration',
+      evidence: 'Self-reported by you',
     }
     setCurrentTopics((prev) => [...prev, newTopic])
-    setLevels((prev) => ({ ...prev, [trimmed]: 'intermediate' }))
+    setLevels((prev) => ({ ...prev, [trimmed]: 'basic' }))
     setNewSkillInput('')
   }
 
@@ -210,14 +222,21 @@ export default function AssessSkills({ topics = [], detectedYears = 0, onContinu
   const submit = () => {
     const ratings = currentTopics.map((t) => {
       const chosenLevel = levels[t.name] || normalizeLevel(t.suggested_level)
-      const suggested = normalizeLevel(t.suggested_level)
-      const dynamicPct = confidenceFor(chosenLevel, suggested, t.confidence_pct)
-      return {
+      const pct = confidencePctFor(t, chosenLevel)
+      const rating = {
         name: t.name,
         level: chosenLevel,
-        confidence_pct: dynamicPct,
-        evidence: t.evidence || 'Verified in your profile skills',
+        evidence: pct !== null
+          ? (t.evidence || 'Detected from your profile')
+          : (t.evidence || 'Self-reported during skill calibration'),
       }
+      // Only send a confidence_pct when it is REAL evidence still backing
+      // the currently-chosen level. Omitting it for self-reported/adjusted
+      // skills is intentional: the backend
+      // (mastery_service._apply_topics) applies its own documented
+      // self_assessment default uncertainty rather than us inventing one.
+      if (pct !== null) rating.confidence_pct = pct
+      return rating
     })
     onContinue(ratings)
   }
@@ -278,8 +297,10 @@ export default function AssessSkills({ topics = [], detectedYears = 0, onContinu
         Your skills, your confidence
       </h1>
       <p className="text-[#494949] dark:text-[#94A3B8] mt-2.5 mb-6" style={{ fontSize: 'clamp(15px,1.4vw,17px)' }}>
-        We identified {currentTopics.length} skill{currentTopics.length === 1 ? '' : 's'} in your profile
-        {detectedYears ? ` (≈${detectedYears} years experience)` : ''}. Review your detected skills or fine-tune your level per skill.
+        {currentTopics.length > 0
+          ? <>We identified {currentTopics.length} skill{currentTopics.length === 1 ? '' : 's'} in your profile
+              {detectedYears ? ` (≈${detectedYears} years experience)` : ''}. Review your detected skills or fine-tune your level per skill.</>
+          : <>We didn't detect any skills from a resume or GitHub sync. Add the skills you actually have below and tell us your real level for each.</>}
       </p>
 
       {/* Method Toggle: Skills vs Choose Level */}
@@ -351,11 +372,19 @@ export default function AssessSkills({ topics = [], detectedYears = 0, onContinu
             </form>
           </div>
 
-          {/* Skill Badges Catalog */}
+          {/* Skill Badges Catalog, or an honest empty state when nothing has been detected/added yet */}
+          {currentTopics.length === 0 ? (
+            <div className="mb-5 rounded-xl border border-dashed border-[#D8DFEB] dark:border-[#2D3F59] bg-white dark:bg-[#0B0F17] px-5 py-8 text-center">
+              <p className="font-bold text-[#1d1d1f] dark:text-[#F8FAFC] text-[15px]">No skills confirmed yet</p>
+              <p className="text-[13px] text-[#7a7a7a] dark:text-[#94A3B8] mt-1.5 max-w-md mx-auto leading-relaxed">
+                We didn't detect any skills from a resume or GitHub sync. Add skills yourself using the field above or the suggestions below — your self-reported level is what we'll use to build your roadmap.
+              </p>
+            </div>
+          ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-5">
             {currentTopics.map((t) => {
               const currentLvl = levels[t.name] || normalizeLevel(t.suggested_level)
-              const pct = confidenceFor(currentLvl, normalizeLevel(t.suggested_level), t.confidence_pct)
+              const pct = confidencePctFor(t, currentLvl)
               return (
                 <div
                   key={t.name}
@@ -371,10 +400,10 @@ export default function AssessSkills({ topics = [], detectedYears = 0, onContinu
                       </div>
                       <div className="flex items-center gap-1.5 mt-0.5">
                         <span className="text-[11px] font-semibold text-[#0066cc] dark:text-[#38BDF8] bg-[#eaf2fc] dark:bg-[#182438] px-1.5 py-0.5 rounded capitalize">
-                          {LEVEL_META[currentLvl]?.label || 'Intermediate'}
+                          {LEVEL_META[currentLvl]?.label || 'Basic'}
                         </span>
                         <span className="text-[11px] text-[#7a7a7a] dark:text-[#94A3B8] font-mono">
-                          {pct}%
+                          {pct !== null ? `${pct}% inferred` : 'Self-reported'}
                         </span>
                       </div>
                     </div>
@@ -392,6 +421,7 @@ export default function AssessSkills({ topics = [], detectedYears = 0, onContinu
               )
             })}
           </div>
+          )}
 
           {/* Quick Suggestions Chips */}
           {unaddedSuggestions.length > 0 && (
@@ -415,7 +445,14 @@ export default function AssessSkills({ topics = [], detectedYears = 0, onContinu
       ) : (
         /* PER-TOPIC LEVEL PANELS */
         <div className="space-y-4">
-          {currentTopics.map((t) => (
+          {currentTopics.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-[#e6e6e6] dark:border-[#2D3A4F] bg-white dark:bg-[#101726] px-5 py-8 text-center">
+              <p className="font-bold text-[#1d1d1f] dark:text-[#F8FAFC] text-[15px]">No skills confirmed yet</p>
+              <p className="text-[13px] text-[#7a7a7a] dark:text-[#94A3B8] mt-1.5">
+                Switch to the "Skills" tab to add the skills you actually have.
+              </p>
+            </div>
+          ) : currentTopics.map((t) => (
             <SkillLevelPanel
               key={t.name}
               topic={t}

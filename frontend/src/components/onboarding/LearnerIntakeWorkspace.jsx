@@ -5,31 +5,27 @@ import ThemeToggle from '../ui/ThemeToggle'
 
 const EMPTY_DRAFT = { skills: '', education: '', projects: '', confidence: '', goal: '', summary: '' }
 
-const COMMON_TECH_SKILLS = [
-  'Python', 'JavaScript', 'TypeScript', 'React', 'Node.js', 'Next.js', 'Vue', 'Angular',
-  'HTML', 'CSS', 'Tailwind', 'Bootstrap', 'FastAPI', 'Flask', 'Django', 'Express',
-  'SQL', 'PostgreSQL', 'MySQL', 'MongoDB', 'Redis', 'GraphQL', 'REST APIs', 'Git', 'GitHub',
-  'Docker', 'Kubernetes', 'AWS', 'Azure', 'GCP', 'Linux', 'Machine Learning', 'Deep Learning',
-  'TensorFlow', 'PyTorch', 'Pandas', 'NumPy', 'Scikit-Learn', 'Data Analysis', 'Tableau', 'Power BI',
-  'C++', 'Java', 'C#', 'Go', 'Rust', 'Swift', 'Kotlin', 'DevOps', 'CI/CD', 'Agile'
-]
-
-function extractKeywordsFromText(text) {
-  if (!text) return []
-  const detected = []
-  COMMON_TECH_SKILLS.forEach((skill) => {
-    const reg = new RegExp(`\\b${skill.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i')
-    if (reg.test(text)) {
-      detected.push({
-        name: skill,
-        suggested_level: 'intermediate',
-        confidence_pct: 82,
-        evidence: `Mentioned in background description`,
-      })
-    }
-  })
-  return detected
-}
+// REMOVED: extractKeywordsFromText()/COMMON_TECH_SKILLS used to scan the
+// learner's free-text description for substring matches against a
+// hardcoded 49-word tech list, and for every match FABRICATED
+// suggested_level: 'intermediate' + confidence_pct: 82 as if it were a
+// real detected skill - with no regard for context. "I want to LEARN
+// Python" and "I have 5 years of Python" both matched identically. Those
+// invented topics flowed straight into onExtracted() -> OnboardingPage's
+// resumeTopics -> POST /api/profile/'s topic_ratings ->
+// mastery_service.update_mastery_from_self_assessment(), landing as REAL
+// learner_skill_mastery rows (evidence_source='self_assessment',
+// mastery_probability=0.55, confidence=0.82) indistinguishable from
+// genuine self-assessment. The backend already has a real, safe mechanism
+// for interpreting free-text goal descriptions - profile_service.
+// extract_profile() (LLM-based, prompt-injection-defended, output-validated),
+// called from OnboardingPage.runPlan() via POST /api/profile/ - so this
+// client-side heuristic was both harmful (fabricated evidence) and
+// redundant (a real interpreter already exists downstream). No skills are
+// invented locally now: a goal-only signup (no resume, no GitHub) honestly
+// reports zero detected topics until the learner explicitly self-assesses
+// them (see AssessSkills.jsx's "No skills confirmed yet" state) or the
+// real backend extraction runs.
 
 // Qualitative label for an average suggested_level across real extracted topics.
 // Purely descriptive of what was actually detected — never a guess.
@@ -43,10 +39,33 @@ function levelLabel(topics) {
   return 'Basic'
 }
 
+// Averages only the topics that actually carry a real confidence_pct from
+// the backend (resume/GitHub extraction) - never substitutes a fabricated
+// number for a topic that has none.
 function avgConfidence(topics) {
   if (!topics || !topics.length) return ''
-  const sum = topics.reduce((acc, t) => acc + (t.confidence_pct || 80), 0)
-  return `${Math.round(sum / topics.length)}%`
+  const withConfidence = topics.filter((t) => typeof t.confidence_pct === 'number')
+  if (!withConfidence.length) return ''
+  const sum = withConfidence.reduce((acc, t) => acc + t.confidence_pct, 0)
+  return `${Math.round(sum / withConfidence.length)}%`
+}
+
+// Combined "62% (Advanced)" display string - omits the percentage clause
+// entirely when no topic carries a real confidence_pct, rather than
+// rendering a dangling "(Advanced)" with an invisible fabricated number.
+function confidenceDisplay(topics) {
+  if (!topics || !topics.length) return ''
+  const pct = avgConfidence(topics)
+  const label = levelLabel(topics)
+  if (pct && label) return `${pct} (${label})`
+  return pct || label || ''
+}
+
+// "~62% confidence" parenthetical for summary sentences - empty string
+// when there is no real confidence to report.
+function confidenceClause(topics) {
+  const pct = avgConfidence(topics)
+  return pct ? ` (~${pct} confidence)` : ''
 }
 
 /**
@@ -92,13 +111,13 @@ export default function LearnerIntakeWorkspace({
   React.useEffect(() => {
     if (githubData?.topics && githubData.topics.length > 0 && !file && !singleDescription.trim()) {
       const topics = githubData.topics
-      const confStr = topics.length ? `${avgConfidence(topics)} (${levelLabel(topics)})` : ''
+      const stacks = githubData.top_languages?.length ? githubData.top_languages.join(', ') : 'the languages in your repositories'
       setProfileDraft((prev) => ({
         ...EMPTY_DRAFT,
         ...prev,
         skills: topics.map((t) => t.name).join(', '),
-        confidence: confStr,
-        summary: `Imported ${githubData.github_projects?.length || topics.length} repositories for ${customUsername || authenticatedUsername || 'your profile'} with ${githubData.top_languages?.join(', ') || 'modern stacks'}. Detected ${topics.length} skills (~${avgConfidence(topics)} confidence).`,
+        confidence: confidenceDisplay(topics),
+        summary: `Imported ${githubData.github_projects?.length || topics.length} repositories for ${customUsername || authenticatedUsername || 'your profile'} with ${stacks}. Detected ${topics.length} skill${topics.length === 1 ? '' : 's'}${confidenceClause(topics)}.`,
       }))
     }
   }, [githubData, customUsername, authenticatedUsername])
@@ -117,15 +136,15 @@ export default function LearnerIntakeWorkspace({
 
     if (githubData?.topics && githubData.topics.length > 0) {
       const topics = githubData.topics
-      const confStr = topics.length ? `${avgConfidence(topics)} (${levelLabel(topics)})` : ''
+      const stacks = githubData.top_languages?.length ? githubData.top_languages.join(', ') : 'the languages in your repositories'
       setProfileDraft((prev) => ({
         ...EMPTY_DRAFT,
         ...prev,
         skills: topics.map((t) => t.name).join(', '),
-        confidence: confStr,
+        confidence: confidenceDisplay(topics),
         summary: prev?.summary && !prev.summary.includes('ready')
           ? prev.summary
-          : `Imported ${githubData.github_projects?.length || topics.length} repositories for ${customUsername || authenticatedUsername || 'your profile'} with ${githubData.top_languages?.join(', ') || 'modern stacks'}. Detected ${topics.length} skills (~${avgConfidence(topics)} confidence).`,
+          : `Imported ${githubData.github_projects?.length || topics.length} repositories for ${customUsername || authenticatedUsername || 'your profile'} with ${stacks}. Detected ${topics.length} skill${topics.length === 1 ? '' : 's'}${confidenceClause(topics)}.`,
       }))
     }
 
@@ -174,13 +193,14 @@ export default function LearnerIntakeWorkspace({
     setSingleDescription(val)
     setContinueError('')
 
-    const detected = extractKeywordsFromText(val)
-    const skillsList = detected.map((d) => d.name).join(', ')
-
+    // Only reflect the raw text back as a preview here - no client-side
+    // skill guessing. Real skills come from an uploaded resume, a synced
+    // GitHub account, or the learner's own explicit self-assessment later
+    // in onboarding (see AssessSkills.jsx). `skills` is intentionally left
+    // untouched (real evidence only, never inferred from goal text).
     setProfileDraft((prev) => ({
       ...EMPTY_DRAFT,
       ...prev,
-      skills: skillsList || prev?.skills || '',
       goal: val,
       summary: val.trim().length > 15
         ? `Draft from your description: "${val.slice(0, 140)}${val.length > 140 ? '…' : ''}"`
@@ -201,7 +221,14 @@ export default function LearnerIntakeWorkspace({
       return
     }
 
-    const detectedFromText = extractKeywordsFromText(trimmedDesc)
+    // NOTE: topics here come ONLY from real evidence sources - an uploaded
+    // resume parsed server-side, or a synced GitHub account's actual repo
+    // languages. The free-text description is never scanned for keyword
+    // matches; it is passed through as `goal` for the backend's real LLM
+    // extraction (profile_service.extract_profile) to interpret honestly,
+    // and as a fallback nothing is invented - an empty topics array means
+    // "no skills detected yet," matching AssessSkills.jsx's honest empty
+    // state rather than a fabricated default.
 
     if (file) {
       setUploading(true)
@@ -213,31 +240,23 @@ export default function LearnerIntakeWorkspace({
           headers: { 'Content-Type': 'multipart/form-data' },
         })
         const resumeTopics = data.topics || []
-        const existingNames = new Set(resumeTopics.map((t) => t.name.toLowerCase()))
-        const mergedTopics = [...resumeTopics]
-        detectedFromText.forEach((dt) => {
-          if (!existingNames.has(dt.name.toLowerCase())) {
-            mergedTopics.push(dt)
-          }
-        })
-        const confStr = mergedTopics.length ? `${avgConfidence(mergedTopics)} (${levelLabel(mergedTopics)})` : ''
         const updatedDraft = {
           ...EMPTY_DRAFT,
           ...profileDraft,
-          skills: mergedTopics.map((t) => t.name).join(', ') || profileDraft?.skills || '',
-          confidence: confStr || profileDraft?.confidence || '',
+          skills: resumeTopics.map((t) => t.name).join(', ') || profileDraft?.skills || '',
+          confidence: confidenceDisplay(resumeTopics) || profileDraft?.confidence || '',
           education: data.education || profileDraft?.education || '',
           projects: data.projects || profileDraft?.projects || '',
           goal: trimmedDesc || data.suggested_goal || profileDraft?.goal || '',
-          summary: mergedTopics.length
-            ? `Identified ${mergedTopics.length} skill${mergedTopics.length === 1 ? '' : 's'} (~${avgConfidence(mergedTopics)} confidence)${
+          summary: resumeTopics.length
+            ? `Identified ${resumeTopics.length} skill${resumeTopics.length === 1 ? '' : 's'}${confidenceClause(resumeTopics)}${
                 data.detected_years_experience ? ` and ~${data.detected_years_experience} years experience` : ''
-              }: ${mergedTopics.map((t) => t.name).join(', ')}.`
+              }: ${resumeTopics.map((t) => t.name).join(', ')}.`
             : profileDraft?.summary || 'Profile draft updated.',
         }
         setProfileDraft(updatedDraft)
         onExtracted(
-          mergedTopics,
+          resumeTopics,
           data.detected_years_experience || 0,
           updatedDraft.education,
           updatedDraft.projects,
@@ -250,7 +269,7 @@ export default function LearnerIntakeWorkspace({
             'Could not analyze this resume. Continuing with your description.'
         )
         onExtracted(
-          detectedFromText,
+          [],
           0,
           profileDraft?.education || '',
           profileDraft?.projects || '',
@@ -260,23 +279,18 @@ export default function LearnerIntakeWorkspace({
         setUploading(false)
       }
     } else if (githubData?.topics && githubData.topics.length > 0) {
-      const existingNames = new Set(githubData.topics.map((t) => t.name.toLowerCase()))
-      const mergedTopics = [...githubData.topics]
-      detectedFromText.forEach((dt) => {
-        if (!existingNames.has(dt.name.toLowerCase())) {
-          mergedTopics.push(dt)
-        }
-      })
       onExtracted(
-        mergedTopics,
+        githubData.topics,
         githubData.detected_years_experience || 0,
         profileDraft?.education || '',
         profileDraft?.projects || '',
         trimmedDesc || profileDraft?.goal || ''
       )
     } else {
+      // Goal-only signup: no resume, no GitHub - honestly report zero
+      // detected topics rather than fabricating skills from goal text.
       onExtracted(
-        detectedFromText,
+        [],
         0,
         profileDraft?.education || '',
         profileDraft?.projects || '',
@@ -362,7 +376,10 @@ export default function LearnerIntakeWorkspace({
                     </span>
                   </p>
                   <p className="text-[12px] text-[#52617D] dark:text-[#94A3B8] mt-0.5">
-                    Stack: {githubData.top_languages?.join(', ') || 'Python, TypeScript'} · Experience: ~{githubData.detected_years_experience || 1} yrs
+                    Stack: {githubData.top_languages?.length ? githubData.top_languages.join(', ') : 'No languages detected'}
+                    {typeof githubData.detected_years_experience === 'number' && githubData.detected_years_experience > 0
+                      ? ` · Experience: ~${githubData.detected_years_experience} yrs`
+                      : ''}
                   </p>
                 </div>
               </div>
