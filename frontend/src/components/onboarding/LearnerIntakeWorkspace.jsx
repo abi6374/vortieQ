@@ -240,9 +240,16 @@ export default function LearnerIntakeWorkspace({
         : (prev?.summary || 'Describe your background to build your AI Profile Draft.'),
     }))
 
-    // Debounce natural language extraction
+    // Debounce natural language extraction. Previously gated on `!file` -
+    // meaning the moment a resume was ALSO picked, typing here silently did
+    // nothing (no live preview, no real skills ever populated, the "Skills
+    // & tools not verified yet" warning just stayed up forever) with no
+    // indication to the user that this was expected. Text extraction is
+    // independent of the file (it only reads what was typed), and
+    // handleContinue's resume branch already merges resume-derived skills
+    // over whatever this populates, so there's no reason to disable it.
     if (extractTimerRef.current) clearTimeout(extractTimerRef.current)
-    if (val.trim().length >= 25 && !file) {
+    if (val.trim().length >= 25) {
       extractTimerRef.current = setTimeout(() => {
         runTextExtraction(val)
       }, 700)
@@ -250,7 +257,7 @@ export default function LearnerIntakeWorkspace({
   }
 
   const handleOpenEditDraft = async () => {
-    if (!profileDraft?.skills && singleDescription.trim().length >= 20 && !file) {
+    if (!profileDraft?.skills && singleDescription.trim().length >= 20) {
       await runTextExtraction(singleDescription)
     }
     setEditFormData({
