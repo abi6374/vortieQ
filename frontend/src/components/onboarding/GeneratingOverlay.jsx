@@ -148,43 +148,46 @@ export default function GeneratingOverlay({ status = 'loading', onFinished, onRe
     }
 
     if (status === 'success') {
-      // Rapidly but smoothly glide to 100%
+      // Rapidly but smoothly glide from current pct to 99% -> 100%
       const interval = setInterval(() => {
         setPct((p) => {
           if (p >= 100) {
             clearInterval(interval)
             return 100
           }
-          const next = p + Math.max(2, (100 - p) * 0.4)
-          return next >= 99.5 ? 100 : next
+          const next = p + Math.max(0.5, (100 - p) * 0.28)
+          return next >= 99.8 ? 100 : next
         })
       }, 25)
       return () => clearInterval(interval)
     }
 
-    // Steady, constant forward progress animation starting strictly from 0%
+    // Steady, constant forward progress animation starting strictly from 0% and advancing up to 99%
     setPct(0)
     const startTime = Date.now()
     const interval = setInterval(() => {
       const elapsed = (Date.now() - startTime) / 1000 // in seconds
       
-      // Constant, smooth pace starting at 0%
+      // Constant, smooth pace reaching 99%
       let target = 0
       if (elapsed <= 2.5) {
-        target = (elapsed / 2.5) * 30
+        target = (elapsed / 2.5) * 32
       } else if (elapsed <= 5.5) {
-        target = 30 + ((elapsed - 2.5) / 3.0) * 30
+        target = 32 + ((elapsed - 2.5) / 3.0) * 34 // to 66%
       } else if (elapsed <= 8.5) {
-        target = 60 + ((elapsed - 5.5) / 3.0) * 22
+        target = 66 + ((elapsed - 5.5) / 3.0) * 22 // to 88%
+      } else if (elapsed <= 12.0) {
+        target = 88 + ((elapsed - 8.5) / 3.5) * 8 // to 96%
       } else {
-        const extra = elapsed - 8.5
-        target = 82 + 14 * (1 - Math.exp(-extra / 4.5))
+        const extra = elapsed - 12.0
+        // Steadily climbs from 96% to 99%
+        target = 96 + Math.min(3.0, extra * 0.5)
       }
 
       setPct((current) => {
         // Monotonically increase only, perfectly constant motion
         const next = Math.max(current, target)
-        return Math.min(97.5, next)
+        return Math.min(99.0, next)
       })
     }, 40)
 
