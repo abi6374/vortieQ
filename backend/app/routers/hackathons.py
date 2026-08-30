@@ -1,8 +1,10 @@
+from typing import Literal, Optional
+
 from fastapi import APIRouter, Depends, Query, HTTPException
 from pydantic import BaseModel
-from typing import Optional
 
 from app.middleware.auth import verify_jwt
+from app.middleware.rate_limit import rate_limit
 from app.services import hackathon_service
 
 router = APIRouter()
@@ -14,10 +16,13 @@ class RegisterRequest(BaseModel):
 
 @router.get("")
 def list_hackathons(
-    status: Optional[str] = Query(None, description="upcoming | ongoing | ended"),
-    theme: Optional[str] = Query(None, description="AI/ML, Web, FinTech, etc."),
+    status: Optional[str] = Query(None, max_length=50, description="upcoming | ongoing | ended"),
+    theme: Optional[str] = Query(None, max_length=100, description="AI/ML, Web, FinTech, etc."),
     is_online: Optional[bool] = Query(None),
-    user_id: str = Depends(verify_jwt),
+    # Real, though not costly-per-call like path generation - still worth
+    # a generous cap since this can trigger an Apify/scraper call
+    # (hackathon_service.get_hackathons) on a cache miss.
+    user_id: str = Depends(rate_limit("hackathons.list", max_calls=60)),
 ):
     """
     List real hackathons from Devfolio/Devpost via Apify (if token set)
@@ -61,7 +66,12 @@ def get_hackathon_detail(
 @router.post("/{hackathon_id}/register")
 def register_for_hackathon(
     hackathon_id: str,
-    status: str = Query("registered", description="registered | interested | submitted"),
+    # Matches user_hackathons.status's real DB CHECK constraint
+    # (migration 015) exactly - previously a bare string, so any other
+    # value would only ever be caught by the DB itself, surfacing as the
+    # RuntimeError/500 branch below (and, before this fix, leaking the
+    # raw Postgres error string to the client).
+    status: Literal["registered", "interested", "submitted"] = Query("registered"),
     user_id: str = Depends(verify_jwt),
 ):
     """
@@ -74,7 +84,11 @@ def register_for_hackathon(
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except RuntimeError as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        # Real exception details (a raw Postgres/Supabase error string,
+        # which can reveal table/column/constraint names) go to server
+        # logs only - the client gets a generic, safe message.
+        print(f"[hackathons router] register_for_hackathon failed: {type(e).__name__}: {e}", flush=True)
+        raise HTTPException(status_code=500, detail="Failed to register for this hackathon. Please try again.")
 
 
 @router.delete("/{hackathon_id}/register")
@@ -87,11 +101,18 @@ def unregister_from_hackathon(
         result = hackathon_service.unregister_from_hackathon(user_id, hackathon_id)
         return result
     except RuntimeError as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"[hackathons router] unregister_from_hackathon failed: {type(e).__name__}: {e}", flush=True)
+        raise HTTPException(status_code=500, detail="Failed to remove this registration. Please try again.")
 
 
 @router.post("/refresh")
-def refresh_hackathons(user_id: str = Depends(verify_jwt)):
+def refresh_hackathons(
+    # Real cost/DoS gap this closes: hackathon_service._CACHE is a
+    # process-wide (not per-user) cache - any authenticated learner could
+    # previously force a full external re-scrape (Apify/Devfolio) for
+    # EVERY user with no limit at all, repeatedly.
+    user_id: str = Depends(rate_limit("hackathons.refresh", max_calls=3)),
+):
     """Manually trigger a hackathon data refresh from external sources."""
     hackathon_service._CACHE.clear()
     hackathons = hackathon_service.get_hackathons()

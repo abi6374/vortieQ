@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Query
 
-from app.middleware.auth import verify_jwt
+from app.middleware.rate_limit import rate_limit
 from app.services import web_search_service
 
 router = APIRouter()
@@ -9,7 +9,11 @@ router = APIRouter()
 @router.get("/search")
 def search_resources(
     query: str = Query(..., min_length=2, max_length=200),
-    user_id: str = Depends(verify_jwt),
+    # Real cost gap this closes: authenticated but had no rate limit at
+    # all despite triggering a live web search per call - every other
+    # search-triggering route in this app (swap/rerecommend, path
+    # generation) is rate-limited for exactly this reason.
+    user_id: str = Depends(rate_limit("resources.search", max_calls=30)),
 ):
     """
     Live web-search recommendations to supplement the seeded course library

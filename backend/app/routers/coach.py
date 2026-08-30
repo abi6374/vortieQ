@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.middleware.rate_limit import rate_limit
 from app.services import coach_service
@@ -8,8 +8,15 @@ router = APIRouter()
 
 
 class PracticeRequest(BaseModel):
-    topic: str
-    count: int = 5
+    # topic had no length limit at all despite going directly into
+    # coach_service.generate_practice's LLM prompt ("TOPIC TO PRACTICE:
+    # {topic}") - real prompt-injection surface and unbounded per-request
+    # cost. count was already safely clamped inside the service
+    # (max(1, min(MAX_QUESTIONS, ...))) but enforcing it here too turns an
+    # out-of-range request into a clean 422 instead of a silently-adjusted
+    # value the caller never sees reflected back.
+    topic: str = Field(..., min_length=1, max_length=200)
+    count: int = Field(default=5, ge=1, le=10)  # matches coach_service.MAX_QUESTIONS
 
 
 @router.post("/practice")

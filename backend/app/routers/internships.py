@@ -1,7 +1,9 @@
+from typing import Literal, Optional
+
 from fastapi import APIRouter, Depends, Query, HTTPException
-from typing import Optional
 
 from app.middleware.auth import verify_jwt
+from app.middleware.rate_limit import rate_limit
 from app.services import internship_service
 
 router = APIRouter()
@@ -10,9 +12,11 @@ router = APIRouter()
 @router.get("")
 def list_internships(
     is_remote: Optional[bool] = Query(None),
-    category: Optional[str] = Query(None, description="AI/ML, Web Dev, Data Science, DevOps, etc."),
-    company: Optional[str] = Query(None, description="Filter by company name"),
-    user_id: str = Depends(verify_jwt),
+    category: Optional[str] = Query(None, max_length=100, description="AI/ML, Web Dev, Data Science, DevOps, etc."),
+    company: Optional[str] = Query(None, max_length=200, description="Filter by company name"),
+    # Real, though not costly-per-call - still worth a cap since this can
+    # hit the live Greenhouse Public Job Board API on a cache miss.
+    user_id: str = Depends(rate_limit("internships.list", max_calls=60)),
 ):
     """
     List real internships fetched from the Greenhouse Public Job Board API.
@@ -56,7 +60,9 @@ def get_internship_detail(
 @router.post("/{internship_id}/apply")
 def apply_to_internship(
     internship_id: str,
-    status: str = Query("applied", description="applied | saved"),
+    # Matches user_internships.application_status's real DB CHECK
+    # constraint (migration 015) exactly.
+    status: Literal["applied", "saved"] = Query("applied"),
     user_id: str = Depends(verify_jwt),
 ):
     """
@@ -69,7 +75,8 @@ def apply_to_internship(
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except RuntimeError as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"[internships router] apply_to_internship failed: {type(e).__name__}: {e}", flush=True)
+        raise HTTPException(status_code=500, detail="Failed to apply to this internship. Please try again.")
 
 
 @router.delete("/{internship_id}/apply")
@@ -82,13 +89,16 @@ def unapply_from_internship(
         result = internship_service.unapply_from_internship(user_id, internship_id)
         return result
     except RuntimeError as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"[internships router] unapply_from_internship failed: {type(e).__name__}: {e}", flush=True)
+        raise HTTPException(status_code=500, detail="Failed to remove this application. Please try again.")
 
 
 @router.patch("/{internship_id}/status")
 def update_internship_status(
     internship_id: str,
-    new_status: str = Query(..., description="applied | saved | interviewing | offer | rejected"),
+    # Matches user_internships.application_status's full real DB CHECK
+    # constraint (migration 015) exactly.
+    new_status: Literal["applied", "saved", "interviewing", "offer", "rejected"] = Query(...),
     user_id: str = Depends(verify_jwt),
 ):
     """Update the application status for a tracked internship."""
@@ -98,5 +108,6 @@ def update_internship_status(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except RuntimeError as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"[internships router] update_application_status failed: {type(e).__name__}: {e}", flush=True)
+        raise HTTPException(status_code=500, detail="Failed to update application status. Please try again.")
 

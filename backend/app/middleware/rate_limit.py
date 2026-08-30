@@ -25,10 +25,10 @@ LLM-backed route in the app.
 import random
 from datetime import datetime, timedelta, timezone
 
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, Request
 
 from app.config import supabase_client
-from app.middleware.auth import verify_jwt
+from app.middleware.auth import verify_jwt, verify_jwt_optional
 
 # Roughly 1-in-N checks also sweeps rows older than the longest realistic
 # window across the whole table - there's no cron/scheduled-job
@@ -97,6 +97,40 @@ def rate_limit(name: str, max_calls: int, window_seconds: int = 300):
     """
     def _dep(user_id: str = Depends(verify_jwt)) -> str:
         _check(f"{name}:{user_id}", max_calls, window_seconds)
+        return user_id
+
+    return _dep
+
+
+def _client_ip(request: Request) -> str:
+    """Best-effort real client IP: prefers X-Forwarded-For's first hop (set
+    by Vercel's edge when it proxies /api/* to this backend - see the
+    frontend's server-side proxy), falls back to the raw connection IP for
+    a direct call. Not spoof-proof against a client crafting its own
+    X-Forwarded-For directly against this backend's IP (no reverse proxy
+    stripping/re-setting it here) - this is a cost-abuse throttle, not a
+    security boundary, so a determined attacker rotating a spoofed header
+    only matters as much as any other rate-limit evasion already does."""
+    forwarded = request.headers.get("x-forwarded-for", "")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.client.host if request.client else "unknown"
+
+
+def rate_limit_by_ip_or_user(name: str, max_calls: int, window_seconds: int = 300):
+    """Same cost-protection budget as rate_limit(), for a route that is
+    ALSO reachable without authentication (verify_jwt_optional) - real gap
+    this closes: github.py's ingest_github_profile makes a real external
+    API call (GitHub) and is explicitly reachable anonymously (an
+    "anonymous preview" of the feature), but had no rate limit at all,
+    since the plain rate_limit() dependency requires a real verified
+    user_id to key on and can't be used for an anonymous caller. Keys by
+    the real user_id when authenticated (consistent with every other
+    rate-limited route), falls back to a best-effort client IP when not.
+    """
+    def _dep(request: Request, user_id: str | None = Depends(verify_jwt_optional)) -> str | None:
+        key = f"{name}:{user_id}" if user_id else f"{name}:ip:{_client_ip(request)}"
+        _check(key, max_calls, window_seconds)
         return user_id
 
     return _dep

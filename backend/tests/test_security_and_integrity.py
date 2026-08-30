@@ -30,6 +30,37 @@ from app.main import app
 client = TestClient(app)
 
 
+@pytest.fixture(autouse=True)
+def _no_live_rate_limit_writes():
+    # This file's own docstring states "no live Supabase writes" - true
+    # for every OTHER route tested here (rate_limit() requires a real
+    # verify_jwt, so an unauthenticated/malformed-JWT test call never
+    # reaches the DB-backed check at all), but github.py's
+    # ingest_github_profile is reachable WITHOUT auth
+    # (rate_limit_by_ip_or_user), so several tests below that post to it
+    # unauthenticated DO reach the real check - and since TestClient's
+    # requests all share the same synthetic client host ("testclient"),
+    # repeated pytest runs within the same file accumulate real rows
+    # under one shared bucket_key in the LIVE rate_limit_hits table until
+    # a real max_calls limit trips, at which point one of THESE tests
+    # starts failing with an unrelated 429 - confirmed live: an earlier
+    # run of this exact suite left exactly 15 real rows under
+    # "github.ingest:ip:testclient" in production, which were found and
+    # deleted (that table holds no PII, only ephemeral rate-limit
+    # bucketing keys). Autouse-mocked here so no test in this file can
+    # ever touch that table again.
+    mock_supabase = MagicMock()
+    # .data must be a real empty list (not an auto-generated MagicMock
+    # attribute, which `len()` can't be called on) so _check()'s
+    # `hits = existing.data or []` / `len(hits)` behave exactly like a
+    # real "no hits yet" response - this fixture is about NOT writing to
+    # the live table, not about testing rate-limit behavior itself, so
+    # every check should cleanly report zero prior hits.
+    mock_supabase.table.return_value.select.return_value.eq.return_value.gte.return_value.order.return_value.execute.return_value = MagicMock(data=[])
+    with patch("app.middleware.rate_limit.supabase_client", mock_supabase):
+        yield
+
+
 # ── 1. Malformed / expired JWT rejection ────────────────────────────────────
 class TestJWTRejection:
     def test_no_auth_header_rejected(self):

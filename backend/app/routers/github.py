@@ -4,7 +4,8 @@ from fastapi import APIRouter, Depends, HTTPException, Body
 from typing import Optional, Dict, Any
 
 from app.config import supabase_client
-from app.middleware.auth import verify_jwt, verify_jwt_optional
+from app.middleware.auth import verify_jwt
+from app.middleware.rate_limit import rate_limit_by_ip_or_user
 from app.services.github_service import (
     fetch_github_repos,
     analyze_github_repositories,
@@ -38,7 +39,12 @@ def _validate_username(username: str) -> str:
 @router.post("")
 async def ingest_github_profile(
     payload: Dict[str, Any] = Body(default={}),
-    user_id: Optional[str] = Depends(verify_jwt_optional)
+    # Real cost/DoS gap this closes: reachable without authentication (an
+    # anonymous preview of the feature) but had NO rate limit at all,
+    # despite making a real external GitHub API call per request -
+    # rate_limit_by_ip_or_user keys by the real user_id when
+    # authenticated, falls back to a best-effort client IP when not.
+    user_id: Optional[str] = Depends(rate_limit_by_ip_or_user("github.ingest", max_calls=15))
 ):
     """
     Ingests a user's GitHub repositories, computes tech stack skills and confidence scores,
