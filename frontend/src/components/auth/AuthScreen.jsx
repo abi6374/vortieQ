@@ -57,7 +57,7 @@ const STYLES = `
 .pfa .hero h1{ font-family:"Manrope",sans-serif; font-weight:800; font-size:clamp(26px,2.6vw,36px);
   line-height:1.14; letter-spacing:-.025em; margin:0 0 14px; text-wrap:balance; color:var(--navy); }
 .pfa .hero p{ font-size:15px; line-height:1.55; color:var(--slate); margin:0; max-width:32ch; }
-.pfa .privacy{ display:flex; align-items:center; justify-content:center; gap:10px; color:var(--slate); font-size:13px; font-weight:500; flex:none; width:100%; text-align:center; }
+.pfa .privacy{ display:flex; align-items:center; justify-content:flex-start; gap:10px; color:var(--slate); font-size:13px; font-weight:500; flex:none; }
 .pfa .privacy svg{ color:var(--violet); flex:none; }
 
 .pfa .form-panel{ background:rgba(255,255,255,0.55); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
