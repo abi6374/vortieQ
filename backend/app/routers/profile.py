@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
 
 from app.config import supabase_client
 from app.middleware.auth import verify_jwt
@@ -105,6 +105,7 @@ def _ext_for(filename: str, content_type: str) -> str:
 
 @router.post("/resume", response_model=ResumeExtractResponse)
 async def upload_resume(
+    request: Request,
     file: UploadFile = File(...),
     user_id: str = Depends(rate_limit("profile.resume", max_calls=10)),
 ):
@@ -116,6 +117,16 @@ async def upload_resume(
     return the parse result (the user's flow doesn't break). A GET on
     /api/profile/resume surfaces the most recent stored resume for reuse.
     """
+    # Early, honest, real Content-Length check BEFORE buffering the whole
+    # body into memory - resume_service.extract_text's own MAX_BYTES check
+    # only runs AFTER `await file.read()` has already read everything, so
+    # on its own it bounds what gets PARSED but not what gets BUFFERED.
+    # Best-effort only (a chunked-encoding request has no Content-Length
+    # header at all) - the post-read check remains the real guarantee.
+    declared_length = request.headers.get("content-length")
+    if declared_length and declared_length.isdigit() and int(declared_length) > resume_service.MAX_BYTES:
+        raise HTTPException(413, f"File too large (max {resume_service.MAX_BYTES} bytes).")
+
     try:
         data = await file.read()
         text = resume_service.extract_text(

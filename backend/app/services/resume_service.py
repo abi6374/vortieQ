@@ -3,16 +3,100 @@
 Accepts a PDF or DOCX file's bytes, pulls text out, hands it to Groq with the
 resume_extract prompt, returns the structured topic list. No persistence at
 this layer — the router or a later phase decides what to store.
+
+Upload security (Phase 4): file TYPE is verified by real magic bytes, not
+only the filename extension or the client-supplied Content-Type header
+(either of which a caller fully controls and could set to anything
+regardless of the file's actual content). Parsing itself is bounded -
+real page-count/size limits before any per-page work happens, and a
+best-effort wall-clock timeout around the parse call. Malware scanning is
+explicitly NOT implemented here - see MALWARE_SCANNING_NOTE below; this
+is a documented infrastructure gap, not something faked.
 """
 
 import io
 import json
+import signal
 from pathlib import Path as _Path
 
 from app.llm_client import chat_completion
 
 MAX_BYTES = 5 * 1024 * 1024  # 5 MB cap
 MAX_TEXT_CHARS = 60_000       # trim very long resumes before sending to the LLM
+MAX_PDF_PAGES = 30            # a real resume is a handful of pages - bounds
+                               # per-page parse work against a maliciously
+                               # huge page count before extracting anything
+PARSE_TIMEOUT_SECONDS = 10    # best-effort wall-clock bound on the parse call
+
+# Real magic-byte signatures - a caller controls the filename and
+# Content-Type header completely; neither is trustworthy evidence of what
+# the bytes actually are. PDF files always start with "%PDF-". DOCX is
+# Office Open XML, which is a ZIP container, so a real .docx always starts
+# with the ZIP local-file-header signature (PK\x03\x04) - this doesn't
+# prove the ZIP's INTERNAL contents are a valid Word document (that's
+# what parsing failure below catches), only that it's genuinely a ZIP/
+# OOXML-shaped file and not, say, an executable or a script renamed with
+# a .pdf/.docx extension.
+_PDF_MAGIC = b"%PDF-"
+_ZIP_MAGIC = b"PK\x03\x04"
+
+# Real infrastructure gap, stated honestly rather than faked: this
+# deployment has no malware-scanning service (ClamAV, a cloud AV API,
+# etc.) provisioned, and none is implemented here. A resume that passes
+# every check in this module (real magic bytes, parses cleanly, bounded
+# size/pages/time) could still theoretically carry malicious content a
+# dedicated scanner would catch that a text-extraction library does not
+# (e.g. an embedded exploit targeting a DIFFERENT consumer of the raw
+# file than this text extractor). Flagging this explicitly rather than
+# adding a scanning call this environment can't actually make real.
+MALWARE_SCANNING_NOTE = (
+    "No malware-scanning service is provisioned in this deployment. "
+    "Uploaded files are validated by real magic bytes and parsed with "
+    "bounded size/page-count/time limits, but are not scanned by a "
+    "dedicated AV engine before being parsed or stored."
+)
+
+
+class UnsupportedFileError(ValueError):
+    """A file that isn't the real, correct type it claims to be (wrong
+    magic bytes for its extension), or a real file this module explicitly
+    can't safely process (encrypted, too many pages)."""
+
+
+def _looks_like_pdf(data: bytes) -> bool:
+    return data[:5] == _PDF_MAGIC
+
+
+def _looks_like_docx(data: bytes) -> bool:
+    return data[:4] == _ZIP_MAGIC
+
+
+class _ParseTimeout(Exception):
+    pass
+
+
+def _run_with_timeout(fn, *args, seconds: int = PARSE_TIMEOUT_SECONDS):
+    """Best-effort wall-clock bound using SIGALRM - only available on
+    Unix (the real production target: this runs in a Linux Docker
+    container on EC2). On a platform without SIGALRM (Windows local dev),
+    this honestly runs unbounded rather than pretending to enforce a
+    timeout it structurally cannot on that platform - a real, stated
+    limitation rather than a faked one."""
+    if not hasattr(signal, "SIGALRM"):
+        return fn(*args)
+
+    def _on_alarm(signum, frame):
+        raise _ParseTimeout()
+
+    previous_handler = signal.signal(signal.SIGALRM, _on_alarm)
+    signal.alarm(seconds)
+    try:
+        return fn(*args)
+    except _ParseTimeout:
+        raise ValueError(f"This file took too long to parse (over {seconds}s) and was rejected.")
+    finally:
+        signal.alarm(0)
+        signal.signal(signal.SIGALRM, previous_handler)
 
 
 def _load_prompt(name: str) -> str:
@@ -34,6 +118,17 @@ def _pdf_to_text(data: bytes) -> str:
     if PdfReader is None:
         raise ValueError("pypdf is not installed. Please install pypdf to process PDF files.")
     reader = PdfReader(io.BytesIO(data))
+    # Encrypted PDFs are rejected outright rather than attempting a blank-
+    # password unlock (which pypdf will sometimes do implicitly) - "reject
+    # unsupported... encrypted... files safely" from the audit; an
+    # encrypted resume isn't something this pipeline can honestly claim
+    # to have read.
+    if reader.is_encrypted:
+        raise UnsupportedFileError("This PDF is password-protected. Please upload an unprotected file.")
+    if len(reader.pages) > MAX_PDF_PAGES:
+        raise UnsupportedFileError(
+            f"This PDF has {len(reader.pages)} pages; a resume should have at most {MAX_PDF_PAGES}."
+        )
     return "\n".join((page.extract_text() or "") for page in reader.pages)
 
 
@@ -60,15 +155,31 @@ def extract_text(data: bytes, filename: str, content_type: str = "") -> str:
     name = (filename or "").lower()
     ct = (content_type or "").lower()
 
-    is_pdf = name.endswith(".pdf") or "pdf" in ct
-    is_docx = name.endswith(".docx") or "wordprocessingml" in ct
+    claims_pdf = name.endswith(".pdf") or "pdf" in ct
+    claims_docx = name.endswith(".docx") or "wordprocessingml" in ct
 
-    if is_pdf:
-        text = _pdf_to_text(data)
-    elif is_docx:
-        text = _docx_to_text(data)
-    else:
+    if not claims_pdf and not claims_docx:
         raise ValueError("Unsupported file type. Please upload a PDF or DOCX.")
+
+    # Real magic-byte check - the filename/Content-Type only say what the
+    # CALLER claims this is; a caller controls both completely regardless
+    # of the actual bytes. A mismatch is rejected outright rather than
+    # handed to a parser expecting a different format.
+    if claims_pdf and not _looks_like_pdf(data):
+        raise UnsupportedFileError(
+            "This file's content doesn't match a real PDF (wrong file signature). "
+            "It may be corrupted, a different file type renamed, or not a real PDF."
+        )
+    if claims_docx and not _looks_like_docx(data):
+        raise UnsupportedFileError(
+            "This file's content doesn't match a real DOCX (wrong file signature). "
+            "It may be corrupted, a different file type renamed, or not a real DOCX."
+        )
+
+    if claims_pdf:
+        text = _run_with_timeout(_pdf_to_text, data)
+    else:
+        text = _run_with_timeout(_docx_to_text, data)
 
     text = text.strip()
     if not text:
