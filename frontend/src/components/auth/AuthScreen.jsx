@@ -39,26 +39,25 @@ const STYLES = `
 .pfa .brand-panel{ position:relative; overflow:hidden; padding:36px 44px;
   background:linear-gradient(160deg,rgba(255,255,255,0.6) 0%,rgba(234,242,252,0.5) 100%);
   border-right:1px solid rgba(255,255,255,0.55); display:flex; flex-direction:column; height:100%; }
+
+/* Subtle roadmap background styling */
 .pfa .path-deco{ position:absolute; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; }
-.pfa .path-deco .path-glow{ stroke:rgba(0,102,204,0.12); }
-.pfa .path-deco .path-line{ stroke:url(#pfa-path-grad-light); }
-.pfa .path-deco .node-ring-outer{ fill:rgba(219,234,252,0.6); stroke:rgba(188,216,246,0.85); stroke-width:1.5; }
-.pfa .path-deco .node-core{ fill:#0066CC; }
-.pfa .path-deco .node-dot{ fill:#FFFFFF; }
-.pfa .path-deco .node-ring-dest-outer{ fill:rgba(219,234,252,0.8); stroke:#0066CC; stroke-width:2; }
-.pfa .path-deco .node-ring-dest-inner{ fill:rgba(0,102,204,0.2); }
-.pfa .path-deco .node-core-dest{ fill:#0066CC; }
+.pfa .path-deco .path-line{ stroke:#deecfb; stroke-width:2.5; stroke-dasharray:4 10; stroke-linecap:round; }
+.pfa .path-deco .node-ring{ fill:#dbeafc; stroke:#cfe4fa; stroke-width:1.5; }
+.pfa .path-deco .node-dest{ fill:#eaf2fc; stroke:#bcd8f6; stroke-width:2; }
+.pfa .path-deco .node-dest-inner{ fill:#bcd8f6; }
 
 .pfa .brand-inner{ position:relative; z-index:1; display:flex; flex-direction:column; justify-content:space-between; height:100%; }
-.pfa .logo-row{ display:flex; align-items:center; gap:14px; }
+.pfa .logo-row{ display:flex; align-items:center; gap:14px; margin-bottom:28px; }
 .pfa .logo-mark{ width:48px; height:48px; border-radius:14px; flex:none;
   background:linear-gradient(160deg,var(--violet-2),var(--violet)); display:grid; place-items:center;
   box-shadow:0 6px 18px rgba(0,102,204,.28); }
 .pfa .logo-name{ font-family:"Manrope",sans-serif; font-weight:800; font-size:clamp(24px,2.2vw,30px); letter-spacing:-.02em; }
-.pfa .hero{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px 8px; margin:0; }
-.pfa .hero h1{ font-family:"Manrope",sans-serif; font-weight:800; font-size:clamp(30px,3vw,40px);
-  line-height:1.2; letter-spacing:-.03em; margin:0; text-align:center; text-wrap:balance; color:var(--navy); }
-.pfa .privacy{ display:flex; align-items:center; justify-content:center; gap:10px; color:var(--slate); font-size:13px; font-weight:500; }
+.pfa .hero{ margin:0 0 24px; padding:0; }
+.pfa .hero h1{ font-family:"Manrope",sans-serif; font-weight:800; font-size:clamp(26px,2.6vw,36px);
+  line-height:1.14; letter-spacing:-.025em; margin:0 0 12px; text-wrap:balance; color:var(--navy); }
+.pfa .hero p{ font-size:14.5px; line-height:1.5; color:var(--slate); margin:0; max-width:32ch; }
+.pfa .privacy{ display:flex; align-items:center; gap:10px; color:var(--slate); font-size:13px; font-weight:500; }
 .pfa .privacy svg{ color:var(--violet); flex:none; }
 
 .pfa .form-panel{ background:rgba(255,255,255,0.55); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
@@ -201,38 +200,27 @@ html.dark .pfa .tab.active {
 html.dark .pfa .hero h1 {
   color: #F9FAFB;
 }
-html.dark .pfa .path-deco .path-glow {
-  stroke: rgba(56, 189, 248, 0.25);
-  filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.4));
+html.dark .pfa .hero p {
+  color: #94A3B8;
 }
+
+/* Subtle dark mode roadmap styling */
 html.dark .pfa .path-deco .path-line {
-  stroke: url(#pfa-path-grad-dark);
-  stroke-width: 3.2;
+  stroke: rgba(56, 189, 248, 0.16);
+  stroke-width: 2.5;
 }
-html.dark .pfa .path-deco .node-ring-outer {
-  fill: rgba(14, 165, 233, 0.18);
-  stroke: rgba(56, 189, 248, 0.6);
+html.dark .pfa .path-deco .node-ring {
+  fill: rgba(30, 41, 59, 0.6);
+  stroke: rgba(56, 189, 248, 0.28);
   stroke-width: 1.5;
 }
-html.dark .pfa .path-deco .node-core {
-  fill: #38BDF8;
-  filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.8));
-}
-html.dark .pfa .path-deco .node-dot {
-  fill: #0B0E14;
-}
-html.dark .pfa .path-deco .node-ring-dest-outer {
-  fill: rgba(56, 189, 248, 0.22);
-  stroke: #38BDF8;
+html.dark .pfa .path-deco .node-dest {
+  fill: rgba(56, 189, 248, 0.12);
+  stroke: rgba(56, 189, 248, 0.4);
   stroke-width: 2;
-  filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.6));
 }
-html.dark .pfa .path-deco .node-ring-dest-inner {
-  fill: rgba(56, 189, 248, 0.4);
-}
-html.dark .pfa .path-deco .node-core-dest {
-  fill: #38BDF8;
-  filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.9));
+html.dark .pfa .path-deco .node-dest-inner {
+  fill: rgba(56, 189, 248, 0.45);
 }
 
 @media (max-width:900px){ .pfa .app{ grid-template-columns:1fr; min-height:0; height:auto; max-height:none; } .pfa .brand-panel{ border-right:none; border-bottom:1px solid var(--divider); padding:28px 24px; min-height:220px; } .pfa .hero{ padding:16px 0; } .pfa .form-panel{ padding:28px 20px; height:auto; } }
@@ -278,7 +266,7 @@ export default function AuthScreen({ initialMode = 'signin' }) {
 
     try {
       if (isCreate) {
-        // Requirement 2 & 3: Email auth registration -> show top verification notice, redirect to Sign In with all fields empty
+        // Email auth registration -> show top verification notice, redirect to Sign In with all fields empty
         const targetEmail = email.trim()
         await signUp(targetEmail, password, fullName.trim())
 
@@ -297,7 +285,7 @@ export default function AuthScreen({ initialMode = 'signin' }) {
           message: `A verification link has been sent to ${targetEmail}. Please check your inbox (and spam folder) to verify your account, then sign in below.`,
         })
       } else {
-        // Requirement 4: If email is unverified on Sign in -> pop up error stating email is not verified
+        // If email is unverified on Sign in -> pop up error stating email is not verified
         try {
           await signIn(email.trim(), password)
         } catch (authErr) {
@@ -403,15 +391,16 @@ export default function AuthScreen({ initialMode = 'signin' }) {
         <ThemeToggle />
       </div>
 
-      {/* Top Pop-Up Notice Banner (Verification email sent / Email not verified) */}
+      {/* Top Pop-Up Notice Banner (Dead-center horizontally at the top of the webpage above the container) */}
       <AnimatePresence>
         {notice && (
           <motion.div
-            initial={{ opacity: 0, y: -24, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -16, scale: 0.96 }}
-            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className={`fixed top-4 sm:top-6 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-lg p-4 sm:p-4.5 rounded-2xl shadow-2xl border flex items-start gap-3.5 backdrop-blur-xl transition-all ${
+            initial={{ opacity: 0, y: -24, x: '-50%', scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, x: '-50%', scale: 1 }}
+            exit={{ opacity: 0, y: -16, x: '-50%', scale: 0.96 }}
+            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+            style={{ left: '50%' }}
+            className={`fixed top-4 sm:top-6 z-50 w-[92%] max-w-lg p-4 sm:p-4.5 rounded-2xl shadow-2xl border flex items-start gap-3.5 backdrop-blur-xl transition-colors ${
               notice.type === 'success'
                 ? 'bg-[#F0FDF4]/95 dark:bg-[#062414]/95 border-[#86EFAC] dark:border-[#166534] text-[#14532D] dark:text-[#BBF7D0] shadow-emerald-900/10 dark:shadow-black/40'
                 : 'bg-[#FEF2F2]/95 dark:bg-[#280B0E]/95 border-[#FECACA] dark:border-[#991B1B] text-[#7F1D1D] dark:text-[#FECDD3] shadow-rose-900/10 dark:shadow-black/40'
@@ -467,91 +456,53 @@ export default function AuthScreen({ initialMode = 'signin' }) {
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
       >
-        {/* LEFT: Redesigned Branding & Connected Milestone Path */}
+        {/* LEFT: Subtle Connected Milestone Roadmap & Clean Hero Branding */}
         <section className="brand-panel">
           <svg className="path-deco" viewBox="0 0 500 740" fill="none" preserveAspectRatio="none" aria-hidden="true">
-            <defs>
-              <linearGradient id="pfa-path-grad-light" x1="100%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#38BDF8" stopOpacity="0.85" />
-                <stop offset="50%" stopColor="#0066CC" stopOpacity="0.75" />
-                <stop offset="100%" stopColor="#0284C7" stopOpacity="0.9" />
-              </linearGradient>
-              <linearGradient id="pfa-path-grad-dark" x1="100%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#38BDF8" stopOpacity="0.95" />
-                <stop offset="50%" stopColor="#0066CC" stopOpacity="0.85" />
-                <stop offset="100%" stopColor="#6366F1" stopOpacity="0.95" />
-              </linearGradient>
-            </defs>
-
-            {/* Glowing background track */}
-            <path
-              d="M 440 60 C 470 200, 320 260, 320 380 C 320 500, 140 550, 220 670"
-              className="path-glow"
-              strokeWidth="9"
-              strokeLinecap="round"
-            />
-
-            {/* Connected Journey Line */}
+            {/* Connected subtle roadmap path line */}
             <path
               d="M 440 60 C 470 200, 320 260, 320 380 C 320 500, 140 550, 220 670"
               className="path-line"
-              strokeWidth="3.2"
-              strokeDasharray="6 8"
-              strokeLinecap="round"
             />
 
             {/* Milestone Node 1 (Start - 440, 60) */}
-            <g transform="translate(440, 60)" className="path-node">
-              <circle r="16" className="node-ring-outer" />
-              <circle r="8.5" className="node-core" />
-              <circle r="3.5" className="node-dot" />
-            </g>
+            <circle cx="440" cy="60" r="9" className="node-ring" />
 
             {/* Milestone Node 2 (391, 228) */}
-            <g transform="translate(391, 228)" className="path-node">
-              <circle r="14" className="node-ring-outer" />
-              <circle r="7.5" className="node-core" />
-              <circle r="3" className="node-dot" />
-            </g>
+            <circle cx="391" cy="228" r="8" className="node-ring" />
 
             {/* Milestone Node 3 (Mid Waypoint - 320, 380) */}
-            <g transform="translate(320, 380)" className="path-node">
-              <circle r="15" className="node-ring-outer" />
-              <circle r="8" className="node-core" />
-              <circle r="3.5" className="node-dot" />
-            </g>
+            <circle cx="320" cy="380" r="9" className="node-ring" />
 
             {/* Milestone Node 4 (240, 525) */}
-            <g transform="translate(240, 525)" className="path-node">
-              <circle r="14" className="node-ring-outer" />
-              <circle r="7.5" className="node-core" />
-              <circle r="3" className="node-dot" />
-            </g>
+            <circle cx="240" cy="525" r="8" className="node-ring" />
 
             {/* Milestone Node 5 (Destination Target - 220, 670) */}
-            <g transform="translate(220, 670)" className="path-node">
-              <circle r="20" className="node-ring-dest-outer" />
-              <circle r="12" className="node-ring-dest-inner" />
-              <circle r="6" className="node-core-dest" />
-            </g>
+            <circle cx="220" cy="670" r="14" className="node-dest" />
+            <circle cx="220" cy="670" r="6" className="node-dest-inner" />
           </svg>
 
           <div className="brand-inner">
-            <div className="logo-row">
-              <span className="logo-mark" aria-hidden="true">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="9" />
-                  <polygon points="16 8 10.5 10.5 8 16 13.5 13.5" fill="#fff" stroke="none" />
-                </svg>
-              </span>
-              <span className="logo-name">PathFinder</span>
-            </div>
+            <div>
+              <div className="logo-row">
+                <span className="logo-mark" aria-hidden="true">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="9" />
+                    <polygon points="16 8 10.5 10.5 8 16 13.5 13.5" fill="#fff" stroke="none" />
+                  </svg>
+                </span>
+                <span className="logo-name">PathFinder</span>
+              </div>
 
-            {/* Requirement 5 & 6: Center-justified title, removed extra paragraphs and journey items */}
-            <div className="hero">
-              <h1>
-                Build the path to<br />your next goal.
-              </h1>
+              {/* Requirement 2: Title and description matching 2nd image */}
+              <div className="hero">
+                <h1>
+                  Build the path to<br />your next goal.
+                </h1>
+                <p>
+                  Discover your strengths, close skill gaps, and follow a learning plan designed around you.
+                </p>
+              </div>
             </div>
 
             <div className="privacy">
