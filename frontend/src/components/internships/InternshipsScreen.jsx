@@ -444,7 +444,7 @@ export default function InternshipsScreen() {
                 Launch Your Career with<br />Curated Internships
               </h1>
               <p className="text-white/75 text-sm sm:text-base max-w-md">
-                Live openings aggregated directly from company Greenhouse job boards (Anthropic, OpenAI, Stripe, Figma, Vercel & more).
+                Live openings aggregated directly boards
               </p>
             </div>
             <div className="flex flex-col gap-2 text-sm">
@@ -473,8 +473,8 @@ export default function InternshipsScreen() {
         {/* Navigation Tabs */}
         <div className="flex border-b border-[#e0e0e0] dark:border-[#27272F]">
           {[
-            { id: 'discover', label: 'Discover Internships', count: filtered.length },
-            { id: 'mine', label: 'My Applications', count: myInternships.length },
+            { id: 'discover', label: 'Discover Internships' },
+            { id: 'mine', label: 'My Applications' },
           ].map(t => (
             <button
               key={t.id}
@@ -486,7 +486,6 @@ export default function InternshipsScreen() {
               }`}
             >
               {t.label}
-              <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-black/5 dark:bg-white/10 text-[#64748b] dark:text-slate-400">{t.count}</span>
             </button>
           ))}
         </div>

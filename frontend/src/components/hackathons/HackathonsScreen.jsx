@@ -610,7 +610,7 @@ export default function HackathonsScreen() {
                 Join the World's Best<br />Hackathons
               </h1>
               <p className="text-white/75 text-sm sm:text-base max-w-md">
-                Real-time listings from Devfolio & Devpost. Personalized to your learning path and skills.
+                Personalized to your learning path and skills.
               </p>
             </div>
             <div className="flex flex-col gap-2 text-sm">
@@ -639,8 +639,8 @@ export default function HackathonsScreen() {
         {/* Tabs */}
         <div className="flex border-b border-[#e0e0e0] dark:border-[#27272F]">
           {[
-            { id: 'discover', label: 'Discover Hackathons', count: filtered.length },
-            { id: 'mine', label: 'My Hackathons', count: myHackathons.length },
+            { id: 'discover', label: 'Discover Hackathons' },
+            { id: 'mine', label: 'My Hackathons' },
           ].map(t => (
             <button
               key={t.id}
@@ -652,7 +652,6 @@ export default function HackathonsScreen() {
               }`}
             >
               {t.label}
-              <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-black/5 dark:bg-white/10 text-[#64748b] dark:text-slate-400">{t.count}</span>
             </button>
           ))}
         </div>
