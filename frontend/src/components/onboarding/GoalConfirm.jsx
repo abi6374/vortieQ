@@ -70,7 +70,7 @@ export default function GoalConfirm({ profile, onConfirm, onEdit }) {
 
         <div className="bg-[#fbfbfc] dark:bg-[#18181D] border border-[#f0f0f0] dark:border-[#27272F] rounded-xl p-4">
           <p className="text-xs uppercase tracking-wider font-bold text-[#7a7a7a] dark:text-[#94A3B8]">Weekly Commitment</p>
-          <p className="mt-1 text-base font-bold text-[#0066cc] dark:text-[#A9D8FF]">
+          <p className="mt-1 text-base font-bold text-[#0066cc] dark:text-[#0066cc]">
             {weekly_hours ?? 8} hours per week
           </p>
         </div>
@@ -79,7 +79,7 @@ export default function GoalConfirm({ profile, onConfirm, onEdit }) {
       <div className="mt-8 flex flex-col sm:flex-row gap-3">
         <button
           onClick={onConfirm}
-          className="flex-1 bg-[#0066cc] dark:bg-[#A9D8FF] hover:bg-[#004fa3] dark:hover:bg-[#8ECAFF] text-white dark:text-black font-bold py-3.5 px-6 rounded-xl shadow-[0_4px_14px_rgba(0,102,204,0.35)] dark:shadow-[0_4px_14px_rgba(169,216,255,0.4)] transition-all cursor-pointer flex items-center justify-center gap-2"
+          className="flex-1 bg-[#0066cc] dark:bg-[#0066cc] hover:bg-[#004fa3] dark:hover:bg-[#004fa3] text-white dark:text-white font-bold py-3.5 px-6 rounded-xl shadow-[0_4px_14px_rgba(0,102,204,0.35)] dark:shadow-[0_4px_14px_rgba(0,102,204,0.4)] transition-all cursor-pointer flex items-center justify-center gap-2"
         >
           <span>✨ Generate My Learning Path</span>
         </button>

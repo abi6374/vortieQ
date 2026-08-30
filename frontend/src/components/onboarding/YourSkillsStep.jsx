@@ -125,7 +125,7 @@ export default function YourSkillsStep({
               <button
                 type="submit"
                 disabled={!newSkillInput.trim()}
-                className="px-3.5 py-2 bg-[#0066cc] dark:bg-[#A9D8FF] hover:bg-[#004fa3] dark:hover:bg-[#8ECAFF] text-white dark:text-black font-bold text-xs rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                className="px-3.5 py-2 bg-[#0066cc] dark:bg-[#0066cc] hover:bg-[#004fa3] dark:hover:bg-[#004fa3] text-white dark:text-white font-bold text-xs rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
               >
                 Add
               </button>
@@ -136,7 +136,7 @@ export default function YourSkillsStep({
           <div className="pt-5">
             {currentTopics.length === 0 ? (
               <div className="py-10 px-4 text-center rounded-xl border-2 border-dashed border-[#e6e6e6] dark:border-[#27272F] bg-[#fafbfc] dark:bg-[#0E0E12]">
-                <div className="w-12 h-12 rounded-2xl bg-[#eaf2fc] dark:bg-[#27272F] text-[#0066cc] dark:text-[#A9D8FF] grid place-items-center mx-auto mb-3">
+                <div className="w-12 h-12 rounded-2xl bg-[#eaf2fc] dark:bg-[#27272F] text-[#0066cc] dark:text-[#0066cc] grid place-items-center mx-auto mb-3">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="12" cy="12" r="10" />
                     <line x1="12" y1="8" x2="12" y2="12" />
@@ -155,7 +155,7 @@ export default function YourSkillsStep({
                 {currentTopics.map((t) => (
                   <span
                     key={t.name}
-                    className="group inline-flex items-center gap-2 rounded-xl bg-[#f0f4f9] dark:bg-[#18181D] border border-[#dce4f0] dark:border-[#27272F] text-[#1d1d1f] dark:text-[#F8FAFC] px-3.5 py-2 text-[13.5px] font-semibold shadow-xs hover:border-[#0066cc] dark:hover:border-[#A9D8FF] transition-all"
+                    className="group inline-flex items-center gap-2 rounded-xl bg-[#f0f4f9] dark:bg-[#18181D] border border-[#dce4f0] dark:border-[#27272F] text-[#1d1d1f] dark:text-[#F8FAFC] px-3.5 py-2 text-[13.5px] font-semibold shadow-xs hover:border-[#0066cc] dark:hover:border-[#0066cc] transition-all"
                   >
                     <span>{t.name}</span>
                     <button
@@ -185,7 +185,7 @@ export default function YourSkillsStep({
                     key={s}
                     type="button"
                     onClick={() => handleAddSkill(s)}
-                    className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-lg border border-[#e6e6e6] dark:border-[#27272F] bg-white dark:bg-[#18181D] text-[#494949] dark:text-[#CBD5E1] hover:border-[#0066cc] hover:text-[#0066cc] dark:hover:border-[#A9D8FF] dark:hover:text-[#A9D8FF] transition-all cursor-pointer shadow-2xs"
+                    className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-lg border border-[#e6e6e6] dark:border-[#27272F] bg-white dark:bg-[#18181D] text-[#494949] dark:text-[#CBD5E1] hover:border-[#0066cc] hover:text-[#0066cc] dark:hover:border-[#0066cc] dark:hover:text-[#0066cc] transition-all cursor-pointer shadow-2xs"
                   >
                     <span>+</span>
                     <span>{s}</span>
@@ -202,7 +202,7 @@ export default function YourSkillsStep({
         <button
           type="button"
           onClick={() => onContinue(currentTopics)}
-          className="inline-flex items-center justify-center gap-2 bg-gradient-to-b from-[#0071e3] to-[#0066cc] dark:from-[#A9D8FF] dark:to-[#A9D8FF] dark:bg-[#A9D8FF] text-white dark:text-black font-bold rounded-xl cursor-pointer transition-all shadow-[0_8px_20px_rgba(0,102,204,.30)] dark:shadow-[0_8px_20px_rgba(169,216,255,.4)]"
+          className="inline-flex items-center justify-center gap-2 bg-gradient-to-b from-[#0071e3] to-[#0066cc] dark:from-[#0066cc] dark:to-[#004fa3] dark:bg-[#0066cc] text-white dark:text-white font-bold rounded-xl cursor-pointer transition-all shadow-[0_8px_20px_rgba(0,102,204,.30)] dark:shadow-[0_8px_20px_rgba(0,102,204,.4)]"
           style={{
             minWidth: 200,
             height: 52,

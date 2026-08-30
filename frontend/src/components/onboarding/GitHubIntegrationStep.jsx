@@ -207,11 +207,11 @@ export default function GitHubIntegrationStep({
                 <button
                   type="submit"
                   disabled={loading || !username.trim()}
-                  className="px-6 py-2.5 bg-[#0066cc] dark:bg-[#A9D8FF] hover:bg-[#0052a3] dark:hover:bg-[#8ECAFF] text-white dark:text-black font-bold text-sm rounded-xl transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-xs active:scale-[0.99] flex-none min-w-[140px]"
+                  className="px-6 py-2.5 bg-[#0066cc] dark:bg-[#0066cc] hover:bg-[#0052a3] dark:hover:bg-[#004fa3] text-white dark:text-white font-bold text-sm rounded-xl transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-xs active:scale-[0.99] flex-none min-w-[140px]"
                 >
                   {loading ? (
                     <>
-                      <svg className="animate-spin h-4 w-4 text-white dark:text-black" viewBox="0 0 24 24" fill="none">
+                      <svg className="animate-spin h-4 w-4 text-white dark:text-white" viewBox="0 0 24 24" fill="none">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
                       </svg>
@@ -286,7 +286,7 @@ export default function GitHubIntegrationStep({
           <button
             type="button"
             onClick={handleProceed}
-            className="w-[160px] h-[46px] bg-[#0066cc] dark:bg-[#A9D8FF] hover:bg-[#0052a3] dark:hover:bg-[#8ECAFF] active:scale-[0.99] text-white dark:text-black font-bold rounded-xl shadow-[0_4px_14px_rgba(0,102,204,0.35)] dark:shadow-[0_4px_14px_rgba(169,216,255,0.4)] transition-all flex items-center justify-center text-[14.5px] cursor-pointer"
+            className="w-[160px] h-[46px] bg-[#0066cc] dark:bg-[#0066cc] hover:bg-[#0052a3] dark:hover:bg-[#004fa3] active:scale-[0.99] text-white dark:text-white font-bold rounded-xl shadow-[0_4px_14px_rgba(0,102,204,0.35)] dark:shadow-[0_4px_14px_rgba(0,102,204,0.4)] transition-all flex items-center justify-center text-[14.5px] cursor-pointer"
           >
             {syncedData ? 'Continue' : 'Skip & Continue'}
           </button>

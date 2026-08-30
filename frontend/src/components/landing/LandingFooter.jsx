@@ -14,8 +14,8 @@ export default function LandingFooter() {
           {/* Brand & Mission */}
           <div className="md:col-span-2 space-y-4">
             <Link to="/" className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#0066CC] to-[#004FA3] dark:from-[#A9D8FF] dark:to-[#A9D8FF] dark:bg-[#A9D8FF] flex items-center justify-center text-white dark:text-black shadow-md shadow-[#0066CC]/25 dark:shadow-[0_4px_16px_rgba(169,216,255,0.35)]">
-                <Compass className="w-5 h-5 text-white dark:text-black" />
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#0066CC] to-[#004FA3] dark:from-[#0066CC] dark:to-[#004FA3] dark:bg-[#0066CC] flex items-center justify-center text-white dark:text-white shadow-md shadow-[#0066CC]/25 dark:shadow-[0_4px_16px_rgba(0,102,204,0.35)]">
+                <Compass className="w-5 h-5 text-white dark:text-white" />
               </div>
               <span className="font-sans font-extrabold text-xl tracking-tight text-[#1D1D1F] dark:text-[#F8FAFC]">
                 PathFinder
@@ -42,22 +42,22 @@ export default function LandingFooter() {
             </h4>
             <ul className="space-y-2 text-sm text-[#7A7A7A] dark:text-[#94A3B8]">
               <li>
-                <Link to="/onboarding" className="hover:text-[#0066CC] dark:hover:text-[#A9D8FF] transition-colors">
+                <Link to="/onboarding" className="hover:text-[#0066CC] dark:hover:text-[#0066CC] transition-colors">
                   Generate Roadmap
                 </Link>
               </li>
               <li>
-                <Link to="/skills" className="hover:text-[#0066CC] dark:hover:text-[#A9D8FF] transition-colors">
+                <Link to="/skills" className="hover:text-[#0066CC] dark:hover:text-[#0066CC] transition-colors">
                   Skill Heatmap
                 </Link>
               </li>
               <li>
-                <Link to="/coach" className="hover:text-[#0066CC] dark:hover:text-[#A9D8FF] transition-colors">
+                <Link to="/coach" className="hover:text-[#0066CC] dark:hover:text-[#0066CC] transition-colors">
                   AI Career Coach
                 </Link>
               </li>
               <li>
-                <Link to="/resources" className="hover:text-[#0066CC] dark:hover:text-[#A9D8FF] transition-colors">
+                <Link to="/resources" className="hover:text-[#0066CC] dark:hover:text-[#0066CC] transition-colors">
                   Curated Catalog
                 </Link>
               </li>
@@ -85,15 +85,15 @@ export default function LandingFooter() {
             </h4>
             <ul className="space-y-2 text-sm text-[#7A7A7A] dark:text-[#94A3B8]">
               <li className="flex items-center gap-1.5">
-                <Shield className="w-3.5 h-3.5 text-[#0066CC] dark:text-[#A9D8FF]" />
+                <Shield className="w-3.5 h-3.5 text-[#0066CC] dark:text-[#0066CC]" />
                 <span>Zero-Retention Resume Parser</span>
               </li>
               <li className="flex items-center gap-1.5">
-                <Cpu className="w-3.5 h-3.5 text-[#0066CC] dark:text-[#A9D8FF]" />
+                <Cpu className="w-3.5 h-3.5 text-[#0066CC] dark:text-[#0066CC]" />
                 <span>Supabase AES-256 Encryption</span>
               </li>
               <li className="flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-[#0066CC] dark:text-[#A9D8FF]" />
+                <Sparkles className="w-3.5 h-3.5 text-[#0066CC] dark:text-[#0066CC]" />
                 <span>Deterministic Skill Gating</span>
               </li>
             </ul>
@@ -104,10 +104,10 @@ export default function LandingFooter() {
         <div className="mt-12 pt-6 border-t border-[#E0E0E0] dark:border-[#27272F] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#7A7A7A] dark:text-[#64748B]">
           <p>© {new Date().getFullYear()} PathFinder AI Inc. All rights reserved.</p>
           <div className="flex items-center gap-6">
-            <Link to="/auth" className="hover:text-[#0066CC] dark:hover:text-[#A9D8FF] transition-colors">
+            <Link to="/auth" className="hover:text-[#0066CC] dark:hover:text-[#0066CC] transition-colors">
               Sign In
             </Link>
-            <Link to="/onboarding" className="hover:text-[#0066CC] dark:hover:text-[#A9D8FF] transition-colors">
+            <Link to="/onboarding" className="hover:text-[#0066CC] dark:hover:text-[#0066CC] transition-colors">
               Get Started
             </Link>
             <span>Privacy Policy</span>

@@ -33,14 +33,14 @@
 :root.dark,
 html.dark,
 [data-theme="dark"] {
-  --violet: #A9D8FF;
-  --violet-dark: #8ECAFF;
-  --violet-focus: #A9D8FF;
+  --violet: #0066cc;
+  --violet-dark: #004fa3;
+  --violet-focus: #0071e3;
   --navy: #F8FAFC;
   --slate: #E2E8F0;
   --muted: #A1A1AA;
-  --lavender: rgba(169, 216, 255, 0.14);
-  --lav-icon: rgba(169, 216, 255, 0.22);
+  --lavender: rgba(0, 102, 204, 0.14);
+  --lav-icon: rgba(0, 102, 204, 0.22);
   --card-bd: #27272F;
   --divider: #202026;
   --bg-main: #09090B;
@@ -48,8 +48,8 @@ html.dark,
   --pearl: #18181D;
   --silver: #C9D0D6;
   --silver-dark: #8B949E;
-  --clear-sky: #A9D8FF;
-  --clear-sky-hover: #8ECAFF;
+  --clear-sky: #0066cc;
+  --clear-sky-hover: #004fa3;
   --green: #34D399;
   --green-surface: rgba(52, 211, 153, 0.16);
   --amber: #FBBF24;
@@ -810,33 +810,33 @@ html.dark .pfchat-in textarea::placeholder,
 }
 html.dark .pfchat-send,
 [data-theme="dark"] .pfchat-send {
-  background-color: #A9D8FF !important;
-  color: #000000 !important;
+  background-color: #0066cc !important;
+  color: #ffffff !important;
   font-weight: bold !important;
 }
 html.dark .pfchat-send:hover:not(:disabled),
 [data-theme="dark"] .pfchat-send:hover:not(:disabled) {
-  background-color: #8ECAFF !important;
-  color: #000000 !important;
+  background-color: #004fa3 !important;
+  color: #ffffff !important;
 }
 html.dark .pfchat-send svg,
 [data-theme="dark"] .pfchat-send svg {
-  color: #000000 !important;
-  stroke: #000000 !important;
+  color: #ffffff !important;
+  stroke: #ffffff !important;
 }
 html.dark .pfchat-ctx,
 [data-theme="dark"] .pfchat-ctx {
   color: #A1A1AA !important;
 }
 
-/* 9. Global Clear Sky (#A9D8FF) Buttons & Logos in Dark Mode */
+/* 9. Global Action Blue (#0066cc) Buttons & Logos in Dark Mode */
 html.dark .btn-primary,
 html.dark button.btn-primary,
 html.dark a.btn-primary,
 html.dark .pf-btn-primary,
 html.dark .bg-primary-btn {
-  background-color: #A9D8FF !important;
-  color: #000000 !important;
+  background-color: #0066cc !important;
+  color: #ffffff !important;
   font-weight: 700 !important;
 }
 html.dark .btn-primary:hover,
@@ -844,32 +844,32 @@ html.dark button.btn-primary:hover,
 html.dark a.btn-primary:hover,
 html.dark .pf-btn-primary:hover,
 html.dark .bg-primary-btn:hover {
-  background-color: #8ECAFF !important;
-  color: #000000 !important;
+  background-color: #004fa3 !important;
+  color: #ffffff !important;
 }
 html.dark .btn-primary svg,
 html.dark button.btn-primary svg,
 html.dark a.btn-primary svg,
 html.dark .pf-btn-primary svg,
 html.dark .bg-primary-btn svg {
-  stroke: #000000 !important;
-  color: #000000 !important;
+  stroke: #ffffff !important;
+  color: #ffffff !important;
 }
 
-/* Logo icon containers in Dark Mode (Clear Sky #A9D8FF with black icon) */
+/* Logo icon containers in Dark Mode (Action Blue #0066cc with white icon) */
 html.dark .pf-logo-box,
 html.dark [data-pf-logo] {
-  background: #A9D8FF !important;
-  background-color: #A9D8FF !important;
+  background: #0066cc !important;
+  background-color: #0066cc !important;
 }
 html.dark .pf-logo-box svg,
 html.dark [data-pf-logo] svg {
-  stroke: #000000 !important;
-  color: #000000 !important;
+  stroke: #ffffff !important;
+  color: #ffffff !important;
 }
 html.dark .pf-logo-box polygon,
 html.dark [data-pf-logo] polygon {
-  fill: #000000 !important;
+  fill: #ffffff !important;
 }
 
 /* 9. Recharts SVG Charts & Data Visuals in Dark Mode */

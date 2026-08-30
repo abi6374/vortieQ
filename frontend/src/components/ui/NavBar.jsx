@@ -16,7 +16,7 @@ export default function NavBar({ children }) {
             className="flex items-center gap-2.5 group focus:outline-none cursor-pointer"
             aria-label="PathFinder Home"
           >
-            <span className="w-9 h-9 rounded-xl bg-[#dbeafc] dark:bg-[#A9D8FF] text-[#0066cc] dark:text-black flex items-center justify-center shadow-sm group-hover:bg-[#0066cc] group-hover:text-white dark:group-hover:bg-[#8ECAFF] dark:group-hover:text-black transition-all">
+            <span className="w-9 h-9 rounded-xl bg-[#dbeafc] dark:bg-[#0066cc] text-[#0066cc] dark:text-white flex items-center justify-center shadow-sm group-hover:bg-[#0066cc] group-hover:text-white dark:group-hover:bg-[#0052A3] dark:group-hover:text-white transition-all">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10" />
                 <polygon points="16.2 7.8 10.5 10.5 7.8 16.2 13.5 13.5" fill="currentColor" stroke="none" />
@@ -33,7 +33,7 @@ export default function NavBar({ children }) {
               to="/dashboard"
               className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
                 location.pathname === '/dashboard' || location.pathname === '/workspace'
-                  ? 'bg-[#eaf2fc] dark:bg-[#A9D8FF]/20 text-[#0066cc] dark:text-[#A9D8FF]'
+                  ? 'bg-[#eaf2fc] dark:bg-[#0066cc]/20 text-[#0066cc] dark:text-[#0066cc]'
                   : 'text-[#333333] dark:text-[#CBD5E1] hover:text-[#1d1d1f] dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5'
               }`}
             >
@@ -43,7 +43,7 @@ export default function NavBar({ children }) {
               to="/skills"
               className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
                 location.pathname === '/skills'
-                  ? 'bg-[#eaf2fc] dark:bg-[#A9D8FF]/20 text-[#0066cc] dark:text-[#A9D8FF]'
+                  ? 'bg-[#eaf2fc] dark:bg-[#0066cc]/20 text-[#0066cc] dark:text-[#0066cc]'
                   : 'text-[#333333] dark:text-[#CBD5E1] hover:text-[#1d1d1f] dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5'
               }`}
             >
@@ -53,7 +53,7 @@ export default function NavBar({ children }) {
               to="/progress"
               className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
                 location.pathname === '/progress'
-                  ? 'bg-[#eaf2fc] dark:bg-[#A9D8FF]/20 text-[#0066cc] dark:text-[#A9D8FF]'
+                  ? 'bg-[#eaf2fc] dark:bg-[#0066cc]/20 text-[#0066cc] dark:text-[#0066cc]'
                   : 'text-[#333333] dark:text-[#CBD5E1] hover:text-[#1d1d1f] dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5'
               }`}
             >

@@ -118,7 +118,7 @@ function Tooltip({ label, badge, visible }) {
             />
             <span>{label}</span>
             {badge && (
-              <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-[#0066cc] dark:bg-[#A9D8FF] text-white dark:text-black">
+              <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-[#0066cc] dark:bg-[#0066cc] text-white dark:text-white">
                 {badge}
               </span>
             )}
@@ -149,7 +149,7 @@ function CollapsedNavItem({ item, isActive, onClick }) {
         {isActive ? (
           <motion.span
             layoutId="sidebar-active-pill-collapsed"
-            className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#0066cc] to-[#004fa3] dark:from-[#A9D8FF] dark:to-[#A9D8FF] shadow-[0_4px_16px_rgba(0,102,204,0.42)] dark:shadow-[0_4px_16px_rgba(169,216,255,0.4)]"
+            className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#0066cc] to-[#004fa3] dark:from-[#0066cc] dark:to-[#004fa3] shadow-[0_4px_16px_rgba(0,102,204,0.42)] dark:shadow-[0_4px_16px_rgba(0,102,204,0.4)]"
             transition={{ type: 'spring', stiffness: 420, damping: 32 }}
           />
         ) : (
@@ -160,8 +160,8 @@ function CollapsedNavItem({ item, isActive, onClick }) {
         <span
           className={`relative z-10 transition-all duration-150 flex items-center justify-center ${
             isActive
-              ? 'text-white dark:text-black scale-[1.06]'
-              : 'text-[#7a7a7a] hover:text-[#0066cc] dark:hover:text-[#A9D8FF]'
+              ? 'text-white dark:text-white scale-[1.06]'
+              : 'text-[#7a7a7a] hover:text-[#0066cc] dark:hover:text-[#0066cc]'
           }`}
         >
           {React.cloneElement(ICONS[item.key], {
@@ -171,7 +171,7 @@ function CollapsedNavItem({ item, isActive, onClick }) {
 
         {/* Micro badge dot for Beta */}
         {item.badge && !isActive && (
-          <span className="absolute top-2.5 right-2.5 w-1.5 h-1.5 rounded-full bg-[#0066cc] dark:bg-[#A9D8FF]" />
+          <span className="absolute top-2.5 right-2.5 w-1.5 h-1.5 rounded-full bg-[#0066cc] dark:bg-[#0066cc]" />
         )}
       </button>
 
@@ -192,7 +192,7 @@ function ExpandedNavItem({ item, isActive, onClick }) {
       aria-current={isActive ? 'page' : undefined}
       className={`relative w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition-all duration-150 cursor-pointer border-none outline-none text-left ${
         isActive
-          ? 'text-white dark:text-black font-bold'
+          ? 'text-white dark:text-white font-bold'
           : 'text-[#333333] dark:text-[#E2E8F0] hover:bg-black/[0.04] dark:hover:bg-white/[0.06]'
       }`}
     >
@@ -200,7 +200,7 @@ function ExpandedNavItem({ item, isActive, onClick }) {
       {isActive && (
         <motion.span
           layoutId="sidebar-active-pill-expanded"
-          className="absolute inset-0 rounded-2xl z-0 bg-gradient-to-br from-[#0066cc] to-[#004fa3] dark:from-[#A9D8FF] dark:to-[#A9D8FF] shadow-[0_4px_16px_rgba(0,102,204,0.38)] dark:shadow-[0_4px_16px_rgba(169,216,255,0.4)]"
+          className="absolute inset-0 rounded-2xl z-0 bg-gradient-to-br from-[#0066cc] to-[#004fa3] dark:from-[#0066cc] dark:to-[#004fa3] shadow-[0_4px_16px_rgba(0,102,204,0.38)] dark:shadow-[0_4px_16px_rgba(0,102,204,0.4)]"
           transition={{ type: 'spring', stiffness: 420, damping: 32 }}
         />
       )}
@@ -208,7 +208,7 @@ function ExpandedNavItem({ item, isActive, onClick }) {
       {/* Icon */}
       <span
         className={`relative z-10 flex-none flex items-center justify-center ${
-          isActive ? 'text-white dark:text-black' : 'text-[#7a7a7a] dark:text-[#A1A1AA]'
+          isActive ? 'text-white dark:text-white' : 'text-[#7a7a7a] dark:text-[#A1A1AA]'
         }`}
       >
         {React.cloneElement(ICONS[item.key], {
@@ -226,8 +226,8 @@ function ExpandedNavItem({ item, isActive, onClick }) {
         <span
           className={`relative z-10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md ${
             isActive
-              ? 'bg-white/20 text-white dark:bg-black/20 dark:text-black'
-              : 'bg-[#0066cc]/10 dark:bg-[#A9D8FF]/20 text-[#0066cc] dark:text-[#A9D8FF]'
+              ? 'bg-white/20 text-white dark:bg-white/20 dark:text-white'
+              : 'bg-[#0066cc]/10 dark:bg-[#0066cc]/20 text-[#0066cc] dark:text-[#0066cc]'
           }`}
         >
           {item.badge}
@@ -250,7 +250,7 @@ function ToggleSidebarButton({ isExpanded, onClick }) {
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         aria-label={isExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
-        className="w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-150 cursor-pointer border-none outline-none text-[#7a7a7a] hover:text-[#0066cc] dark:hover:text-[#A9D8FF] hover:bg-[#0066cc]/10 dark:hover:bg-[#A9D8FF]/10"
+        className="w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-150 cursor-pointer border-none outline-none text-[#7a7a7a] hover:text-[#0066cc] dark:hover:text-[#0066cc] hover:bg-[#0066cc]/10 dark:hover:bg-[#0066cc]/10"
       >
         <SidebarIcon className="w-5 h-5" />
       </button>

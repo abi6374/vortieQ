@@ -369,7 +369,7 @@ html.dark .gc {
   --input-bd: #27272F;
   --divider: #27272F;
   --track: #202026;
-  --range-fill: #A9D8FF;
+  --range-fill: #0066cc;
   --green-surface: rgba(6, 78, 59, 0.3);
   --green-bd: rgba(52, 211, 153, 0.3);
   --green-text: #34D399;
@@ -398,8 +398,8 @@ html.dark .gc .cinput {
   border-color: #27272F;
 }
 html.dark .gc .cinput:focus-within {
-  border-color: #A9D8FF;
-  box-shadow: 0 0 0 3px rgba(169, 216, 255, 0.22);
+  border-color: #0066cc;
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.22);
 }
 html.dark .gc .cinput svg {
   color: #94A3B8;
@@ -423,87 +423,87 @@ html.dark .gc .cinput input[type=month]::-webkit-calendar-picker-indicator {
 html.dark .gc .role.sel,
 html.dark .gc .role-custom.sel {
   background: #18181D;
-  border-color: #A9D8FF !important;
+  border-color: #0066cc !important;
 }
 html.dark .gc .role.sel .role-ic {
-  background: #A9D8FF;
-  color: #000000;
+  background: #0066cc;
+  color: #ffffff;
 }
 html.dark .gc .role-check {
-  background: #A9D8FF !important;
-  color: #000000 !important;
+  background: #0066cc !important;
+  color: #ffffff !important;
 }
 html.dark .gc .role.sel .role-name {
-  color: #A9D8FF !important;
+  color: #0066cc !important;
 }
 html.dark .gc .role-suggested {
-  color: #A9D8FF !important;
+  color: #0066cc !important;
 }
 html.dark .gc .step-badge {
-  color: #A9D8FF !important;
-  background: rgba(169, 216, 255, 0.12) !important;
-  border-color: rgba(169, 216, 255, 0.25) !important;
+  color: #0066cc !important;
+  background: rgba(0, 102, 204, 0.12) !important;
+  border-color: rgba(0, 102, 204, 0.25) !important;
 }
 html.dark .gc .head-icon {
-  background: rgba(169, 216, 255, 0.18) !important;
-  color: #A9D8FF !important;
+  background: rgba(0, 102, 204, 0.18) !important;
+  color: #0066cc !important;
 }
 html.dark .gc .time-val b {
-  color: #A9D8FF;
+  color: #0066cc;
 }
 html.dark .gc input[type=range] {
   background: var(--track);
   border: 1px solid #27272F;
 }
 html.dark .gc input[type=range]::-webkit-slider-thumb {
-  background: #A9D8FF;
+  background: #0066cc;
   border: 3.5px solid #121216;
-  box-shadow: 0 0 14px rgba(169, 216, 255, 0.7);
+  box-shadow: 0 0 14px rgba(0, 102, 204, 0.7);
 }
 html.dark .gc input[type=range]::-moz-range-thumb {
-  background: #A9D8FF;
+  background: #0066cc;
   border: 3.5px solid #121216;
-  box-shadow: 0 0 14px rgba(169, 216, 255, 0.7);
+  box-shadow: 0 0 14px rgba(0, 102, 204, 0.7);
 }
 html.dark .gc .big {
-  color: #A9D8FF;
+  color: #0066cc;
 }
 html.dark .gc .meter {
   background: linear-gradient(165deg, #121216, #18181D 60%, #0E0E12);
   border-color: #27272F;
 }
 html.dark .gc .bar-fill {
-  background: linear-gradient(90deg, #A9D8FF, #8ECAFF) !important;
+  background: linear-gradient(90deg, #0066cc, #004fa3) !important;
 }
 html.dark .gc .callout {
   background: #18181D;
   border-color: #27272F;
 }
 html.dark .gc .callout .ci {
-  background: rgba(169, 216, 255, 0.18);
-  color: #A9D8FF;
+  background: rgba(0, 102, 204, 0.18);
+  color: #0066cc;
 }
 html.dark .gc .pstep .pic {
   background: #27272F;
   color: #CBD5E1;
 }
 html.dark .gc .pstep.first .pic {
-  background: rgba(169, 216, 255, 0.18);
-  color: #A9D8FF;
+  background: rgba(0, 102, 204, 0.18);
+  color: #0066cc;
 }
 html.dark .gc .btn-plan {
-  background: #A9D8FF !important;
-  color: #000000 !important;
+  background: #0066cc !important;
+  color: #ffffff !important;
   font-weight: 700 !important;
-  box-shadow: 0 8px 20px rgba(169, 216, 255, 0.4) !important;
+  box-shadow: 0 8px 20px rgba(0, 102, 204, 0.4) !important;
 }
 html.dark .gc .btn-plan:hover {
-  background: #8ECAFF !important;
-  color: #000000 !important;
+  background: #004fa3 !important;
+  color: #ffffff !important;
 }
 html.dark .gc .btn-plan svg {
-  stroke: #000000 !important;
-  color: #000000 !important;
+  stroke: #ffffff !important;
+  color: #ffffff !important;
 }
 
 @media (max-width:1000px){ .gc .cols{ grid-template-columns:1fr; } .gc .preview-top{ flex-direction:column; align-items:stretch; } .gc .btn-plan{ width:100%; } }

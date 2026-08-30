@@ -134,7 +134,7 @@ export default function LandingPage() {
           Architect your custom week roadmap to become an{' '}
           <DecryptedText
             words={['AI / LLM Engineer', 'Full-Stack Architect', 'MLOps Lead', 'Cloud Specialist']}
-            className="text-[#0066CC] dark:text-[#A9D8FF] underline decoration-[#0066CC]/40 dark:decoration-[#A9D8FF]/40"
+            className="text-[#0066CC] dark:text-[#0066CC] underline decoration-[#0066CC]/40 dark:decoration-[#0066CC]/40"
           />
           . Real-time path adaptation grounded in your verified GitHub code and resume.
         </p>
@@ -144,8 +144,8 @@ export default function LandingPage() {
           <SpecularButton
             size="lg"
             radius={16}
-            lineColor={isDark ? '#A9D8FF' : '#000000'}
-            baseColor={isDark ? '#18181D' : '#000000'}
+            lineColor={isDark ? '#0066CC' : '#000000'}
+            baseColor={isDark ? '#0066CC' : '#000000'}
             intensity={1.25}
             thickness={1.5}
             shineSize={12}
@@ -154,17 +154,17 @@ export default function LandingPage() {
             followMouse
             proximity={250}
             onClick={handleStartRoadmap}
-            className="w-full sm:w-auto px-8 py-4 !bg-gradient-to-r !from-[#0066CC] !to-[#004FA3] dark:!from-[#A9D8FF] dark:!to-[#A9D8FF] dark:!bg-[#A9D8FF] hover:!from-[#0052A3] hover:!to-[#003D80] dark:hover:!from-[#8ECAFF] dark:hover:!to-[#8ECAFF] !text-white dark:!text-black font-bold text-base sm:text-lg shadow-xl shadow-[#0066CC]/30 dark:shadow-[0_8px_24px_rgba(169,216,255,0.4)] hover:shadow-2xl transition-all flex items-center justify-center gap-3 group cursor-pointer"
+            className="w-full sm:w-auto px-8 py-4 !bg-gradient-to-r !from-[#0066CC] !to-[#004FA3] dark:!from-[#0066CC] dark:!to-[#004FA3] dark:!bg-[#0066CC] hover:!from-[#0052A3] hover:!to-[#003D80] dark:hover:!from-[#0052A3] dark:hover:!to-[#003D80] !text-white dark:!text-white font-bold text-base sm:text-lg shadow-xl shadow-[#0066CC]/30 dark:shadow-[0_8px_24px_rgba(0,102,204,0.4)] hover:shadow-2xl transition-all flex items-center justify-center gap-3 group cursor-pointer"
           >
-            <Sparkles className="w-5 h-5 group-hover:rotate-12 transition-transform dark:text-black" />
+            <Sparkles className="w-5 h-5 group-hover:rotate-12 transition-transform text-white dark:text-white" />
             <span>Generate Your Learning Path</span>
-            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform dark:text-black" />
+            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform text-white dark:text-white" />
           </SpecularButton>
 
           <SpecularButton
             size="lg"
             radius={16}
-            lineColor={isDark ? '#A9D8FF' : '#000000'}
+            lineColor={isDark ? '#0066CC' : '#000000'}
             baseColor={isDark ? '#121216' : '#000000'}
             intensity={1.25}
             thickness={1.5}
@@ -174,10 +174,10 @@ export default function LandingPage() {
             followMouse
             proximity={250}
             onClick={scrollToDemo}
-            className="w-full sm:w-auto px-7 py-4 border border-[#D0D0D0] dark:border-[#27272F] !bg-white/70 dark:!bg-[#121216]/75 hover:!bg-white dark:hover:!bg-[#18181D] !text-[#1D1D1F] dark:!text-[#F1F5F9] font-bold text-base backdrop-blur-md shadow-xs hover:border-[#0066CC] dark:hover:border-[#A9D8FF] transition-all flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full sm:w-auto px-7 py-4 border border-[#D0D0D0] dark:border-[#27272F] !bg-white/70 dark:!bg-[#121216]/75 hover:!bg-white dark:hover:!bg-[#18181D] !text-[#1D1D1F] dark:!text-[#F1F5F9] font-bold text-base backdrop-blur-md shadow-xs hover:border-[#0066CC] dark:hover:border-[#0066CC] transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
             <span>Explore Interactive Demo</span>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-[#EAF2FC] dark:bg-[#A9D8FF]/15 text-[#0066CC] dark:text-[#A9D8FF] font-mono border border-transparent dark:border-[#A9D8FF]/30">
+            <span className="text-xs px-2 py-0.5 rounded-full bg-[#EAF2FC] dark:bg-[#0066CC]/15 text-[#0066CC] dark:text-[#0066CC] font-mono border border-transparent dark:border-[#0066CC]/30">
               60s
             </span>
           </SpecularButton>
@@ -186,15 +186,15 @@ export default function LandingPage() {
         {/* Feature Checkpoints */}
         <div className="mt-12 flex flex-wrap items-center justify-center gap-6 text-xs sm:text-sm font-semibold text-[#666666] dark:text-[#94A3B8]">
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-[#0066CC] dark:text-[#A9D8FF]" />
+            <CheckCircle2 className="w-4 h-4 text-[#0066CC] dark:text-[#0066CC]" />
             <span>Deterministic Skill Gating</span>
           </div>
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-[#0066CC] dark:text-[#A9D8FF]" />
+            <CheckCircle2 className="w-4 h-4 text-[#0066CC] dark:text-[#0066CC]" />
             <span>Public GitHub Repos Grounding</span>
           </div>
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-[#0066CC] dark:text-[#A9D8FF]" />
+            <CheckCircle2 className="w-4 h-4 text-[#0066CC] dark:text-[#0066CC]" />
             <span>Integrated 24/7 AI Coach</span>
           </div>
         </div>
@@ -229,10 +229,10 @@ export default function LandingPage() {
           {/* Pillar 1 */}
           <SpotlightCard className="p-8 flex flex-col justify-between">
             <div>
-              <div className="w-12 h-12 rounded-2xl bg-[#EAF2FC] dark:bg-[#18181D] text-[#0066CC] dark:text-[#A9D8FF] flex items-center justify-center mb-6 shadow-xs border border-transparent dark:border-[rgba(169,216,255,0.15)]">
+              <div className="w-12 h-12 rounded-2xl bg-[#EAF2FC] dark:bg-[#18181D] text-[#0066CC] dark:text-[#0066CC] flex items-center justify-center mb-6 shadow-xs border border-transparent dark:border-[rgba(0,102,204,0.15)]">
                 <FileText className="w-6 h-6" />
               </div>
-              <div className="font-mono text-xs font-bold text-[#0066CC] dark:text-[#A9D8FF] uppercase tracking-wider mb-1">
+              <div className="font-mono text-xs font-bold text-[#0066CC] dark:text-[#0066CC] uppercase tracking-wider mb-1">
                 PILLAR 01
               </div>
               <h3 className="font-sans text-2xl font-bold text-[#1D1D1F] dark:text-[#F8FAFC] mb-3">
@@ -242,7 +242,7 @@ export default function LandingPage() {
                 Upload your resume or connect your GitHub handle. PathFinder extracts your verified languages, frameworks, and project seniority so you never waste time on topics you already know.
               </p>
             </div>
-            <div className="mt-8 pt-6 border-t border-[#F0F0F0] dark:border-[#27272F] flex items-center gap-2 text-xs font-bold text-[#0066CC] dark:text-[#A9D8FF]">
+            <div className="mt-8 pt-6 border-t border-[#F0F0F0] dark:border-[#27272F] flex items-center gap-2 text-xs font-bold text-[#0066CC] dark:text-[#0066CC]">
               <span>Zero boilerplate re-learning</span>
               <ChevronRight className="w-4 h-4" />
             </div>
@@ -251,10 +251,10 @@ export default function LandingPage() {
           {/* Pillar 2 */}
           <SpotlightCard className="p-8 flex flex-col justify-between">
             <div>
-              <div className="w-12 h-12 rounded-2xl bg-[#EAF2FC] dark:bg-[#18181D] text-[#0066CC] dark:text-[#A9D8FF] flex items-center justify-center mb-6 shadow-xs border border-transparent dark:border-[rgba(169,216,255,0.15)]">
+              <div className="w-12 h-12 rounded-2xl bg-[#EAF2FC] dark:bg-[#18181D] text-[#0066CC] dark:text-[#0066CC] flex items-center justify-center mb-6 shadow-xs border border-transparent dark:border-[rgba(0,102,204,0.15)]">
                 <Layers className="w-6 h-6" />
               </div>
-              <div className="font-mono text-xs font-bold text-[#0066CC] dark:text-[#A9D8FF] uppercase tracking-wider mb-1">
+              <div className="font-mono text-xs font-bold text-[#0066CC] dark:text-[#0066CC] uppercase tracking-wider mb-1">
                 PILLAR 02
               </div>
               <h3 className="font-sans text-2xl font-bold text-[#1D1D1F] dark:text-[#F8FAFC] mb-3">
@@ -264,7 +264,7 @@ export default function LandingPage() {
                 Every milestone has deterministic prerequisite dependencies. If you breeze through a week or hit a blocker, the learning graph recalibrates subsequent tasks automatically.
               </p>
             </div>
-            <div className="mt-8 pt-6 border-t border-[#F0F0F0] dark:border-[#27272F] flex items-center gap-2 text-xs font-bold text-[#0066CC] dark:text-[#A9D8FF]">
+            <div className="mt-8 pt-6 border-t border-[#F0F0F0] dark:border-[#27272F] flex items-center gap-2 text-xs font-bold text-[#0066CC] dark:text-[#0066CC]">
               <span>Dynamic prerequisite recalibration</span>
               <ChevronRight className="w-4 h-4" />
             </div>
@@ -273,10 +273,10 @@ export default function LandingPage() {
           {/* Pillar 3 */}
           <SpotlightCard className="p-8 flex flex-col justify-between">
             <div>
-              <div className="w-12 h-12 rounded-2xl bg-[#EAF2FC] dark:bg-[#18181D] text-[#0066CC] dark:text-[#A9D8FF] flex items-center justify-center mb-6 shadow-xs border border-transparent dark:border-[rgba(169,216,255,0.15)]">
+              <div className="w-12 h-12 rounded-2xl bg-[#EAF2FC] dark:bg-[#18181D] text-[#0066CC] dark:text-[#0066CC] flex items-center justify-center mb-6 shadow-xs border border-transparent dark:border-[rgba(0,102,204,0.15)]">
                 <BarChart3 className="w-6 h-6" />
               </div>
-              <div className="font-mono text-xs font-bold text-[#0066CC] dark:text-[#A9D8FF] uppercase tracking-wider mb-1">
+              <div className="font-mono text-xs font-bold text-[#0066CC] dark:text-[#0066CC] uppercase tracking-wider mb-1">
                 PILLAR 03
               </div>
               <h3 className="font-sans text-2xl font-bold text-[#1D1D1F] dark:text-[#F8FAFC] mb-3">
@@ -286,7 +286,7 @@ export default function LandingPage() {
                 Visualize exactly where you stand against industry job requirements. Color-coded competency heatmaps show your progression from Foundational to Production-Ready mastery.
               </p>
             </div>
-            <div className="mt-8 pt-6 border-t border-[#F0F0F0] dark:border-[#27272F] flex items-center gap-2 text-xs font-bold text-[#0066CC] dark:text-[#A9D8FF]">
+            <div className="mt-8 pt-6 border-t border-[#F0F0F0] dark:border-[#27272F] flex items-center gap-2 text-xs font-bold text-[#0066CC] dark:text-[#0066CC]">
               <span>Target role calibration</span>
               <ChevronRight className="w-4 h-4" />
             </div>
@@ -295,10 +295,10 @@ export default function LandingPage() {
           {/* Pillar 4 */}
           <SpotlightCard className="p-8 flex flex-col justify-between">
             <div>
-              <div className="w-12 h-12 rounded-2xl bg-[#EAF2FC] dark:bg-[#18181D] text-[#0066CC] dark:text-[#A9D8FF] flex items-center justify-center mb-6 shadow-xs border border-transparent dark:border-[rgba(169,216,255,0.15)]">
+              <div className="w-12 h-12 rounded-2xl bg-[#EAF2FC] dark:bg-[#18181D] text-[#0066CC] dark:text-[#0066CC] flex items-center justify-center mb-6 shadow-xs border border-transparent dark:border-[rgba(0,102,204,0.15)]">
                 <Bot className="w-6 h-6" />
               </div>
-              <div className="font-mono text-xs font-bold text-[#0066CC] dark:text-[#A9D8FF] uppercase tracking-wider mb-1">
+              <div className="font-mono text-xs font-bold text-[#0066CC] dark:text-[#0066CC] uppercase tracking-wider mb-1">
                 PILLAR 04
               </div>
               <h3 className="font-sans text-2xl font-bold text-[#1D1D1F] dark:text-[#F8FAFC] mb-3">
@@ -308,7 +308,7 @@ export default function LandingPage() {
                 Never get stuck alone on an obscure error. The AI Coach knows your exact roadmap context, the current milestone you’re tackling, and guides you with interactive hints, code reviews, and explanations.
               </p>
             </div>
-            <div className="mt-8 pt-6 border-t border-[#F0F0F0] dark:border-[#27272F] flex items-center gap-2 text-xs font-bold text-[#0066CC] dark:text-[#A9D8FF]">
+            <div className="mt-8 pt-6 border-t border-[#F0F0F0] dark:border-[#27272F] flex items-center gap-2 text-xs font-bold text-[#0066CC] dark:text-[#0066CC]">
               <span>24/7 Milestone tutoring</span>
               <ChevronRight className="w-4 h-4" />
             </div>
@@ -374,7 +374,7 @@ export default function LandingPage() {
 
       {/* 10. FINAL LAUNCH CTA BANNER */}
       <section className="relative py-24 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto z-10">
-        <div className="relative rounded-3xl p-10 sm:p-14 border border-[#0066CC]/30 dark:border-[rgba(169,216,255,0.25)] bg-gradient-to-br from-[#EAF2FC]/90 via-white/85 to-[#DBEAFC]/90 dark:from-[#121216]/90 dark:via-[#18181D]/85 dark:to-[#0E0E12]/90 backdrop-blur-lg shadow-2xl overflow-hidden text-center will-change-transform">
+        <div className="relative rounded-3xl p-10 sm:p-14 border border-[#0066CC]/30 dark:border-[rgba(0,102,204,0.25)] bg-gradient-to-br from-[#EAF2FC]/90 via-white/85 to-[#DBEAFC]/90 dark:from-[#121216]/90 dark:via-[#18181D]/85 dark:to-[#0E0E12]/90 backdrop-blur-lg shadow-2xl overflow-hidden text-center will-change-transform">
           <div className="font-shadow text-2xl sm:text-3xl text-[#0066CC] dark:text-[#0066CC] font-bold mb-3">
             Start Your Transformation Today
           </div>
@@ -389,8 +389,8 @@ export default function LandingPage() {
             <SpecularButton
               size="lg"
               radius={16}
-              lineColor={isDark ? '#A9D8FF' : '#000000'}
-              baseColor={isDark ? '#18181D' : '#000000'}
+              lineColor={isDark ? '#0066CC' : '#000000'}
+              baseColor={isDark ? '#0066CC' : '#000000'}
               intensity={1.25}
               thickness={1.5}
               shineSize={12}
@@ -399,11 +399,11 @@ export default function LandingPage() {
               followMouse
               proximity={250}
               onClick={handleStartRoadmap}
-              className="w-full sm:w-auto px-9 py-4 !bg-gradient-to-r !from-[#0066CC] !to-[#004FA3] dark:!from-[#A9D8FF] dark:!to-[#A9D8FF] dark:!bg-[#A9D8FF] hover:!from-[#0052A3] hover:!to-[#003D80] dark:hover:!from-[#8ECAFF] dark:hover:!to-[#8ECAFF] !text-white dark:!text-black font-bold text-lg shadow-xl shadow-[#0066CC]/35 dark:shadow-[0_8px_24px_rgba(169,216,255,0.4)] hover:shadow-2xl transition-all flex items-center justify-center gap-3 group cursor-pointer"
+              className="w-full sm:w-auto px-9 py-4 !bg-gradient-to-r !from-[#0066CC] !to-[#004FA3] dark:!from-[#0066CC] dark:!to-[#004FA3] dark:!bg-[#0066CC] hover:!from-[#0052A3] hover:!to-[#003D80] dark:hover:!from-[#0052A3] dark:hover:!to-[#003D80] !text-white dark:!text-white font-bold text-lg shadow-xl shadow-[#0066CC]/35 dark:shadow-[0_8px_24px_rgba(0,102,204,0.4)] hover:shadow-2xl transition-all flex items-center justify-center gap-3 group cursor-pointer"
             >
-              <Sparkles className="w-5 h-5 group-hover:rotate-12 transition-transform dark:text-black" />
+              <Sparkles className="w-5 h-5 group-hover:rotate-12 transition-transform text-white dark:text-white" />
               <span>Generate My Free Roadmap</span>
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform dark:text-black" />
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform text-white dark:text-white" />
             </SpecularButton>
           </div>
         </div>
