@@ -48,6 +48,46 @@ _BLOCKED_BARE_DOMAINS = {
     "yahoo.com", "www.yahoo.com",
 }
 
+# Same search-engine hosts, but this time to catch a SEARCH-RESULTS PAGE
+# specifically (not just the bare homepage) - "google.com/search?q=X
+# tutorial" is not a course any more than the bare homepage is, but it has
+# a non-empty path so _BLOCKED_BARE_DOMAINS's `not parsed.path.strip("/")`
+# check never caught it. Real production incident this fixes: a seed-era
+# `courses` row (source='seed', never independently verified - seed data
+# predates this whole validation module) had resource_url literally
+# "https://www.google.com/search?q=NumPy+and+Pandas+Essentials+DataCamp+
+# course" and was being recommended to real learners via generate_path()
+# - swap/rerecommend already validated every NEW resource through this
+# module, but nothing had ever gone back and checked the ORIGINAL seed
+# rows generate_path()'s recommender pulls from against the same rule.
+_SEARCH_ENGINE_DOMAINS = _BLOCKED_BARE_DOMAINS | {
+    "baidu.com", "www.baidu.com", "yandex.com", "www.yandex.com",
+    "search.yahoo.com", "www.ecosia.org", "ecosia.org",
+}
+_SEARCH_RESULT_PATH_SEGMENTS = ("/search", "/webhp")
+_SEARCH_RESULT_QUERY_PARAMS = ("q", "query", "p", "text")
+
+
+def is_search_results_url(url: str) -> bool:
+    """True for a search-ENGINE'S OWN results page (not a course/tutorial
+    hosted on some other site that merely mentions search) - a search-
+    engine host combined with either a /search-shaped path or a real
+    search-query parameter (q=/query=/p=/text=)."""
+    if not url:
+        return False
+    try:
+        parsed = urlparse(url)
+    except ValueError:
+        return False
+    host = parsed.netloc.lower().split(":")[0]
+    if host not in _SEARCH_ENGINE_DOMAINS:
+        return False
+    path = parsed.path.lower()
+    if any(path.startswith(seg) for seg in _SEARCH_RESULT_PATH_SEGMENTS):
+        return True
+    query_keys = {p.split("=")[0].lower() for p in (parsed.query or "").split("&") if p}
+    return bool(query_keys & set(_SEARCH_RESULT_QUERY_PARAMS))
+
 # URL shorteners hide the real destination domain until resolved, and are a
 # common phishing/spam vector - "reject... unapproved shorteners" from the
 # audit. Rejected outright rather than resolved-then-checked: even a
@@ -157,7 +197,8 @@ def _check_url(url: str) -> dict:
     host = parsed.netloc.lower().split(":")[0]
     is_bare_blocked_homepage = host in _BLOCKED_BARE_DOMAINS and not parsed.path.strip("/")
     is_shortener = host in _BLOCKED_SHORTENER_DOMAINS
-    result["domain_allowed"] = not is_bare_blocked_homepage and not is_shortener
+    is_search_results = is_search_results_url(url)
+    result["domain_allowed"] = not is_bare_blocked_homepage and not is_shortener and not is_search_results
     if not result["domain_allowed"]:
         return result
 

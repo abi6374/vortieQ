@@ -30,6 +30,32 @@ class TestHardFilter:
         assert [c["id"] for c in eligible] == ["c2"]
         assert reasons["c1"] == "resource_unavailable"
 
+    def test_excludes_a_search_results_url_regardless_of_source(self):
+        """Real production incident: a seed-era `courses` row (source=
+        'seed', never independently verified - seed data predates the
+        catalog_service validation module entirely) had resource_url
+        literally "https://www.google.com/search?q=NumPy+and+Pandas+
+        Essentials+DataCamp+course" and kept being recommended via
+        generate_path(), even though swap/rerecommend already validated
+        every NEWLY-ingested resource through catalog_service. hard_filter
+        is the one place generate_path() and swap share, so the check
+        belongs here - applied to every candidate regardless of
+        availability_status or how old/how it was sourced."""
+        candidates = [
+            {"id": "bad-seed", "availability_status": "available",
+             "resource_url": "https://www.google.com/search?q=NumPy+and+Pandas+Essentials+DataCamp+course"},
+            {"id": "good-course", "availability_status": "available",
+             "resource_url": "https://docs.python.org/3/tutorial/"},
+        ]
+        eligible, reasons = ranking_engine.hard_filter(candidates, completed_ids=set())
+        assert [c["id"] for c in eligible] == ["good-course"]
+        assert reasons["bad-seed"] == "resource_url_is_a_search_results_page"
+
+    def test_missing_resource_url_never_crashes_the_filter(self):
+        candidates = [{"id": "c1", "availability_status": "available"}]  # no resource_url key at all
+        eligible, reasons = ranking_engine.hard_filter(candidates, completed_ids=set())
+        assert [c["id"] for c in eligible] == ["c1"]
+
 
 class TestMasteryChangesRanking:
     """The actual acceptance criterion from the audit: confidence/mastery

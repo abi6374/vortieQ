@@ -74,7 +74,23 @@ def input_snapshot_hash(profile: dict, candidate_ids: list[str]) -> str:
 def hard_filter(candidates: list[dict], completed_ids: set[str],
                  disliked_ids: set[str] | None = None) -> tuple[list[dict], dict[str, str]]:
     """Rejects invalid candidates OUTRIGHT before any scoring - never just
-    down-ranked. Returns (eligible, {course_id: reason} for rejected)."""
+    down-ranked. Returns (eligible, {course_id: reason} for rejected).
+
+    Real production gap this closes: catalog_service already rejected a
+    search-engine-results URL (e.g. "google.com/search?q=...") at
+    INGESTION time for any newly web-searched/YouTube-sourced resource -
+    but that check never ran against the ORIGINAL seed-era `courses` rows
+    (source='seed', inserted before this validation module existed, never
+    independently re-checked since). Those rows flow through the exact
+    same recommender both generate_path() (initial path creation) and
+    swap_step/swap_step_with_preference use, so this filter is the one
+    place both flows are guaranteed to share - applying the URL check
+    HERE, on every real candidate regardless of source or age, is what
+    actually closes the gap rather than only guarding new ingestions
+    while old ones keep slipping through generate_path().
+    """
+    from app.services.catalog_service import is_search_results_url
+
     disliked_ids = disliked_ids or set()
     eligible = []
     reasons: dict[str, str] = {}
@@ -88,6 +104,9 @@ def hard_filter(candidates: list[dict], completed_ids: set[str],
             continue
         if c.get("availability_status") == "unavailable":
             reasons[cid] = "resource_unavailable"
+            continue
+        if is_search_results_url(c.get("resource_url") or ""):
+            reasons[cid] = "resource_url_is_a_search_results_page"
             continue
         eligible.append(c)
     return eligible, reasons

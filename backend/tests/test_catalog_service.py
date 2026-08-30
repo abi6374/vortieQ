@@ -42,6 +42,41 @@ class TestUrlCanonicalizationAndTrust:
         assert v["domain_allowed"] is False
 
 
+class TestSearchResultsUrlDetection:
+    """Real production incident this fixes: a seed-era `courses` row had
+    resource_url = "https://www.google.com/search?q=NumPy+and+Pandas+
+    Essentials+DataCamp+course" - a Google SEARCH RESULTS page, not a
+    course - and was being recommended to real learners via
+    generate_path(). The pre-existing _BLOCKED_BARE_DOMAINS check only
+    caught a BARE homepage (no path); this one has a real path (/search),
+    so it slipped through untouched until this fix."""
+
+    def test_detects_google_search_by_path(self):
+        assert catalog_service.is_search_results_url("https://www.google.com/search?q=numpy+tutorial") is True
+
+    def test_detects_search_by_query_param_on_a_search_engine_host(self):
+        assert catalog_service.is_search_results_url("https://www.bing.com/search?q=python") is True
+        assert catalog_service.is_search_results_url("https://yandex.com/search/?text=react") is True
+
+    def test_never_flags_a_real_course_page_on_an_unrelated_domain(self):
+        assert catalog_service.is_search_results_url("https://docs.python.org/3/tutorial/") is False
+        assert catalog_service.is_search_results_url("https://www.coursera.org/learn/python?q=1") is False
+
+    def test_never_flags_a_real_non_search_google_hosted_page(self):
+        # A genuine Google-hosted resource (docs, a Workspace page) is not
+        # a search-results page just for sharing the domain.
+        assert catalog_service.is_search_results_url("https://developers.google.com/youtube/v3/getting-started") is False
+
+    def test_handles_empty_and_malformed_input(self):
+        assert catalog_service.is_search_results_url("") is False
+        assert catalog_service.is_search_results_url("not a url") is False
+
+    def test_check_url_rejects_search_results_url_without_a_network_call(self):
+        v = catalog_service._check_url("https://www.google.com/search?q=NumPy+and+Pandas+Essentials+DataCamp+course")
+        assert v["domain_allowed"] is False
+        assert v["reachable"] is False  # never even attempted
+
+
 class TestIngestWebResult:
     def test_rejects_result_missing_url_or_title(self):
         assert catalog_service.ingest_web_result({"title": "No URL here"}) is None
