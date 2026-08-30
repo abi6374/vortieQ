@@ -316,7 +316,7 @@ html.dark .rx-bar {
 .rx-list{ display:flex; flex-direction:column; gap:14px; flex:1; }
 .rx-card{ display:grid; grid-template-columns:56px 1fr auto auto auto; gap:16px; align-items:center;
   background:#fff; border:1px solid var(--border); border-radius:16px; padding:18px 20px; transition:border-color .15s, box-shadow .15s; }
-.rx-card:hover{ border-color:var(--vbd); box-shadow:0 6px 20px rgba(0,102,204,.08); }
+.rx-card:hover{ border-color:rgba(0,0,0,0.45); box-shadow:0 8px 24px rgba(0,0,0,.12); }
 .rx-card .r-ic{ width:48px; height:48px; border-radius:14px; display:grid; place-items:center; flex:none; }
 .rx-card .r-body{ min-width:0; }
 .rx-card .r-type{ font-family:"Manrope",sans-serif; font-size:11px; font-weight:700; letter-spacing:.06em; color:var(--muted); margin-bottom:4px; }

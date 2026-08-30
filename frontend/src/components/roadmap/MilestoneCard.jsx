@@ -12,7 +12,7 @@ export default function MilestoneCard({ milestone, index, defaultOpen = false, o
         {index}
       </div>
 
-      <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl shadow-[0_4px_14px_rgba(25,49,75,0.05)] overflow-hidden transition-all hover:border-[#0066cc]/40 dark:hover:border-[#C9D0D6]/40">
+      <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl shadow-[0_4px_14px_rgba(25,49,75,0.05)] overflow-hidden transition-all hover:border-black/40 dark:hover:border-[#C9D0D6]/40">
         <button
           onClick={() => setOpen((v) => !v)}
           className="w-full flex items-center justify-between gap-3 p-5 text-left hover:bg-[#eaf2fc]/30 dark:hover:bg-[#18181D] transition-colors"

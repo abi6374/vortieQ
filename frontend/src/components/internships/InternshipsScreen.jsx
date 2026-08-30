@@ -218,7 +218,7 @@ function InternshipDetailModal({ internship, applied, onVisitBoard, onToggleTrac
 function InternshipCard({ internship, applied, onVisitBoard, onToggleTrack, onView }) {
   return (
     <div
-      className="group bg-white dark:bg-[#121216] rounded-2xl border border-[#e0e0e0] dark:border-[#27272F] p-5 shadow-sm hover:shadow-[0_8px_32px_rgba(0,102,204,0.10)] dark:hover:shadow-[0_8px_32px_rgba(0,0,0,0.5)] transition-all duration-200 hover:-translate-y-0.5 cursor-pointer flex flex-col justify-between"
+      className="group bg-white dark:bg-[#121216] rounded-2xl border border-[#e0e0e0] dark:border-[#27272F] p-5 shadow-sm hover:border-black/40 hover:shadow-[0_8px_32px_rgba(0,0,0,0.12)] dark:hover:border-[#C9D0D6]/40 dark:hover:shadow-[0_8px_32px_rgba(0,0,0,0.5)] transition-all duration-200 hover:-translate-y-0.5 cursor-pointer flex flex-col justify-between"
       onClick={() => onView(internship)}
     >
       <div className="flex flex-col gap-3">

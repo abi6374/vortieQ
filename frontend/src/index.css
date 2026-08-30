@@ -408,8 +408,8 @@ html {
 }
 .pf-glass-card:hover {
   transform: translateY(-2px);
-  border-color: rgba(0, 102, 204, 0.3);
-  box-shadow: 0 18px 42px -12px rgba(0, 102, 204, 0.12), 0 3px 10px rgba(20, 40, 80, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.98);
+  border-color: rgba(0, 0, 0, 0.45);
+  box-shadow: 0 18px 42px -12px rgba(0, 0, 0, 0.14), 0 3px 10px rgba(0, 0, 0, 0.06), 0 0 16px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.98);
 }
 
 /* Glowing accents */

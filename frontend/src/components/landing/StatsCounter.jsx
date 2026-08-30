@@ -62,7 +62,7 @@ export default function StatsCounter() {
       {stats.map((stat, i) => (
         <div
           key={i}
-          className="p-6 rounded-2xl border border-[#E0E0E0] dark:border-[#27272F] bg-white/70 dark:bg-[#121216]/75 backdrop-blur-xl flex flex-col justify-between hover:border-[#0066CC]/40 dark:hover:border-[#C9D0D6]/40 transition-all duration-300 shadow-xs hover:shadow-lg group"
+          className="p-6 rounded-2xl border border-[#E0E0E0] dark:border-[#27272F] bg-white/70 dark:bg-[#121216]/75 backdrop-blur-xl flex flex-col justify-between hover:border-black/40 dark:hover:border-[#C9D0D6]/40 transition-all duration-300 shadow-xs hover:shadow-lg group"
         >
           <div className="text-3xl sm:text-4xl md:text-5xl text-[#0066CC] dark:text-[#C9D0D6] group-hover:scale-105 transition-transform duration-300 origin-left">
             <AnimatedNumber value={stat.value} suffix={stat.suffix} />

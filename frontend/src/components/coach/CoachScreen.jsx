@@ -65,7 +65,7 @@ function ChatTab() {
                   key={p}
                   type="button"
                   onClick={() => send(p)}
-                  className="text-left p-4 bg-white dark:bg-[#18181D] border-[1.5px] border-[#D0D7E2] dark:border-[#27272F] hover:border-[#0066cc] dark:hover:border-[#C9D0D6] hover:bg-[#eaf2fc] dark:hover:bg-[#202026] rounded-2xl text-[13.5px] font-semibold text-[#1d1d1f] dark:text-white transition-all hover:translate-y-[-2px] shadow-sm cursor-pointer"
+                  className="text-left p-4 bg-white dark:bg-[#18181D] border-[1.5px] border-[#D0D7E2] dark:border-[#27272F] hover:border-black/50 dark:hover:border-[#C9D0D6] hover:bg-[#fafafc] dark:hover:bg-[#202026] rounded-2xl text-[13.5px] font-semibold text-[#1d1d1f] dark:text-white transition-all hover:translate-y-[-2px] shadow-sm cursor-pointer"
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span>{p}</span>
@@ -375,7 +375,7 @@ export default function CoachScreen() {
                     key={p}
                     type="button"
                     onClick={() => handleQuickPrompt(p)}
-                    className="w-full text-left px-5 py-3.5 sm:py-4 bg-white dark:bg-[#0E0E12] hover:bg-[#eaf2fc] dark:hover:bg-[#18181D] border-[1.5px] border-[#D0D7E2] dark:border-[#27272F] hover:border-[#0066cc] dark:hover:border-[#C9D0D6] text-[13.5px] sm:text-sm font-semibold text-[#1d1d1f] dark:text-white rounded-2xl transition-all hover:translate-x-1.5 shadow-2xs cursor-pointer flex items-center justify-between group"
+                    className="w-full text-left px-5 py-3.5 sm:py-4 bg-white dark:bg-[#0E0E12] hover:bg-[#fafafc] dark:hover:bg-[#18181D] border-[1.5px] border-[#D0D7E2] dark:border-[#27272F] hover:border-black/50 dark:hover:border-[#C9D0D6] text-[13.5px] sm:text-sm font-semibold text-[#1d1d1f] dark:text-white rounded-2xl transition-all hover:translate-x-1.5 shadow-2xs cursor-pointer flex items-center justify-between group"
                   >
                     <span>{p}</span>
                     <span className="w-7 h-7 rounded-lg bg-[#F5F5F7] dark:bg-[#18181D] group-hover:bg-[#0066cc] text-[#86868b] dark:text-[#94A3B8] group-hover:text-white flex items-center justify-center transition-all text-xs font-bold flex-none ml-3 shadow-2xs">

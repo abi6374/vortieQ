@@ -706,7 +706,7 @@ export default function PersonalizedRoadmap({
                     <div className={`border rounded-xl p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-colors ${
                       isCompleted
                         ? 'border-[#22A06B]/30 dark:border-emerald-800/60 bg-[#F6FEF9] dark:bg-emerald-950/20'
-                        : 'border-[#e0e0e0] dark:border-[#27272F] bg-white dark:bg-[#121216] hover:border-[#0066cc]/40 dark:hover:border-[#0066cc]/40'
+                        : 'border-[#e0e0e0] dark:border-[#27272F] bg-white dark:bg-[#121216] hover:border-black/40 dark:hover:border-[#C9D0D6]/40'
                     }`}>
                       <div className="flex items-center gap-3.5 min-w-0 flex-1">
                         {/* Checkbox button */}
