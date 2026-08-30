@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import AppShell from '../layout/AppShell'
 import api from '../../lib/apiClient'
 import CustomSelect from '../ui/CustomSelect'
@@ -21,11 +22,11 @@ function fmt(dateStr) {
 
 function RegisterConfirmModal({ hackathon, onConfirm, onSaveInterest, onClose }) {
   if (!hackathon) return null
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+  const modalContent = (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-md animate-in fade-in duration-150" />
       <div
-        className="relative z-10 w-full max-w-md bg-white dark:bg-[#121216] rounded-3xl border border-[#e0e0e0] dark:border-[#27272F] p-6 shadow-2xl"
+        className="relative z-10 w-full max-w-md bg-white dark:bg-[#121216] rounded-3xl border border-[#e0e0e0] dark:border-[#27272F] p-6 shadow-2xl animate-in zoom-in-95 duration-150"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">
@@ -73,15 +74,17 @@ function RegisterConfirmModal({ hackathon, onConfirm, onSaveInterest, onClose })
       </div>
     </div>
   )
+
+  return typeof document !== 'undefined' ? createPortal(modalContent, document.body) : modalContent
 }
 
 function HackathonDetailModal({ hackathon, registered, onVisitSite, onToggleRegister, onClose }) {
   const s = STATUS_META[hackathon.status] || STATUS_META.upcoming
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+  const modalContent = (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-md animate-in fade-in duration-150" />
       <div
-        className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-[#121216] rounded-3xl border border-[#e0e0e0] dark:border-[#27272F] shadow-[0_32px_80px_rgba(0,0,0,0.22)]"
+        className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-[#121216] rounded-3xl border border-[#e0e0e0] dark:border-[#27272F] shadow-[0_32px_80px_rgba(0,0,0,0.22)] animate-in zoom-in-95 duration-150"
         onClick={e => e.stopPropagation()}
       >
         {/* Hero Banner */}
@@ -221,6 +224,8 @@ function HackathonDetailModal({ hackathon, registered, onVisitSite, onToggleRegi
       </div>
     </div>
   )
+
+  return typeof document !== 'undefined' ? createPortal(modalContent, document.body) : modalContent
 }
 
 function HackathonCard({ hackathon, registered, onVisitSite, onToggleRegister, onView }) {
