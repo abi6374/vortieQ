@@ -346,7 +346,7 @@ export default function ProgressScreen() {
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5" aria-label="KPI Cards">
           
           {/* Card 1: Learning Progress */}
-          <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-5 shadow-sm flex flex-col justify-between hover:border-[#cfe4fb] dark:hover:border-[#38BDF8] transition-all">
+          <div className="pf-glass-card p-5 shadow-sm flex flex-col justify-between cursor-pointer">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-[#6e6e73] dark:text-[#94A3B8]">Learning progress</span>
               <span className="w-8 h-8 rounded-xl bg-[#eaf2fc] dark:bg-[#18181D] text-[#0066cc] dark:text-[#38BDF8] border border-[#cfe4fb] dark:border-[#27272F] flex items-center justify-center shadow-xs">
@@ -364,7 +364,7 @@ export default function ProgressScreen() {
           </div>
 
           {/* Card 2: Skills Mastered */}
-          <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-5 shadow-sm flex flex-col justify-between hover:border-[#cfe4fb] dark:hover:border-[#38BDF8] transition-all">
+          <div className="pf-glass-card p-5 shadow-sm flex flex-col justify-between cursor-pointer">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-[#6e6e73] dark:text-[#94A3B8]">Skills mastered</span>
               <span className="w-8 h-8 rounded-xl bg-[#ECFDF3] dark:bg-emerald-950/70 text-[#16A34A] dark:text-emerald-400 border border-[#D1FADF] dark:border-emerald-800/60 flex items-center justify-center shadow-xs">
@@ -382,7 +382,7 @@ export default function ProgressScreen() {
           </div>
 
           {/* Card 3: Learning Time */}
-          <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-5 shadow-sm flex flex-col justify-between hover:border-[#cfe4fb] dark:hover:border-[#38BDF8] transition-all">
+          <div className="pf-glass-card p-5 shadow-sm flex flex-col justify-between cursor-pointer">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-[#6e6e73] dark:text-[#94A3B8]">Learning time</span>
               <span className="w-8 h-8 rounded-xl bg-[#FFF7E6] dark:bg-amber-950/70 text-[#F59E0B] dark:text-amber-400 border border-[#FEE4B2] dark:border-amber-800/60 flex items-center justify-center shadow-xs">
@@ -400,7 +400,7 @@ export default function ProgressScreen() {
           </div>
 
           {/* Card 4: Learning Streak */}
-          <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-5 shadow-sm flex flex-col justify-between hover:border-[#cfe4fb] dark:hover:border-[#38BDF8] transition-all">
+          <div className="pf-glass-card p-5 shadow-sm flex flex-col justify-between cursor-pointer">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-[#6e6e73] dark:text-[#94A3B8]">Learning streak</span>
               <span className="w-8 h-8 rounded-xl bg-[#FFF5EB] dark:bg-orange-950/70 text-[#F97316] dark:text-orange-400 border border-[#FED7AA] dark:border-orange-800/60 flex items-center justify-center shadow-xs">
@@ -426,7 +426,7 @@ export default function ProgressScreen() {
           <div className="space-y-6 min-w-0">
             
             {/* CARD A: Learning Progress Over Time (Dynamic Area Chart) */}
-            <section className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-6 shadow-sm hover:border-[#cfe4fb] dark:hover:border-[#27272F] transition-all">
+            <section className="pf-glass-card p-6 shadow-sm">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-[#f5f5f7] dark:border-[#202026] gap-2">
                 <div>
                   <h2 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">
@@ -536,7 +536,7 @@ export default function ProgressScreen() {
             </section>
 
             {/* CARD B: Skill Progress List */}
-            <section className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-6 shadow-sm hover:border-[#cfe4fb] dark:hover:border-[#27272F] transition-all">
+            <section className="pf-glass-card p-6 shadow-sm">
               <div className="pb-3 border-b border-[#f5f5f7] dark:border-[#202026] flex items-center justify-between">
                 <div>
                   <h2 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">
@@ -567,7 +567,7 @@ export default function ProgressScreen() {
                     return (
                       <div
                         key={skill.id}
-                        className="group p-3.5 rounded-xl bg-[#fafafc] dark:bg-[#0E0E12] border border-[#f5f5f7] dark:border-[#202026] hover:border-[#0066cc] dark:hover:border-[#38BDF8] transition-all cursor-pointer flex flex-col justify-between gap-2.5"
+                        className="group p-3.5 rounded-xl bg-[#fafafc] dark:bg-[#0E0E12] border border-[#f5f5f7] dark:border-[#202026] hover:-translate-y-0.5 hover:border-black/40 hover:shadow-md dark:hover:border-[#C9D0D6]/40 dark:hover:shadow-lg transition-all cursor-pointer flex flex-col justify-between gap-2.5"
                         onClick={() => navigate('/skills')}
                       >
                         <div className="flex items-center justify-between">
@@ -601,7 +601,7 @@ export default function ProgressScreen() {
             </section>
 
             {/* CARD C: Learning Streak & Mini Heatmap */}
-            <section className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-6 shadow-sm hover:border-[#cfe4fb] dark:hover:border-[#27272F] transition-all">
+            <section className="pf-glass-card p-6 shadow-sm">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-[#f5f5f7] dark:border-[#202026] gap-3">
                 <div className="flex items-center gap-3">
                   <span className="w-10 h-10 rounded-xl bg-[#FFF7E6] dark:bg-amber-950/70 text-[#F59E0B] dark:text-amber-400 border border-[#FEE4B2] dark:border-amber-800/60 flex items-center justify-center flex-none shadow-xs">
@@ -662,7 +662,7 @@ export default function ProgressScreen() {
           <div className="space-y-6 min-w-0">
             
             {/* RIGHT CARD 1: Weekly Activity Bar Chart */}
-            <section className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-5 shadow-sm hover:border-[#cfe4fb] dark:hover:border-[#27272F] transition-all">
+            <section className="pf-glass-card p-5 shadow-sm">
               <div className="pb-3 border-b border-[#f5f5f7] dark:border-[#202026]">
                 <div className="flex items-center justify-between">
                   <h3 className="font-['Manrope'] font-bold text-sm text-[#1d1d1f] dark:text-white">
@@ -728,7 +728,7 @@ export default function ProgressScreen() {
             </section>
 
             {/* RIGHT CARD 2: AI Progress Insight Card ("PathFinder insight") */}
-            <section className="bg-[#f5faff] dark:bg-[#18181D] border border-[#cfe4fb] dark:border-[#27272F] rounded-2xl p-5 shadow-sm">
+            <section className="pf-glass-card p-5 shadow-sm bg-[#f5faff] dark:bg-[#18181D] border border-[#cfe4fb] dark:border-[#27272F]">
               <div className="flex items-center gap-2 text-[#0066cc] dark:text-[#38BDF8] mb-2">
                 <Sparkles className="w-4 h-4" />
                 <h3 className="font-['Manrope'] font-bold text-xs uppercase tracking-wider text-[#0066cc] dark:text-[#38BDF8]">
@@ -751,7 +751,7 @@ export default function ProgressScreen() {
             </section>
 
             {/* RIGHT CARD 3: Next Best Actions (01, 02, 03) */}
-            <section className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-5 shadow-sm hover:border-[#cfe4fb] dark:hover:border-[#27272F] transition-all">
+            <section className="pf-glass-card p-5 shadow-sm">
               <div className="pb-3 border-b border-[#f5f5f7] dark:border-[#202026]">
                 <h3 className="font-['Manrope'] font-bold text-sm text-[#1d1d1f] dark:text-white">
                   Your next best actions
@@ -769,7 +769,7 @@ export default function ProgressScreen() {
                   return (
                     <div
                       key={act.id}
-                      className="p-3 rounded-xl bg-[#fafafc] dark:bg-[#0E0E12] border border-[#f5f5f7] dark:border-[#202026] hover:border-[#0066cc] dark:hover:border-[#38BDF8] transition-all flex items-center justify-between gap-2"
+                      className="p-3 rounded-xl bg-[#fafafc] dark:bg-[#0E0E12] border border-[#f5f5f7] dark:border-[#202026] hover:-translate-y-0.5 hover:border-black/40 hover:shadow-md dark:hover:border-[#C9D0D6]/40 transition-all flex items-center justify-between gap-2"
                     >
                       <div className="flex items-start gap-2.5">
                         <span className="font-mono text-xs font-extrabold text-[#0066cc] dark:text-[#38BDF8] mt-0.5">
@@ -795,7 +795,7 @@ export default function ProgressScreen() {
             </section>
 
             {/* RIGHT CARD 4: Contextual Roadmap Status Panel (Dynamic Weekly Goal) */}
-            <section className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-5 shadow-sm hover:border-[#cfe4fb] dark:hover:border-[#27272F] transition-all space-y-4">
+            <section className="pf-glass-card p-5 shadow-sm space-y-4">
               {/* Item 1: Roadmap status */}
               <div>
                 <div className="flex items-center justify-between text-xs font-bold mb-1">
@@ -862,7 +862,7 @@ export default function ProgressScreen() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
           {/* Left: Roadmap Milestones */}
-          <section className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-6 shadow-sm flex flex-col justify-between hover:border-[#cfe4fb] dark:hover:border-[#27272F] transition-all">
+          <section className="pf-glass-card p-6 shadow-sm flex flex-col justify-between">
             <div>
               <div className="pb-4 border-b border-[#f5f5f7] dark:border-[#202026]">
                 <h2 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">
@@ -900,7 +900,7 @@ export default function ProgressScreen() {
                           </span>
                         )}
 
-                        <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl bg-[#fafafc] dark:bg-[#0E0E12] border border-[#f5f5f7] dark:border-[#202026] hover:border-[#cfe4fb] dark:hover:border-[#27272F] transition-colors">
+                        <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl bg-[#fafafc] dark:bg-[#0E0E12] border border-[#f5f5f7] dark:border-[#202026] hover:-translate-y-0.5 hover:border-black/40 hover:shadow-md dark:hover:border-[#C9D0D6]/40 transition-all">
                           <div className="min-w-0">
                             <h4 className={`font-bold text-xs sm:text-sm truncate ${isInProgress ? 'text-[#0066cc] dark:text-[#38BDF8]' : isCompleted ? 'text-[#1d1d1f] dark:text-white' : 'text-[#475569] dark:text-[#CBD5E1]'}`}>
                               {m.title}
@@ -935,7 +935,7 @@ export default function ProgressScreen() {
           </section>
 
           {/* Right: Recent Activity Card */}
-          <section className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-6 shadow-sm flex flex-col justify-between hover:border-[#cfe4fb] dark:hover:border-[#27272F] transition-all">
+          <section className="pf-glass-card p-6 shadow-sm flex flex-col justify-between">
             <div>
               <div className="pb-4 border-b border-[#f5f5f7] dark:border-[#202026] flex items-center justify-between">
                 <div>
@@ -972,7 +972,7 @@ export default function ProgressScreen() {
                   displayedActivities.map((act) => (
                     <div
                       key={act.id}
-                      className="flex items-center justify-between p-3 rounded-xl bg-[#fafafc] dark:bg-[#0E0E12] border border-[#f5f5f7] dark:border-[#202026] hover:bg-white dark:hover:bg-[#121216] hover:border-[#cfe4fb] dark:hover:border-[#27272F] transition-all"
+                      className="flex items-center justify-between p-3 rounded-xl bg-[#fafafc] dark:bg-[#0E0E12] border border-[#f5f5f7] dark:border-[#202026] hover:bg-white dark:hover:bg-[#121216] hover:-translate-y-0.5 hover:border-black/40 hover:shadow-md dark:hover:border-[#C9D0D6]/40 transition-all"
                     >
                       <div className="flex items-center gap-3 min-w-0 flex-1 pr-2">
                         <span className="w-7 h-7 rounded-full flex items-center justify-center flex-none bg-[#ECFDF3] dark:bg-emerald-950/70 text-[#16A34A] dark:text-emerald-400 border border-[#D1FADF] dark:border-emerald-800/60">
