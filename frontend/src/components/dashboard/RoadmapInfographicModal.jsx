@@ -629,46 +629,82 @@ export default function RoadmapInfographicModal({
     return curriculum.months.reduce((acc, m) => acc + m.weeks.length, 0)
   }, [curriculum])
 
-  const handleDownloadPDF = async () => {
+  const handleDownloadPDF = async (mode = 'multipage') => {
     if (!posterRef.current || isExporting) return
     setIsExporting(true)
     setDownloadSuccess(false)
     try {
       const element = posterRef.current
+
+      // Scroll container to top to ensure complete capture
+      const container = element.parentElement
+      const originalScrollTop = container ? container.scrollTop : 0
+      if (container) container.scrollTop = 0
+
+      // Capture the entire element at 2x resolution
       const canvas = await html2canvas(element, {
-        scale: 2, // High resolution for crisp printing
+        scale: 2,
         useCORS: true,
         backgroundColor: '#fafbfc',
         logging: false,
-        windowWidth: 1100,
+        scrollX: 0,
+        scrollY: 0,
+        width: element.offsetWidth,
+        height: element.scrollHeight,
+        windowWidth: element.offsetWidth,
+        windowHeight: element.scrollHeight,
       })
 
-      const imgData = canvas.toDataURL('image/png')
-      const imgWidth = 210 // A4 width in mm
-      const pageHeight = 297 // A4 height in mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width
+      // Restore scroll
+      if (container) container.scrollTop = originalScrollTop
 
-      const pdf = new jsPDF('p', 'mm', 'a4')
-      let heightLeft = imgHeight
-      let position = 0
+      const safeTitle = (cleanGoalTitle || targetRole || 'Career').replace(/[^a-zA-Z0-9_-]/g, '_')
+      const imgWidthMm = 210 // A4 width in mm
+      const a4HeightMm = 297 // A4 height in mm
 
-      if (imgHeight <= pageHeight) {
-        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight, undefined, 'FAST')
+      if (mode === 'poster') {
+        // Continuous single-page long infographic poster
+        const totalHeightMm = (canvas.height * imgWidthMm) / canvas.width
+        const pdf = new jsPDF('p', 'mm', [imgWidthMm, Math.ceil(totalHeightMm)])
+        const imgData = canvas.toDataURL('image/png', 1.0)
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidthMm, totalHeightMm, undefined, 'FAST')
+        pdf.save(`${safeTitle}_Roadmap_Poster.pdf`)
       } else {
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, undefined, 'FAST')
-        heightLeft -= pageHeight
+        // High-fidelity multi-page A4 document
+        const pageCanvasHeightPx = (canvas.width * a4HeightMm) / imgWidthMm
+        const totalPages = Math.ceil(canvas.height / pageCanvasHeightPx)
+        const pdf = new jsPDF('p', 'mm', 'a4')
 
-        while (heightLeft > 0) {
-          position = heightLeft - imgHeight
-          pdf.addPage()
-          pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, undefined, 'FAST')
-          heightLeft -= pageHeight
+        for (let page = 0; page < totalPages; page++) {
+          const srcY = page * pageCanvasHeightPx
+          const srcHeight = Math.min(pageCanvasHeightPx, canvas.height - srcY)
+
+          const pageCanvas = document.createElement('canvas')
+          pageCanvas.width = canvas.width
+          pageCanvas.height = pageCanvasHeightPx
+          const ctx = pageCanvas.getContext('2d')
+
+          // Background fill
+          ctx.fillStyle = '#fafbfc'
+          ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height)
+
+          // Slice source canvas
+          ctx.drawImage(
+            canvas,
+            0, srcY, canvas.width, srcHeight,
+            0, 0, canvas.width, srcHeight
+          )
+
+          const pageDataUrl = pageCanvas.toDataURL('image/png', 1.0)
+          if (page > 0) {
+            pdf.addPage('a4', 'p')
+          }
+          pdf.addImage(pageDataUrl, 'PNG', 0, 0, imgWidthMm, a4HeightMm, undefined, 'FAST')
         }
+
+        pdf.save(`${safeTitle}_Roadmap_PathFinder.pdf`)
       }
 
-      const safeTitle = (cleanGoalTitle || targetRole || 'Career')
-        .replace(/[^a-zA-Z0-9_-]/g, '_')
-      pdf.save(`${safeTitle}_Roadmap_PathFinder.pdf`)
       setDownloadSuccess(true)
       setTimeout(() => setDownloadSuccess(false), 4000)
     } catch (err) {
@@ -706,10 +742,25 @@ export default function RoadmapInfographicModal({
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={handleDownloadPDF}
+              onClick={() => handleDownloadPDF('poster')}
+              disabled={isExporting}
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 bg-[#f0f5fa] dark:bg-[#1A2840] hover:bg-[#e1eefc] dark:hover:bg-[#223656] text-[#0066cc] dark:text-[#38BDF8] border border-[#cfe4fb] dark:border-[#273B5B] text-xs font-bold rounded-xl transition-all disabled:opacity-50 cursor-pointer"
+              title="Download as a continuous single-page infographic poster"
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                <line x1="12" y1="8" x2="12" y2="16" />
+                <line x1="8" y1="12" x2="16" y2="12" />
+              </svg>
+              <span>1-Page Poster</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleDownloadPDF('multipage')}
               disabled={isExporting}
               className="inline-flex items-center gap-2 px-4 py-2 bg-[#0066cc] hover:bg-[#004fa3] text-white text-xs font-bold rounded-xl transition-all shadow-md active:scale-[0.98] disabled:opacity-50 cursor-pointer"
             >
@@ -740,7 +791,7 @@ export default function RoadmapInfographicModal({
             <button
               type="button"
               onClick={onClose}
-              className="w-8 h-8 rounded-full flex items-center justify-center text-[#7a7a7a] hover:text-[#1d1d1f] hover:bg-[#f0f0f0] dark:hover:bg-[#1E2638] dark:hover:text-white transition-colors cursor-pointer"
+              className="w-8 h-8 rounded-full flex items-center justify-center text-[#7a7a7a] hover:text-[#1d1d1f] hover:bg-[#f0f0f0] dark:hover:bg-[#1E2638] dark:hover:text-white transition-colors cursor-pointer ml-1"
               aria-label="Close modal"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
