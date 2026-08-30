@@ -52,8 +52,8 @@ function ChatTab() {
   }
 
   return (
-    <div className="coach-chat-card bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl overflow-hidden shadow-xs">
-      <div ref={bodyRef} className="flex-1 min-h-0 overflow-y-auto p-5 space-y-3 bg-[#fafcfe] dark:bg-[#0E131E]">
+    <div className="coach-chat-card bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl overflow-hidden shadow-xs">
+      <div ref={bodyRef} className="flex-1 min-h-0 overflow-y-auto p-5 space-y-3 bg-[#fafcfe] dark:bg-[#0E0E12]">
         {hydrating && <p className="text-xs text-[#7a7a7a] dark:text-[#94A3B8] text-center">Loading your conversation…</p>}
         {!hydrating && messages.length === 0 && (
           <div className="h-full flex flex-col items-center justify-center text-center text-[#7a7a7a] dark:text-[#94A3B8] text-sm max-w-lg mx-auto py-6">
@@ -65,11 +65,11 @@ function ChatTab() {
                   key={p}
                   type="button"
                   onClick={() => send(p)}
-                  className="text-left p-4 bg-white dark:bg-[#141A26] border-[1.5px] border-[#D0D7E2] dark:border-[#242E40] hover:border-[#0066cc] dark:hover:border-[#38BDF8] hover:bg-[#eaf2fc] dark:hover:bg-[#1E293B] rounded-2xl text-[13.5px] font-semibold text-[#1d1d1f] dark:text-white transition-all hover:translate-y-[-2px] shadow-sm cursor-pointer"
+                  className="text-left p-4 bg-white dark:bg-[#18181D] border-[1.5px] border-[#D0D7E2] dark:border-[#27272F] hover:border-[#0066cc] dark:hover:border-[#C9D0D6] hover:bg-[#eaf2fc] dark:hover:bg-[#202026] rounded-2xl text-[13.5px] font-semibold text-[#1d1d1f] dark:text-white transition-all hover:translate-y-[-2px] shadow-sm cursor-pointer"
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span>{p}</span>
-                    <span className="text-[#86868b] dark:text-[#64748B] text-sm font-bold flex-none">→</span>
+                    <span className="text-[#86868b] dark:text-[#94A3B8] text-sm font-bold flex-none">→</span>
                   </div>
                 </button>
               ))}
@@ -82,7 +82,7 @@ function ChatTab() {
               className={`max-w-[75%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap break-words ${
                 m.role === 'user'
                   ? 'bg-[#0066cc] text-white rounded-br-sm'
-                  : 'bg-white dark:bg-[#141A26] text-[#1d1d1f] dark:text-white border border-[#e0e0e0] dark:border-[#242E40] rounded-bl-sm'
+                  : 'bg-white dark:bg-[#18181D] text-[#1d1d1f] dark:text-white border border-[#e0e0e0] dark:border-[#27272F] rounded-bl-sm'
               }`}
             >
               {m.content}
@@ -91,10 +91,10 @@ function ChatTab() {
         ))}
         {loading && (
           <div className="flex justify-start">
-            <div className="px-4 py-3 bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl rounded-bl-sm flex gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#c6c6c7] dark:bg-[#64748B] animate-bounce" style={{ animationDelay: '0ms' }} />
-              <span className="w-1.5 h-1.5 rounded-full bg-[#c6c6c7] dark:bg-[#64748B] animate-bounce" style={{ animationDelay: '150ms' }} />
-              <span className="w-1.5 h-1.5 rounded-full bg-[#c6c6c7] dark:bg-[#64748B] animate-bounce" style={{ animationDelay: '300ms' }} />
+            <div className="px-4 py-3 bg-white dark:bg-[#18181D] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl rounded-bl-sm flex gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#c6c6c7] dark:bg-[#71717A] animate-bounce" style={{ animationDelay: '0ms' }} />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#c6c6c7] dark:bg-[#71717A] animate-bounce" style={{ animationDelay: '150ms' }} />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#c6c6c7] dark:bg-[#71717A] animate-bounce" style={{ animationDelay: '300ms' }} />
             </div>
           </div>
         )}
@@ -107,14 +107,14 @@ function ChatTab() {
         </div>
       )}
 
-      <form onSubmit={submit} className="p-3 border-t border-[#f5f5f7] dark:border-[#1E2638] flex items-end gap-2 bg-white dark:bg-[#141A26]">
+      <form onSubmit={submit} className="p-3 border-t border-[#f5f5f7] dark:border-[#27272F] flex items-end gap-2 bg-white dark:bg-[#121216]">
         <textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) submit(e) }}
           placeholder="Ask about your path, a skill gap, or what to do next…"
           rows={1}
-          className="flex-1 resize-none border border-[#e0e0e0] dark:border-[#242E40] bg-white dark:bg-[#0E131E] rounded-xl px-3.5 py-2.5 text-sm text-[#1d1d1f] dark:text-white focus:outline-none focus:border-[#0066cc] dark:focus:border-[#38BDF8] focus:ring-2 focus:ring-[#0066cc]/15 max-h-24"
+          className="flex-1 resize-none border border-[#e0e0e0] dark:border-[#27272F] bg-white dark:bg-[#0E0E12] rounded-xl px-3.5 py-2.5 text-sm text-[#1d1d1f] dark:text-white focus:outline-none focus:border-[#0066cc] dark:focus:border-[#C9D0D6] focus:ring-2 focus:ring-[#0066cc]/15 max-h-24"
         />
         <button
           type="submit"
@@ -162,7 +162,7 @@ function PracticeTab() {
 
   return (
     <div className="space-y-5">
-      <form onSubmit={generate} className="bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-5 flex flex-col sm:flex-row gap-3 sm:items-end shadow-xs">
+      <form onSubmit={generate} className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-5 flex flex-col sm:flex-row gap-3 sm:items-end shadow-xs">
         <div className="flex-1">
           <label className="block text-xs font-bold text-[#333333] dark:text-[#CBD5E1] mb-1.5">What do you want to practice?</label>
           <input
@@ -170,7 +170,7 @@ function PracticeTab() {
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
             placeholder="e.g. Python dictionaries, SQL joins, React hooks…"
-            className="w-full border border-[#e0e0e0] dark:border-[#242E40] bg-white dark:bg-[#0E131E] text-[#1d1d1f] dark:text-white rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-[#0066cc] dark:focus:border-[#38BDF8] focus:ring-2 focus:ring-[#0066cc]/15"
+            className="w-full border border-[#e0e0e0] dark:border-[#27272F] bg-white dark:bg-[#0E0E12] text-[#1d1d1f] dark:text-white rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-[#0066cc] dark:focus:border-[#C9D0D6] focus:ring-2 focus:ring-[#0066cc]/15"
           />
         </div>
         <div className="flex-none">
@@ -183,7 +183,7 @@ function PracticeTab() {
               { value: 5, label: '5 Questions', subtitle: 'Standard (Recommended)' },
               { value: 10, label: '10 Questions', subtitle: 'Deep challenge' },
             ]}
-            buttonClassName="w-[140px] bg-white dark:bg-[#0E131E] border-[#e0e0e0] dark:border-[#242E40] text-[#1d1d1f] dark:text-white"
+            buttonClassName="w-[140px] bg-white dark:bg-[#0E0E12] border-[#e0e0e0] dark:border-[#27272F] text-[#1d1d1f] dark:text-white"
             ariaLabel="Question count"
           />
         </div>
@@ -201,24 +201,24 @@ function PracticeTab() {
       {questions && (
         <div className="space-y-4">
           {checked && (
-            <div className="bg-[#eaf2fc] dark:bg-[#1E293B] border border-[#dcecfd] dark:border-[#242E40] rounded-2xl p-4 flex items-center justify-between">
+            <div className="bg-[#eaf2fc] dark:bg-[#18181D] border border-[#dcecfd] dark:border-[#27272F] rounded-2xl p-4 flex items-center justify-between">
               <span className="font-bold text-[#1d1d1f] dark:text-white">Score: {score} / {questions.length}</span>
-              <button type="button" onClick={() => { setChecked(false); setAnswers({}) }} className="text-xs font-bold text-[#0066cc] dark:text-[#38BDF8] hover:underline cursor-pointer">
+              <button type="button" onClick={() => { setChecked(false); setAnswers({}) }} className="text-xs font-bold text-[#0066cc] dark:text-[#C9D0D6] hover:underline cursor-pointer">
                 Try again
               </button>
             </div>
           )}
           {questions.map((q, i) => (
-            <div key={i} className="bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-5 shadow-xs">
+            <div key={i} className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-5 shadow-xs">
               <p className="font-bold text-sm text-[#1d1d1f] dark:text-white mb-3 whitespace-pre-wrap">{i + 1}. {q.question}</p>
               <div className="space-y-2">
                 {q.options.map((opt, oi) => {
                   const isSelected = answers[i] === oi
                   const isCorrect = oi === q.correct_index
-                  let style = 'border-[#e0e0e0] dark:border-[#242E40] bg-white dark:bg-[#0E131E] text-[#1d1d1f] dark:text-white hover:border-[#0066cc] dark:hover:border-[#38BDF8]'
+                  let style = 'border-[#e0e0e0] dark:border-[#27272F] bg-white dark:bg-[#0E0E12] text-[#1d1d1f] dark:text-white hover:border-[#0066cc] dark:hover:border-[#C9D0D6]'
                   if (checked && isCorrect) style = 'border-[#22A06B] dark:border-emerald-500 bg-[#ECFDF3] dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300'
                   else if (checked && isSelected && !isCorrect) style = 'border-[#E5484D] dark:border-rose-500 bg-[#FFF0F0] dark:bg-rose-950/40 text-rose-800 dark:text-rose-300'
-                  else if (!checked && isSelected) style = 'border-[#0066cc] dark:border-[#38BDF8] bg-[#eaf2fc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8]'
+                  else if (!checked && isSelected) style = 'border-[#0066cc] dark:border-[#C9D0D6] bg-[#eaf2fc] dark:bg-[#18181D] text-[#0066cc] dark:text-[#C9D0D6]'
                   return (
                     <button
                       key={oi}
@@ -233,7 +233,7 @@ function PracticeTab() {
                 })}
               </div>
               {checked && q.explanation && (
-                <p className="mt-3 text-xs text-[#333333] dark:text-[#CBD5E1] bg-[#fafafc] dark:bg-[#0E131E] border border-transparent dark:border-[#1E2638] rounded-lg px-3 py-2">{q.explanation}</p>
+                <p className="mt-3 text-xs text-[#333333] dark:text-[#CBD5E1] bg-[#fafafc] dark:bg-[#0E0E12] border border-transparent dark:border-[#27272F] rounded-lg px-3 py-2">{q.explanation}</p>
               )}
             </div>
           ))}
@@ -274,13 +274,13 @@ function ProjectsTab() {
 
   const DIFF_COLOR = {
     beginner: 'bg-[#ECFDF3] dark:bg-emerald-950/50 text-[#16A34A] dark:text-emerald-300 border-[#D1FADF] dark:border-emerald-800/60',
-    intermediate: 'bg-[#eaf2fc] dark:bg-blue-950/50 text-[#0066cc] dark:text-blue-300 border-[#cfe4fb] dark:border-blue-800/60',
+    intermediate: 'bg-[#eaf2fc] dark:bg-[#18181D] text-[#0066cc] dark:text-[#C9D0D6] border-[#cfe4fb] dark:border-[#27272F]',
     advanced: 'bg-[#FFF0F0] dark:bg-rose-950/50 text-[#E5484D] dark:text-rose-300 border-[#FECDCA] dark:border-rose-800/60',
   }
 
   return (
     <div className="space-y-5">
-      <div className="bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-5 flex items-center justify-between gap-4 flex-wrap shadow-xs">
+      <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-5 flex items-center justify-between gap-4 flex-wrap shadow-xs">
         <div>
           <h3 className="font-bold text-sm text-[#1d1d1f] dark:text-white">Project suggestion</h3>
           <p className="text-xs text-[#7a7a7a] dark:text-[#94A3B8] mt-0.5">Built only from skills you've actually completed or are currently learning.</p>
@@ -298,7 +298,7 @@ function ProjectsTab() {
       {error && <p className="text-sm text-[#B42318] dark:text-red-400 bg-[#FDECEC] dark:bg-red-950/40 border border-[#F3B9B9] dark:border-red-800/60 rounded-xl px-4 py-3">{error}</p>}
 
       {idea && (
-        <div className="bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-6 shadow-xs">
+        <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-6 shadow-xs">
           <div className="flex items-center gap-2 flex-wrap mb-2">
             <h2 className="font-bold text-lg text-[#1d1d1f] dark:text-white">{idea.title}</h2>
             <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border capitalize ${DIFF_COLOR[idea.difficulty] || DIFF_COLOR.beginner}`}>
@@ -312,7 +312,7 @@ function ProjectsTab() {
           {idea.skills_used.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {idea.skills_used.map((s) => (
-                <span key={s} className="px-2.5 py-1 bg-[#eaf2fc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] text-xs font-bold rounded-lg">{s}</span>
+                <span key={s} className="px-2.5 py-1 bg-[#eaf2fc] dark:bg-[#18181D] text-[#0066cc] dark:text-[#C9D0D6] text-xs font-bold rounded-lg">{s}</span>
               ))}
             </div>
           )}
@@ -342,14 +342,14 @@ export default function CoachScreen() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-7 items-start w-full">
           {/* Main Coach Column */}
           <div className="lg:col-span-7 flex flex-col gap-4 min-w-0">
-            <div className="flex gap-1.5 bg-[#f5f5f7] dark:bg-[#141A26] border border-transparent dark:border-[#242E40] rounded-xl p-1 w-fit">
+            <div className="flex gap-1.5 bg-[#f5f5f7] dark:bg-[#121216] border border-transparent dark:border-[#27272F] rounded-xl p-1 w-fit">
               {TABS.map((t) => (
                 <button
                   key={t.key}
                   type="button"
                   onClick={() => setTab(t.key)}
                   className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors cursor-pointer ${
-                    tab === t.key ? 'bg-white dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] shadow-sm' : 'text-[#6e6e73] dark:text-[#94A3B8] hover:text-[#1d1d1f] dark:hover:text-white'
+                    tab === t.key ? 'bg-white dark:bg-[#18181D] text-[#0066cc] dark:text-[#C9D0D6] shadow-sm' : 'text-[#6e6e73] dark:text-[#94A3B8] hover:text-[#1d1d1f] dark:hover:text-white'
                   }`}
                 >
                   {t.label}
@@ -365,9 +365,9 @@ export default function CoachScreen() {
           {/* Right Rail: Quick Actions & Coach Context */}
           <div className="lg:col-span-5 space-y-6">
             {/* Quick Prompts */}
-            <div className="bg-white dark:bg-[#141A26] border-[1.5px] border-[#D0D7E2] dark:border-[#242E40] rounded-2xl p-6 sm:p-7 shadow-sm">
+            <div className="bg-white dark:bg-[#121216] border-[1.5px] border-[#D0D7E2] dark:border-[#27272F] rounded-2xl p-6 sm:p-7 shadow-sm">
               <h3 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white mb-4 flex items-center gap-2.5">
-                <span className="w-7 h-7 rounded-xl bg-[#eaf2fc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center text-sm shadow-xs font-bold">⚡</span>
+                <span className="w-7 h-7 rounded-xl bg-[#eaf2fc] dark:bg-[#18181D] text-[#0066cc] dark:text-[#C9D0D6] flex items-center justify-center text-sm shadow-xs font-bold">⚡</span>
                 Suggested Questions
               </h3>
               <div className="space-y-3">
@@ -376,10 +376,10 @@ export default function CoachScreen() {
                     key={p}
                     type="button"
                     onClick={() => handleQuickPrompt(p)}
-                    className="w-full text-left px-5 py-3.5 sm:py-4 bg-white dark:bg-[#0E131E] hover:bg-[#eaf2fc] dark:hover:bg-[#1E293B] border-[1.5px] border-[#D0D7E2] dark:border-[#242E40] hover:border-[#0066cc] dark:hover:border-[#38BDF8] text-[13.5px] sm:text-sm font-semibold text-[#1d1d1f] dark:text-white rounded-2xl transition-all hover:translate-x-1.5 shadow-2xs cursor-pointer flex items-center justify-between group"
+                    className="w-full text-left px-5 py-3.5 sm:py-4 bg-white dark:bg-[#0E0E12] hover:bg-[#eaf2fc] dark:hover:bg-[#18181D] border-[1.5px] border-[#D0D7E2] dark:border-[#27272F] hover:border-[#0066cc] dark:hover:border-[#C9D0D6] text-[13.5px] sm:text-sm font-semibold text-[#1d1d1f] dark:text-white rounded-2xl transition-all hover:translate-x-1.5 shadow-2xs cursor-pointer flex items-center justify-between group"
                   >
                     <span>{p}</span>
-                    <span className="w-7 h-7 rounded-lg bg-[#F5F5F7] dark:bg-[#1E293B] group-hover:bg-[#0066cc] text-[#86868b] dark:text-[#94A3B8] group-hover:text-white flex items-center justify-center transition-all text-xs font-bold flex-none ml-3 shadow-2xs">
+                    <span className="w-7 h-7 rounded-lg bg-[#F5F5F7] dark:bg-[#18181D] group-hover:bg-[#0066cc] text-[#86868b] dark:text-[#94A3B8] group-hover:text-white flex items-center justify-center transition-all text-xs font-bold flex-none ml-3 shadow-2xs">
                       →
                     </span>
                   </button>
@@ -388,7 +388,7 @@ export default function CoachScreen() {
             </div>
 
             {/* Context Awareness Notice */}
-            <div className="bg-gradient-to-br from-[#fafbfc] to-[#eaf2fc] dark:from-[#141A26] dark:to-[#182236] border-[1.5px] border-[#BFDBFE] dark:border-[#24344D] rounded-2xl p-6 sm:p-7 shadow-sm">
+            <div className="bg-gradient-to-br from-[#fafbfc] to-[#eaf2fc] dark:from-[#121216] dark:to-[#18181D] border-[1.5px] border-[#BFDBFE] dark:border-[#27272F] rounded-2xl p-6 sm:p-7 shadow-sm">
               <h4 className="font-['Manrope'] font-bold text-sm text-[#1d1d1f] dark:text-[#F9FAFB] mb-2 flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#22A06B] shadow-[0_0_8px_rgba(34,160,107,0.6)]" />
                 Roadmap-Grounded
@@ -399,17 +399,17 @@ export default function CoachScreen() {
             </div>
 
             {/* Study Mode Tips */}
-            <div className="bg-white dark:bg-[#141A26] border-[1.5px] border-[#D0D7E2] dark:border-[#242E40] rounded-2xl p-6 sm:p-7 shadow-sm">
+            <div className="bg-white dark:bg-[#121216] border-[1.5px] border-[#D0D7E2] dark:border-[#27272F] rounded-2xl p-6 sm:p-7 shadow-sm">
               <h4 className="font-['Manrope'] font-bold text-xs uppercase tracking-wider text-[#7a7a7a] dark:text-[#94A3B8] mb-3">
                 Coaching Modes
               </h4>
               <ul className="text-xs sm:text-[13px] text-[#333333] dark:text-[#CBD5E1] space-y-3">
                 <li className="flex items-start gap-2.5">
-                  <span className="text-[#0066cc] dark:text-[#38BDF8] font-bold text-base leading-none mt-0.5">•</span>
+                  <span className="text-[#0066cc] dark:text-[#C9D0D6] font-bold text-base leading-none mt-0.5">•</span>
                   <span><strong>Practice:</strong> Generate multiple-choice questions tailored to your active skills.</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <span className="text-[#0066cc] dark:text-[#38BDF8] font-bold text-base leading-none mt-0.5">•</span>
+                  <span className="text-[#0066cc] dark:text-[#C9D0D6] font-bold text-base leading-none mt-0.5">•</span>
                   <span><strong>Project Ideas:</strong> Get portfolio-ready project concepts with step-by-step guidance.</span>
                 </li>
               </ul>

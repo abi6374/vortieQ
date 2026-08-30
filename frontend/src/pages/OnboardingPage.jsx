@@ -338,7 +338,7 @@ export default function OnboardingPage() {
   // Step 1: Learner Intake (Resume Upload + Background Description)
   if (phase === 'intake' || phase === 'resume') {
     return (
-      <div className="min-h-screen flex bg-[#f5f5f7] dark:bg-[#0B0E14]">
+      <div className="min-h-screen flex bg-[#f5f5f7] dark:bg-[#09090B]">
         <SetupSidebar current={1} />
         <div className="flex-1 flex flex-col items-center justify-start px-4 py-8 lg:py-10 overflow-y-auto">
           <LearnerIntakeWorkspace
@@ -355,7 +355,7 @@ export default function OnboardingPage() {
   // Step 2: Dedicated GitHub Integration Step (Optional)
   if (phase === 'github') {
     return (
-      <div className="min-h-screen flex bg-[#f5f5f7] dark:bg-[#0B0E14]">
+      <div className="min-h-screen flex bg-[#f5f5f7] dark:bg-[#09090B]">
         <SetupSidebar current={2} />
         <div className="flex-1 flex flex-col items-center justify-start px-4 py-8 lg:py-10 overflow-y-auto">
           <GitHubIntegrationStep
@@ -373,7 +373,7 @@ export default function OnboardingPage() {
   // Step 3: Your Skill (Review & manage detected skills & stacks)
   if (phase === 'skills' || phase === 'topics') {
     return (
-      <div className="min-h-screen flex bg-[#f5f5f7] dark:bg-[#0B0E14]">
+      <div className="min-h-screen flex bg-[#f5f5f7] dark:bg-[#09090B]">
         <SetupSidebar current={3} />
         <div className="flex-1 flex flex-col items-center justify-center px-4 py-8 lg:py-10 overflow-y-auto">
           <YourSkillsStep
@@ -390,7 +390,7 @@ export default function OnboardingPage() {
   // Step 4: Your Confidence Level (Fine-tune level per skill)
   if (phase === 'confidence') {
     return (
-      <div className="min-h-screen flex bg-[#f5f5f7] dark:bg-[#0B0E14]">
+      <div className="min-h-screen flex bg-[#f5f5f7] dark:bg-[#09090B]">
         <SetupSidebar current={4} />
         <div className="flex-1 flex flex-col items-center justify-start px-4 py-8 lg:py-10 overflow-y-auto">
           <SkillConfidenceStep
@@ -408,7 +408,7 @@ export default function OnboardingPage() {
   if (phase === 'goalcompass' || phase === 'generating') {
     return (
       <>
-        <div ref={bgRef} className="min-h-screen flex bg-[#f5f5f7] dark:bg-[#0B0E14]">
+        <div ref={bgRef} className="min-h-screen flex bg-[#f5f5f7] dark:bg-[#09090B]">
           <SetupSidebar current={phase === 'generating' ? 6 : 5} />
           <div className="flex-1 flex flex-col items-center justify-start px-4 py-8 lg:py-10 overflow-y-auto">
             <GoalCompass
@@ -439,18 +439,18 @@ export default function OnboardingPage() {
 
   // Fallback Chat/Confirm Lanes
   return (
-    <div className="min-h-screen flex bg-[#f5f5f7] dark:bg-[#0B0E14]">
+    <div className="min-h-screen flex bg-[#f5f5f7] dark:bg-[#09090B]">
       <SetupSidebar current={1} />
       <div className="flex-1 flex flex-col items-center justify-start px-4 py-8 lg:py-10 overflow-y-auto">
         <div className="w-full max-w-[1140px] flex justify-center">
           {phase === 'chat' && (
-            <div className="bg-white dark:bg-[#0E1522] rounded-2xl border border-[#f0f0f0] dark:border-[#202B3C] shadow-[0_14px_38px_rgba(25,49,75,0.08)] p-8 max-w-2xl w-full">
+            <div className="bg-white dark:bg-[#121216] rounded-2xl border border-[#f0f0f0] dark:border-[#27272F] shadow-[0_14px_38px_rgba(0,0,0,0.4)] p-8 max-w-2xl w-full">
               <h1 className="text-2xl font-bold text-[#1d1d1f] dark:text-white">Let's map your path</h1>
               <p className="mt-2 text-sm text-[#555555] dark:text-[#94A3B8]">
                 Describe your learning goal in your own words. Our AI will turn it into a personalized roadmap.
               </p>
               {topicRatings.length > 0 && (
-                <p className="mt-3 text-xs text-[#0066cc] dark:text-[#38BDF8] bg-[#eaf2fc] dark:bg-[#132238] rounded-lg px-3 py-2 border border-[#cfe4fb] dark:border-[#1E3A5F]">
+                <p className="mt-3 text-xs text-[#0066cc] dark:text-[#C9D0D6] bg-[#eaf2fc] dark:bg-[#18181D] rounded-lg px-3 py-2 border border-[#cfe4fb] dark:border-[#27272F]">
                   Using {topicRatings.length} skill{topicRatings.length === 1 ? '' : 's'} from your profile to personalize recommendations.
                 </p>
               )}

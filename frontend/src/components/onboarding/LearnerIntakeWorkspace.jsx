@@ -135,7 +135,7 @@ export default function LearnerIntakeWorkspace({
   }
 
   return (
-    <div className="w-full max-w-[1140px] bg-white dark:bg-[#0E1522] rounded-2xl border border-[#f0f0f0] dark:border-[#202B3C] shadow-[0_14px_38px_rgba(25,49,75,0.08)] dark:shadow-[0_14px_38px_rgba(0,0,0,0.5)] flex flex-col justify-between overflow-hidden transition-colors min-h-[640px]">
+    <div className="w-full max-w-[1140px] bg-white dark:bg-[#121216] rounded-2xl border border-[#f0f0f0] dark:border-[#27272F] shadow-[0_14px_38px_rgba(25,49,75,0.08)] dark:shadow-[0_14px_38px_rgba(0,0,0,0.5)] flex flex-col justify-between overflow-hidden transition-colors min-h-[640px]">
       
       {/* Top Header Row with ThemeToggle & conditional Profile Dropdown */}
       <div className="pt-6 sm:pt-8 pb-3 px-6 sm:px-10 relative">
@@ -146,7 +146,7 @@ export default function LearnerIntakeWorkspace({
         <div className="text-center mt-2">
           <h1 className="text-2xl sm:text-3xl md:text-[38px] font-bold text-[#1d1d1f] dark:text-[#F8FAFC] tracking-tight leading-tight flex items-center justify-center gap-2.5 flex-wrap">
             <span>Let’s understand where you are today</span>
-            <span className="inline-flex text-[#0066cc] dark:text-[#38BDF8]">
+            <span className="inline-flex text-[#0066cc] dark:text-[#C9D0D6]">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 2L14.4 7.6L20 10L14.4 12.4L12 18L9.6 12.4L4 10L9.6 7.6L12 2Z" />
                 <path d="M19 16L20.2 18.8L23 20L20.2 21.2L19 24L17.8 21.2L15 20L17.8 18.8L19 16Z" />
@@ -167,12 +167,12 @@ export default function LearnerIntakeWorkspace({
           onClick={() => setSelectedMethod('resume')}
           className={`rounded-2xl p-6 sm:p-7 flex flex-col justify-between transition-all cursor-pointer border-2 ${
             selectedMethod === 'resume'
-              ? 'bg-[#fbfdff] dark:bg-[#131D2E] border-[#0066cc] dark:border-[#38BDF8] shadow-[0_6px_24px_rgba(0,102,204,0.08)] ring-1 ring-[#0066cc]/20'
-              : 'bg-white dark:bg-[#101726] border-[#e0e0e0] dark:border-[#202C3E] hover:border-[#abd2fb] dark:hover:border-[#38BDF8] shadow-xs'
+              ? 'bg-[#fbfdff] dark:bg-[#18181D] border-[#0066cc] dark:border-[#C9D0D6] shadow-[0_6px_24px_rgba(0,102,204,0.08)] ring-1 ring-[#0066cc]/20'
+              : 'bg-white dark:bg-[#121216] border-[#e0e0e0] dark:border-[#27272F] hover:border-[#abd2fb] dark:hover:border-[#C9D0D6] shadow-xs'
           }`}
         >
           <div>
-            <div className="w-[68px] h-[68px] rounded-2xl bg-[#dbeafc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center mb-4 shadow-xs">
+            <div className="w-[68px] h-[68px] rounded-2xl bg-[#dbeafc] dark:bg-[#18181D] text-[#0066cc] dark:text-[#C9D0D6] flex items-center justify-center mb-4 shadow-xs">
               <svg
                 width="32"
                 height="32"
@@ -215,7 +215,7 @@ export default function LearnerIntakeWorkspace({
             }}
             className={`border-2 border-dashed rounded-xl p-5 text-center flex flex-col items-center justify-center relative min-h-[175px] transition-colors ${
               dragOver
-                ? 'border-[#0066cc] dark:border-[#38BDF8] bg-[#eaf2fc] dark:bg-[#18263D]'
+                ? 'border-[#0066cc] dark:border-[#C9D0D6] bg-[#eaf2fc] dark:bg-[#18263D]'
                 : 'border-[#abd2fb] dark:border-[#263750] bg-[#fafbfc] dark:bg-[#121927] hover:bg-[#f1f7fe] dark:hover:bg-[#162133]'
             }`}
           >
@@ -245,14 +245,14 @@ export default function LearnerIntakeWorkspace({
                     setFile(null)
                     if (fileInputRef.current) fileInputRef.current.value = ''
                   }}
-                  className="mt-2 text-xs font-semibold text-[#0066cc] dark:text-[#38BDF8] hover:underline"
+                  className="mt-2 text-xs font-semibold text-[#0066cc] dark:text-[#C9D0D6] hover:underline"
                 >
                   Change file
                 </button>
               </div>
             ) : (
               <>
-                <div className="text-[#0066cc] dark:text-[#38BDF8] mb-1">
+                <div className="text-[#0066cc] dark:text-[#C9D0D6] mb-1">
                   <svg
                     width="28"
                     height="28"
@@ -270,7 +270,7 @@ export default function LearnerIntakeWorkspace({
 
                 <p className="text-[14.5px] text-[#1d1d1f] dark:text-[#F8FAFC] font-medium">
                   Drop your resume here or{' '}
-                  <span className="text-[#0066cc] dark:text-[#38BDF8] font-semibold underline underline-offset-2">
+                  <span className="text-[#0066cc] dark:text-[#C9D0D6] font-semibold underline underline-offset-2">
                     browse
                   </span>
                 </p>
@@ -284,7 +284,7 @@ export default function LearnerIntakeWorkspace({
                     e.stopPropagation()
                     fileInputRef.current?.click()
                   }}
-                  className="bg-white dark:bg-[#1A2536] border border-[#0066cc] dark:border-[#38BDF8] text-[#0066cc] dark:text-[#38BDF8] font-semibold text-[13px] px-5 py-1.5 rounded-xl hover:bg-[#eaf2fc] dark:hover:bg-[#1E2D44] transition-colors shadow-xs"
+                  className="bg-white dark:bg-[#1A2536] border border-[#0066cc] dark:border-[#C9D0D6] text-[#0066cc] dark:text-[#C9D0D6] font-semibold text-[13px] px-5 py-1.5 rounded-xl hover:bg-[#eaf2fc] dark:hover:bg-[#1E2D44] transition-colors shadow-xs"
                 >
                   Choose file
                 </button>
@@ -312,12 +312,12 @@ export default function LearnerIntakeWorkspace({
           onClick={() => setSelectedMethod('text')}
           className={`rounded-2xl p-6 sm:p-7 flex flex-col justify-between transition-all cursor-pointer border-2 ${
             selectedMethod === 'text'
-              ? 'bg-[#fbfdff] dark:bg-[#131D2E] border-[#0066cc] dark:border-[#38BDF8] shadow-[0_6px_24px_rgba(0,102,204,0.08)] ring-1 ring-[#0066cc]/20'
-              : 'bg-white dark:bg-[#101726] border-[#e0e0e0] dark:border-[#202C3E] hover:border-[#abd2fb] dark:hover:border-[#38BDF8] shadow-xs'
+              ? 'bg-[#fbfdff] dark:bg-[#18181D] border-[#0066cc] dark:border-[#C9D0D6] shadow-[0_6px_24px_rgba(0,102,204,0.08)] ring-1 ring-[#0066cc]/20'
+              : 'bg-white dark:bg-[#121216] border-[#e0e0e0] dark:border-[#27272F] hover:border-[#abd2fb] dark:hover:border-[#C9D0D6] shadow-xs'
           }`}
         >
           <div>
-            <div className="w-[68px] h-[68px] rounded-2xl bg-[#dbeafc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center mb-4 shadow-xs">
+            <div className="w-[68px] h-[68px] rounded-2xl bg-[#dbeafc] dark:bg-[#18181D] text-[#0066cc] dark:text-[#C9D0D6] flex items-center justify-center mb-4 shadow-xs">
               <svg
                 width="32"
                 height="32"
@@ -334,7 +334,7 @@ export default function LearnerIntakeWorkspace({
             </div>
 
             <h2 className="text-[20px] sm:text-[22px] font-bold text-[#1d1d1f] dark:text-[#F8FAFC] mb-1">
-              Describe your background <span className="text-xs font-bold text-[#0066cc] dark:text-[#38BDF8]">(Required)</span>
+              Describe your background <span className="text-xs font-bold text-[#0066cc] dark:text-[#C9D0D6]">(Required)</span>
             </h2>
             <p className="text-[14px] text-[#555555] dark:text-[#94A3B8] leading-snug mb-4">
               Share your current skills, experience, and target career goal.
@@ -348,7 +348,7 @@ export default function LearnerIntakeWorkspace({
               onChange={handleDescriptionChange}
               maxLength={1500}
               placeholder="e.g. I have 2 years of Python experience building APIs with FastAPI and Flask. I understand descriptive statistics and basic Pandas for data analysis. I have built 1 data visualization project with Matplotlib. I want to learn Machine Learning from scratch..."
-              className="w-full resize-none rounded-xl border border-[#D8DFEB] dark:border-[#263750] bg-[#fbfbfb] dark:bg-[#0E1522] p-3.5 text-[14px] text-[#1d1d1f] dark:text-[#F8FAFC] placeholder-[#7a7a7a] dark:placeholder-[#64748B] leading-relaxed focus:outline-none focus:border-[#0066cc] dark:focus:border-[#38BDF8] focus:bg-white dark:focus:bg-[#141C2B] focus:ring-2 focus:ring-[#0066cc]/15 transition-all shadow-inner"
+              className="w-full resize-none rounded-xl border border-[#D8DFEB] dark:border-[#27272F] bg-[#fbfbfb] dark:bg-[#0E0E12] p-3.5 text-[14px] text-[#1d1d1f] dark:text-[#F8FAFC] placeholder-[#7a7a7a] dark:placeholder-[#64748B] leading-relaxed focus:outline-none focus:border-[#0066cc] dark:focus:border-[#C9D0D6] focus:bg-white dark:focus:bg-[#141C2B] focus:ring-2 focus:ring-[#0066cc]/15 transition-all shadow-inner"
               style={{ minHeight: 175 }}
             />
             <div className="flex items-center justify-between mt-1 text-[11.5px] font-semibold text-[#7a7a7a] dark:text-[#64748B]">
@@ -362,15 +362,15 @@ export default function LearnerIntakeWorkspace({
       </div>
 
       {/* Full-Width "What PathFinder will understand" Indicator Panel */}
-      <div className="mx-6 sm:mx-10 bg-[#f9fcff]/90 dark:bg-[#101622] border border-[#ddedfe] dark:border-[#242E40] rounded-2xl p-4 sm:p-5 my-2 shadow-xs">
+      <div className="mx-6 sm:mx-10 bg-[#f9fcff]/90 dark:bg-[#18181D] border border-[#ddedfe] dark:border-[#27272F] rounded-2xl p-4 sm:p-5 my-2 shadow-xs">
         <h3 className="font-bold text-[#1d1d1f] dark:text-white text-[14.5px] mb-3">
           What PathFinder will understand
         </h3>
         
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5">
           {/* 1. Skills */}
-          <div className="h-[44px] bg-white dark:bg-[#141A26] border border-[#e8eff8] dark:border-[#242E40] rounded-full px-3.5 flex items-center gap-2 text-[#1d1d1f] dark:text-[#F9FAFB] text-[13px] font-semibold shadow-xs hover:border-[#0066cc] dark:hover:border-[#38BDF8] transition-all">
-            <span className="text-[#0066cc] dark:text-[#38BDF8] flex-shrink-0">
+          <div className="h-[44px] bg-white dark:bg-[#121216] border border-[#e8eff8] dark:border-[#27272F] rounded-full px-3.5 flex items-center gap-2 text-[#1d1d1f] dark:text-[#F9FAFB] text-[13px] font-semibold shadow-xs hover:border-[#0066cc] dark:hover:border-[#C9D0D6] transition-all">
+            <span className="text-[#0066cc] dark:text-[#C9D0D6] flex-shrink-0">
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10" />
                 <line x1="2" y1="12" x2="22" y2="12" />
@@ -381,8 +381,8 @@ export default function LearnerIntakeWorkspace({
           </div>
 
           {/* 2. Education */}
-          <div className="h-[44px] bg-white dark:bg-[#141A26] border border-[#e8eff8] dark:border-[#242E40] rounded-full px-3.5 flex items-center gap-2 text-[#1d1d1f] dark:text-[#F9FAFB] text-[13px] font-semibold shadow-xs hover:border-[#0066cc] dark:hover:border-[#38BDF8] transition-all">
-            <span className="text-[#0066cc] dark:text-[#38BDF8] flex-shrink-0">
+          <div className="h-[44px] bg-white dark:bg-[#121216] border border-[#e8eff8] dark:border-[#27272F] rounded-full px-3.5 flex items-center gap-2 text-[#1d1d1f] dark:text-[#F9FAFB] text-[13px] font-semibold shadow-xs hover:border-[#0066cc] dark:hover:border-[#C9D0D6] transition-all">
+            <span className="text-[#0066cc] dark:text-[#C9D0D6] flex-shrink-0">
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
                 <path d="M6 12v5c3 3 9 3 12 0v-5" />
@@ -392,8 +392,8 @@ export default function LearnerIntakeWorkspace({
           </div>
 
           {/* 3. Projects */}
-          <div className="h-[44px] bg-white dark:bg-[#141A26] border border-[#e8eff8] dark:border-[#242E40] rounded-full px-3.5 flex items-center gap-2 text-[#1d1d1f] dark:text-[#F9FAFB] text-[13px] font-semibold shadow-xs hover:border-[#0066cc] dark:hover:border-[#38BDF8] transition-all">
-            <span className="text-[#0066cc] dark:text-[#38BDF8] flex-shrink-0">
+          <div className="h-[44px] bg-white dark:bg-[#121216] border border-[#e8eff8] dark:border-[#27272F] rounded-full px-3.5 flex items-center gap-2 text-[#1d1d1f] dark:text-[#F9FAFB] text-[13px] font-semibold shadow-xs hover:border-[#0066cc] dark:hover:border-[#C9D0D6] transition-all">
+            <span className="text-[#0066cc] dark:text-[#C9D0D6] flex-shrink-0">
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
               </svg>
@@ -402,8 +402,8 @@ export default function LearnerIntakeWorkspace({
           </div>
 
           {/* 4. Confidence */}
-          <div className="h-[44px] bg-white dark:bg-[#141A26] border border-[#e8eff8] dark:border-[#242E40] rounded-full px-3.5 flex items-center gap-2 text-[#1d1d1f] dark:text-[#F9FAFB] text-[13px] font-semibold shadow-xs hover:border-[#0066cc] dark:hover:border-[#38BDF8] transition-all">
-            <span className="text-[#0066cc] dark:text-[#38BDF8] flex-shrink-0">
+          <div className="h-[44px] bg-white dark:bg-[#121216] border border-[#e8eff8] dark:border-[#27272F] rounded-full px-3.5 flex items-center gap-2 text-[#1d1d1f] dark:text-[#F9FAFB] text-[13px] font-semibold shadow-xs hover:border-[#0066cc] dark:hover:border-[#C9D0D6] transition-all">
+            <span className="text-[#0066cc] dark:text-[#C9D0D6] flex-shrink-0">
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
                 <polyline points="17 6 23 6 23 12" />
@@ -413,8 +413,8 @@ export default function LearnerIntakeWorkspace({
           </div>
 
           {/* 5. Goal & time */}
-          <div className="h-[44px] bg-white dark:bg-[#141A26] border border-[#e8eff8] dark:border-[#242E40] rounded-full px-3.5 flex items-center gap-2 text-[#1d1d1f] dark:text-[#F9FAFB] text-[13px] font-semibold shadow-xs hover:border-[#0066cc] dark:hover:border-[#38BDF8] transition-all">
-            <span className="text-[#0066cc] dark:text-[#38BDF8] flex-shrink-0">
+          <div className="h-[44px] bg-white dark:bg-[#121216] border border-[#e8eff8] dark:border-[#27272F] rounded-full px-3.5 flex items-center gap-2 text-[#1d1d1f] dark:text-[#F9FAFB] text-[13px] font-semibold shadow-xs hover:border-[#0066cc] dark:hover:border-[#C9D0D6] transition-all">
+            <span className="text-[#0066cc] dark:text-[#C9D0D6] flex-shrink-0">
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10" />
                 <circle cx="12" cy="12" r="6" />
@@ -436,7 +436,7 @@ export default function LearnerIntakeWorkspace({
       )}
 
       {/* Footer Controls */}
-      <div className="h-[76px] px-6 sm:px-10 border-t border-[#f0f0f0] dark:border-[#1E2638] flex items-center justify-between mt-auto">
+      <div className="h-[76px] px-6 sm:px-10 border-t border-[#f0f0f0] dark:border-[#202026] flex items-center justify-between mt-auto">
         <div className="flex items-center gap-2 text-[13.5px] font-medium text-[#555555] dark:text-[#94A3B8]">
           <span className="text-[#22A06B] dark:text-emerald-400">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">

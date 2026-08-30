@@ -187,11 +187,11 @@ export default function InterviewScreen() {
   // Evaluating / Processing Interstitial
   if (stage === 'evaluating') {
     return (
-      <div className="fixed inset-0 z-50 bg-[#090d16] text-white flex flex-col items-center justify-center p-6 text-center select-none font-['Inter',sans-serif]">
+      <div className="fixed inset-0 z-50 bg-[#09090B] text-white flex flex-col items-center justify-center p-6 text-center select-none font-['Inter',sans-serif]">
         <div className="relative mb-6">
-          <div className="w-20 h-20 rounded-full border-4 border-white/10 border-t-[#0071e3] animate-spin flex items-center justify-center shadow-xl shadow-[#0071e3]/30">
-            <div className="w-10 h-10 rounded-full bg-[#0071e3]/20 flex items-center justify-center">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="animate-pulse">
+          <div className="w-20 h-20 rounded-full border-4 border-white/10 border-t-[#C9D0D6] animate-spin flex items-center justify-center shadow-xl shadow-white/10">
+            <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9D0D6" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="animate-pulse">
                 <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
                 <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
                 <line x1="12" y1="19" x2="12" y2="22" />

@@ -11,7 +11,7 @@ import { supabase } from '../lib/supabaseClient'
  */
 
 const V = '#0066cc'
-const FIELD = 'w-full rounded-xl border border-[#e0e0e0] dark:border-[#242E40] bg-white dark:bg-[#0E131E] px-3.5 py-2.5 text-[14.5px] text-[#1d1d1f] dark:text-white outline-none focus:border-[#0066cc] dark:focus:border-[#38BDF8] focus:ring-[3px] focus:ring-[#0066cc]/20 transition-colors'
+const FIELD = 'w-full rounded-xl border border-[#e0e0e0] dark:border-[#27272F] bg-white dark:bg-[#0E0E12] px-3.5 py-2.5 text-[14.5px] text-[#1d1d1f] dark:text-white outline-none focus:border-[#0066cc] dark:focus:border-[#C9D0D6] focus:ring-[3px] focus:ring-[#0066cc]/20 dark:focus:ring-[#C9D0D6]/20 transition-colors'
 const LABEL = 'block text-[13.5px] font-semibold text-[#1d1d1f] dark:text-[#CBD5E1] mb-1.5'
 
 export default function AccountPage() {
@@ -263,7 +263,7 @@ export default function AccountPage() {
         </header>
 
         {loading ? (
-          <div className="p-8 text-center text-[#7a7a7a] dark:text-[#94A3B8] text-sm bg-white dark:bg-[#141A26] rounded-2xl border border-[#e0e0e0] dark:border-[#242E40]">
+          <div className="p-8 text-center text-[#7a7a7a] dark:text-[#94A3B8] text-sm bg-white dark:bg-[#121216] rounded-2xl border border-[#e0e0e0] dark:border-[#27272F]">
             Loading your profile…
           </div>
         ) : (
@@ -271,9 +271,9 @@ export default function AccountPage() {
             {/* Primary Left Column: 8 cols on desktop */}
             <div className="lg:col-span-8 space-y-6">
               {/* Profile Information Card */}
-              <section className="bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-6 shadow-2xs">
+              <section className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-6 shadow-2xs">
                 <div className="flex items-center gap-3 mb-5">
-                  <span className="w-9 h-9 rounded-xl bg-[#eaf2fc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center flex-none">
+                  <span className="w-9 h-9 rounded-xl bg-[#eaf2fc] dark:bg-[#18181D] text-[#0066cc] dark:text-[#C9D0D6] border border-transparent dark:border-[rgba(201,208,214,0.15)] flex items-center justify-center flex-none">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                       <circle cx="12" cy="7" r="4" />
@@ -304,7 +304,7 @@ export default function AccountPage() {
                     <label className={LABEL} htmlFor="email">Email Address</label>
                     <input
                       id="email"
-                      className={`${FIELD} bg-[#fafafc] dark:bg-[#0E131E] text-[#7a7a7a] dark:text-[#94A3B8] cursor-not-allowed`}
+                      className={`${FIELD} bg-[#fafafc] dark:bg-[#0E0E12] text-[#7a7a7a] dark:text-[#94A3B8] cursor-not-allowed`}
                       value={email}
                       disabled
                       title="Email is managed via authentication"
@@ -314,9 +314,9 @@ export default function AccountPage() {
               </section>
 
               {/* Learning Goal & Career Ambition */}
-              <section className="bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-6 shadow-2xs">
+              <section className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-6 shadow-2xs">
                 <div className="flex items-center gap-3 mb-5">
-                  <span className="w-9 h-9 rounded-xl bg-[#eaf2fc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center flex-none">
+                  <span className="w-9 h-9 rounded-xl bg-[#eaf2fc] dark:bg-[#18181D] text-[#0066cc] dark:text-[#C9D0D6] border border-transparent dark:border-[rgba(201,208,214,0.15)] flex items-center justify-center flex-none">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <circle cx="12" cy="12" r="10" />
                       <polygon points="16.2 7.8 10.5 10.5 7.8 16.2 13.5 13.5" fill="currentColor" />
@@ -367,7 +367,7 @@ export default function AccountPage() {
                           { value: 'advanced', label: 'Advanced', subtitle: 'Deep domain expertise / complex architectures' },
                         ]}
                         className="w-full"
-                        buttonClassName="w-full py-2.5 bg-white dark:bg-[#0E131E] border-[#e0e0e0] dark:border-[#242E40] text-[#1d1d1f] dark:text-white"
+                        buttonClassName="w-full py-2.5 bg-white dark:bg-[#0E0E12] border-[#e0e0e0] dark:border-[#27272F] text-[#1d1d1f] dark:text-white"
                         menuClassName="w-full"
                         ariaLabel="Current level"
                       />
@@ -403,10 +403,10 @@ export default function AccountPage() {
               </section>
 
               {/* Developer Stack & GitHub Integration Card */}
-              <section className="bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-6 shadow-2xs">
+              <section className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-6 shadow-2xs">
                 <div className="flex items-center justify-between mb-5 flex-wrap gap-2">
                   <div className="flex items-center gap-3">
-                    <span className="w-9 h-9 rounded-xl bg-[#181717] dark:bg-[#1E293B] text-white flex items-center justify-center flex-none">
+                    <span className="w-9 h-9 rounded-xl bg-[#181717] dark:bg-[#18181D] text-white flex items-center justify-center flex-none">
                       <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor">
                         <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
                       </svg>
@@ -431,10 +431,10 @@ export default function AccountPage() {
                   )}
                 </div>
 
-                <div className="bg-[#fafafc] dark:bg-[#0E131E] border border-[#e0e0e0] dark:border-[#242E40] rounded-xl p-4 space-y-3">
+                <div className="bg-[#fafafc] dark:bg-[#0E0E12] border border-[#e0e0e0] dark:border-[#27272F] rounded-xl p-4 space-y-3">
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
-                    <div className="flex-1 flex items-center bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-xl px-3 py-2 text-xs sm:text-sm focus-within:border-[#0066cc] dark:focus-within:border-[#38BDF8] focus-within:ring-2 focus-within:ring-[#0066cc]/20 transition-all">
-                      <span className="text-[#86868b] dark:text-[#64748B] font-mono mr-1">github.com/</span>
+                    <div className="flex-1 flex items-center bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-xl px-3 py-2 text-xs sm:text-sm focus-within:border-[#0066cc] dark:focus-within:border-[#C9D0D6] focus-within:ring-2 focus-within:ring-[#0066cc]/20 transition-all">
+                      <span className="text-[#86868b] dark:text-[#71717A] font-mono mr-1">github.com/</span>
                       <input
                         type="text"
                         value={ghInput}
@@ -447,7 +447,7 @@ export default function AccountPage() {
                       type="button"
                       onClick={() => handleSyncGithubAccount()}
                       disabled={ghSyncing || (!ghInput.trim() && !githubHandle)}
-                      className="px-4 py-2 bg-[#181717] dark:bg-[#242E40] hover:bg-black dark:hover:bg-[#1E293B] text-white text-xs sm:text-sm font-bold rounded-xl transition-colors cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 flex-none"
+                      className="px-4 py-2 bg-[#181717] dark:bg-[#18181D] hover:bg-black dark:hover:bg-[#27272F] border border-transparent dark:border-[rgba(201,208,214,0.2)] text-white text-xs sm:text-sm font-bold rounded-xl transition-colors cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 flex-none"
                     >
                       {ghSyncing ? (
                         <>
@@ -469,7 +469,7 @@ export default function AccountPage() {
                     type="button"
                     onClick={handleLinkGithubOAuth}
                     disabled={ghLinking}
-                    className="w-full flex items-center justify-center gap-2 py-2 bg-[#181717] dark:bg-[#1E293B] hover:bg-black dark:hover:bg-[#242E40] text-white text-xs font-semibold rounded-xl transition-colors cursor-pointer disabled:opacity-50"
+                    className="w-full flex items-center justify-center gap-2 py-2 bg-[#181717] dark:bg-[#18181D] hover:bg-black dark:hover:bg-[#27272F] border border-transparent dark:border-[rgba(201,208,214,0.2)] text-white text-xs font-semibold rounded-xl transition-colors cursor-pointer disabled:opacity-50"
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                       <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
@@ -540,7 +540,7 @@ export default function AccountPage() {
             {/* Right Rail Context & Quick Insights: 4 cols on desktop */}
             <div className="lg:col-span-4 space-y-6">
               {/* Learner Identity Summary Card */}
-              <div className="bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-6 shadow-2xs">
+              <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-6 shadow-2xs">
                 <div className="flex items-center gap-4 mb-4">
                   <span className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#0071e3] to-[#0066cc] text-white font-extrabold text-lg flex items-center justify-center shadow-sm flex-none">
                     {initials}
@@ -559,10 +559,10 @@ export default function AccountPage() {
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-[#f5f5f7] dark:border-[#1E2638] space-y-3">
+                <div className="pt-4 border-t border-[#f5f5f7] dark:border-[#202026] space-y-3">
                   <div className="flex justify-between items-center text-xs">
                     <span className="text-[#7a7a7a] dark:text-[#94A3B8]">Target Role</span>
-                    <span className="font-bold text-[#0066cc] dark:text-[#38BDF8] bg-[#eaf2fc] dark:bg-[#1E293B] px-2.5 py-1 rounded-lg">
+                    <span className="font-bold text-[#0066cc] dark:text-[#C9D0D6] bg-[#eaf2fc] dark:bg-[#18181D] border border-transparent dark:border-[rgba(201,208,214,0.2)] px-2.5 py-1 rounded-lg">
                       {form.target_role || 'Not Set'}
                     </span>
                   </div>
@@ -582,9 +582,9 @@ export default function AccountPage() {
               </div>
 
               {/* Real-time Dynamic Sync Card */}
-              <div className="bg-gradient-to-br from-[#fafbfc] to-[#eaf2fc] dark:from-[#141A26] dark:to-[#101622] border border-[#cfe4fb] dark:border-[#242E40] rounded-2xl p-5 shadow-2xs">
+              <div className="bg-gradient-to-br from-[#fafbfc] to-[#eaf2fc] dark:from-[#18181D] dark:to-[#121216] border border-[#cfe4fb] dark:border-[#27272F] rounded-2xl p-5 shadow-2xs">
                 <div className="flex items-start gap-3">
-                  <span className="w-8 h-8 rounded-xl bg-white dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center flex-none shadow-2xs">
+                  <span className="w-8 h-8 rounded-xl bg-white dark:bg-[#18181D] text-[#0066cc] dark:text-[#C9D0D6] border border-transparent dark:border-[rgba(201,208,214,0.2)] flex items-center justify-center flex-none shadow-2xs">
                     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M12 2v4" />
                       <path d="m4.93 4.93 2.83 2.83" />
@@ -608,7 +608,7 @@ export default function AccountPage() {
               </div>
 
               {/* Data & Security Notice */}
-              <div className="bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-5 shadow-2xs">
+              <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-5 shadow-2xs">
                 <h4 className="font-['Manrope'] font-bold text-xs uppercase tracking-wider text-[#7a7a7a] dark:text-[#94A3B8] mb-2">
                   Account Privacy
                 </h4>

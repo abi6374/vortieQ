@@ -47,7 +47,7 @@ export default function InteractiveCoachTeaser() {
           </div>
         </div>
 
-        <div className="px-3 py-1 rounded-full text-xs font-bold font-mono bg-[#EAF2FC] dark:bg-[#1E293B] text-[#0066CC] dark:text-[#38BDF8]">
+        <div className="px-3 py-1 rounded-full text-xs font-bold font-mono bg-[#EAF2FC] dark:bg-[#18181D] text-[#0066CC] dark:text-[#C9D0D6]">
           24/7 ACTIVE
         </div>
       </div>
@@ -62,7 +62,7 @@ export default function InteractiveCoachTeaser() {
             className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 ${
               selected === idx
                 ? 'bg-[#0066CC] text-white shadow-md shadow-[#0066CC]/25'
-                : 'bg-white dark:bg-[#1A2333] border border-[#E0E0E0] dark:border-[#263143] text-[#1D1D1F] dark:text-[#CBD5E1] hover:border-[#0066CC]'
+                : 'bg-white dark:bg-[#18181D] border border-[#E0E0E0] dark:border-[#27272F] text-[#1D1D1F] dark:text-[#CBD5E1] hover:border-[#0066CC] dark:hover:border-[#C9D0D6]'
             }`}
           >
             <Sparkles className="w-3 h-3" />
@@ -72,13 +72,13 @@ export default function InteractiveCoachTeaser() {
       </div>
 
       {/* Simulated Chat Dialogue */}
-      <div className="space-y-4 rounded-2xl bg-[#F8FAFC] dark:bg-[#0C121D] p-5 border border-[#EAEFF6] dark:border-[#1E2837]">
+      <div className="space-y-4 rounded-2xl bg-[#F8FAFC] dark:bg-[#0E0E12] p-5 border border-[#EAEFF6] dark:border-[#27272F]">
         {/* User Question */}
         <div className="flex items-start gap-3">
-          <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-[#1D1D1F] dark:text-white flex-none text-xs font-bold">
+          <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-zinc-800 flex items-center justify-center text-[#1D1D1F] dark:text-white flex-none text-xs font-bold">
             YOU
           </div>
-          <div className="bg-white dark:bg-[#182130] p-3.5 rounded-2xl rounded-tl-none border border-[#E2E8F0] dark:border-[#243042] text-sm font-medium text-[#1D1D1F] dark:text-[#F1F5F9] shadow-xs">
+          <div className="bg-white dark:bg-[#18181D] p-3.5 rounded-2xl rounded-tl-none border border-[#E2E8F0] dark:border-[#27272F] text-sm font-medium text-[#1D1D1F] dark:text-[#F1F5F9] shadow-xs">
             {prompts[selected].q}
           </div>
         </div>
@@ -88,9 +88,9 @@ export default function InteractiveCoachTeaser() {
           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#0066CC] to-[#004FA3] flex items-center justify-center text-white flex-none shadow-xs">
             <Bot className="w-4 h-4" />
           </div>
-          <div className="bg-[#EAF2FC]/70 dark:bg-[#132238] p-4 rounded-2xl rounded-tl-none border border-[#CFE4FA] dark:border-[#1E3A5F] text-sm text-[#1D1D1F] dark:text-[#E2E8F0] leading-relaxed shadow-xs space-y-2">
-            <div className="flex items-center justify-between border-b border-[#CFE4FA] dark:border-[#1E3A5F] pb-1.5 mb-1.5">
-              <span className="text-[11px] font-extrabold text-[#0066CC] dark:text-[#38BDF8] uppercase tracking-wider font-mono">
+          <div className="bg-[#EAF2FC]/70 dark:bg-[#18181D] p-4 rounded-2xl rounded-tl-none border border-[#CFE4FA] dark:border-[#27272F] text-sm text-[#1D1D1F] dark:text-[#E2E8F0] leading-relaxed shadow-xs space-y-2">
+            <div className="flex items-center justify-between border-b border-[#CFE4FA] dark:border-[#27272F] pb-1.5 mb-1.5">
+              <span className="text-[11px] font-extrabold text-[#0066CC] dark:text-[#C9D0D6] uppercase tracking-wider font-mono">
                 {prompts[selected].tag}
               </span>
               <span className="text-[10px] text-[#7A7A7A] dark:text-[#64748B]">Context: Active Roadmap</span>

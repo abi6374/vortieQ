@@ -33,19 +33,21 @@
 :root.dark,
 html.dark,
 [data-theme="dark"] {
-  --violet: #2997FF;
-  --violet-dark: #0071E3;
-  --violet-focus: #38bdf8;
-  --navy: #F5F5F7;
-  --slate: #E5E5EA;
-  --muted: #9CA3AF;
-  --lavender: rgba(41, 151, 255, 0.16);
-  --lav-icon: rgba(41, 151, 255, 0.24);
-  --card-bd: #28303F;
-  --divider: #202734;
-  --bg-main: #0B0E14;
-  --canvas: #121722;
-  --pearl: #171D2B;
+  --violet: #C9D0D6;
+  --violet-dark: #A8B1BA;
+  --violet-focus: #C9D0D6;
+  --navy: #F8FAFC;
+  --slate: #E2E8F0;
+  --muted: #A1A1AA;
+  --lavender: rgba(201, 208, 214, 0.14);
+  --lav-icon: rgba(201, 208, 214, 0.22);
+  --card-bd: #27272F;
+  --divider: #202026;
+  --bg-main: #09090B;
+  --canvas: #121216;
+  --pearl: #18181D;
+  --silver: #C9D0D6;
+  --silver-dark: #8B949E;
   --green: #34D399;
   --green-surface: rgba(52, 211, 153, 0.16);
   --amber: #FBBF24;
@@ -463,31 +465,31 @@ html {
 html.dark body,
 [data-theme="dark"] body {
   background:
-    radial-gradient(1200px 700px at 12% -8%, rgba(20, 50, 100, 0.45) 0%, rgba(20, 50, 100, 0) 55%),
-    radial-gradient(1000px 600px at 92% 112%, rgba(25, 40, 80, 0.35) 0%, rgba(25, 40, 80, 0) 50%),
-    #0B0E14 !important;
-  color: #F9FAFB !important;
+    radial-gradient(1200px 700px at 12% -8%, rgba(201, 208, 214, 0.05) 0%, rgba(0, 0, 0, 0) 55%),
+    radial-gradient(1000px 600px at 92% 112%, rgba(201, 208, 214, 0.03) 0%, rgba(0, 0, 0, 0) 50%),
+    #09090B !important;
+  color: #F8FAFC !important;
 }
 
 html.dark .pf-shell,
 [data-theme="dark"] .pf-shell {
   background:
-    radial-gradient(1100px 650px at 10% -5%, rgba(20, 50, 100, 0.4) 0%, rgba(20, 50, 100, 0) 55%),
-    radial-gradient(900px 550px at 95% 105%, rgba(25, 40, 80, 0.3) 0%, rgba(25, 40, 80, 0) 50%),
-    #0B0E14 !important;
+    radial-gradient(1100px 650px at 10% -5%, rgba(201, 208, 214, 0.04) 0%, rgba(0, 0, 0, 0) 55%),
+    radial-gradient(900px 550px at 95% 105%, rgba(201, 208, 214, 0.03) 0%, rgba(0, 0, 0, 0) 50%),
+    #09090B !important;
 }
 
 /* Chrome (TopBar & Sidebar) */
 html.dark .pf-topbar,
 [data-theme="dark"] .pf-topbar {
-  background: rgba(16, 21, 30, 0.88) !important;
-  border-bottom: 1px solid rgba(40, 48, 64, 0.85) !important;
+  background: rgba(18, 18, 22, 0.92) !important;
+  border-bottom: 1px solid #27272F !important;
 }
 
 html.dark .pf-sidebar,
 [data-theme="dark"] .pf-sidebar {
-  background: rgba(16, 21, 30, 0.85) !important;
-  border-right: 1px solid rgba(40, 48, 64, 0.85) !important;
+  background: rgba(18, 18, 22, 0.92) !important;
+  border-right: 1px solid #27272F !important;
 }
 
 /* 1. Global High-Contrast Typography in Dark Mode */
@@ -503,7 +505,7 @@ html.dark [class*="text-[#0E1B38]"],
 html.dark [class*="text-[#111827]"],
 html.dark [class*="text-slate-900"],
 html.dark [class*="text-gray-900"] {
-  color: #F9FAFB !important;
+  color: #F8FAFC !important;
 }
 
 html.dark p,
@@ -525,15 +527,15 @@ html.dark [class*="text-[#74819A]"],
 html.dark [class*="text-[#94A3B8]"],
 html.dark [class*="text-slate-500"],
 html.dark [class*="text-gray-500"] {
-  color: #94A3B8 !important;
+  color: #A1A1AA !important;
 }
 
-/* 2. Global Dark Surfaces & Cards */
+/* 2. Global Dark Surfaces & Cards (Obsidian Black & Chrome Silver) */
 html.dark .bg-white,
 html.dark [class*="bg-white/"],
 html.dark .bg-\[\#ffffff\],
 html.dark [class*="bg-[#ffffff]"] {
-  background-color: #141A26 !important;
+  background-color: #121216 !important;
 }
 
 html.dark [class*="bg-[#fafafa]"],
@@ -546,34 +548,34 @@ html.dark [class*="bg-[#f5f5f7]"],
 html.dark [class*="bg-[#f5f5f5]"],
 html.dark [class*="bg-slate-50"],
 html.dark [class*="bg-gray-50"] {
-  background-color: #0E131E !important;
+  background-color: #0E0E12 !important;
 }
 
 /* 3. Global Dark Glass Cards */
 html.dark .pf-glass-card,
 [data-theme="dark"] .pf-glass-card {
-  background: linear-gradient(145deg, rgba(20, 26, 38, 0.95) 0%, rgba(14, 19, 28, 0.88) 100%) !important;
-  border-color: rgba(45, 56, 78, 0.85) !important;
-  box-shadow: 0 10px 30px -8px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  background: linear-gradient(145deg, rgba(24, 24, 29, 0.95) 0%, rgba(18, 18, 22, 0.88) 100%) !important;
+  border-color: rgba(201, 208, 214, 0.22) !important;
+  box-shadow: 0 10px 30px -8px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(201, 208, 214, 0.12) !important;
 }
 html.dark .pf-glass-card:hover,
 [data-theme="dark"] .pf-glass-card:hover {
-  border-color: rgba(56, 189, 248, 0.45) !important;
-  box-shadow: 0 18px 42px -12px rgba(0, 102, 204, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+  border-color: #C9D0D6 !important;
+  box-shadow: 0 18px 42px -12px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(201, 208, 214, 0.25) !important;
 }
 
 html.dark .pf-glass,
 [data-theme="dark"] .pf-glass {
-  background: rgba(18, 24, 34, 0.85) !important;
-  border-color: rgba(45, 56, 78, 0.7) !important;
-  box-shadow: 0 12px 40px -12px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
+  background: rgba(18, 18, 22, 0.88) !important;
+  border-color: #27272F !important;
+  box-shadow: 0 12px 40px -12px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(201, 208, 214, 0.08) !important;
 }
 
 html.dark .pf-glass-strong,
 [data-theme="dark"] .pf-glass-strong {
-  background: rgba(20, 26, 38, 0.94) !important;
-  border-color: rgba(45, 56, 78, 0.85) !important;
-  box-shadow: 0 24px 64px -20px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.09) !important;
+  background: rgba(24, 24, 29, 0.95) !important;
+  border-color: rgba(201, 208, 214, 0.22) !important;
+  box-shadow: 0 24px 64px -20px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(201, 208, 214, 0.14) !important;
 }
 
 /* 4. Global Dark Borders & Dividers */
@@ -590,50 +592,50 @@ html.dark [class*="border-[#D0D7E2]"],
 html.dark [class*="border-[#D8DFEB]"],
 html.dark [class*="border-slate-200"],
 html.dark [class*="border-gray-200"] {
-  border-color: #242E40 !important;
+  border-color: #27272F !important;
 }
 
-/* 5. Accent Badges & Highlights */
+/* 5. Accent Badges & Highlights (Chrome Silver & Obsidian) */
 html.dark [class*="bg-[#eaf2fc]"],
 html.dark [class*="bg-[#dbeafc]"],
 html.dark [class*="bg-[#e3f0fe]"] {
-  background-color: rgba(41, 151, 255, 0.16) !important;
-  color: #38BDF8 !important;
+  background-color: rgba(201, 208, 214, 0.14) !important;
+  color: #C9D0D6 !important;
 }
 html.dark [class*="border-[#cfe4fb]"],
 html.dark [class*="border-[#bfdbfe]"],
 html.dark [class*="border-[#abd2fb]"],
 html.dark [class*="border-[#dbeafc]"],
 html.dark [class*="border-[#BFDBFE]"] {
-  border-color: rgba(56, 189, 248, 0.35) !important;
+  border-color: rgba(201, 208, 214, 0.25) !important;
 }
 
 /* 6. Form Controls, Text Inputs & Dropdowns */
 html.dark input:not([type="checkbox"]):not([type="radio"]),
 html.dark textarea,
 html.dark select {
-  background-color: #101520 !important;
-  color: #F9FAFB !important;
-  border-color: #242E40 !important;
+  background-color: #0E0E12 !important;
+  color: #F8FAFC !important;
+  border-color: #27272F !important;
 }
 html.dark input::placeholder,
 html.dark textarea::placeholder {
-  color: #64748B !important;
+  color: #71717A !important;
 }
 
 /* 7. Resources Screen (.rx) Comprehensive Theming */
 html.dark .rx {
-  --navy: #F9FAFB !important;
-  --slate: #D1D5DB !important;
-  --muted: #94A3B8 !important;
-  --border: #242E40 !important;
-  --border-l: #1A2232 !important;
-  --page: #0B0E14 !important;
-  --card: #141A26 !important;
-  --vsoft: rgba(41, 151, 255, 0.16) !important;
-  --vsoft-2: rgba(41, 151, 255, 0.08) !important;
-  --vbd: rgba(56, 189, 248, 0.3) !important;
-  color: #F9FAFB !important;
+  --navy: #F8FAFC !important;
+  --slate: #E2E8F0 !important;
+  --muted: #A1A1AA !important;
+  --border: #27272F !important;
+  --border-l: #202026 !important;
+  --page: #09090B !important;
+  --card: #121216 !important;
+  --vsoft: rgba(201, 208, 214, 0.14) !important;
+  --vsoft-2: rgba(201, 208, 214, 0.06) !important;
+  --vbd: rgba(201, 208, 214, 0.28) !important;
+  color: #F8FAFC !important;
 }
 html.dark .rx-card,
 html.dark .rx-panel,
@@ -642,230 +644,234 @@ html.dark .rx-goal,
 html.dark .rx-view-road,
 html.dark .rx-filter,
 html.dark .rx-sort {
-  background-color: #141A26 !important;
-  border-color: #242E40 !important;
-  color: #F9FAFB !important;
+  background-color: #121216 !important;
+  border-color: #27272F !important;
+  color: #F8FAFC !important;
 }
 html.dark .rx-chip {
-  background-color: #141A26 !important;
-  border-color: #242E40 !important;
-  color: #D1D5DB !important;
+  background-color: #121216 !important;
+  border-color: #27272F !important;
+  color: #C9D0D6 !important;
 }
 html.dark .rx-chip.on {
-  background-color: #0066CC !important;
-  border-color: #0066CC !important;
-  color: #FFFFFF !important;
+  background-color: #C9D0D6 !important;
+  border-color: #C9D0D6 !important;
+  color: #09090B !important;
 }
 html.dark .rx-search .s-in {
-  background-color: #101520 !important;
-  border-color: #242E40 !important;
+  background-color: #0E0E12 !important;
+  border-color: #27272F !important;
 }
 html.dark .rx-search input {
-  color: #F9FAFB !important;
+  color: #F8FAFC !important;
 }
 html.dark .rx-search .kbd {
-  background-color: #1A2232 !important;
-  border-color: #2D3A50 !important;
-  color: #94A3B8 !important;
+  background-color: #18181D !important;
+  border-color: #27272F !important;
+  color: #C9D0D6 !important;
 }
 html.dark .rx-card .r-tag {
-  background-color: #1A2232 !important;
-  color: #D1D5DB !important;
+  background-color: #18181D !important;
+  color: #C9D0D6 !important;
+  border: 1px solid rgba(201, 208, 214, 0.2) !important;
 }
 html.dark .rx-card .r-save {
-  background-color: #141A26 !important;
-  border-color: #242E40 !important;
-  color: #94A3B8 !important;
+  background-color: #121216 !important;
+  border-color: #27272F !important;
+  color: #C9D0D6 !important;
 }
 html.dark .rx-card .r-save.on {
-  background-color: rgba(41, 151, 255, 0.2) !important;
-  border-color: #38BDF8 !important;
-  color: #38BDF8 !important;
+  background-color: rgba(201, 208, 214, 0.2) !important;
+  border-color: #C9D0D6 !important;
+  color: #C9D0D6 !important;
 }
 html.dark .rx-btn.ghost {
-  background-color: #141A26 !important;
-  color: #38BDF8 !important;
-  border-color: #242E40 !important;
+  background-color: #121216 !important;
+  color: #C9D0D6 !important;
+  border-color: #27272F !important;
 }
 html.dark .rx-bar {
-  background-color: #1A2232 !important;
+  background-color: #18181D !important;
 }
 html.dark .rx-picked {
-  background: linear-gradient(160deg, #141A26, rgba(41, 151, 255, 0.12)) !important;
-  border-color: rgba(56, 189, 248, 0.3) !important;
+  background: linear-gradient(160deg, #18181D, rgba(201, 208, 214, 0.12)) !important;
+  border-color: rgba(201, 208, 214, 0.3) !important;
 }
 html.dark .rx-insight {
-  background: linear-gradient(160deg, rgba(41, 151, 255, 0.12), rgba(16, 21, 30, 0.9)) !important;
-  border-color: rgba(56, 189, 248, 0.3) !important;
+  background: linear-gradient(160deg, rgba(201, 208, 214, 0.1), rgba(18, 18, 22, 0.95)) !important;
+  border-color: rgba(201, 208, 214, 0.28) !important;
 }
 
 /* 8. AIChat Floating Assistant (.pfchat) Comprehensive Theming */
 html.dark .pfchat-fab,
 [data-theme="dark"] .pfchat-fab {
-  background-color: #141A26 !important;
-  border-color: #242E40 !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
+  background-color: #121216 !important;
+  border-color: #27272F !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7) !important;
 }
 html.dark .pfchat-fab span,
 [data-theme="dark"] .pfchat-fab span {
-  color: #F9FAFB !important;
+  color: #C9D0D6 !important;
 }
 html.dark .pfchat-panel,
 [data-theme="dark"] .pfchat-panel {
-  background-color: #141A26 !important;
-  border-color: #242E40 !important;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7) !important;
+  background-color: #121216 !important;
+  border-color: #27272F !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8) !important;
 }
 html.dark .pfchat-head,
 [data-theme="dark"] .pfchat-head {
-  border-bottom-color: #1E2638 !important;
-  background-color: #141A26 !important;
+  border-bottom-color: #202026 !important;
+  background-color: #121216 !important;
 }
 html.dark .pfchat-head .n,
 [data-theme="dark"] .pfchat-head .n {
-  color: #F9FAFB !important;
+  color: #F8FAFC !important;
 }
 html.dark .pfchat-head button,
 [data-theme="dark"] .pfchat-head button {
-  color: #94A3B8 !important;
+  color: #C9D0D6 !important;
 }
 html.dark .pfchat-head button:hover,
 [data-theme="dark"] .pfchat-head button:hover {
-  background-color: #1E2638 !important;
-  color: #F9FAFB !important;
+  background-color: #202026 !important;
+  color: #FFFFFF !important;
 }
 html.dark .pfchat-body,
 [data-theme="dark"] .pfchat-body {
-  background-color: #0E131E !important;
+  background-color: #0E0E12 !important;
 }
 html.dark .pfchat-empty,
 [data-theme="dark"] .pfchat-empty {
-  color: #94A3B8 !important;
+  color: #A1A1AA !important;
 }
 html.dark .pfchat-empty b,
 [data-theme="dark"] .pfchat-empty b {
-  color: #F9FAFB !important;
+  color: #C9D0D6 !important;
 }
 html.dark .pfchat-msg.assistant,
 [data-theme="dark"] .pfchat-msg.assistant {
-  background-color: #141A26 !important;
-  border-color: #242E40 !important;
-  color: #F9FAFB !important;
+  background-color: #18181D !important;
+  border-color: #27272F !important;
+  color: #F8FAFC !important;
 }
 html.dark .pfchat-msg.user,
 [data-theme="dark"] .pfchat-msg.user {
-  background-color: #0066cc !important;
-  color: #FFFFFF !important;
+  background-color: #C9D0D6 !important;
+  color: #09090B !important;
+  font-weight: 600 !important;
 }
 html.dark .pfchat-sugg button,
 [data-theme="dark"] .pfchat-sugg button {
-  background-color: #141A26 !important;
-  border-color: #242E40 !important;
-  color: #F9FAFB !important;
+  background-color: #121216 !important;
+  border-color: #27272F !important;
+  color: #C9D0D6 !important;
 }
 html.dark .pfchat-sugg button:hover,
 [data-theme="dark"] .pfchat-sugg button:hover {
-  border-color: #38BDF8 !important;
-  background-color: #1E293B !important;
+  border-color: #C9D0D6 !important;
+  background-color: #18181D !important;
+  color: #FFFFFF !important;
 }
 html.dark .pfchat-typing,
 [data-theme="dark"] .pfchat-typing {
-  background-color: #141A26 !important;
-  border-color: #242E40 !important;
+  background-color: #18181D !important;
+  border-color: #27272F !important;
 }
 html.dark .pfchat-typing i,
 [data-theme="dark"] .pfchat-typing i {
-  background-color: #64748B !important;
+  background-color: #A1A1AA !important;
 }
 html.dark .pfchat-foot,
 [data-theme="dark"] .pfchat-foot {
-  border-top-color: #1E2638 !important;
-  background-color: #141A26 !important;
+  border-top-color: #202026 !important;
+  background-color: #121216 !important;
 }
 html.dark .pfchat-in,
 [data-theme="dark"] .pfchat-in {
-  border-color: #242E40 !important;
-  background-color: #0E131E !important;
+  border-color: #27272F !important;
+  background-color: #0E0E12 !important;
 }
 html.dark .pfchat-in:focus-within,
 [data-theme="dark"] .pfchat-in:focus-within {
-  border-color: #38BDF8 !important;
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18) !important;
+  border-color: #C9D0D6 !important;
+  box-shadow: 0 0 0 3px rgba(201, 208, 214, 0.2) !important;
 }
 html.dark .pfchat-in textarea,
 [data-theme="dark"] .pfchat-in textarea {
-  color: #F9FAFB !important;
+  color: #F8FAFC !important;
   background-color: transparent !important;
 }
 html.dark .pfchat-in textarea::placeholder,
 [data-theme="dark"] .pfchat-in textarea::placeholder {
-  color: #64748B !important;
+  color: #71717A !important;
 }
 html.dark .pfchat-send,
 [data-theme="dark"] .pfchat-send {
-  background-color: #0066cc !important;
-  color: #FFFFFF !important;
+  background-color: #C9D0D6 !important;
+  color: #09090B !important;
 }
 html.dark .pfchat-send:hover:not(:disabled),
 [data-theme="dark"] .pfchat-send:hover:not(:disabled) {
-  background-color: #0052a3 !important;
+  background-color: #B4BCC3 !important;
 }
 html.dark .pfchat-ctx,
 [data-theme="dark"] .pfchat-ctx {
-  color: #64748B !important;
+  color: #A1A1AA !important;
 }
 
 /* 9. Recharts SVG Charts & Data Visuals in Dark Mode */
 html.dark .recharts-cartesian-grid line,
 html.dark .recharts-polar-grid-concentric path,
 html.dark .recharts-polar-grid-angle line {
-  stroke: #242E40 !important;
+  stroke: #27272F !important;
 }
 html.dark .recharts-text,
 html.dark .recharts-polar-angle-axis-tick-value {
-  fill: #94A3B8 !important;
+  fill: #A1A1AA !important;
 }
 html.dark .recharts-default-tooltip {
-  background-color: #141A26 !important;
-  border-color: #242E40 !important;
-  color: #F9FAFB !important;
+  background-color: #121216 !important;
+  border-color: #27272F !important;
+  color: #F8FAFC !important;
 }
 
 /* 10. Dark Mode Navigation & Sidebar Links */
 html.dark .pf-sidebar nav button[aria-current="page"] {
-  background-color: rgba(41, 151, 255, 0.18) !important;
-  color: #38BDF8 !important;
+  background-color: rgba(201, 208, 214, 0.14) !important;
+  color: #C9D0D6 !important;
+  border: 1px solid rgba(201, 208, 214, 0.25) !important;
 }
 html.dark .pf-sidebar nav button:not([aria-current="page"]) {
   background-color: transparent !important;
   color: #D1D5DB !important;
 }
 html.dark .pf-sidebar nav button:not([aria-current="page"]):hover {
-  background-color: rgba(255, 255, 255, 0.06) !important;
+  background-color: rgba(201, 208, 214, 0.06) !important;
   color: #FFFFFF !important;
 }
 html.dark .pf-sidebar nav button:not([aria-current="page"]) span:first-child {
-  color: #94A3B8 !important;
+  color: #A1A1AA !important;
 }
 html.dark .pf-sidebar nav button[aria-current="page"] span:first-child {
-  color: #38BDF8 !important;
+  color: #C9D0D6 !important;
 }
 
 html.dark .pf-topbar nav button {
   color: #D1D5DB !important;
 }
 html.dark .pf-topbar nav button:hover {
-  background-color: rgba(255, 255, 255, 0.06) !important;
+  background-color: rgba(201, 208, 214, 0.06) !important;
   color: #FFFFFF !important;
 }
 
 /* 11. AI Coach Chat Card & Workspace Theming */
 html.dark .coach-chat-card {
-  background-color: #141A26 !important;
-  border-color: #242E40 !important;
+  background-color: #121216 !important;
+  border-color: #27272F !important;
 }
 html.dark .coach-chat-card > div:first-child {
-  background-color: #0E131E !important;
+  background-color: #0E0E12 !important;
 }
 
 /* 12. Universal Sleek Scrollbars (Light & Dark) */
@@ -896,20 +902,20 @@ html.dark .coach-chat-card > div:first-child {
 html.dark ::-webkit-scrollbar-track,
 html.dark .pf-custom-scrollbar::-webkit-scrollbar-track,
 html.dark .overflow-x-auto::-webkit-scrollbar-track {
-  background: #0E131E !important;
+  background: #0E0E12 !important;
   border-radius: 9999px !important;
 }
 html.dark ::-webkit-scrollbar-thumb,
 html.dark .pf-custom-scrollbar::-webkit-scrollbar-thumb,
 html.dark .overflow-x-auto::-webkit-scrollbar-thumb {
-  background: #242E40 !important;
-  border: 1px solid #141A26 !important;
+  background: #27272F !important;
+  border: 1px solid #121216 !important;
   border-radius: 9999px !important;
 }
 html.dark ::-webkit-scrollbar-thumb:hover,
 html.dark .pf-custom-scrollbar::-webkit-scrollbar-thumb:hover,
 html.dark .overflow-x-auto::-webkit-scrollbar-thumb:hover {
-  background: #38BDF8 !important;
+  background: #C9D0D6 !important;
 }
 
 /* When a browser can't do backdrop-filter, fall back to near-opaque surfaces. */
@@ -917,6 +923,6 @@ html.dark .overflow-x-auto::-webkit-scrollbar-thumb:hover {
   .pf-glass { background: rgba(255, 255, 255, 0.96); }
   .pf-glass-strong { background: rgba(255, 255, 255, 0.98); }
   .pf-topbar, .pf-sidebar { background: #ffffff; }
-  html.dark .pf-glass, [data-theme="dark"] .pf-glass { background: #141A26 !important; }
-  html.dark .pf-topbar, html.dark .pf-sidebar { background: #141A26 !important; }
+  html.dark .pf-glass, [data-theme="dark"] .pf-glass { background: #121216 !important; }
+  html.dark .pf-topbar, html.dark .pf-sidebar { background: #121216 !important; }
 }

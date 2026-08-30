@@ -63,26 +63,26 @@ const STYLES = `
 .genov .btn-ghost:hover{ background:#f8fafc; }
 .genov .btn:focus-visible{ outline:none; box-shadow:0 0 0 3px rgba(0,102,204,.35); }
 
-/* DARK THEME SUPPORT */
-html.dark .genov .scrim{ background:rgba(3,7,18,.82); -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); }
-html.dark .genov .modal{ background:#0F1728; border:1px solid #22344E; box-shadow:0 24px 64px rgba(0,0,0,.75); }
+/* DARK THEME SUPPORT (Obsidian Black + Chrome Silver) */
+html.dark .genov .scrim{ background:rgba(9,9,11,.85); -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); }
+html.dark .genov .modal{ background:#121216; border:1px solid #27272F; box-shadow:0 24px 64px rgba(0,0,0,.75); }
 html.dark .genov h2{ color:#F8FAFC; }
 html.dark .genov .sub{ color:#94A3B8; }
-html.dark .genov .row.done{ background:rgba(30,41,59,.7); color:#F8FAFC; border-color:#23334A; }
-html.dark .genov .row.done .ic .dot-done{ background:#38BDF8; }
-html.dark .genov .row.done .ic .dot-done svg path{ stroke:#0B1220; stroke-width:3.6; }
-html.dark .genov .row.active{ background:#152238; color:#38BDF8; border-color:#38BDF8; box-shadow:0 0 0 3px rgba(56,189,248,.18); }
-html.dark .genov .row.todo{ color:#64748B; }
-html.dark .genov .row.todo .ic .dot-todo{ border-color:#334155; }
-html.dark .genov .track{ background:#1A2638; border:1px solid #293D5A; }
-html.dark .genov .fill{ background:linear-gradient(90deg,#0284C7,#38BDF8); box-shadow:0 0 14px rgba(56,189,248,.65); }
+html.dark .genov .row.done{ background:rgba(24,24,29,.7); color:#F8FAFC; border-color:#27272F; }
+html.dark .genov .row.done .ic .dot-done{ background:#C9D0D6; }
+html.dark .genov .row.done .ic .dot-done svg path{ stroke:#09090B; stroke-width:3.6; }
+html.dark .genov .row.active{ background:#18181D; color:#C9D0D6; border-color:#C9D0D6; box-shadow:0 0 0 3px rgba(201,208,214,.18); }
+html.dark .genov .row.todo{ color:#71717A; }
+html.dark .genov .row.todo .ic .dot-todo{ border-color:#27272F; }
+html.dark .genov .track{ background:#18181D; border:1px solid #27272F; }
+html.dark .genov .fill{ background:linear-gradient(90deg,#94A3B8,#C9D0D6); box-shadow:0 0 14px rgba(201,208,214,.45); }
 html.dark .genov .ptext{ color:#F8FAFC; }
 html.dark .genov .foot{ color:#94A3B8; }
 html.dark .genov .err p{ color:#FCA5A5; background:rgba(127,29,29,.35); border-color:rgba(248,113,113,.4); }
-html.dark .genov .btn-ghost{ background:#141C2B; color:#F8FAFC; border-color:#2D3F59; }
-html.dark .genov .btn-ghost:hover{ background:#1E293B; }
-html.dark .genov .btn-primary{ background:#0284C7; color:#fff; }
-html.dark .genov .btn-primary:hover{ background:#0369A1; }
+html.dark .genov .btn-ghost{ background:#18181D; color:#F8FAFC; border-color:#27272F; }
+html.dark .genov .btn-ghost:hover{ background:#27272F; }
+html.dark .genov .btn-primary{ background:#0066cc; color:#fff; }
+html.dark .genov .btn-primary:hover{ background:#004fa3; }
 
 .genov .spin{ transform-origin:center; animation:genov-spin 1s linear infinite; }
 .genov .compass{ transform-origin:60px 60px; animation:genov-spin 14s linear infinite; }
@@ -104,8 +104,8 @@ function CheckIcon() {
 function ActiveRing() {
   return (
     <svg className="step-ring spin" viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{ boxShadow: 'none', border: 'none', outline: 'none' }}>
-      <circle cx="12" cy="12" r="9.5" className="stroke-[#cfe4fb] dark:stroke-[#1E2E48]" strokeWidth="2.5" />
-      <path d="M12 2.5a9.5 9.5 0 0 1 9.5 9.5" className="stroke-[#0066cc] dark:stroke-[#38BDF8]" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+      <circle cx="12" cy="12" r="9.5" className="stroke-[#cfe4fb] dark:stroke-[#27272F]" strokeWidth="2.5" />
+      <path d="M12 2.5a9.5 9.5 0 0 1 9.5 9.5" className="stroke-[#0066cc] dark:stroke-[#C9D0D6]" strokeWidth="2.5" strokeLinecap="round" fill="none" />
     </svg>
   )
 }
@@ -114,21 +114,21 @@ function Illustration() {
   return (
     <svg className="art" viewBox="0 0 120 120" fill="none" aria-hidden="true">
       {/* Outer glow background circle */}
-      <circle cx="60" cy="60" r="58" className="fill-[#eef6fe] dark:fill-[#142034] dark:stroke-[#243754]" strokeWidth="1" />
+      <circle cx="60" cy="60" r="58" className="fill-[#eef6fe] dark:fill-[#121216] dark:stroke-[#27272F]" strokeWidth="1" />
       {/* dotted orbital path */}
-      <circle cx="60" cy="60" r="42" className="stroke-[#b8d6f6] dark:stroke-[#38BDF8] opacity-80 dark:opacity-60" strokeWidth="1.4" strokeDasharray="2 7" strokeLinecap="round" />
+      <circle cx="60" cy="60" r="42" className="stroke-[#b8d6f6] dark:stroke-[#C9D0D6] opacity-80 dark:opacity-60" strokeWidth="1.4" strokeDasharray="2 7" strokeLinecap="round" />
       {/* three orbit dots, rotating as a group */}
       <g className="orbit">
-        <circle cx="60" cy="18" r="3.6" className="fill-[#0066cc] dark:fill-[#38BDF8]" />
-        <circle cx="96.4" cy="81" r="3.6" className="fill-[#5ba3f0] dark:fill-[#60A5FA]" />
-        <circle cx="23.6" cy="81" r="3.6" className="fill-[#80b8f4] dark:fill-[#93C5FD]" />
+        <circle cx="60" cy="18" r="3.6" className="fill-[#0066cc] dark:fill-[#C9D0D6]" />
+        <circle cx="96.4" cy="81" r="3.6" className="fill-[#5ba3f0] dark:fill-[#A1A1AA]" />
+        <circle cx="23.6" cy="81" r="3.6" className="fill-[#80b8f4] dark:fill-[#71717A]" />
       </g>
       {/* compass */}
       <g className="compass">
-        <circle cx="60" cy="60" r="26" className="fill-white dark:fill-[#1A283F] stroke-[#d8e9fb] dark:stroke-[#30486D]" strokeWidth="1.5" />
-        <polygon points="60,40 66,60 60,56 54,60" className="fill-[#0066cc] dark:fill-[#38BDF8]" />
-        <polygon points="60,80 54,60 60,64 66,60" className="fill-[#a6cbf2] dark:fill-[#1E3A5F]" />
-        <circle cx="60" cy="60" r="3.2" className="fill-[#004fa3] dark:fill-[#38BDF8]" />
+        <circle cx="60" cy="60" r="26" className="fill-white dark:fill-[#18181D] stroke-[#d8e9fb] dark:stroke-[#27272F]" strokeWidth="1.5" />
+        <polygon points="60,40 66,60 60,56 54,60" className="fill-[#0066cc] dark:fill-[#C9D0D6]" />
+        <polygon points="60,80 54,60 60,64 66,60" className="fill-[#a6cbf2] dark:fill-[#27272F]" />
+        <circle cx="60" cy="60" r="3.2" className="fill-[#004fa3] dark:fill-[#C9D0D6]" />
       </g>
     </svg>
   )

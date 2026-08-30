@@ -25,16 +25,16 @@ function RegisterConfirmModal({ hackathon, onConfirm, onSaveInterest, onClose })
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
       <div
-        className="relative z-10 w-full max-w-md bg-white dark:bg-[#141A26] rounded-3xl border border-[#e0e0e0] dark:border-[#242E40] p-6 shadow-2xl"
+        className="relative z-10 w-full max-w-md bg-white dark:bg-[#121216] rounded-3xl border border-[#e0e0e0] dark:border-[#27272F] p-6 shadow-2xl"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-50 dark:bg-blue-900/20 text-[#0066cc] dark:text-[#38BDF8] border border-blue-200 dark:border-blue-800/40">
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-50 dark:bg-zinc-800 text-[#0066cc] dark:text-[#C9D0D6] border border-blue-200 dark:border-[#27272F]">
             Registration Confirmation
           </span>
           <button
             onClick={onClose}
-            className="w-7 h-7 rounded-full bg-[#fafafc] dark:bg-[#1E2638] text-[#7a7a7a] hover:text-[#1d1d1f] dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+            className="w-7 h-7 rounded-full bg-[#fafafc] dark:bg-[#18181D] text-[#7a7a7a] hover:text-[#1d1d1f] dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
@@ -51,14 +51,14 @@ function RegisterConfirmModal({ hackathon, onConfirm, onSaveInterest, onClose })
           <button
             type="button"
             onClick={() => onConfirm(hackathon.id, 'registered')}
-            className="w-full py-2.5 px-4 rounded-xl bg-[#0066cc] hover:bg-[#004fa3] dark:bg-[#38BDF8] dark:hover:bg-[#0ea5e9] text-white dark:text-[#0B0E14] font-bold text-xs text-center transition-all shadow-sm cursor-pointer"
+            className="w-full py-2.5 px-4 rounded-xl bg-[#0066cc] hover:bg-[#004fa3] dark:bg-[#C9D0D6] dark:hover:bg-[#CBD5E1] text-white dark:text-[#09090B] font-bold text-xs text-center transition-all shadow-sm cursor-pointer"
           >
             ✓ Yes, I Registered
           </button>
           <button
             type="button"
             onClick={() => onSaveInterest(hackathon.id, 'saved')}
-            className="w-full py-2.5 px-4 rounded-xl border border-[#0066cc] dark:border-[#38BDF8] text-[#0066cc] dark:text-[#38BDF8] font-bold text-xs text-center hover:bg-[#eaf2fc] dark:hover:bg-white/5 transition-colors cursor-pointer"
+            className="w-full py-2.5 px-4 rounded-xl border border-[#0066cc] dark:border-[#27272F] text-[#0066cc] dark:text-[#C9D0D6] font-bold text-xs text-center hover:bg-[#eaf2fc] dark:hover:bg-[#18181D] transition-colors cursor-pointer"
           >
             Save for Later
           </button>
@@ -81,7 +81,7 @@ function HackathonDetailModal({ hackathon, registered, onVisitSite, onToggleRegi
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
       <div
-        className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-[#141A26] rounded-3xl border border-[#e0e0e0] dark:border-[#242E40] shadow-[0_32px_80px_rgba(0,0,0,0.22)]"
+        className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-[#121216] rounded-3xl border border-[#e0e0e0] dark:border-[#27272F] shadow-[0_32px_80px_rgba(0,0,0,0.22)]"
         onClick={e => e.stopPropagation()}
       >
         {/* Hero Banner */}
@@ -146,8 +146,8 @@ function HackathonDetailModal({ hackathon, registered, onVisitSite, onToggleRegi
                 val: `${hackathon.team_min || 1}–${hackathon.team_max || 4} members`
               },
             ].map(item => (
-              <div key={item.label} className="flex flex-col gap-1 bg-[#fafafc] dark:bg-[#0d1117] rounded-xl p-3 border border-[#f0f0f0] dark:border-[#1a2032]">
-                <span className="text-[#0066cc] dark:text-[#38BDF8]">{item.icon}</span>
+              <div key={item.label} className="flex flex-col gap-1 bg-[#fafafc] dark:bg-[#0E0E12] rounded-xl p-3 border border-[#f0f0f0] dark:border-[#27272F]">
+                <span className="text-[#0066cc] dark:text-[#C9D0D6]">{item.icon}</span>
                 <span className="text-[10px] font-semibold uppercase tracking-wide text-[#7a7a7a] dark:text-[#9CA3AF]">{item.label}</span>
                 <span className="text-xs sm:text-sm font-bold text-[#1d1d1f] dark:text-white truncate">{item.val}</span>
               </div>
@@ -168,7 +168,7 @@ function HackathonDetailModal({ hackathon, registered, onVisitSite, onToggleRegi
               <h3 className="font-['Manrope'] font-bold text-sm text-[#1d1d1f] dark:text-white mb-2">Themes & Tracks</h3>
               <div className="flex flex-wrap gap-2">
                 {hackathon.themes.map((t, i) => (
-                  <span key={i} className="px-3 py-1 rounded-full text-xs font-semibold bg-[#eaf2fc] dark:bg-[rgba(41,151,255,0.18)] text-[#0066cc] dark:text-[#38BDF8] border border-[#cfe4fb] dark:border-[rgba(41,151,255,0.3)]">
+                  <span key={i} className="px-3 py-1 rounded-full text-xs font-semibold bg-[#eaf2fc] dark:bg-[rgba(201,208,214,0.15)] text-[#0066cc] dark:text-[#C9D0D6] border border-[#cfe4fb] dark:border-[rgba(201,208,214,0.25)]">
                     {t}
                   </span>
                 ))}
@@ -178,8 +178,8 @@ function HackathonDetailModal({ hackathon, registered, onVisitSite, onToggleRegi
 
           {/* Prizes */}
           {hackathon.prizes && (
-            <div className="flex items-center gap-3 p-3.5 rounded-xl bg-[#fafafc] dark:bg-[#0d1117] border border-[#f0f0f0] dark:border-[#1a2032]">
-              <div className="w-8 h-8 rounded-lg bg-[#eaf2fc] dark:bg-[rgba(41,151,255,0.18)] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center flex-none">
+            <div className="flex items-center gap-3 p-3.5 rounded-xl bg-[#fafafc] dark:bg-[#0E0E12] border border-[#f0f0f0] dark:border-[#27272F]">
+              <div className="w-8 h-8 rounded-lg bg-[#eaf2fc] dark:bg-[rgba(201,208,214,0.15)] text-[#0066cc] dark:text-[#C9D0D6] flex items-center justify-center flex-none">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
               </div>
               <div>
@@ -194,7 +194,7 @@ function HackathonDetailModal({ hackathon, registered, onVisitSite, onToggleRegi
             <button
               type="button"
               onClick={() => onVisitSite(hackathon)}
-              className="flex-1 py-3 px-5 rounded-xl bg-[#0066cc] hover:bg-[#004fa3] dark:bg-[#38BDF8] dark:hover:bg-[#0ea5e9] text-white dark:text-[#0B0E14] font-bold text-sm text-center shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
+              className="flex-1 py-3 px-5 rounded-xl bg-[#0066cc] hover:bg-[#004fa3] dark:bg-[#C9D0D6] dark:hover:bg-[#CBD5E1] text-white dark:text-[#09090B] font-bold text-sm text-center shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
               <span>{hackathon.status === 'ended' ? 'View Event Details ↗' : 'Register on Official Website ↗'}</span>
             </button>
@@ -204,7 +204,7 @@ function HackathonDetailModal({ hackathon, registered, onVisitSite, onToggleRegi
               className={`py-3 px-5 rounded-xl border font-bold text-sm transition-colors cursor-pointer ${
                 registered
                   ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700 hover:bg-red-50 hover:text-red-600 hover:border-red-200'
-                  : 'border-[#0066cc] dark:border-[#38BDF8] text-[#0066cc] dark:text-[#38BDF8] hover:bg-[#eaf2fc] dark:hover:bg-white/5'
+                  : 'border-[#0066cc] dark:border-[#27272F] text-[#0066cc] dark:text-[#C9D0D6] hover:bg-[#eaf2fc] dark:hover:bg-[#18181D]'
               }`}
             >
               {registered ? 'Undo Registration' : 'Mark as Registered'}
@@ -212,7 +212,7 @@ function HackathonDetailModal({ hackathon, registered, onVisitSite, onToggleRegi
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-3 rounded-xl border border-[#e0e0e0] dark:border-[#242E40] text-[#1d1d1f] dark:text-white font-semibold text-sm hover:bg-[#f5f5f7] dark:hover:bg-white/5 transition-colors cursor-pointer"
+              className="px-5 py-3 rounded-xl border border-[#e0e0e0] dark:border-[#27272F] text-[#1d1d1f] dark:text-white font-semibold text-sm hover:bg-[#f5f5f7] dark:hover:bg-white/5 transition-colors cursor-pointer"
             >
               Close
             </button>
@@ -227,12 +227,12 @@ function HackathonCard({ hackathon, registered, onVisitSite, onToggleRegister, o
   const s = STATUS_META[hackathon.status] || STATUS_META.upcoming
   return (
     <div
-      className="group bg-white dark:bg-[#141A26] rounded-2xl border border-[#e0e0e0] dark:border-[#242E40] shadow-sm hover:shadow-[0_8px_32px_rgba(0,102,204,0.10)] dark:hover:shadow-[0_8px_32px_rgba(56,189,248,0.08)] transition-all duration-200 hover:-translate-y-0.5 overflow-hidden cursor-pointer flex flex-col justify-between"
+      className="group bg-white dark:bg-[#121216] rounded-2xl border border-[#e0e0e0] dark:border-[#27272F] shadow-sm hover:shadow-[0_8px_32px_rgba(0,102,204,0.10)] dark:hover:shadow-[0_8px_32px_rgba(0,0,0,0.5)] transition-all duration-200 hover:-translate-y-0.5 overflow-hidden cursor-pointer flex flex-col justify-between"
       onClick={() => onView(hackathon)}
     >
       <div>
         {/* Card image banner */}
-        <div className="relative h-28 overflow-hidden flex-none bg-gradient-to-br from-[#0066cc] to-[#0047b3] dark:from-[#1a3a6e] dark:to-[#0d1f3c]">
+        <div className="relative h-28 overflow-hidden flex-none bg-gradient-to-br from-[#0066cc] to-[#0047b3] dark:from-[#18181D] dark:to-[#09090B]">
           {hackathon.image_url && (
             <img
               src={hackathon.image_url}
@@ -258,7 +258,7 @@ function HackathonCard({ hackathon, registered, onVisitSite, onToggleRegister, o
         {/* Body */}
         <div className="flex flex-col gap-3 p-4">
           <div>
-            <h3 className="font-['Manrope'] font-extrabold text-base text-[#1d1d1f] dark:text-white leading-tight line-clamp-2 group-hover:text-[#0066cc] dark:group-hover:text-[#38BDF8] transition-colors">
+            <h3 className="font-['Manrope'] font-extrabold text-base text-[#1d1d1f] dark:text-white leading-tight line-clamp-2 group-hover:text-[#0066cc] dark:group-hover:text-[#C9D0D6] transition-colors">
               {hackathon.name}
             </h3>
             {hackathon.tagline && (
@@ -270,7 +270,7 @@ function HackathonCard({ hackathon, registered, onVisitSite, onToggleRegister, o
           {hackathon.themes?.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
               {hackathon.themes.slice(0, 3).map((t, i) => (
-                <span key={i} className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-[#eaf2fc] dark:bg-[rgba(41,151,255,0.15)] text-[#0066cc] dark:text-[#38BDF8]">
+                <span key={i} className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-[#eaf2fc] dark:bg-[#18181D] text-[#0066cc] dark:text-[#C9D0D6]">
                   {t}
                 </span>
               ))}
@@ -298,7 +298,7 @@ function HackathonCard({ hackathon, registered, onVisitSite, onToggleRegister, o
         <button
           type="button"
           onClick={e => { e.stopPropagation(); onVisitSite(hackathon) }}
-          className="flex-1 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer bg-[#0066cc] hover:bg-[#004fa3] dark:bg-[#38BDF8] dark:hover:bg-[#0ea5e9] text-white dark:text-[#0B0E14] shadow-sm flex items-center justify-center gap-1"
+          className="flex-1 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer bg-[#0066cc] hover:bg-[#004fa3] dark:bg-[#C9D0D6] dark:hover:bg-[#CBD5E1] text-white dark:text-[#09090B] shadow-sm flex items-center justify-center gap-1"
         >
           <span>{hackathon.status === 'ended' ? 'View Details ↗' : 'Register on Website ↗'}</span>
         </button>
@@ -320,7 +320,7 @@ function HackathonCard({ hackathon, registered, onVisitSite, onToggleRegister, o
             type="button"
             title="Track this hackathon without visiting"
             onClick={e => { e.stopPropagation(); onToggleRegister(hackathon.id, 'tracked') }}
-            className="px-3 py-2.5 rounded-xl border border-[#e0e0e0] dark:border-[#242E40] text-[#7a7a7a] hover:text-[#0066cc] dark:hover:text-[#38BDF8] hover:border-[#0066cc] font-bold text-xs transition-colors cursor-pointer"
+            className="px-3 py-2.5 rounded-xl border border-[#e0e0e0] dark:border-[#27272F] text-[#7a7a7a] hover:text-[#0066cc] dark:hover:text-[#C9D0D6] hover:border-[#0066cc] dark:hover:border-[#C9D0D6] font-bold text-xs transition-colors cursor-pointer"
           >
             Track
           </button>
@@ -587,7 +587,7 @@ export default function HackathonsScreen() {
         {/* Toast */}
         {toast && (
           <div className={`fixed top-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl shadow-2xl text-sm font-semibold flex items-center gap-2 transition-all ${
-            toast.type === 'error' ? 'bg-red-500 text-white' : 'bg-[#0066cc] text-white dark:bg-[#38BDF8] dark:text-[#0B0E14]'
+            toast.type === 'error' ? 'bg-red-500 text-white' : 'bg-[#0066cc] text-white dark:bg-[#C9D0D6] dark:text-[#09090B]'
           }`}>
             <span>{toast.msg}</span>
           </div>
@@ -637,7 +637,7 @@ export default function HackathonsScreen() {
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-[#e0e0e0] dark:border-[#242E40]">
+        <div className="flex border-b border-[#e0e0e0] dark:border-[#27272F]">
           {[
             { id: 'discover', label: 'Discover Hackathons', count: filtered.length },
             { id: 'mine', label: 'My Hackathons', count: myHackathons.length },
@@ -647,7 +647,7 @@ export default function HackathonsScreen() {
               onClick={() => setTab(t.id)}
               className={`pb-3 px-4 text-sm font-bold border-b-2 transition-all flex items-center gap-2 cursor-pointer ${
                 tab === t.id
-                  ? 'border-[#0066cc] text-[#0066cc] dark:border-[#38BDF8] dark:text-[#38BDF8]'
+                  ? 'border-[#0066cc] text-[#0066cc] dark:border-[#C9D0D6] dark:text-[#C9D0D6]'
                   : 'border-transparent text-[#7a7a7a] hover:text-[#1d1d1f] dark:hover:text-white'
               }`}
             >
@@ -670,8 +670,8 @@ export default function HackathonsScreen() {
                       onClick={() => setSelectedTheme(theme)}
                       className={`flex-none px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer ${
                         selectedTheme === theme
-                          ? 'bg-[#0066cc] dark:bg-[#38BDF8] text-white dark:text-[#0B0E14] border-[#0066cc] dark:border-[#38BDF8]'
-                          : 'bg-white dark:bg-[#141A26] text-[#333] dark:text-[#D1D5DB] border-[#e0e0e0] dark:border-[#242E40] hover:border-[#0066cc] dark:hover:border-[#38BDF8]'
+                          ? 'bg-[#0066cc] dark:bg-[#C9D0D6] text-white dark:text-[#09090B] border-[#0066cc] dark:border-[#C9D0D6]'
+                          : 'bg-white dark:bg-[#121216] text-[#333] dark:text-[#D1D5DB] border-[#e0e0e0] dark:border-[#27272F] hover:border-[#0066cc] dark:hover:border-[#C9D0D6]'
                       }`}
                     >
                       {theme}
@@ -713,12 +713,12 @@ export default function HackathonsScreen() {
               </div>
             )}
             {!loading && !error && filtered.length === 0 && (
-              <div className="flex flex-col items-center gap-3 py-16 bg-white dark:bg-[#141A26] rounded-2xl border border-[#e0e0e0] dark:border-[#242E40]">
+              <div className="flex flex-col items-center gap-3 py-16 bg-white dark:bg-[#121216] rounded-2xl border border-[#e0e0e0] dark:border-[#27272F]">
                 <p className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">No Hackathons Found</p>
                 <p className="text-xs sm:text-sm text-[#7a7a7a] dark:text-[#9CA3AF] text-center max-w-sm">
                   No hackathon events match your current filter selection.
                 </p>
-                <button onClick={() => { setSelectedTheme('All'); setSelectedStatus('All') }} className="mt-2 text-xs font-bold text-[#0066cc] dark:text-[#38BDF8] cursor-pointer">
+                <button onClick={() => { setSelectedTheme('All'); setSelectedStatus('All') }} className="mt-2 text-xs font-bold text-[#0066cc] dark:text-[#C9D0D6] cursor-pointer">
                   Clear all filters
                 </button>
               </div>
@@ -744,7 +744,7 @@ export default function HackathonsScreen() {
         {tab === 'mine' && (
           <div className="flex flex-col gap-4">
             {myHackathons.length === 0 ? (
-              <div className="flex flex-col items-center gap-3 py-16 bg-white dark:bg-[#141A26] rounded-2xl border border-[#e0e0e0] dark:border-[#242E40]">
+              <div className="flex flex-col items-center gap-3 py-16 bg-white dark:bg-[#121216] rounded-2xl border border-[#e0e0e0] dark:border-[#27272F]">
                 <p className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">No Tracked Hackathons</p>
                 <p className="text-xs sm:text-sm text-[#7a7a7a] dark:text-[#9CA3AF] text-center max-w-xs">
                   Click "Register on Website" or "Track" on any hackathon to track your participation here.
@@ -766,12 +766,12 @@ export default function HackathonsScreen() {
                   ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800'
                   : 'bg-slate-50 dark:bg-slate-800/40 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700'
                 return (
-                  <div key={h.id} className="bg-white dark:bg-[#141A26] rounded-2xl border border-[#e0e0e0] dark:border-[#242E40] p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+                  <div key={h.id} className="bg-white dark:bg-[#121216] rounded-2xl border border-[#e0e0e0] dark:border-[#27272F] p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
                     <div className="flex-1 flex flex-col gap-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         <h3 className="font-['Manrope'] font-extrabold text-base text-[#1d1d1f] dark:text-white">{h.name}</h3>
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${s.bg} ${s.text}`}>{s.label}</span>
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${statusColor}`}>
+                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${s.bg} ${s.text}`}>{s.label}</span>
+                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${statusColor}`}>
                           {statusLabel}
                         </span>
                       </div>
@@ -783,7 +783,7 @@ export default function HackathonsScreen() {
                       <button
                         type="button"
                         onClick={() => handleToggleRegister(h.id, userStatus === 'registered' ? 'saved' : 'registered')}
-                        className="px-3 py-1.5 rounded-xl border border-[#e0e0e0] dark:border-[#242E40] text-xs font-semibold text-[#1d1d1f] dark:text-white hover:bg-[#f5f5f7] dark:hover:bg-white/5 transition-colors cursor-pointer"
+                        className="px-3 py-1.5 rounded-xl border border-[#e0e0e0] dark:border-[#27272F] text-xs font-semibold text-[#1d1d1f] dark:text-white hover:bg-[#f5f5f7] dark:hover:bg-[#18181D] transition-colors cursor-pointer"
                       >
                         {userStatus === 'registered' ? 'Move to Saved' : 'Mark as Registered'}
                       </button>
@@ -798,7 +798,7 @@ export default function HackathonsScreen() {
                         href={h.registration_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-3.5 py-1.5 rounded-xl bg-[#0066cc] dark:bg-[#38BDF8] text-white dark:text-[#0B0E14] text-xs font-bold hover:bg-[#004fa3] transition-colors"
+                        className="px-3.5 py-1.5 rounded-xl bg-[#0066cc] dark:bg-[#C9D0D6] text-white dark:text-[#09090B] text-xs font-bold hover:bg-[#004fa3] transition-colors"
                       >
                         View Event ↗
                       </a>

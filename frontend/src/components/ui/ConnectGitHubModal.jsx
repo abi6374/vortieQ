@@ -79,11 +79,11 @@ export default function ConnectGitHubModal({ isOpen, onClose, onConnected, onRem
   }
 
   return (
-    <div className="w-full mb-6 bg-gradient-to-r from-[#EFF6FF] via-[#F8FAFC] to-[#EFF6FF] dark:from-[#0D1527] dark:via-[#131F38] dark:to-[#0D1527] text-[#1D1D1F] dark:text-white rounded-2xl border border-[#BFDBFE] dark:border-sky-500/20 shadow-md shadow-blue-500/5 dark:shadow-lg p-5 sm:p-6 relative overflow-hidden animate-in fade-in slide-in-from-top-4 duration-200">
+    <div className="w-full mb-6 bg-gradient-to-r from-[#EFF6FF] via-[#F8FAFC] to-[#EFF6FF] dark:from-[#121216] dark:via-[#18181D] dark:to-[#121216] text-[#1D1D1F] dark:text-white rounded-2xl border border-[#BFDBFE] dark:border-[rgba(201,208,214,0.25)] shadow-md shadow-blue-500/5 dark:shadow-lg p-5 sm:p-6 relative overflow-hidden animate-in fade-in slide-in-from-top-4 duration-200">
       
       {/* Decorative ambient flares */}
-      <div className="absolute -top-12 -right-12 w-64 h-64 bg-[#0066CC]/5 dark:bg-[#38BDF8]/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-[#0066CC]/10 dark:bg-[#0066CC]/15 rounded-full blur-2xl pointer-events-none" />
+      <div className="absolute -top-12 -right-12 w-64 h-64 bg-[#0066CC]/5 dark:bg-[#C9D0D6]/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-[#0066CC]/10 dark:bg-[#C9D0D6]/5 rounded-full blur-2xl pointer-events-none" />
 
       <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-5">
         
@@ -92,7 +92,7 @@ export default function ConnectGitHubModal({ isOpen, onClose, onConnected, onRem
           <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-none shadow-sm backdrop-blur-sm border transition-colors ${
             syncedUser
               ? 'bg-[#ECFDF3] dark:bg-emerald-950/60 border-[#A6F4C5] dark:border-emerald-700/50 text-[#12B76A] dark:text-emerald-400'
-              : 'bg-[#0066CC]/10 dark:bg-white/10 border-[#0066CC]/20 dark:border-white/15 text-[#0066CC] dark:text-white'
+              : 'bg-[#0066CC]/10 dark:bg-white/10 border-[#0066CC]/20 dark:border-white/15 text-[#0066CC] dark:text-[#C9D0D6]'
           }`}>
             {syncedUser ? (
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
@@ -143,14 +143,14 @@ export default function ConnectGitHubModal({ isOpen, onClose, onConnected, onRem
             /* Input Form + OAuth */
             <>
               <form onSubmit={handleSyncUsername} className="flex items-center gap-2">
-                <div className="flex items-center bg-white dark:bg-[#0B1120] border border-[#CBD5E1] dark:border-[#334155] focus-within:border-[#0066CC] dark:focus-within:border-[#38BDF8] focus-within:ring-2 focus-within:ring-[#0066CC]/15 dark:focus-within:ring-[#38BDF8]/30 rounded-xl px-3 py-1.5 text-xs text-[#0F172A] dark:text-white transition-all shadow-2xs">
-                  <span className="text-[#64748B] font-mono mr-1 select-none">github.com/</span>
+                <div className="flex items-center bg-white dark:bg-[#0E0E12] border border-[#CBD5E1] dark:border-[#27272F] focus-within:border-[#0066CC] dark:focus-within:border-[#C9D0D6] focus-within:ring-2 focus-within:ring-[#0066CC]/15 dark:focus-within:ring-[#C9D0D6]/20 rounded-xl px-3 py-1.5 text-xs text-[#0F172A] dark:text-white transition-all shadow-2xs">
+                  <span className="text-[#64748B] dark:text-[#71717A] font-mono mr-1 select-none">github.com/</span>
                   <input
                     type="text"
                     value={username}
                     onChange={(e) => { setUsername(e.target.value); setError('') }}
                     placeholder="username"
-                    className="w-28 sm:w-36 bg-transparent text-[#0F172A] dark:text-white placeholder:text-[#94A3B8] dark:placeholder:text-[#475569] outline-none font-medium"
+                    className="w-28 sm:w-36 bg-transparent text-[#0F172A] dark:text-white placeholder:text-[#94A3B8] dark:placeholder:text-[#71717A] outline-none font-medium"
                     disabled={loading}
                   />
                 </div>
@@ -169,7 +169,7 @@ export default function ConnectGitHubModal({ isOpen, onClose, onConnected, onRem
                 type="button"
                 onClick={handleOAuthConnect}
                 disabled={loading}
-                className="px-3.5 py-1.5 bg-white dark:bg-[#1E293B] hover:bg-[#F8FAFC] dark:hover:bg-[#2A374F] border border-[#CBD5E1] dark:border-[#475569] hover:border-[#94A3B8] dark:hover:border-[#64748B] text-[#1E293B] dark:text-white text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
+                className="px-3.5 py-1.5 bg-white dark:bg-[#18181D] hover:bg-[#F8FAFC] dark:hover:bg-[#27272F] border border-[#CBD5E1] dark:border-[#27272F] hover:border-[#94A3B8] dark:hover:border-[#C9D0D6] text-[#1E293B] dark:text-[#F8FAFC] text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
               >
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
                   <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
@@ -193,7 +193,7 @@ export default function ConnectGitHubModal({ isOpen, onClose, onConnected, onRem
       </div>
 
       {/* Sub-actions line with Glass Buttons */}
-      <div className="mt-3.5 pt-3 border-t border-[#E2E8F0] dark:border-[#1E293B] flex flex-wrap items-center justify-between gap-3 text-xs">
+      <div className="mt-3.5 pt-3 border-t border-[#E2E8F0] dark:border-[#27272F] flex flex-wrap items-center justify-between gap-3 text-xs">
         {syncedUser ? (
           <span className="text-xs font-semibold text-[#027A48] dark:text-emerald-400">
             ✓ Connected as @{syncedUser}. Roadmap successfully recalibrated.

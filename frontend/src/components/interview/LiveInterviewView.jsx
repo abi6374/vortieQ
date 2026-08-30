@@ -377,7 +377,7 @@ export default function LiveInterviewView({
             <span
               className="w-2 h-2 rounded-full animate-pulse"
               style={{
-                backgroundColor: aiState === 'speaking' ? '#38bdf8' : aiState === 'listening' ? '#34d399' : '#c084fc'
+                backgroundColor: aiState === 'speaking' ? '#C9D0D6' : aiState === 'listening' ? '#34d399' : '#c084fc'
               }}
             />
             <span>
@@ -401,7 +401,7 @@ export default function LiveInterviewView({
                 className="h-1 rounded-full transition-all duration-300"
                 style={{
                   width: i === currentQuestionIndex ? 24 : 8,
-                  backgroundColor: i < currentQuestionIndex ? '#34d399' : i === currentQuestionIndex ? '#38bdf8' : 'rgba(255,255,255,0.2)'
+                  backgroundColor: i < currentQuestionIndex ? '#34d399' : i === currentQuestionIndex ? '#C9D0D6' : 'rgba(255,255,255,0.2)'
                 }}
               />
             ))}
@@ -438,7 +438,7 @@ export default function LiveInterviewView({
 
         {/* Spoken AI Question Prompt (Minimalist subtitle) */}
         <div className="max-w-2xl px-6 py-3 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 shadow-2xl">
-          <span className="text-xs uppercase font-extrabold tracking-widest text-[#38bdf8] block mb-1">
+          <span className="text-xs uppercase font-extrabold tracking-widest text-[#C9D0D6] block mb-1">
             Question {currentQuestionIndex + 1}
           </span>
           <p className="text-base sm:text-lg font-medium text-slate-100 leading-snug">

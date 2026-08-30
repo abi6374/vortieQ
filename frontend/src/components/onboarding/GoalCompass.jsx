@@ -361,15 +361,15 @@ const STYLES = `
 
 html.dark .gc {
   --navy: #F8FAFC;
-  --slate: #CBD5E1;
-  --muted: #94A3B8;
-  --lavender: #182438;
-  --lav-icon: #1E293B;
-  --card-bd: #202B3C;
-  --input-bd: #2D3F59;
-  --divider: #202B3C;
-  --track: #263852;
-  --range-fill: #38BDF8;
+  --slate: #A1A1AA;
+  --muted: #71717A;
+  --lavender: #18181D;
+  --lav-icon: #27272F;
+  --card-bd: #27272F;
+  --input-bd: #27272F;
+  --divider: #27272F;
+  --track: #202026;
+  --range-fill: #C9D0D6;
   --green-surface: rgba(6, 78, 59, 0.3);
   --green-bd: rgba(52, 211, 153, 0.3);
   --green-text: #34D399;
@@ -381,25 +381,25 @@ html.dark .gc {
   --red-text: #F87171;
 }
 html.dark .gc .card {
-  background: #0E1522;
+  background: #121216;
   box-shadow: 0 14px 38px rgba(0, 0, 0, 0.5);
 }
 html.dark .gc textarea {
-  background: #0B0F17;
+  background: #0E0E12;
   color: #F8FAFC;
 }
 html.dark .gc .role,
 html.dark .gc .role-custom,
 html.dark .gc .pstep {
-  background: #141C2B;
+  background: #18181D;
 }
 html.dark .gc .cinput {
-  background: #0B0F17;
-  border-color: #2D3F59;
+  background: #0E0E12;
+  border-color: #27272F;
 }
 html.dark .gc .cinput:focus-within {
-  border-color: #38BDF8;
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.22);
+  border-color: #C9D0D6;
+  box-shadow: 0 0 0 3px rgba(201, 208, 214, 0.22);
 }
 html.dark .gc .cinput svg {
   color: #94A3B8;
@@ -422,39 +422,40 @@ html.dark .gc .cinput input[type=month]::-webkit-calendar-picker-indicator {
 }
 html.dark .gc .role.sel,
 html.dark .gc .role-custom.sel {
-  background: #18263D;
+  background: #18181D;
+  border-color: #C9D0D6 !important;
 }
 html.dark .gc .role.sel .role-ic {
-  background: #1E293B;
-  color: #38BDF8;
+  background: #27272F;
+  color: #C9D0D6;
 }
 html.dark .gc .time-val b {
-  color: #38BDF8;
+  color: #C9D0D6;
 }
 html.dark .gc input[type=range] {
   background: var(--track);
-  border: 1px solid #334A6E;
+  border: 1px solid #27272F;
 }
 html.dark .gc input[type=range]::-webkit-slider-thumb {
-  background: #38BDF8;
-  border: 3.5px solid #0E1522;
-  box-shadow: 0 0 14px rgba(56, 189, 248, 0.7);
+  background: #C9D0D6;
+  border: 3.5px solid #121216;
+  box-shadow: 0 0 14px rgba(201, 208, 214, 0.7);
 }
 html.dark .gc input[type=range]::-moz-range-thumb {
-  background: #38BDF8;
-  border: 3.5px solid #0E1522;
-  box-shadow: 0 0 14px rgba(56, 189, 248, 0.7);
+  background: #C9D0D6;
+  border: 3.5px solid #121216;
+  box-shadow: 0 0 14px rgba(201, 208, 214, 0.7);
 }
 html.dark .gc .meter {
-  background: linear-gradient(165deg, #0E1522, #121B2C 60%, #0F1726);
-  border-color: #24334A;
+  background: linear-gradient(165deg, #121216, #18181D 60%, #0E0E12);
+  border-color: #27272F;
 }
 html.dark .gc .callout {
-  background: #131E30;
-  border-color: #22344E;
+  background: #18181D;
+  border-color: #27272F;
 }
 html.dark .gc .pstep .pic {
-  background: #1E293B;
+  background: #27272F;
   color: #CBD5E1;
 }
 
@@ -578,7 +579,7 @@ export default function GoalCompass({ topicRatings = [], detectedYears = 0, init
         <div className="card">
           <div className="sec">
             <div className="flex items-center justify-between mb-2">
-              <h3 className="sec-h" style={{ margin: 0 }}>Describe your goal <span className="text-xs font-bold text-[#0066cc] dark:text-[#38BDF8]">(Required)</span></h3>
+              <h3 className="sec-h" style={{ margin: 0 }}>Describe your goal <span className="text-xs font-bold text-[#0066cc] dark:text-[#C9D0D6]">(Required)</span></h3>
               <span className="text-xs text-[#7a7a7a] dark:text-[#94A3B8]">Extend or refine for richer recommendations</span>
             </div>
             <textarea
@@ -641,7 +642,7 @@ export default function GoalCompass({ topicRatings = [], detectedYears = 0, init
             </div>
             <div className="cfield">
               <label htmlFor="gc-weekly">
-                Weekly learning time <span className="text-xs font-bold text-[#0066cc] dark:text-[#38BDF8]">(Required)</span>
+                Weekly learning time <span className="text-xs font-bold text-[#0066cc] dark:text-[#C9D0D6]">(Required)</span>
               </label>
               <div className="time-val"><b>{weekly}</b><span>hours per week</span></div>
               <input

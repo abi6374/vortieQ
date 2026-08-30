@@ -10,7 +10,7 @@ import api from '../lib/apiClient'
  */
 
 const V = '#0066cc'
-const FIELD = 'w-full rounded-xl border border-[#e0e0e0] dark:border-[#242E40] bg-white dark:bg-[#0E131E] px-3.5 py-2.5 text-[14.5px] text-[#1d1d1f] dark:text-white outline-none focus:border-[#0066cc] dark:focus:border-[#38BDF8] focus:ring-[3px] focus:ring-[#0066cc]/20 transition-colors'
+const FIELD = 'w-full rounded-xl border border-[#e0e0e0] dark:border-[#27272F] bg-white dark:bg-[#0E0E12] px-3.5 py-2.5 text-[14.5px] text-[#1d1d1f] dark:text-white outline-none focus:border-[#0066cc] dark:focus:border-[#C9D0D6] focus:ring-[3px] focus:ring-[#0066cc]/20 dark:focus:ring-[#C9D0D6]/20 transition-colors'
 const LABEL = 'block text-[13.5px] font-semibold text-[#1d1d1f] dark:text-[#CBD5E1] mb-1.5'
 
 function Toggle({ checked, onChange, label, hint }) {
@@ -57,9 +57,9 @@ export default function SettingsPage() {
           target_date: '2026-08-14',
           difficulty_preference: 'adaptive',
           preferred_formats: ['course', 'video', 'article', 'practice'],
-          email_summaries: true,
-          streak_reminders: true,
-          proactive_ai: true,
+          email_notifications: true,
+          reminder_notifications: true,
+          ai_suggestions: true,
         })
       } finally {
         setLoading(false)
@@ -67,36 +67,30 @@ export default function SettingsPage() {
     })()
   }, [])
 
-  const flash = (m) => {
-    setToast(m)
-    setTimeout(() => setToast(null), 2600)
-  }
-
-  const patch = async (changes) => {
+  const patch = async (delta) => {
+    const updated = { ...s, ...delta }
+    setS(updated)
     setSaving(true)
     setError(null)
-    const optimistic = { ...s, ...changes }
-    setS(optimistic)
     try {
-      const { data } = await api.patch('/api/settings', changes)
-      setS(data)
-      flash('Saved preferences')
+      await api.patch('/api/settings', delta)
+      setToast('Saved')
+      setTimeout(() => setToast(null), 2400)
     } catch {
-      setS(s) // roll back
-      setError('Unable to update. Try again.')
+      setError('Could not save preference. Check backend connectivity.')
     } finally {
       setSaving(false)
     }
   }
 
-  const toggleFormat = (fmt) => {
-    const cur = s.preferred_formats || []
-    const next = cur.includes(fmt) ? cur.filter((f) => f !== fmt) : [...cur, fmt]
-    patch({ preferred_formats: next.length ? next : [fmt] })
+  const toggleFormat = (f) => {
+    const list = s.preferred_formats || []
+    const next = list.includes(f) ? list.filter((x) => x !== f) : [...list, f]
+    patch({ preferred_formats: next })
   }
 
   return (
-    <AppShell>
+    <AppShell activePage="settings">
       <div className="w-full font-['Inter',sans-serif] text-[#1d1d1f] dark:text-white">
         {/* Page Header */}
         <header className="mb-6">
@@ -109,7 +103,7 @@ export default function SettingsPage() {
         </header>
 
         {loading || !s ? (
-          <div className="p-8 text-center text-[#7a7a7a] dark:text-[#94A3B8] text-sm bg-white dark:bg-[#141A26] rounded-2xl border border-[#e0e0e0] dark:border-[#242E40]">
+          <div className="p-8 text-center text-[#7a7a7a] dark:text-[#94A3B8] text-sm bg-white dark:bg-[#121216] rounded-2xl border border-[#e0e0e0] dark:border-[#27272F]">
             Loading settings…
           </div>
         ) : (
@@ -117,9 +111,9 @@ export default function SettingsPage() {
             {/* Primary Left Column: 8 cols on desktop */}
             <div className="lg:col-span-8 space-y-6">
               {/* Study Preferences Card */}
-              <section className="bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-6 shadow-2xs">
+              <section className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-6 shadow-2xs">
                 <div className="flex items-center gap-3 mb-5">
-                  <span className="w-9 h-9 rounded-xl bg-[#eaf2fc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center flex-none">
+                  <span className="w-9 h-9 rounded-xl bg-[#eaf2fc] dark:bg-[#18181D] text-[#0066cc] dark:text-[#C9D0D6] border border-transparent dark:border-[rgba(201,208,214,0.15)] flex items-center justify-center flex-none">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
                       <line x1="16" y1="2" x2="16" y2="6" />
@@ -178,7 +172,7 @@ export default function SettingsPage() {
                       { value: 'harder', label: 'Fast-track & Rigorous', subtitle: 'Intensive curriculum' },
                     ]}
                     className="w-full"
-                    buttonClassName="w-full py-2.5 bg-white dark:bg-[#0E131E] border-[#e0e0e0] dark:border-[#242E40] text-[#1d1d1f] dark:text-white"
+                    buttonClassName="w-full py-2.5 bg-white dark:bg-[#0E0E12] border-[#e0e0e0] dark:border-[#27272F] text-[#1d1d1f] dark:text-white"
                     menuClassName="w-full"
                     ariaLabel="Difficulty progression"
                   />
@@ -186,9 +180,9 @@ export default function SettingsPage() {
               </section>
 
               {/* Resource Formats */}
-              <section className="bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-6 shadow-2xs">
+              <section className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-6 shadow-2xs">
                 <div className="flex items-center gap-3 mb-4">
-                  <span className="w-9 h-9 rounded-xl bg-[#eaf2fc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center flex-none">
+                  <span className="w-9 h-9 rounded-xl bg-[#eaf2fc] dark:bg-[#18181D] text-[#0066cc] dark:text-[#C9D0D6] border border-transparent dark:border-[rgba(201,208,214,0.15)] flex items-center justify-center flex-none">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z" />
                       <path d="M6 6h10" />
@@ -216,7 +210,7 @@ export default function SettingsPage() {
                         className={`rounded-xl px-4 py-2 text-[13px] font-bold border transition-all capitalize cursor-pointer shadow-xs ${
                           on
                             ? 'bg-[#0066cc] border-[#0066cc] text-white'
-                            : 'bg-white dark:bg-[#0E131E] border-[#e0e0e0] dark:border-[#242E40] text-[#333333] dark:text-[#CBD5E1] hover:border-[#0066cc] dark:hover:border-[#38BDF8]'
+                            : 'bg-white dark:bg-[#0E0E12] border-[#e0e0e0] dark:border-[#27272F] text-[#333333] dark:text-[#CBD5E1] hover:border-[#0066cc] dark:hover:border-[#C9D0D6]'
                         }`}
                       >
                         {on ? `✓ ${f}` : `+ ${f}`}
@@ -227,9 +221,9 @@ export default function SettingsPage() {
               </section>
 
               {/* Notifications & AI Assistant Preferences */}
-              <section className="bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-6 shadow-2xs">
+              <section className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-6 shadow-2xs">
                 <div className="flex items-center gap-3 mb-4">
-                  <span className="w-9 h-9 rounded-xl bg-[#eaf2fc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center flex-none">
+                  <span className="w-9 h-9 rounded-xl bg-[#eaf2fc] dark:bg-[#18181D] text-[#0066cc] dark:text-[#C9D0D6] border border-transparent dark:border-[rgba(201,208,214,0.15)] flex items-center justify-center flex-none">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
                       <path d="M13.73 21a2 2 0 0 1-3.46 0" />
@@ -245,7 +239,7 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
-                <div className="divide-y divide-[#f5f5f7] dark:divide-[#1E2638]">
+                <div className="divide-y divide-[#f5f5f7] dark:divide-[#202026]">
                   <Toggle
                     checked={!!s.email_notifications}
                     label="Email Progress Summaries"
@@ -296,27 +290,27 @@ export default function SettingsPage() {
             {/* Right Rail Context & Summary: 4 cols on desktop */}
             <div className="lg:col-span-4 space-y-6">
               {/* Preferences Summary Card */}
-              <div className="bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-6 shadow-2xs">
+              <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-6 shadow-2xs">
                 <h3 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white mb-4">
                   Profile Configuration
                 </h3>
 
                 <div className="space-y-3.5 text-xs">
-                  <div className="flex justify-between items-center py-1 border-b border-[#f5f5f7] dark:border-[#1E2638]">
+                  <div className="flex justify-between items-center py-1 border-b border-[#f5f5f7] dark:border-[#202026]">
                     <span className="text-[#7a7a7a] dark:text-[#94A3B8]">Weekly Target</span>
                     <span className="font-bold text-[#1d1d1f] dark:text-white">
                       {s.weekly_hours || 10} hours / week
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-center py-1 border-b border-[#f5f5f7] dark:border-[#1E2638]">
+                  <div className="flex justify-between items-center py-1 border-b border-[#f5f5f7] dark:border-[#202026]">
                     <span className="text-[#7a7a7a] dark:text-[#94A3B8]">Pacing Mode</span>
-                    <span className="font-bold text-[#0066cc] dark:text-[#38BDF8] bg-[#eaf2fc] dark:bg-[#1E293B] px-2.5 py-1 rounded-lg capitalize">
+                    <span className="font-bold text-[#0066cc] dark:text-[#C9D0D6] bg-[#eaf2fc] dark:bg-[#18181D] border border-transparent dark:border-[rgba(201,208,214,0.2)] px-2.5 py-1 rounded-lg capitalize">
                       {s.difficulty_preference || 'Adaptive'}
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-center py-1 border-b border-[#f5f5f7] dark:border-[#1E2638]">
+                  <div className="flex justify-between items-center py-1 border-b border-[#f5f5f7] dark:border-[#202026]">
                     <span className="text-[#7a7a7a] dark:text-[#94A3B8]">Active Formats</span>
                     <span className="font-semibold text-[#1d1d1f] dark:text-white">
                       {(s.preferred_formats || []).length} types selected
@@ -333,9 +327,9 @@ export default function SettingsPage() {
               </div>
 
               {/* Dynamic Re-calibration Insight */}
-              <div className="bg-gradient-to-br from-[#fafbfc] to-[#eaf2fc] dark:from-[#141A26] dark:to-[#101622] border border-[#cfe4fb] dark:border-[#242E40] rounded-2xl p-5 shadow-2xs">
+              <div className="bg-gradient-to-br from-[#fafbfc] to-[#eaf2fc] dark:from-[#18181D] dark:to-[#121216] border border-[#cfe4fb] dark:border-[#27272F] rounded-2xl p-5 shadow-2xs">
                 <div className="flex items-start gap-3">
-                  <span className="w-8 h-8 rounded-xl bg-white dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center flex-none shadow-2xs">
+                  <span className="w-8 h-8 rounded-xl bg-white dark:bg-[#18181D] text-[#0066cc] dark:text-[#C9D0D6] border border-transparent dark:border-[rgba(201,208,214,0.2)] flex items-center justify-center flex-none shadow-2xs">
                     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <circle cx="12" cy="12" r="10" />
                       <path d="M12 16v-4" />

@@ -110,7 +110,7 @@ function Tooltip({ label, badge, visible }) {
           exit={{ opacity: 0, x: -6, scale: 0.94 }}
           transition={{ duration: 0.14, ease: [0.16, 1, 0.3, 1] }}
         >
-          <div className="relative flex items-center gap-2 bg-[#0c0d12]/95 dark:bg-[#182030]/95 text-white text-[12px] font-semibold px-3 py-2 rounded-xl shadow-[0_12px_28px_rgba(0,0,0,0.36)] border border-white/10 dark:border-white/15 backdrop-blur-md whitespace-nowrap">
+          <div className="relative flex items-center gap-2 bg-[#0c0d12]/95 dark:bg-[#18181D]/95 text-white text-[12px] font-semibold px-3 py-2 rounded-xl shadow-[0_12px_28px_rgba(0,0,0,0.5)] border border-white/10 dark:border-white/15 backdrop-blur-md whitespace-nowrap">
             {/* Arrow point */}
             <span
               className="absolute right-full top-1/2 -translate-y-1/2 border-[5px] border-transparent"
@@ -118,7 +118,7 @@ function Tooltip({ label, badge, visible }) {
             />
             <span>{label}</span>
             {badge && (
-              <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-[#0066cc] dark:bg-[#38BDF8] text-white dark:text-[#0B0E14]">
+              <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-[#0066cc] dark:bg-[#C9D0D6] text-white dark:text-[#09090B]">
                 {badge}
               </span>
             )}
@@ -175,7 +175,7 @@ function CollapsedNavItem({ item, isActive, onClick }) {
 
         {/* Micro badge dot for Beta */}
         {item.badge && !isActive && (
-          <span className="absolute top-2.5 right-2.5 w-1.5 h-1.5 rounded-full bg-[#0066cc] dark:bg-[#38BDF8]" />
+          <span className="absolute top-2.5 right-2.5 w-1.5 h-1.5 rounded-full bg-[#0066cc] dark:bg-[#C9D0D6]" />
         )}
       </button>
 
@@ -236,7 +236,7 @@ function ExpandedNavItem({ item, isActive, onClick }) {
           className={`relative z-10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md ${
             isActive
               ? 'bg-white/20 text-white'
-              : 'bg-[#0066cc]/10 dark:bg-[#38BDF8]/20 text-[#0066cc] dark:text-[#38BDF8]'
+              : 'bg-[#0066cc]/10 dark:bg-[#C9D0D6]/20 text-[#0066cc] dark:text-[#C9D0D6]'
           }`}
         >
           {item.badge}
@@ -259,7 +259,7 @@ function ToggleSidebarButton({ isExpanded, onClick }) {
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         aria-label={isExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
-        className="w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-150 cursor-pointer border-none outline-none text-[#7a7a7a] hover:text-[#0066cc] dark:hover:text-[#38BDF8] hover:bg-[#0066cc]/10 dark:hover:bg-white/10"
+        className="w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-150 cursor-pointer border-none outline-none text-[#7a7a7a] hover:text-[#0066cc] dark:hover:text-[#C9D0D6] hover:bg-[#0066cc]/10 dark:hover:bg-white/10"
       >
         <SidebarIcon className="w-5 h-5" />
       </button>

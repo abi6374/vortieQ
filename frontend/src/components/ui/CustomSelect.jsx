@@ -60,8 +60,8 @@ export default function CustomSelect({
         aria-label={ariaLabel}
         aria-expanded={isOpen}
         aria-haspopup="listbox"
-        className={`flex items-center justify-between gap-2.5 px-3.5 py-2.5 bg-white dark:bg-[#181E2C] border border-[#e0e0e0] dark:border-[#2D3748] hover:border-[#0066cc] dark:hover:border-[#38BDF8] rounded-xl text-sm font-semibold text-[#1d1d1f] dark:text-[#F3F4F6] shadow-2xs transition-all cursor-pointer focus:outline-none focus:border-[#0066cc] focus:ring-2 focus:ring-[#0066cc]/15 ${
-          isOpen ? 'border-[#0066cc] dark:border-[#38BDF8] ring-2 ring-[#0066cc]/15' : ''
+        className={`flex items-center justify-between gap-2.5 px-3.5 py-2.5 bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] hover:border-[#0066cc] dark:hover:border-[#C9D0D6] rounded-xl text-sm font-semibold text-[#1d1d1f] dark:text-[#F8FAFC] shadow-2xs transition-all cursor-pointer focus:outline-none focus:border-[#0066cc] focus:ring-2 focus:ring-[#0066cc]/15 ${
+          isOpen ? 'border-[#0066cc] dark:border-[#C9D0D6] ring-2 ring-[#0066cc]/15' : ''
         } ${buttonClassName}`}
       >
         <span className="truncate">
@@ -77,8 +77,8 @@ export default function CustomSelect({
           strokeWidth="2.4"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className={`text-[#7a7a7a] dark:text-[#9CA3AF] transition-transform duration-200 flex-shrink-0 ${
-            isOpen ? 'rotate-180 text-[#0066cc] dark:text-[#38BDF8]' : ''
+          className={`text-[#7a7a7a] dark:text-[#A1A1AA] transition-transform duration-200 flex-shrink-0 ${
+            isOpen ? 'rotate-180 text-[#0066cc] dark:text-[#C9D0D6]' : ''
           }`}
         >
           <path d="m6 9 6 6 6-6" />
@@ -94,7 +94,7 @@ export default function CustomSelect({
             exit={reduce ? { opacity: 0 } : { opacity: 0, y: -4, scale: 0.96 }}
             transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
             style={{ transformOrigin: 'top left' }}
-            className={`absolute left-0 top-full mt-1.5 z-50 min-w-full w-max bg-white dark:bg-[#181E2C] border border-[#E6EAF2] dark:border-[#2D3748] shadow-[0_20px_48px_rgba(14,27,56,0.18),0_4px_12px_rgba(14,27,56,0.06)] dark:shadow-[0_20px_48px_rgba(0,0,0,0.6)] rounded-xl py-1.5 overflow-hidden ${menuClassName}`}
+            className={`absolute left-0 top-full mt-1.5 z-50 min-w-full w-max bg-white dark:bg-[#121216] border border-[#E6EAF2] dark:border-[#27272F] shadow-[0_20px_48px_rgba(14,27,56,0.18),0_4px_12px_rgba(14,27,56,0.06)] dark:shadow-[0_20px_48px_rgba(0,0,0,0.8)] rounded-xl py-1.5 overflow-hidden ${menuClassName}`}
             role="listbox"
           >
             {normalizedOptions.map((opt) => {
@@ -111,14 +111,14 @@ export default function CustomSelect({
                   }}
                   className={`w-full text-left px-3.5 py-2 text-xs sm:text-sm font-semibold flex items-center justify-between gap-3 transition-colors cursor-pointer ${
                     isSelected
-                      ? 'bg-[#eaf2fc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] font-bold'
-                      : 'text-[#333333] dark:text-[#E5E7EB] hover:bg-[#fafbfc] dark:hover:bg-[#1A2234] hover:text-[#1d1d1f] dark:hover:text-[#F3F4F6]'
+                      ? 'bg-[#eaf2fc] dark:bg-[#18181D] text-[#0066cc] dark:text-[#C9D0D6] font-bold'
+                      : 'text-[#333333] dark:text-[#E2E8F0] hover:bg-[#fafbfc] dark:hover:bg-[#18181D] hover:text-[#1d1d1f] dark:hover:text-[#F8FAFC]'
                   }`}
                 >
                   <div className="min-w-0 flex-1">
                     <div>{opt.label}</div>
                     {opt.subtitle && (
-                      <div className="text-[11px] font-normal text-[#7a7a7a] dark:text-[#9CA3AF] mt-0.5">
+                      <div className="text-[11px] font-normal text-[#7a7a7a] dark:text-[#A1A1AA] mt-0.5">
                         {opt.subtitle}
                       </div>
                     )}
@@ -134,7 +134,7 @@ export default function CustomSelect({
                         strokeWidth="2.5"
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        className="flex-shrink-0 text-[#0066cc] dark:text-[#38BDF8]"
+                        className="flex-shrink-0 text-[#0066cc] dark:text-[#C9D0D6]"
                       >
                         <polyline points="20 6 9 17 4 12" />
                       </svg>

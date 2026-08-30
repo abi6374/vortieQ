@@ -252,7 +252,7 @@ export default function CalibrationModal({
             <h1 className="font-['Manrope'] font-extrabold text-2xl sm:text-[28px] text-[#1d1d1f] dark:text-white tracking-tight">
               AI Interview Studio
             </h1>
-            <span className="px-2.5 py-0.5 text-xs font-extrabold uppercase rounded-md bg-[#0066cc]/10 text-[#0066cc] dark:bg-[#38BDF8]/20 dark:text-[#38BDF8] border border-[#0066cc]/20 dark:border-[#38BDF8]/30">
+            <span className="px-2.5 py-0.5 text-xs font-extrabold uppercase rounded-md bg-[#0066cc]/10 text-[#0066cc] dark:bg-[#C9D0D6]/20 dark:text-[#C9D0D6] border border-[#0066cc]/20 dark:border-[#27272F]">
               Beta
             </span>
           </div>
@@ -264,7 +264,7 @@ export default function CalibrationModal({
         <button
           type="button"
           onClick={handleExit}
-          className="px-4 py-2 rounded-xl text-xs font-bold text-[#6e6e73] dark:text-[#94A3B8] hover:text-[#1d1d1f] dark:hover:text-white border border-[#e0e0e0] dark:border-[#242E40] bg-white dark:bg-[#141A26] shadow-xs hover:border-[#0066cc]/30 transition-colors cursor-pointer flex items-center gap-1.5 self-start sm:self-auto"
+          className="px-4 py-2 rounded-xl text-xs font-bold text-[#6e6e73] dark:text-[#94A3B8] hover:text-[#1d1d1f] dark:hover:text-white border border-[#e0e0e0] dark:border-[#27272F] bg-white dark:bg-[#121216] shadow-xs hover:border-[#0066cc]/30 dark:hover:border-[#C9D0D6]/30 transition-colors cursor-pointer flex items-center gap-1.5 self-start sm:self-auto"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <line x1="18" y1="6" x2="6" y2="18" />
@@ -275,7 +275,7 @@ export default function CalibrationModal({
       </header>
 
       {/* Main Container Card */}
-      <div className="bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-6 sm:p-7 shadow-sm">
+      <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-6 sm:p-7 shadow-sm">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-7 items-start">
 
           {/* ── Left Column: Camera Preview & Hardware Meters (7 cols) ── */}
@@ -294,7 +294,7 @@ export default function CalibrationModal({
                 <div className="flex flex-col items-center justify-center p-6 text-center text-slate-400">
                   <div className="w-16 h-16 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center mb-3 shadow-inner">
                     {permissionState === 'checking' ? (
-                      <div className="w-8 h-8 rounded-full border-2 border-[#0066cc] dark:border-[#38BDF8] border-t-transparent animate-spin" />
+                      <div className="w-8 h-8 rounded-full border-2 border-[#0066cc] dark:border-[#C9D0D6] border-t-transparent animate-spin" />
                     ) : (
                       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
@@ -367,7 +367,7 @@ export default function CalibrationModal({
             </div>
 
             {/* Mic Meter & Noise Indicator */}
-            <div className="p-4 rounded-xl bg-[#f5f5f7] dark:bg-[#1E2638] border border-[#e0e0e0] dark:border-[#242E40] flex flex-col gap-3">
+            <div className="p-4 rounded-xl bg-[#f5f5f7] dark:bg-[#18181D] border border-[#e0e0e0] dark:border-[#27272F] flex flex-col gap-3">
               <div className="flex items-center justify-between text-xs font-bold">
                 <div className="flex items-center gap-2 text-[#1d1d1f] dark:text-white">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0066cc" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -376,12 +376,12 @@ export default function CalibrationModal({
                   </svg>
                   <span>Microphone Input Level</span>
                 </div>
-                <span className="text-[#0066cc] dark:text-[#38BDF8] font-mono">
+                <span className="text-[#0066cc] dark:text-[#C9D0D6] font-mono">
                   {hasMic ? (micLevel > 0.05 ? '🎙 Speaking...' : '✓ Ready') : 'Mic Required'}
                 </span>
               </div>
 
-              <div className="w-full h-2.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden flex items-center p-0.5">
+              <div className="w-full h-2.5 rounded-full bg-slate-200 dark:bg-zinc-800 overflow-hidden flex items-center p-0.5">
                 <div
                   className="h-full rounded-full transition-all duration-75"
                   style={{
@@ -401,7 +401,7 @@ export default function CalibrationModal({
                   <button
                     type="button"
                     onClick={() => requestMediaAccess(false)}
-                    className="text-[#0066cc] dark:text-[#38BDF8] font-bold hover:underline cursor-pointer"
+                    className="text-[#0066cc] dark:text-[#C9D0D6] font-bold hover:underline cursor-pointer"
                   >
                     Retry Permissions
                   </button>
@@ -410,7 +410,7 @@ export default function CalibrationModal({
             </div>
 
             {/* Privacy Note */}
-            <div className="text-[11px] text-[#6e6e73] dark:text-[#94A3B8] leading-relaxed bg-[#eaf2fc]/60 dark:bg-[#1E293B]/60 p-3.5 rounded-xl border border-[#0066cc]/10 dark:border-[#38BDF8]/10">
+            <div className="text-[11px] text-[#6e6e73] dark:text-[#94A3B8] leading-relaxed bg-[#eaf2fc]/60 dark:bg-[#18181D]/60 p-3.5 rounded-xl border border-[#0066cc]/10 dark:border-[#27272F]">
               <span className="font-bold text-[#1d1d1f] dark:text-slate-200">Privacy & Consent:</span> Camera and microphone feeds are processed locally in your browser. Video is never uploaded to any external server.
             </div>
           </div>
@@ -431,12 +431,12 @@ export default function CalibrationModal({
                         type="button"
                         onClick={() => setSelectedTrack(t.id)}
                         className={`p-3.5 rounded-xl text-left border transition-all cursor-pointer flex flex-col gap-1 ${isSelected
-                          ? 'bg-[#eaf2fc] dark:bg-[rgba(41,151,255,0.18)] border-[#0066cc] dark:border-[#38BDF8] shadow-xs'
-                          : 'bg-white dark:bg-[#141A26] border-[#e0e0e0] dark:border-[#242E40] hover:border-[#0066cc]/40'
+                          ? 'bg-[#eaf2fc] dark:bg-[rgba(201,208,214,0.15)] border-[#0066cc] dark:border-[#C9D0D6] shadow-xs'
+                          : 'bg-white dark:bg-[#121216] border-[#e0e0e0] dark:border-[#27272F] hover:border-[#0066cc]/40 dark:hover:border-[#C9D0D6]/40'
                           }`}
                       >
                         <div className="flex items-center justify-between">
-                          <span className={`text-sm font-bold ${isSelected ? 'text-[#0066cc] dark:text-[#38BDF8]' : 'text-[#1d1d1f] dark:text-white'}`}>
+                          <span className={`text-sm font-bold ${isSelected ? 'text-[#0066cc] dark:text-[#C9D0D6]' : 'text-[#1d1d1f] dark:text-white'}`}>
                             {t.name}
                           </span>
                           <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#f5f5f7] dark:bg-white/10 text-[#64748b] dark:text-slate-300">
@@ -462,7 +462,7 @@ export default function CalibrationModal({
                   placeholder="e.g. Next.js 14, Kafka Streams, GraphQL, PyTorch"
                   value={customTopic}
                   onChange={(e) => setCustomTopic(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#d2d2d7] dark:border-[#28303F] bg-white dark:bg-[#1E2638] text-sm text-[#1d1d1f] dark:text-white placeholder:text-[#999999] focus:border-[#0066cc] dark:focus:border-[#38BDF8] focus:outline-hidden transition-colors"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#d2d2d7] dark:border-[#27272F] bg-white dark:bg-[#0E0E12] text-sm text-[#1d1d1f] dark:text-white placeholder:text-[#999999] focus:border-[#0066cc] dark:focus:border-[#C9D0D6] focus:outline-hidden transition-colors"
                 />
               </div>
 
@@ -479,7 +479,7 @@ export default function CalibrationModal({
                       onClick={() => setQuestionCount(cnt)}
                       className={`flex-1 py-2.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${questionCount === cnt
                         ? 'bg-[#0066cc] text-white border-[#0066cc] shadow-xs'
-                        : 'bg-white dark:bg-[#141A26] border-[#e0e0e0] dark:border-[#242E40] text-[#1d1d1f] dark:text-white hover:bg-[#f5f5f7]'
+                        : 'bg-white dark:bg-[#121216] border-[#e0e0e0] dark:border-[#27272F] text-[#1d1d1f] dark:text-white hover:bg-[#f5f5f7] dark:hover:bg-[#18181D]'
                         }`}
                     >
                       {cnt} Q (~{cnt * 2} min)
@@ -490,7 +490,7 @@ export default function CalibrationModal({
             </div>
 
             {/* Actions & Start CTA */}
-            <div className="flex flex-col gap-3 pt-4 border-t border-[#f0f0f0] dark:border-[#242E40]">
+            <div className="flex flex-col gap-3 pt-4 border-t border-[#f0f0f0] dark:border-[#27272F]">
               {!hasCamera && permissionState === 'granted' && (
                 <div className="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 border border-amber-500/20 p-2.5 rounded-xl text-center font-medium">
                   Camera not detected — continuing in Voice-Only mode
@@ -501,7 +501,7 @@ export default function CalibrationModal({
                 type="button"
                 disabled={!canProceed}
                 onClick={handleStartInterview}
-                className="w-full py-3.5 px-5 rounded-xl text-sm font-bold text-white bg-[#0066cc] hover:bg-[#0052a3] dark:bg-[#38BDF8] dark:text-[#090D16] dark:hover:bg-[#0284c7] disabled:opacity-40 disabled:cursor-not-allowed shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-3.5 px-5 rounded-xl text-sm font-bold text-white bg-[#0066cc] hover:bg-[#0052a3] dark:bg-[#C9D0D6] dark:text-[#09090B] dark:hover:bg-[#CBD5E1] disabled:opacity-40 disabled:cursor-not-allowed shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10" />
@@ -514,7 +514,7 @@ export default function CalibrationModal({
                 <button
                   type="button"
                   onClick={() => requestMediaAccess(true)}
-                  className="text-xs text-[#6e6e73] hover:text-[#0066cc] dark:hover:text-[#38BDF8] underline cursor-pointer transition-colors"
+                  className="text-xs text-[#6e6e73] hover:text-[#0066cc] dark:hover:text-[#C9D0D6] underline cursor-pointer transition-colors"
                 >
                   Switch to Voice-Only Mode
                 </button>

@@ -19,7 +19,7 @@ const DIFFICULTY_STYLES = {
 
 function DifficultyBadge({ difficulty }) {
   if (!difficulty) return null
-  const style = DIFFICULTY_STYLES[String(difficulty).toLowerCase()] || 'bg-gray-100 dark:bg-[#1E293B] text-gray-600 dark:text-[#CBD5E1] border border-gray-200 dark:border-[#242E40]'
+  const style = DIFFICULTY_STYLES[String(difficulty).toLowerCase()] || 'bg-gray-100 dark:bg-[#18181D] text-gray-600 dark:text-[#CBD5E1] border border-gray-200 dark:border-[#27272F]'
   return (
     <span className={`rounded-full px-2 py-0.5 text-xs font-semibold capitalize ${style}`}>
       {difficulty}
@@ -42,7 +42,7 @@ export default function NextActions({ steps = [], pathId, onRefresh }) {
       </div>
 
       {visibleSteps.length === 0 ? (
-        <div className="bg-white dark:bg-[#141A26] border border-gray-100 dark:border-[#242E40] rounded-2xl shadow p-8 text-center">
+        <div className="bg-white dark:bg-[#121216] border border-gray-100 dark:border-[#27272F] rounded-2xl shadow p-8 text-center">
           <p className="text-base font-medium text-gray-600 dark:text-[#CBD5E1]">
             🎉 You're all caught up! View your full roadmap for more.
           </p>
@@ -54,7 +54,7 @@ export default function NextActions({ steps = [], pathId, onRefresh }) {
             return (
               <article
                 key={step.id}
-                className="bg-white dark:bg-[#141A26] border border-gray-100 dark:border-[#242E40] rounded-2xl shadow p-5 transition-shadow hover:shadow-md"
+                className="bg-white dark:bg-[#121216] border border-gray-100 dark:border-[#27272F] rounded-2xl shadow p-5 transition-shadow hover:shadow-md"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0">
@@ -74,14 +74,14 @@ export default function NextActions({ steps = [], pathId, onRefresh }) {
                       href={course.resource_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="shrink-0 text-sm font-medium text-indigo-600 dark:text-[#38BDF8] hover:text-indigo-700 dark:hover:text-[#7DD3FC] hover:underline"
+                      className="shrink-0 text-sm font-medium text-indigo-600 dark:text-[#C9D0D6] hover:text-indigo-700 dark:hover:text-white hover:underline"
                     >
                       Open ↗
                     </a>
                   )}
                 </div>
 
-                <hr className="my-4 border-gray-100 dark:border-[#1E2638]" />
+                <hr className="my-4 border-gray-100 dark:border-[#27272F]" />
 
                 <FeedbackButtons stepId={step.id} stepStatus={step.status} onFeedbackGiven={onRefresh} />
               </article>

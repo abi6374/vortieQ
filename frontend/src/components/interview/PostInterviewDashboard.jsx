@@ -94,10 +94,10 @@ ${recommended_learning_topics.map(t => `- ${t}`).join('\n')}
     <div className="w-full font-['Inter',sans-serif] text-[#1d1d1f] dark:text-[#F5F5F7] select-none">
       <div className="flex flex-col gap-6">
         {/* Top Header & Navigation Banner */}
-        <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#141A26] p-6 rounded-2xl border border-[#e0e0e0] dark:border-[#242E40] shadow-sm">
+        <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#121216] p-6 rounded-2xl border border-[#e0e0e0] dark:border-[#27272F] shadow-sm">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="px-2.5 py-0.5 text-xs font-extrabold uppercase tracking-wider rounded-md bg-[#0066cc]/10 text-[#0066cc] dark:bg-[#38BDF8]/20 dark:text-[#38BDF8]">
+              <span className="px-2.5 py-0.5 text-xs font-extrabold uppercase tracking-wider rounded-md bg-[#0066cc]/10 text-[#0066cc] dark:bg-[#C9D0D6]/20 dark:text-[#C9D0D6]">
                 Session Results
               </span>
               <span className="text-xs text-[#6e6e73] dark:text-[#94A3B8] font-medium">
@@ -117,7 +117,7 @@ ${recommended_learning_topics.map(t => `- ${t}`).join('\n')}
             <button
               type="button"
               onClick={handleDownloadReport}
-              className="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold border border-[#e0e0e0] dark:border-[#242E40] bg-white dark:bg-[#1E2638] text-[#1d1d1f] dark:text-white hover:bg-[#f5f5f7] dark:hover:bg-[#20293D] transition-all flex items-center gap-2 cursor-pointer shadow-xs"
+              className="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold border border-[#e0e0e0] dark:border-[#27272F] bg-white dark:bg-[#18181D] text-[#1d1d1f] dark:text-white hover:bg-[#f5f5f7] dark:hover:bg-[#202026] transition-all flex items-center gap-2 cursor-pointer shadow-xs"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -130,7 +130,7 @@ ${recommended_learning_topics.map(t => `- ${t}`).join('\n')}
             <button
               type="button"
               onClick={onRestart}
-              className="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-[#0066cc] dark:text-[#38BDF8] bg-[#eaf2fc] dark:bg-[rgba(41,151,255,0.18)] hover:bg-[#dbeafc] transition-all cursor-pointer flex items-center gap-2"
+              className="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-[#0066cc] dark:text-[#C9D0D6] bg-[#eaf2fc] dark:bg-[rgba(201,208,214,0.15)] hover:bg-[#dbeafc] transition-all cursor-pointer flex items-center gap-2"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
@@ -142,7 +142,7 @@ ${recommended_learning_topics.map(t => `- ${t}`).join('\n')}
             <button
               type="button"
               onClick={() => navigate('/dashboard')}
-              className="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-[#0066cc] dark:bg-[#38BDF8] dark:text-[#090D16] hover:bg-[#0052a3] dark:hover:bg-[#0284c7] transition-all shadow-sm cursor-pointer flex items-center gap-2"
+              className="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-[#0066cc] dark:bg-[#C9D0D6] dark:text-[#09090B] hover:bg-[#0052a3] dark:hover:bg-[#CBD5E1] transition-all shadow-sm cursor-pointer flex items-center gap-2"
             >
               <span>Return to Roadmap</span>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -155,7 +155,7 @@ ${recommended_learning_topics.map(t => `- ${t}`).join('\n')}
         {/* Hero Performance Overview & Score Matrix */}
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Main Score & Verdict Card (4 cols) */}
-          <div className="lg:col-span-4 bg-white dark:bg-[#141A26] p-6 sm:p-7 rounded-2xl border border-[#e0e0e0] dark:border-[#242E40] shadow-sm flex flex-col justify-between">
+          <div className="lg:col-span-4 bg-white dark:bg-[#121216] p-6 sm:p-7 rounded-2xl border border-[#e0e0e0] dark:border-[#27272F] shadow-sm flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-4">
                 <span className="text-xs font-bold uppercase tracking-wider text-[#6e6e73] dark:text-[#94A3B8]">
@@ -176,73 +176,51 @@ ${recommended_learning_topics.map(t => `- ${t}`).join('\n')}
 
               {/* Score Display */}
               <div className="flex items-baseline gap-2 mb-3">
-                <span className="text-6xl font-extrabold font-['Manrope'] text-[#0066cc] dark:text-[#38BDF8] tracking-tight">
+                <span className="text-6xl font-extrabold font-['Manrope'] text-[#0066cc] dark:text-[#C9D0D6] tracking-tight">
                   {overall_score}
                 </span>
-                <span className="text-xl text-[#6e6e73] dark:text-[#94A3B8] font-bold">
-                  / 100
-                </span>
+                <span className="text-xl font-bold text-[#7a7a7a]">/100</span>
               </div>
 
-              <p className="text-xs sm:text-sm text-[#333333] dark:text-[#E5E5EA] leading-relaxed">
-                {summary}
+              <p className="text-xs sm:text-sm text-[#555555] dark:text-[#94A3B8] leading-relaxed">
+                {summary || 'Detailed diagnostic generated based on technical answers, problem solving pacing, and behavioral signals.'}
               </p>
             </div>
 
-            {/* Speaking Flow Metrics */}
-            <div className="mt-6 pt-4 border-t border-[#f0f0f0] dark:border-[#242E40] grid grid-cols-2 gap-3">
-              <div className="p-3 rounded-xl bg-[#f5f5f7] dark:bg-[#1E2638] border border-[#e0e0e0] dark:border-[#242E40]">
-                <span className="text-[11px] text-[#6e6e73] dark:text-[#94A3B8] font-bold uppercase block mb-1">
-                  Pacing (Speed)
-                </span>
-                <span className="text-base font-extrabold text-[#1d1d1f] dark:text-white">
-                  {metrics?.wpm ?? 0} <span className="text-xs font-normal text-[#6e6e73]">WPM</span>
-                </span>
-                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold block mt-0.5">
-                  {metrics?.pacing_status || (overall_score === 0 ? 'No Speech' : 'Optimal Speed')}
-                </span>
+            {/* Quick Metrics Matrix */}
+            <div className="grid grid-cols-2 gap-3 pt-4 mt-4 border-t border-[#f0f0f0] dark:border-[#27272F]">
+              <div className="p-3 rounded-xl bg-[#fafafc] dark:bg-[#18181D]">
+                <div className="text-[11px] text-[#7a7a7a] dark:text-[#94A3B8]">Questions</div>
+                <div className="text-base font-bold text-[#1d1d1f] dark:text-white font-mono mt-0.5">
+                  {question_evaluations.length} Answered
+                </div>
               </div>
-
-              <div className="p-3 rounded-xl bg-[#f5f5f7] dark:bg-[#1E2638] border border-[#e0e0e0] dark:border-[#242E40]">
-                <span className="text-[11px] text-[#6e6e73] dark:text-[#94A3B8] font-bold uppercase block mb-1">
-                  Filler Words
-                </span>
-                <span className="text-base font-extrabold text-[#1d1d1f] dark:text-white">
-                  {fillerData.count} <span className="text-xs font-normal text-[#6e6e73]">used</span>
-                </span>
-                <span className="text-[10px] text-[#6e6e73] dark:text-[#94A3B8] font-semibold block mt-0.5">
-                  {fillerData.impact}
-                </span>
+              <div className="p-3 rounded-xl bg-[#fafafc] dark:bg-[#18181D]">
+                <div className="text-[11px] text-[#7a7a7a] dark:text-[#94A3B8]">Pacing</div>
+                <div className="text-base font-bold text-[#1d1d1f] dark:text-white font-mono mt-0.5">
+                  {Math.round(totalDurationSec / (question_evaluations.length || 1))}s / Q
+                </div>
               </div>
             </div>
           </div>
 
-          {/* 4 Core Competency Pillars (8 cols) */}
-          <div className="lg:col-span-8 bg-white dark:bg-[#141A26] p-6 sm:p-7 rounded-2xl border border-[#e0e0e0] dark:border-[#242E40] shadow-sm flex flex-col justify-between gap-6">
-            <div>
-              <h2 className="text-lg font-bold font-['Manrope'] mb-1 text-[#1d1d1f] dark:text-white">
-                Core Competency Diagnostic
-              </h2>
-              <p className="text-xs text-[#6e6e73] dark:text-[#94A3B8]">
-                Quantitative evaluation across technical precision, articulation, and problem framing.
-              </p>
-            </div>
-
-            {/* Score Progress Bars */}
+          {/* 4 Performance Pillars & Strengths (8 cols) */}
+          <div className="lg:col-span-8 bg-white dark:bg-[#121216] p-6 sm:p-7 rounded-2xl border border-[#e0e0e0] dark:border-[#27272F] shadow-sm flex flex-col justify-between gap-6">
+            {/* 4 Pillars Progress Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[
-                { label: 'Technical Depth & Accuracy', value: scores?.technical_depth ?? (overall_score === 0 ? 0 : 75), icon: 'code', desc: 'Understanding of core APIs, patterns, and trade-offs' },
-                { label: 'Communication & Articulation', value: scores?.communication_clarity ?? (overall_score === 0 ? 0 : 80), icon: 'message', desc: 'Concise explanation, natural pacing, and minimal fillers' },
-                { label: 'Problem Solving & System Design', value: scores?.problem_solving ?? (overall_score === 0 ? 0 : 70), icon: 'cpu', desc: 'Requirements analysis, bottleneck detection, and scaling' },
-                { label: 'Structure & STAR Delivery', value: scores?.confidence_structure ?? (overall_score === 0 ? 0 : 72), icon: 'check', desc: 'Context setting, actions taken, and measurable results' },
-              ].map((pillar, idx) => (
-                <div key={idx} className="p-4 rounded-xl bg-[#f5f5f7] dark:bg-[#1E2638] border border-[#e0e0e0] dark:border-[#242E40] flex flex-col justify-between">
+                { label: 'Technical Depth', value: technical_accuracy_score, desc: 'Domain algorithms, system architecture, core concepts' },
+                { label: 'Communication & Structure', value: communication_score, desc: 'Clarity, conciseness, structured response delivery' },
+                { label: 'Problem Solving Pacing', value: problem_solving_score, desc: 'Edge-case handling, reasoning method, trade-offs' },
+                { label: 'System Design Completeness', value: system_design_score, desc: 'Scalability, reliability, component integration' },
+              ].map((pillar, i) => (
+                <div key={i} className="p-4 rounded-xl bg-[#fafafc] dark:bg-[#18181D] border border-[#f0f0f0] dark:border-[#27272F] flex flex-col justify-between">
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
                       <span className="text-xs font-bold text-[#1d1d1f] dark:text-white">
                         {pillar.label}
                       </span>
-                      <span className="text-sm font-extrabold text-[#0066cc] dark:text-[#38BDF8]">
+                      <span className="text-sm font-extrabold text-[#0066cc] dark:text-[#C9D0D6]">
                         {pillar.value}%
                       </span>
                     </div>
@@ -251,9 +229,9 @@ ${recommended_learning_topics.map(t => `- ${t}`).join('\n')}
                     </p>
                   </div>
                   {/* Progress Bar */}
-                  <div className="w-full h-2.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+                  <div className="w-full h-2.5 rounded-full bg-slate-200 dark:bg-zinc-800 overflow-hidden">
                     <div
-                      className="h-full rounded-full bg-[#0066cc] dark:bg-[#38BDF8]"
+                      className="h-full rounded-full bg-[#0066cc] dark:bg-[#C9D0D6]"
                       style={{ width: `${pillar.value}%` }}
                     />
                   </div>
@@ -262,7 +240,7 @@ ${recommended_learning_topics.map(t => `- ${t}`).join('\n')}
             </div>
 
             {/* Key Strengths & Growth Areas Pills */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-[#f0f0f0] dark:border-[#28303F]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-[#f0f0f0] dark:border-[#27272F]">
               <div>
                 <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider flex items-center gap-1.5 mb-2">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
@@ -297,7 +275,7 @@ ${recommended_learning_topics.map(t => `- ${t}`).join('\n')}
         </section>
 
         {/* Navigation Tabs for Detailed Inspection */}
-        <div className="flex border-b border-[#E0E0E0] dark:border-[#28303F] gap-2">
+        <div className="flex border-b border-[#E0E0E0] dark:border-[#27272F] gap-2">
           {[
             { id: 'questions', label: 'Question-by-Question Breakdown', count: question_evaluations.length },
             { id: 'pathways', label: 'Recommended Roadmap Next Steps', count: recommended_learning_topics.length },
@@ -309,7 +287,7 @@ ${recommended_learning_topics.map(t => `- ${t}`).join('\n')}
               onClick={() => setActiveTab(tab.id)}
               className={`pb-3 px-4 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 ${
                 activeTab === tab.id
-                  ? 'border-[#0066cc] text-[#0066cc] dark:border-[#38BDF8] dark:text-[#38BDF8]'
+                  ? 'border-[#0066cc] text-[#0066cc] dark:border-[#C9D0D6] dark:text-[#C9D0D6]'
                   : 'border-transparent text-[#7a7a7a] hover:text-[#1d1d1f] dark:hover:text-white'
               }`}
             >
@@ -327,12 +305,12 @@ ${recommended_learning_topics.map(t => `- ${t}`).join('\n')}
             {question_evaluations.map((q, idx) => (
               <div
                 key={q.question_id || idx}
-                className="bg-white dark:bg-[#121722] p-6 rounded-3xl border border-[#E0E0E0] dark:border-[#28303F] shadow-xs flex flex-col gap-4"
+                className="bg-white dark:bg-[#121216] p-6 rounded-3xl border border-[#E0E0E0] dark:border-[#27272F] shadow-xs flex flex-col gap-4"
               >
                 {/* Question Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
-                    <span className="w-7 h-7 rounded-xl bg-[#eaf2fc] dark:bg-[rgba(41,151,255,0.18)] text-[#0066cc] dark:text-[#38BDF8] font-bold text-xs flex items-center justify-center">
+                    <span className="w-7 h-7 rounded-xl bg-[#eaf2fc] dark:bg-[rgba(201,208,214,0.18)] text-[#0066cc] dark:text-[#C9D0D6] font-bold text-xs flex items-center justify-center">
                       Q{idx + 1}
                     </span>
                     <span className="text-xs font-bold uppercase tracking-wider text-[#7a7a7a] dark:text-[#9CA3AF]">
@@ -341,7 +319,7 @@ ${recommended_learning_topics.map(t => `- ${t}`).join('\n')}
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-[#7a7a7a]">Score:</span>
-                    <span className="text-sm font-extrabold text-[#0066cc] dark:text-[#38BDF8] bg-[#eaf2fc] dark:bg-[rgba(41,151,255,0.2)] px-2.5 py-0.5 rounded-lg">
+                    <span className="text-sm font-extrabold text-[#0066cc] dark:text-[#C9D0D6] bg-[#eaf2fc] dark:bg-[rgba(201,208,214,0.2)] px-2.5 py-0.5 rounded-lg">
                       {q.score ?? 0}/100
                     </span>
                   </div>
@@ -353,7 +331,7 @@ ${recommended_learning_topics.map(t => `- ${t}`).join('\n')}
                 </h3>
 
                 {/* Candidate's Transcript */}
-                <div className="p-4 rounded-2xl bg-[#fafafc] dark:bg-[#171D2B] border border-[#f0f0f0] dark:border-[#202734]">
+                <div className="p-4 rounded-2xl bg-[#fafafc] dark:bg-[#18181D] border border-[#f0f0f0] dark:border-[#27272F]">
                   <span className="text-[11px] font-bold uppercase tracking-wider text-[#7a7a7a] dark:text-[#9CA3AF] block mb-1">
                     Your Response Transcript
                   </span>
@@ -393,7 +371,7 @@ ${recommended_learning_topics.map(t => `- ${t}`).join('\n')}
 
                 {/* Model Answer Summary */}
                 {q.model_answer_summary && (
-                  <div className="text-xs text-[#7a7a7a] dark:text-[#9CA3AF] bg-[#f5f7fa] dark:bg-[#141b29] p-3 rounded-xl border border-[#e5e9f0] dark:border-[#1f293d]">
+                  <div className="text-xs text-[#7a7a7a] dark:text-[#9CA3AF] bg-[#f5f7fa] dark:bg-[#18181D] p-3 rounded-xl border border-[#e5e9f0] dark:border-[#27272F]">
                     <strong className="text-[#1d1d1f] dark:text-slate-200">Model Interviewer Rubric:</strong> {q.model_answer_summary}
                   </div>
                 )}
@@ -404,7 +382,7 @@ ${recommended_learning_topics.map(t => `- ${t}`).join('\n')}
 
         {/* Tab 2: Recommended Roadmap Pathways */}
         {activeTab === 'pathways' && (
-          <div className="bg-white dark:bg-[#121722] p-6 sm:p-8 rounded-3xl border border-[#E0E0E0] dark:border-[#28303F] shadow-xs flex flex-col gap-6">
+          <div className="bg-white dark:bg-[#121216] p-6 sm:p-8 rounded-3xl border border-[#E0E0E0] dark:border-[#27272F] shadow-xs flex flex-col gap-6">
             <div>
               <h2 className="text-lg font-bold font-['Manrope'] mb-1 text-[#1d1d1f] dark:text-white">
                 Personalized Learning Recommendations
@@ -418,10 +396,10 @@ ${recommended_learning_topics.map(t => `- ${t}`).join('\n')}
               {recommended_learning_topics.map((topicItem, idx) => (
                 <div
                   key={idx}
-                  className="p-5 rounded-2xl bg-[#fafafc] dark:bg-[#171D2B] border border-[#f0f0f0] dark:border-[#202734] flex flex-col justify-between gap-4 hover:border-[#0066cc]/50 transition-colors"
+                  className="p-5 rounded-2xl bg-[#fafafc] dark:bg-[#18181D] border border-[#f0f0f0] dark:border-[#27272F] flex flex-col justify-between gap-4 hover:border-[#0066cc]/50 dark:hover:border-[#C9D0D6]/50 transition-colors"
                 >
                   <div>
-                    <span className="w-8 h-8 rounded-xl bg-[#0066cc]/10 text-[#0066cc] dark:bg-[#38BDF8]/20 dark:text-[#38BDF8] flex items-center justify-center font-bold text-xs mb-3">
+                    <span className="w-8 h-8 rounded-xl bg-[#0066cc]/10 text-[#0066cc] dark:bg-[#C9D0D6]/20 dark:text-[#C9D0D6] flex items-center justify-center font-bold text-xs mb-3">
                       #{idx + 1}
                     </span>
                     <h3 className="text-sm font-bold text-[#1d1d1f] dark:text-white mb-1">
@@ -435,7 +413,7 @@ ${recommended_learning_topics.map(t => `- ${t}`).join('\n')}
                   <button
                     type="button"
                     onClick={() => navigate('/resources')}
-                    className="w-full py-2 px-3 rounded-xl bg-white dark:bg-[#1f293d] border border-[#E0E0E0] dark:border-[#28303F] text-xs font-bold text-[#0066cc] dark:text-[#38BDF8] hover:bg-[#eaf2fc] transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="w-full py-2 px-3 rounded-xl bg-white dark:bg-[#121216] border border-[#E0E0E0] dark:border-[#27272F] text-xs font-bold text-[#0066cc] dark:text-[#C9D0D6] hover:bg-[#eaf2fc] dark:hover:bg-[#27272F] transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <span>Explore Learning Resources</span>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -446,9 +424,9 @@ ${recommended_learning_topics.map(t => `- ${t}`).join('\n')}
               ))}
             </div>
 
-            <div className="p-4 rounded-2xl bg-[#eaf2fc] dark:bg-[rgba(41,151,255,0.15)] border border-[#0066cc]/20 flex items-center justify-between">
+            <div className="p-4 rounded-2xl bg-[#eaf2fc] dark:bg-[#18181D] border border-[#0066cc]/20 dark:border-[#27272F] flex items-center justify-between">
               <div>
-                <h4 className="text-sm font-bold text-[#0066cc] dark:text-[#38BDF8]">
+                <h4 className="text-sm font-bold text-[#0066cc] dark:text-[#C9D0D6]">
                   Ready to update your master Roadmap?
                 </h4>
                 <p className="text-xs text-[#333333] dark:text-[#D1D5DB]">

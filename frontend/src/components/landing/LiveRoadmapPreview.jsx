@@ -74,7 +74,7 @@ export default function LiveRoadmapPreview() {
               <h3 className="font-sans font-bold text-lg text-[#1D1D1F] dark:text-[#F8FAFC]">
                 AI Engineer Acceleration Track
               </h3>
-              <span className="px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-[#EAF2FC] dark:bg-[#1E293B] text-[#0066CC] dark:text-[#38BDF8]">
+              <span className="px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-[#EAF2FC] dark:bg-[#18181D] text-[#0066CC] dark:text-[#C9D0D6]">
                 ADAPTIVE
               </span>
             </div>
@@ -88,7 +88,7 @@ export default function LiveRoadmapPreview() {
         <div className="flex items-center gap-4">
           <div className="text-right">
             <div className="text-xs font-semibold text-[#7A7A7A] dark:text-[#94A3B8]">Velocity</div>
-            <div className="text-sm font-extrabold text-[#0066CC] dark:text-[#38BDF8] font-mono">
+            <div className="text-sm font-extrabold text-[#0066CC] dark:text-[#C9D0D6] font-mono">
               {progressPercent}% Complete
             </div>
           </div>
@@ -100,7 +100,7 @@ export default function LiveRoadmapPreview() {
                 r="19"
                 fill="none"
                 strokeWidth="3.5"
-                className="stroke-[#E0E0E0] dark:stroke-[#1E293B]"
+                className="stroke-[#E0E0E0] dark:stroke-[#27272F]"
               />
               <circle
                 cx="24"
@@ -110,19 +110,19 @@ export default function LiveRoadmapPreview() {
                 stroke="currentColor"
                 strokeWidth="3.5"
                 strokeLinecap="round"
-                className="text-[#0066CC] dark:text-[#38BDF8] transition-all duration-700"
+                className="text-[#0066CC] dark:text-[#C9D0D6] transition-all duration-700"
                 strokeDasharray="119.38"
                 strokeDashoffset={119.38 - (119.38 * progressPercent) / 100}
               />
             </svg>
-            <Trophy className="w-5 h-5 text-[#0066CC] dark:text-[#38BDF8] relative z-10" />
+            <Trophy className="w-5 h-5 text-[#0066CC] dark:text-[#C9D0D6] relative z-10" />
           </div>
         </div>
       </div>
 
       {/* Real-time Recalibration Banner */}
-      <div className="my-4 h-9 flex items-center justify-between px-3.5 rounded-xl bg-[#F0F6FE] dark:bg-[#132238] border border-[#D5E6FA] dark:border-[#1E3A5F]">
-        <div className="flex items-center gap-2 text-xs font-semibold text-[#0066CC] dark:text-[#38BDF8]">
+      <div className="my-4 h-9 flex items-center justify-between px-3.5 rounded-xl bg-[#F0F6FE] dark:bg-[#18181D] border border-[#D5E6FA] dark:border-[#27272F]">
+        <div className="flex items-center gap-2 text-xs font-semibold text-[#0066CC] dark:text-[#C9D0D6]">
           <Sparkles className={`w-3.5 h-3.5 ${isCalibrating ? 'animate-spin' : ''}`} />
           <span>
             {isCalibrating
@@ -147,8 +147,8 @@ export default function LiveRoadmapPreview() {
                 task.completed
                   ? 'border-[#22A06B]/30 bg-[#ECFDF3]/50 dark:bg-[#064E3B]/20 dark:border-[#059669]/30'
                   : isAccessible
-                  ? 'border-[#0066CC]/40 bg-white dark:bg-[#161F30] hover:border-[#0066CC] dark:hover:border-[#38BDF8] shadow-sm hover:shadow-md'
-                  : 'border-[#E0E0E0]/60 dark:border-[#1E293B] bg-gray-50/50 dark:bg-[#0F1522]/50 opacity-60 cursor-not-allowed'
+                  ? 'border-[#0066CC]/40 bg-white dark:bg-[#18181D] hover:border-[#0066CC] dark:hover:border-[#C9D0D6] shadow-sm hover:shadow-md'
+                  : 'border-[#E0E0E0]/60 dark:border-[#27272F] bg-gray-50/50 dark:bg-[#0E0E12]/50 opacity-60 cursor-not-allowed'
               }`}
             >
               <div className="flex items-center gap-3.5">
@@ -159,8 +159,8 @@ export default function LiveRoadmapPreview() {
                     task.completed
                       ? 'bg-[#22A06B] text-white shadow-xs'
                       : isAccessible
-                      ? 'border-2 border-[#0066CC] dark:border-[#38BDF8] text-[#0066CC] dark:text-[#38BDF8] hover:bg-[#EAF2FC] dark:hover:bg-[#1E293B]'
-                      : 'border-2 border-[#CBD5E1] dark:border-[#334155] text-gray-400'
+                      ? 'border-2 border-[#0066CC] dark:border-[#C9D0D6] text-[#0066CC] dark:text-[#C9D0D6] hover:bg-[#EAF2FC] dark:hover:bg-[#27272F]'
+                      : 'border-2 border-[#CBD5E1] dark:border-[#33333F] text-gray-400'
                   }`}
                 >
                   {task.completed ? (
@@ -174,10 +174,10 @@ export default function LiveRoadmapPreview() {
 
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-[11px] font-bold font-mono text-[#0066CC] dark:text-[#38BDF8]">
+                    <span className="text-[11px] font-bold font-mono text-[#0066CC] dark:text-[#C9D0D6]">
                       {task.week}
                     </span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-[#F1F5F9] dark:bg-[#1E293B] text-[#475569] dark:text-[#94A3B8]">
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-[#F1F5F9] dark:bg-[#27272F] text-[#475569] dark:text-[#94A3B8]">
                       {task.skill}
                     </span>
                   </div>
@@ -202,8 +202,8 @@ export default function LiveRoadmapPreview() {
                     task.completed
                       ? 'bg-[#22A06B]/15 text-[#22A06B]'
                       : isAccessible
-                      ? 'bg-[#0066CC]/10 dark:bg-[#38BDF8]/15 text-[#0066CC] dark:text-[#38BDF8]'
-                      : 'bg-gray-100 dark:bg-gray-800 text-gray-400'
+                      ? 'bg-[#0066CC]/10 dark:bg-[#C9D0D6]/15 text-[#0066CC] dark:text-[#C9D0D6]'
+                      : 'bg-gray-100 dark:bg-[#27272F] text-gray-400'
                   }`}
                 >
                   {task.completed ? 'COMPLETED' : isAccessible ? 'ACTIONABLE' : 'LOCKED'}

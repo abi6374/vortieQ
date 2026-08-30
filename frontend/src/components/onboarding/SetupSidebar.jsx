@@ -22,7 +22,7 @@ const STEPS = [
 
 export default function SetupSidebar({ current = 1 }) {
   return (
-    <aside className="hidden md:block flex-none w-[270px] border-r border-[#f0f0f0] dark:border-[#1E2638] p-7 bg-gradient-to-b from-white to-[#f9fcff] dark:from-[#0E131E] dark:to-[#0B0E14] transition-colors">
+    <aside className="hidden md:block flex-none w-[270px] border-r border-[#f0f0f0] dark:border-[#27272F] p-7 bg-gradient-to-b from-white to-[#f9fcff] dark:from-[#121216] dark:to-[#09090B] transition-colors">
       {/* Brand Header */}
       <div className="flex items-center gap-3 mb-10">
         <span className="grid place-items-center rounded-xl text-white flex-shrink-0 w-[38px] height-[38px] bg-gradient-to-br from-[#0071e3] to-[#0066cc] shadow-[0_4px_14px_rgba(0,102,204,0.35)] p-2">
@@ -56,8 +56,8 @@ export default function SetupSidebar({ current = 1 }) {
                     done
                       ? 'bg-gradient-to-b from-[#22A06B] to-[#0066cc]'
                       : active
-                      ? 'bg-gradient-to-b from-[#0066cc] to-[#e6e6e6] dark:to-[#242E40]'
-                      : 'bg-[#e9e9e9] dark:bg-[#1E2638]'
+                      ? 'bg-gradient-to-b from-[#0066cc] to-[#e6e6e6] dark:to-[#27272F]'
+                      : 'bg-[#e9e9e9] dark:bg-[#202026]'
                   }`}
                 />
               )}
@@ -68,8 +68,8 @@ export default function SetupSidebar({ current = 1 }) {
                   done
                     ? 'border-[#22A06B] bg-[#ECFDF3] dark:bg-emerald-950/40 text-[#22A06B] dark:text-emerald-400'
                     : active
-                    ? 'border-[#0066cc] dark:border-[#38BDF8] bg-[#0066cc] dark:bg-[#38BDF8] text-white dark:text-slate-900 shadow-[0_4px_14px_rgba(0,102,204,0.40)]'
-                    : 'border-[#e6e6e6] dark:border-[#242E40] bg-white dark:bg-[#141A26] text-[#7a7a7a] dark:text-[#94A3B8]'
+                    ? 'border-[#0066cc] dark:border-[#C9D0D6] bg-[#0066cc] dark:bg-[#C9D0D6] text-white dark:text-[#09090B] shadow-[0_4px_14px_rgba(0,102,204,0.40)]'
+                    : 'border-[#e6e6e6] dark:border-[#27272F] bg-white dark:bg-[#18181D] text-[#7a7a7a] dark:text-[#94A3B8]'
                 }`}
               >
                 {done ? (
@@ -86,7 +86,7 @@ export default function SetupSidebar({ current = 1 }) {
                 <div
                   className={`text-[15px] font-bold ${
                     active
-                      ? 'text-[#0066cc] dark:text-[#38BDF8]'
+                      ? 'text-[#0066cc] dark:text-[#C9D0D6]'
                       : done
                       ? 'text-[#1d1d1f] dark:text-white'
                       : 'text-[#555555] dark:text-[#94A3B8]'
@@ -99,8 +99,8 @@ export default function SetupSidebar({ current = 1 }) {
                     done
                       ? 'text-[#22A06B] dark:text-emerald-400'
                       : active
-                      ? 'text-[#0066cc] dark:text-[#38BDF8]'
-                      : 'text-[#86868b] dark:text-[#64748B]'
+                      ? 'text-[#0066cc] dark:text-[#C9D0D6]'
+                      : 'text-[#86868b] dark:text-[#71717A]'
                   }`}
                 >
                   {done ? 'Completed' : active ? 'In progress' : 'Upcoming'}

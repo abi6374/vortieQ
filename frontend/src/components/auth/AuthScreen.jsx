@@ -131,98 +131,99 @@ const STYLES = `
 
 /* Dark mode styles for AuthScreen */
 html.dark .pfa {
-  --navy: #F9FAFB;
-  --slate: #D1D5DB;
-  --muted: #94A3B8;
-  --input-bd: #2E384D;
-  --divider: #242E40;
-  --app-bd: #242E40;
-  --lav-circle: rgba(41, 151, 255, 0.2);
+  --navy: #F8FAFC;
+  --slate: #CBD5E1;
+  --muted: #A1A1AA;
+  --input-bd: #27272F;
+  --divider: #27272F;
+  --app-bd: #27272F;
+  --lav-circle: rgba(201, 208, 214, 0.12);
   background:
-    radial-gradient(1100px 680px at 8% -8%, rgba(20,50,100,0.45) 0%, rgba(20,50,100,0) 55%),
-    radial-gradient(900px 560px at 112% 112%, rgba(25,40,80,0.35) 0%, rgba(25,40,80,0) 52%),
-    #0B0E14;
+    radial-gradient(1100px 680px at 8% -8%, rgba(201,208,214,0.06) 0%, transparent 55%),
+    radial-gradient(900px 560px at 112% 112%, rgba(24,24,29,0.5) 0%, transparent 52%),
+    #09090B;
 }
 html.dark .pfa .app {
-  background: rgba(20, 26, 38, 0.94);
-  border: 1px solid rgba(45, 56, 78, 0.85);
-  box-shadow: 0 28px 70px -24px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.08);
+  background: rgba(18, 18, 22, 0.95);
+  border: 1px solid #27272F;
+  box-shadow: 0 28px 70px -24px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.06);
 }
 html.dark .pfa .brand-panel {
-  background: linear-gradient(160deg, rgba(22, 28, 42, 0.9) 0%, rgba(16, 21, 32, 0.85) 100%);
-  border-right: 1px solid rgba(45, 56, 78, 0.85);
+  background: linear-gradient(160deg, #18181D 0%, #121216 100%);
+  border-right: 1px solid #27272F;
 }
 html.dark .pfa .form-panel {
-  background: rgba(18, 24, 34, 0.85);
+  background: #121216;
 }
 html.dark .pfa .input {
-  background: #101520;
-  border-color: #2E384D;
+  background: #0E0E12;
+  border-color: #27272F;
 }
 html.dark .pfa .input input {
-  color: #F9FAFB;
+  color: #F8FAFC;
 }
 html.dark .pfa .input input:-webkit-autofill,
 html.dark .pfa .input input:-webkit-autofill:hover, 
 html.dark .pfa .input input:-webkit-autofill:focus, 
 html.dark .pfa .input input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 1000px #101520 inset !important;
-  -webkit-text-fill-color: #F9FAFB !important;
-  caret-color: #F9FAFB !important;
+  -webkit-box-shadow: 0 0 0 1000px #0E0E12 inset !important;
+  -webkit-text-fill-color: #F8FAFC !important;
+  caret-color: #F8FAFC !important;
 }
 html.dark .pfa .btn-google {
-  background: #101520;
-  color: #F9FAFB;
-  border-color: #2E384D;
+  background: #18181D;
+  color: #F8FAFC;
+  border-color: #27272F;
 }
 html.dark .pfa .btn-google:hover:not(:disabled) {
-  background: #182030;
-  border-color: #38BDF8;
+  background: #202026;
+  border-color: #C9D0D6;
 }
 html.dark .pfa .btn-github {
-  background: #182030;
-  border: 1.5px solid #2E384D;
+  background: #18181D;
+  border: 1.5px solid #27272F;
 }
 html.dark .pfa .btn-github:hover:not(:disabled) {
-  background: #202A40;
+  background: #202026;
+  border-color: #C9D0D6;
 }
 html.dark .pfa .checkbox {
-  background: #101520;
-  border-color: #2E384D;
+  background: #0E0E12;
+  border-color: #27272F;
 }
 html.dark .pfa .logo-name {
-  color: #F9FAFB;
+  color: #F8FAFC;
 }
 html.dark .pfa .tab {
-  color: #94A3B8;
+  color: #A1A1AA;
 }
 html.dark .pfa .tab.active {
-  color: #38BDF8;
+  color: #C9D0D6;
 }
 html.dark .pfa .hero h1 {
-  color: #F9FAFB;
+  color: #F8FAFC;
 }
 html.dark .pfa .hero p {
-  color: #94A3B8;
+  color: #A1A1AA;
 }
 
 /* Subtle dark mode roadmap styling */
 html.dark .pfa .path-deco .path-line {
-  stroke: rgba(56, 189, 248, 0.16);
+  stroke: rgba(201, 208, 214, 0.2);
   stroke-width: 2.5;
 }
 html.dark .pfa .path-deco .node-ring {
-  fill: rgba(30, 41, 59, 0.6);
-  stroke: rgba(56, 189, 248, 0.28);
+  fill: #18181D;
+  stroke: rgba(201, 208, 214, 0.35);
   stroke-width: 1.5;
 }
 html.dark .pfa .path-deco .node-dest {
-  fill: rgba(56, 189, 248, 0.12);
-  stroke: rgba(56, 189, 248, 0.4);
+  fill: rgba(201, 208, 214, 0.15);
+  stroke: rgba(201, 208, 214, 0.5);
   stroke-width: 2;
 }
 html.dark .pfa .path-deco .node-dest-inner {
-  fill: rgba(56, 189, 248, 0.45);
+  fill: #C9D0D6;
 }
 
 @media (max-width:900px){ .pfa .app{ grid-template-columns:1fr; min-height:0; height:auto; max-height:none; } .pfa .brand-panel{ border-right:none; border-bottom:1px solid var(--divider); padding:28px 24px; min-height:220px; } .pfa .hero{ padding:16px 0; } .pfa .form-panel{ padding:28px 20px; height:auto; } }

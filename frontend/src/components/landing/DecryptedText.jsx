@@ -68,7 +68,7 @@ export default function DecryptedText({
   return (
     <span ref={spanRef} className={`inline-block font-mono font-extrabold tracking-tight ${className}`}>
       {displayText}
-      <span className="inline-block w-1.5 h-6 ml-1 bg-[#0066CC] dark:bg-[#38BDF8] animate-pulse align-middle" />
+      <span className="inline-block w-1.5 h-6 ml-1 bg-[#0066CC] dark:bg-[#C9D0D6] animate-pulse align-middle" />
     </span>
   )
 }

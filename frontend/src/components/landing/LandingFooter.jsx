@@ -8,7 +8,7 @@ import { Compass, Github, Twitter, Linkedin, Heart, Shield, Cpu, Sparkles } from
  */
 export default function LandingFooter() {
   return (
-    <footer className="w-full border-t border-[#E0E0E0] dark:border-[#1E293B] bg-white/60 dark:bg-[#070A10]/90 backdrop-blur-xl transition-colors">
+    <footer className="w-full border-t border-[#E0E0E0] dark:border-[#27272F] bg-white/60 dark:bg-[#09090B]/90 backdrop-blur-xl transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div className="grid grid-cols-1 md:grid-cols-5 gap-10">
           {/* Brand & Mission */}
@@ -42,22 +42,22 @@ export default function LandingFooter() {
             </h4>
             <ul className="space-y-2 text-sm text-[#7A7A7A] dark:text-[#94A3B8]">
               <li>
-                <Link to="/onboarding" className="hover:text-[#0066CC] dark:hover:text-[#38BDF8] transition-colors">
+                <Link to="/onboarding" className="hover:text-[#0066CC] dark:hover:text-[#C9D0D6] transition-colors">
                   Generate Roadmap
                 </Link>
               </li>
               <li>
-                <Link to="/skills" className="hover:text-[#0066CC] dark:hover:text-[#38BDF8] transition-colors">
+                <Link to="/skills" className="hover:text-[#0066CC] dark:hover:text-[#C9D0D6] transition-colors">
                   Skill Heatmap
                 </Link>
               </li>
               <li>
-                <Link to="/coach" className="hover:text-[#0066CC] dark:hover:text-[#38BDF8] transition-colors">
+                <Link to="/coach" className="hover:text-[#0066CC] dark:hover:text-[#C9D0D6] transition-colors">
                   AI Career Coach
                 </Link>
               </li>
               <li>
-                <Link to="/resources" className="hover:text-[#0066CC] dark:hover:text-[#38BDF8] transition-colors">
+                <Link to="/resources" className="hover:text-[#0066CC] dark:hover:text-[#C9D0D6] transition-colors">
                   Curated Catalog
                 </Link>
               </li>
@@ -85,15 +85,15 @@ export default function LandingFooter() {
             </h4>
             <ul className="space-y-2 text-sm text-[#7A7A7A] dark:text-[#94A3B8]">
               <li className="flex items-center gap-1.5">
-                <Shield className="w-3.5 h-3.5 text-[#0066CC] dark:text-[#38BDF8]" />
+                <Shield className="w-3.5 h-3.5 text-[#0066CC] dark:text-[#C9D0D6]" />
                 <span>Zero-Retention Resume Parser</span>
               </li>
               <li className="flex items-center gap-1.5">
-                <Cpu className="w-3.5 h-3.5 text-[#0066CC] dark:text-[#38BDF8]" />
+                <Cpu className="w-3.5 h-3.5 text-[#0066CC] dark:text-[#C9D0D6]" />
                 <span>Supabase AES-256 Encryption</span>
               </li>
               <li className="flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-[#0066CC] dark:text-[#38BDF8]" />
+                <Sparkles className="w-3.5 h-3.5 text-[#0066CC] dark:text-[#C9D0D6]" />
                 <span>Deterministic Skill Gating</span>
               </li>
             </ul>
@@ -101,13 +101,13 @@ export default function LandingFooter() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="mt-12 pt-6 border-t border-[#E0E0E0] dark:border-[#1E293B] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#7A7A7A] dark:text-[#64748B]">
+        <div className="mt-12 pt-6 border-t border-[#E0E0E0] dark:border-[#27272F] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#7A7A7A] dark:text-[#64748B]">
           <p>© {new Date().getFullYear()} PathFinder AI Inc. All rights reserved.</p>
           <div className="flex items-center gap-6">
-            <Link to="/auth" className="hover:text-[#0066CC] dark:hover:text-[#38BDF8] transition-colors">
+            <Link to="/auth" className="hover:text-[#0066CC] dark:hover:text-[#C9D0D6] transition-colors">
               Sign In
             </Link>
-            <Link to="/onboarding" className="hover:text-[#0066CC] dark:hover:text-[#38BDF8] transition-colors">
+            <Link to="/onboarding" className="hover:text-[#0066CC] dark:hover:text-[#C9D0D6] transition-colors">
               Get Started
             </Link>
             <span>Privacy Policy</span>

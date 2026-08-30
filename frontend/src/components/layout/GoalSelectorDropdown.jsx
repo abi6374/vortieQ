@@ -138,11 +138,11 @@ function formatGoalTitle(targetRole, rawGoalText) {
         onClick={() => setIsOpen((prev) => !prev)}
         aria-expanded={isOpen}
         aria-haspopup="listbox"
-        className={`flex items-center gap-2.5 px-3.5 py-2 bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] hover:border-[#0066cc] dark:hover:border-[#38BDF8] rounded-xl text-xs font-medium text-[#1d1d1f] dark:text-white shadow-2xs transition-all cursor-pointer select-none max-w-[280px] sm:max-w-xs ${
-          isOpen ? 'border-[#0066cc] dark:border-[#38BDF8] ring-2 ring-[#0066cc]/15' : ''
+        className={`flex items-center gap-2.5 px-3.5 py-2 bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] hover:border-[#0066cc] dark:hover:border-[#C9D0D6] rounded-xl text-xs font-medium text-[#1d1d1f] dark:text-white shadow-2xs transition-all cursor-pointer select-none max-w-[280px] sm:max-w-xs ${
+          isOpen ? 'border-[#0066cc] dark:border-[#C9D0D6] ring-2 ring-[#0066cc]/15' : ''
         }`}
       >
-        <CalendarDays className="w-4 h-4 text-[#0066cc] dark:text-[#38BDF8] flex-none" />
+        <CalendarDays className="w-4 h-4 text-[#0066cc] dark:text-[#C9D0D6] flex-none" />
         <div className="flex flex-col text-left min-w-0 flex-1">
           <span className="font-bold text-[#1d1d1f] dark:text-white leading-tight truncate font-['Manrope']">
             {currentGoalTitle}
@@ -153,7 +153,7 @@ function formatGoalTitle(targetRole, rawGoalText) {
         </div>
         <ChevronDown
           className={`w-3.5 h-3.5 text-[#86868b] dark:text-[#94A3B8] flex-none transition-transform duration-200 ${
-            isOpen ? 'rotate-180 text-[#0066cc] dark:text-[#38BDF8]' : ''
+            isOpen ? 'rotate-180 text-[#0066cc] dark:text-[#C9D0D6]' : ''
           }`}
         />
       </button>
@@ -167,10 +167,10 @@ function formatGoalTitle(targetRole, rawGoalText) {
             exit={{ opacity: 0, y: -4, scale: 0.96 }}
             transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
             style={{ transformOrigin: 'top left' }}
-            className="absolute left-0 top-full mt-1.5 z-50 w-72 sm:w-80 bg-white dark:bg-[#141A26] border border-[#E6EAF2] dark:border-[#242E40] shadow-[0_20px_48px_rgba(14,27,56,0.18),0_4px_12px_rgba(14,27,56,0.06)] dark:shadow-[0_20px_48px_rgba(0,0,0,0.6)] rounded-2xl p-1.5 overflow-hidden"
+            className="absolute left-0 top-full mt-1.5 z-50 w-72 sm:w-80 bg-white dark:bg-[#121216] border border-[#E6EAF2] dark:border-[#27272F] shadow-[0_20px_48px_rgba(14,27,56,0.18),0_4px_12px_rgba(14,27,56,0.06)] dark:shadow-[0_20px_48px_rgba(0,0,0,0.6)] rounded-2xl p-1.5 overflow-hidden"
             role="listbox"
           >
-            <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[#7a7a7a] dark:text-[#94A3B8] border-b border-[#f0f0f0] dark:border-[#1E2638] mb-1 font-['Manrope']">
+            <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[#7a7a7a] dark:text-[#94A3B8] border-b border-[#f0f0f0] dark:border-[#202026] mb-1 font-['Manrope']">
               Your Learning Roadmaps ({displayPaths.length})
             </div>
 
@@ -190,8 +190,8 @@ function formatGoalTitle(targetRole, rawGoalText) {
                     onClick={() => handleSelect(pathItem)}
                     className={`w-full text-left px-3 py-2 rounded-xl text-xs flex items-center justify-between gap-2.5 transition-colors cursor-pointer ${
                       isSelected
-                        ? 'bg-[#eaf2fc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] font-bold'
-                        : 'text-[#1d1d1f] dark:text-[#E2E8F0] hover:bg-[#f5f7fa] dark:hover:bg-[#1A2234] font-medium'
+                        ? 'bg-[#eaf2fc] dark:bg-[#18181D] text-[#0066cc] dark:text-[#C9D0D6] font-bold'
+                        : 'text-[#1d1d1f] dark:text-[#E2E8F0] hover:bg-[#f5f7fa] dark:hover:bg-[#18181D] font-medium'
                     }`}
                   >
                     <div className="min-w-0 flex-1">
@@ -202,7 +202,7 @@ function formatGoalTitle(targetRole, rawGoalText) {
                       </div>
                     </div>
                     {isSelected && (
-                      <Check className="w-4 h-4 text-[#0066cc] dark:text-[#38BDF8] flex-none" />
+                      <Check className="w-4 h-4 text-[#0066cc] dark:text-[#C9D0D6] flex-none" />
                     )}
                   </button>
                 )
@@ -210,14 +210,14 @@ function formatGoalTitle(targetRole, rawGoalText) {
             </div>
 
             {/* Bottom Action: Create New Goal / Replan */}
-            <div className="mt-1 pt-1 border-t border-[#f0f0f0] dark:border-[#1E2638]">
+            <div className="mt-1 pt-1 border-t border-[#f0f0f0] dark:border-[#202026]">
               <button
                 type="button"
                 onClick={() => {
                   setIsOpen(false)
                   navigate('/onboarding')
                 }}
-                className="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-[#0066cc] dark:text-[#38BDF8] hover:bg-[#eaf2fc] dark:hover:bg-[#1E293B] flex items-center gap-2 transition-colors cursor-pointer"
+                className="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-[#0066cc] dark:text-[#C9D0D6] hover:bg-[#eaf2fc] dark:hover:bg-[#18181D] flex items-center gap-2 transition-colors cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Create New Learning Goal</span>

@@ -25,10 +25,10 @@ export default function WaveformVisualizer({
   const colors = {
     speaking: {
       primary: '#0071e3',
-      secondary: '#38bdf8',
-      glow: 'rgba(56, 189, 248, 0.45)',
+      secondary: '#C9D0D6',
+      glow: 'rgba(201, 208, 214, 0.45)',
       ringGlow: 'rgba(0, 113, 227, 0.25)',
-      core: '#e0f2fe'
+      core: '#F8FAFC'
     },
     listening: {
       primary: '#10b981',
@@ -53,10 +53,10 @@ export default function WaveformVisualizer({
     }
   }[state] || {
     primary: '#0071e3',
-    secondary: '#38bdf8',
-    glow: 'rgba(56, 189, 248, 0.45)',
+    secondary: '#C9D0D6',
+    glow: 'rgba(201, 208, 214, 0.45)',
     ringGlow: 'rgba(0, 113, 227, 0.25)',
-    core: '#e0f2fe'
+    core: '#F8FAFC'
   }
 
   useEffect(() => {

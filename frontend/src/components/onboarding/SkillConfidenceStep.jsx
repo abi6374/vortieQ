@@ -29,14 +29,14 @@ function Radio({ on, small }) {
     <span
       className={`rounded-full grid place-items-center flex-none border-2 transition-all ${
         on
-          ? 'border-[#0066cc] dark:border-[#38BDF8] bg-white dark:bg-[#131D2E]'
-          : 'border-[#d0d0d5] dark:border-[#2D3A4F] bg-white dark:bg-[#101726]'
+          ? 'border-[#0066cc] dark:border-[#C9D0D6] bg-white dark:bg-[#18181D]'
+          : 'border-[#d0d0d5] dark:border-[#27272F] bg-white dark:bg-[#121216]'
       }`}
       style={{ width: sz, height: sz }}
     >
       {on && (
         <span
-          className="rounded-full bg-[#0066cc] dark:bg-[#38BDF8]"
+          className="rounded-full bg-[#0066cc] dark:bg-[#C9D0D6]"
           style={{ width: dot, height: dot }}
         />
       )}
@@ -50,11 +50,11 @@ function SkillLevelPanel({ topic, level, onLevel }) {
   const pct = confidencePctFor(topic, level)
 
   return (
-    <section className="rounded-2xl border border-[#e6e6e6] dark:border-[#202B3C] bg-white dark:bg-[#101726] shadow-sm overflow-hidden transition-colors">
+    <section className="rounded-2xl border border-[#e6e6e6] dark:border-[#27272F] bg-white dark:bg-[#18181D] shadow-sm overflow-hidden transition-colors">
       {/* header */}
       <div className="flex items-center gap-4 px-5 py-4">
         <div
-          className="grid place-items-center rounded-xl text-white dark:text-[#0B0F17] font-bold flex-none bg-[#0066cc] dark:bg-[#38BDF8] shadow-[0_4px_12px_rgba(0,102,204,.25)] dark:shadow-[0_4px_12px_rgba(56,189,248,.25)]"
+          className="grid place-items-center rounded-xl text-white dark:text-[#09090B] font-bold flex-none bg-[#0066cc] dark:bg-[#C9D0D6] shadow-[0_4px_12px_rgba(0,102,204,.25)] dark:shadow-[0_4px_12px_rgba(201,208,214,.25)]"
           style={{ width: 44, height: 44 }}
         >
           {topic.name.slice(0, 2).toUpperCase()}
@@ -65,11 +65,11 @@ function SkillLevelPanel({ topic, level, onLevel }) {
         <span className="flex-1" />
         {pct !== null ? (
           <span className="flex items-baseline gap-1.5">
-            <span className="font-extrabold tabular-nums text-[#0066cc] dark:text-[#38BDF8]" style={{ fontSize: 20 }}>{pct}%</span>
+            <span className="font-extrabold tabular-nums text-[#0066cc] dark:text-[#C9D0D6]" style={{ fontSize: 20 }}>{pct}%</span>
             <span className="text-xs sm:text-sm text-[#494949] dark:text-[#94A3B8]">inferred</span>
           </span>
         ) : (
-          <span className="text-[11px] font-bold uppercase tracking-wide text-[#7a7a7a] dark:text-[#94A3B8] bg-[#f2f2f2] dark:bg-[#1A2536] px-2.5 py-1 rounded-full">
+          <span className="text-[11px] font-bold uppercase tracking-wide text-[#7a7a7a] dark:text-[#94A3B8] bg-[#f2f2f2] dark:bg-[#27272F] px-2.5 py-1 rounded-full">
             Self-reported
           </span>
         )}
@@ -77,7 +77,7 @@ function SkillLevelPanel({ topic, level, onLevel }) {
           type="button"
           onClick={() => setOpen((o) => !o)}
           aria-label={open ? 'Collapse' : 'Expand'}
-          className="grid place-items-center rounded-full border border-[#e6e6e6] dark:border-[#263750] bg-[#f7f9fc] dark:bg-[#1A2536] text-[#494949] dark:text-[#CBD5E1] hover:bg-[#eef3f8] dark:hover:bg-[#25354D] flex-none cursor-pointer transition-colors"
+          className="grid place-items-center rounded-full border border-[#e6e6e6] dark:border-[#27272F] bg-[#f7f9fc] dark:bg-[#27272F] text-[#494949] dark:text-[#CBD5E1] hover:bg-[#eef3f8] dark:hover:bg-[#33333F] flex-none cursor-pointer transition-colors"
           style={{ width: 36, height: 36 }}
         >
           <svg
@@ -116,17 +116,17 @@ function SkillLevelPanel({ topic, level, onLevel }) {
                   onClick={() => onLevel(key)}
                   className={`text-left rounded-xl transition-all cursor-pointer p-3 sm:p-3.5 border-2 ${
                     active
-                      ? 'border-[#0066cc] dark:border-[#38BDF8] bg-gradient-to-br from-white to-[#eaf2fc] dark:from-[#131D2E] dark:to-[#18263D] shadow-[0_0_0_3px_rgba(0,102,204,.07)] dark:shadow-[0_0_0_3px_rgba(56,189,248,.15)]'
-                      : 'border-[#e6e6e6] dark:border-[#202C3E] bg-white dark:bg-[#0B0F17] hover:border-[#abd2fb] dark:hover:border-[#38BDF8]'
+                      ? 'border-[#0066cc] dark:border-[#C9D0D6] bg-gradient-to-br from-white to-[#eaf2fc] dark:from-[#18181D] dark:to-[#27272F] shadow-[0_0_0_3px_rgba(0,102,204,.07)] dark:shadow-[0_0_0_3px_rgba(201,208,214,.15)]'
+                      : 'border-[#e6e6e6] dark:border-[#27272F] bg-white dark:bg-[#121216] hover:border-[#abd2fb] dark:hover:border-[#C9D0D6]'
                   }`}
                 >
                   <span className="flex items-center justify-between gap-1.5">
-                    <span className={`font-bold text-sm ${active ? 'text-[#004fa3] dark:text-[#38BDF8]' : 'text-[#1d1d1f] dark:text-[#F8FAFC]'}`}>
+                    <span className={`font-bold text-sm ${active ? 'text-[#004fa3] dark:text-[#C9D0D6]' : 'text-[#1d1d1f] dark:text-[#F8FAFC]'}`}>
                       {LEVEL_META[key].label}
                     </span>
                     <Radio on={active} small />
                   </span>
-                  <span className={`block text-[11.5px] mt-1 leading-snug ${active ? 'text-[#494949] dark:text-[#94A3B8]' : 'text-[#86868b] dark:text-[#64748B]'}`}>
+                  <span className={`block text-[11.5px] mt-1 leading-snug ${active ? 'text-[#494949] dark:text-[#94A3B8]' : 'text-[#86868b] dark:text-[#71717A]'}`}>
                     {suggested === key && typeof topic.confidence_pct === 'number' ? 'Matches what we detected' : LEVEL_META[key].blurb}
                   </span>
                 </button>
@@ -134,8 +134,8 @@ function SkillLevelPanel({ topic, level, onLevel }) {
             })}
           </div>
 
-          <div className="mt-3.5 flex items-center gap-3.5 rounded-xl border px-4 py-3 bg-[#eaf2fc] dark:bg-[#131E30] border-[#d8e9fb] dark:border-[#22354E] transition-colors">
-            <span className="grid place-items-center rounded-full flex-none w-9 h-9 bg-[#dbeafc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8]">
+          <div className="mt-3.5 flex items-center gap-3.5 rounded-xl border px-4 py-3 bg-[#eaf2fc] dark:bg-[#121216] border-[#d8e9fb] dark:border-[#27272F] transition-colors">
+            <span className="grid place-items-center rounded-full flex-none w-9 h-9 bg-[#dbeafc] dark:bg-[#27272F] text-[#0066cc] dark:text-[#C9D0D6]">
               <svg
                 width="18"
                 height="18"
@@ -151,7 +151,7 @@ function SkillLevelPanel({ topic, level, onLevel }) {
               </svg>
             </span>
             <div>
-              <div className="text-[11px] font-bold tracking-wide uppercase text-[#0066cc] dark:text-[#38BDF8]">
+              <div className="text-[11px] font-bold tracking-wide uppercase text-[#0066cc] dark:text-[#C9D0D6]">
                 Key concepts · {LEVEL_META[level].label}
               </div>
               <div className="font-semibold text-[#1d1d1f] dark:text-[#F8FAFC] leading-snug text-[14px]">
@@ -197,7 +197,7 @@ export default function SkillConfidenceStep({
   }
 
   return (
-    <div className="w-full max-w-[1140px] bg-white dark:bg-[#0E1522] rounded-2xl border border-[#f0f0f0] dark:border-[#202B3C] shadow-[0_14px_38px_rgba(25,49,75,0.08)] dark:shadow-[0_14px_38px_rgba(0,0,0,0.5)] p-6 sm:p-10 flex flex-col justify-between overflow-hidden transition-colors min-h-[580px]">
+    <div className="w-full max-w-[1140px] bg-white dark:bg-[#121216] rounded-2xl border border-[#f0f0f0] dark:border-[#27272F] shadow-[0_14px_38px_rgba(25,49,75,0.08)] dark:shadow-[0_14px_38px_rgba(0,0,0,0.5)] p-6 sm:p-10 flex flex-col justify-between overflow-hidden transition-colors min-h-[580px]">
       
       <div>
         {/* Top Header Row with ThemeToggle only (No account option) */}
@@ -221,7 +221,7 @@ export default function SkillConfidenceStep({
         {/* LIST OF SKILL LEVEL PANELS */}
         <div className="space-y-4">
           {topics.length === 0 ? (
-            <div className="py-12 px-4 text-center rounded-2xl border-2 border-dashed border-[#e6e6e6] dark:border-[#202B3C] bg-[#fafbfc] dark:bg-[#0E1522]">
+            <div className="py-12 px-4 text-center rounded-2xl border-2 border-dashed border-[#e6e6e6] dark:border-[#27272F] bg-[#fafbfc] dark:bg-[#0E0E12]">
               <p className="font-bold text-[#1d1d1f] dark:text-[#F8FAFC] text-base">
                 No skills to calibrate yet
               </p>

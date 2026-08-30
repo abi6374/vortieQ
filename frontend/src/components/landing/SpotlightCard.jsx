@@ -9,7 +9,7 @@ export default function SpotlightCard({
   children,
   className = '',
   spotlightColor = 'rgba(0, 102, 204, 0.15)',
-  darkSpotlightColor = 'rgba(56, 189, 248, 0.18)',
+  darkSpotlightColor = 'rgba(201, 208, 214, 0.16)',
   ...props
 }) {
   const divRef = useRef(null)
@@ -50,7 +50,7 @@ export default function SpotlightCard({
       ref={divRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      className={`relative overflow-hidden rounded-2xl border border-[#E0E0E0] dark:border-[#242E40] bg-white/90 dark:bg-[#141A26]/90 backdrop-blur-md transition-all duration-200 hover:shadow-xl hover:border-[#0066CC]/40 dark:hover:border-[#38BDF8]/40 will-change-transform ${className}`}
+      className={`relative overflow-hidden rounded-2xl border border-[#E0E0E0] dark:border-[#27272F] bg-white/90 dark:bg-[#121216]/90 backdrop-blur-md transition-all duration-200 hover:shadow-xl hover:border-[#0066CC]/40 dark:hover:border-[#C9D0D6]/40 will-change-transform ${className}`}
       {...props}
     >
       {/* Radial Spotlight Light Cone with GPU CSS variables */}

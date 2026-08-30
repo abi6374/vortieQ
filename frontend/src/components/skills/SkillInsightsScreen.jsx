@@ -375,7 +375,7 @@ export default function SkillInsightsScreen() {
           height={targetHeight}
           fill="transparent"
           stroke="#d2d2d7"
-          className="dark:stroke-[#334155] dark:fill-[#38BDF8]/5"
+          className="dark:stroke-[#33333F] dark:fill-[#C9D0D6]/5"
           strokeWidth="1.5"
           strokeDasharray="4 4"
           rx="6"
@@ -388,7 +388,7 @@ export default function SkillInsightsScreen() {
             width={width}
             height={height}
             fill="#0066cc"
-            className="dark:fill-[#38BDF8] transition-all duration-300 hover:opacity-85 cursor-pointer"
+            className="dark:fill-[#C9D0D6] transition-all duration-300 hover:opacity-85 cursor-pointer"
             rx="6"
           />
         )}
@@ -538,7 +538,7 @@ export default function SkillInsightsScreen() {
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex items-start gap-3.5">
             {/* Purple Icon Badge */}
-            <div className="w-11 h-11 rounded-2xl bg-[#eaf2fc] dark:bg-[#1E293B] border border-[#dcecfd] dark:border-[#242E40] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center flex-none shadow-sm mt-0.5">
+            <div className="w-11 h-11 rounded-2xl bg-[#eaf2fc] dark:bg-[#18181D] border border-[#dcecfd] dark:border-[#27272F] text-[#0066cc] dark:text-[#C9D0D6] flex items-center justify-center flex-none shadow-sm mt-0.5">
               <Lightbulb className="w-6 h-6" strokeWidth={2.2} />
             </div>
             <div>
@@ -553,8 +553,8 @@ export default function SkillInsightsScreen() {
 
           {/* Right Side: Real Goal & Last Updated (live-computed, so "now") */}
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 lg:self-center">
-            <div className="flex items-center gap-2 px-3.5 py-2 bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-xl text-xs font-bold text-[#1d1d1f] dark:text-white shadow-sm max-w-xs">
-              <Target className="w-4 h-4 text-[#0066cc] dark:text-[#38BDF8] flex-none" strokeWidth={2.2} />
+            <div className="flex items-center gap-2 px-3.5 py-2 bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-xl text-xs font-bold text-[#1d1d1f] dark:text-white shadow-sm max-w-xs">
+              <Target className="w-4 h-4 text-[#0066cc] dark:text-[#C9D0D6] flex-none" strokeWidth={2.2} />
               <span className="truncate">
                 {roadmap.path?.goal_text ? `Goal: ${roadmap.path.goal_text.split('.')[0]}` : 'No active goal yet'}
               </span>
@@ -575,13 +575,13 @@ export default function SkillInsightsScreen() {
           <div className="pf-glass-card p-5 sm:p-6 shadow-sm flex flex-col justify-between">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="w-7 h-7 rounded-xl bg-[#eaf2fc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center flex-none shadow-xs">
+                <span className="w-7 h-7 rounded-xl bg-[#eaf2fc] dark:bg-[#18181D] text-[#0066cc] dark:text-[#C9D0D6] flex items-center justify-center flex-none shadow-xs">
                   <BarChart3 className="w-3.5 h-3.5" />
                 </span>
                 <span className="text-xs font-bold text-[#333333] dark:text-[#CBD5E1]">Overall Skill Readiness</span>
               </div>
               <Info
-                className="w-3.5 h-3.5 text-[#86868b] dark:text-[#64748B] cursor-pointer hover:text-[#0066cc] dark:hover:text-[#38BDF8]"
+                className="w-3.5 h-3.5 text-[#86868b] dark:text-[#64748B] cursor-pointer hover:text-[#0066cc] dark:hover:text-[#C9D0D6]"
                 title="Calculated from assessments, completed learning activities, practice performance, and skill progress."
               />
             </div>
@@ -596,8 +596,8 @@ export default function SkillInsightsScreen() {
               </span>
             </div>
 
-            <div className="w-full bg-[#eef2f6] dark:bg-[#1E2638] h-2 rounded-full overflow-hidden">
-              <div className="bg-gradient-to-r from-[#0066cc] to-[#38bdf8] h-full rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(0,102,204,0.4)]" style={{ width: `${roadmap.percent}%` }} />
+            <div className="w-full bg-[#eef2f6] dark:bg-[#202026] h-2 rounded-full overflow-hidden">
+              <div className="bg-gradient-to-r from-[#0066cc] to-[#004fa3] dark:from-[#C9D0D6] dark:to-[#8B949E] h-full rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(0,102,204,0.4)]" style={{ width: `${roadmap.percent}%` }} />
             </div>
           </div>
 
@@ -621,7 +621,7 @@ export default function SkillInsightsScreen() {
               </span>
             </div>
 
-            <div className="w-full bg-[#eef2f6] dark:bg-[#1E2638] h-2 rounded-full overflow-hidden">
+            <div className="w-full bg-[#eef2f6] dark:bg-[#202026] h-2 rounded-full overflow-hidden">
               <div className="bg-[#22A06B] h-full rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(34,160,107,0.4)]" style={{ width: `${totalSkillsCount ? (masteredSkillsCount / totalSkillsCount) * 100 : 0}%` }} />
             </div>
           </div>
@@ -644,7 +644,7 @@ export default function SkillInsightsScreen() {
               </span>
             </div>
 
-            <div className="w-full bg-[#eef2f6] dark:bg-[#1E2638] h-2 rounded-full overflow-hidden">
+            <div className="w-full bg-[#eef2f6] dark:bg-[#202026] h-2 rounded-full overflow-hidden">
               <div className="bg-[#D88700] h-full rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(216,135,0,0.4)]" style={{ width: `${totalSkillsCount ? (inProgressSkillsCount / totalSkillsCount) * 100 : 0}%` }} />
             </div>
           </div>
@@ -653,12 +653,12 @@ export default function SkillInsightsScreen() {
           <div className="pf-glass-card p-5 sm:p-6 shadow-sm flex flex-col justify-between">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="w-7 h-7 rounded-xl bg-[#eaf2fc] dark:bg-blue-950/40 text-[#5B8DEF] dark:text-blue-400 flex items-center justify-center flex-none shadow-xs">
+                <span className="w-7 h-7 rounded-xl bg-[#eaf2fc] dark:bg-[#18181D] text-[#5B8DEF] dark:text-[#C9D0D6] flex items-center justify-center flex-none shadow-xs">
                   <BookOpen className="w-3.5 h-3.5" />
                 </span>
                 <span className="text-xs font-bold text-[#333333] dark:text-[#CBD5E1]">Skills to Learn</span>
               </div>
-              <span className="text-[11px] font-bold text-[#5B8DEF] dark:text-blue-400">{toLearnSkillsCount > 0 ? 'Focus recommended' : '—'}</span>
+              <span className="text-[11px] font-bold text-[#5B8DEF] dark:text-[#C9D0D6]">{toLearnSkillsCount > 0 ? 'Focus recommended' : '—'}</span>
             </div>
 
             <div className="my-3">
@@ -667,8 +667,8 @@ export default function SkillInsightsScreen() {
               </span>
             </div>
 
-            <div className="w-full bg-[#eef2f6] dark:bg-[#1E2638] h-2 rounded-full overflow-hidden">
-              <div className="bg-[#5B8DEF] h-full rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(91,141,239,0.4)]" style={{ width: `${totalSkillsCount ? (toLearnSkillsCount / totalSkillsCount) * 100 : 0}%` }} />
+            <div className="w-full bg-[#eef2f6] dark:bg-[#202026] h-2 rounded-full overflow-hidden">
+              <div className="bg-[#5B8DEF] dark:bg-[#C9D0D6] h-full rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(201,208,214,0.4)]" style={{ width: `${totalSkillsCount ? (toLearnSkillsCount / totalSkillsCount) * 100 : 0}%` }} />
             </div>
           </div>
         </section>
@@ -678,107 +678,107 @@ export default function SkillInsightsScreen() {
                 1. Skill Proficiency Comparison (Large)
                 2. Skill Radar (Medium)
                 3. Top Skill Gaps (Right)
-               --------------------------------------------------------------------- */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6">
-              
-              {/* CARD 1: Skill Proficiency Comparison (5.5 of 12 cols or 6 cols) */}
-              <div className="lg:col-span-6 bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between pb-3 border-b border-[#f5f5f7] dark:border-[#1E2638]">
-                    <div className="flex items-center gap-2">
-                      <h2 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">
-                        Skill Proficiency Comparison
-                      </h2>
-                      <Info
-                        className="w-3.5 h-3.5 text-[#86868b] dark:text-[#64748B] cursor-pointer hover:text-[#0066cc] dark:hover:text-[#38BDF8]"
-                        title="Current completion compared with full completion of the steps assigned for each skill in your roadmap."
-                      />
-                    </div>
+           --------------------------------------------------------------------- */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6">
+          
+          {/* CARD 1: Skill Proficiency Comparison (5.5 of 12 cols or 6 cols) */}
+          <div className="lg:col-span-6 bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between pb-3 border-b border-[#f5f5f7] dark:border-[#202026]">
+                <div className="flex items-center gap-2">
+                  <h2 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">
+                    Skill Proficiency Comparison
+                  </h2>
+                  <Info
+                    className="w-3.5 h-3.5 text-[#86868b] dark:text-[#64748B] cursor-pointer hover:text-[#0066cc] dark:hover:text-[#C9D0D6]"
+                    title="Current completion compared with full completion of the steps assigned for each skill in your roadmap."
+                  />
+                </div>
 
-                    {/* Chart Legend */}
-                    <div className="flex items-center gap-4 text-xs font-medium text-[#333333] dark:text-[#CBD5E1]">
-                      <div className="flex items-center gap-1.5">
-                        <span className="w-2.5 h-2.5 rounded-full bg-[#0066cc] dark:bg-[#38BDF8]" />
-                        <span>Your Level</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="w-3.5 border-t-2 border-dashed border-[#d2d2d7] dark:border-[#64748B]" />
-                        <span>Target Level (Internship)</span>
-                      </div>
-                    </div>
+                {/* Chart Legend */}
+                <div className="flex items-center gap-4 text-xs font-medium text-[#333333] dark:text-[#CBD5E1]">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#0066cc] dark:bg-[#C9D0D6]" />
+                    <span>Your Level</span>
                   </div>
-
-                  {/* Grouped Bar Chart with Target Outline */}
-                  <div className="h-72 w-full pt-2">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart
-                        data={proficiencyData}
-                        margin={{ top: 25, right: 15, left: 5, bottom: 45 }}
-                        barSize={24}
-                      >
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f5f5f7" className="stroke-[#f0f0f0] dark:stroke-[#242E40]" />
-                        <XAxis
-                          dataKey="skill"
-                          axisLine={{ stroke: '#242E40' }}
-                          tickLine={false}
-                          interval={0}
-                          height={55}
-                          tick={<CustomBarXAxisTick />}
-                        />
-                        <YAxis
-                          domain={[0, 100]}
-                          ticks={[0, 20, 40, 60, 80, 100]}
-                          tickFormatter={(val) => `${val}%`}
-                          tick={{ fill: '#94A3B8', fontSize: 10, fontWeight: 600 }}
-                          axisLine={false}
-                          tickLine={false}
-                        />
-                        <RechartsTooltip
-                          cursor={{ fill: 'rgba(56,189,248,0.06)' }}
-                          content={({ active, payload }) => {
-                            if (active && payload && payload.length) {
-                              const d = payload[0].payload
-                              return (
-                                <div className="bg-[#1d1d1f] dark:bg-[#0E131E] border border-gray-700 dark:border-[#242E40] text-white p-2.5 rounded-xl shadow-xl text-xs space-y-1">
-                                  <div className="font-bold border-b border-gray-700 pb-1 text-[#dbeafc]">{d.name || d.skill}</div>
-                                  <div className="flex justify-between gap-4">
-                                    <span className="text-gray-300">Your Level:</span>
-                                    <span className="font-bold text-[#38BDF8]">{d.current}%</span>
-                                  </div>
-                                  <div className="flex justify-between gap-4">
-                                    <span className="text-gray-300">Target Level:</span>
-                                    <span className="font-bold text-gray-200">{d.target}%</span>
-                                  </div>
-                                  <div className="flex justify-between gap-4 text-[11px] pt-1 text-gray-400">
-                                    <span>Gap:</span>
-                                    <span className={d.gap > 20 ? 'text-rose-400 font-bold' : 'text-emerald-400 font-bold'}>{d.gap}%</span>
-                                  </div>
-                                </div>
-                              )
-                            }
-                            return null
-                          }}
-                        />
-                        <Bar
-                          dataKey="current"
-                          shape={<CustomBarWithTarget />}
-                        />
-                      </BarChart>
-                    </ResponsiveContainer>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-3.5 border-t-2 border-dashed border-[#d2d2d7] dark:border-[#8B949E]" />
+                    <span>Target Level (Internship)</span>
                   </div>
                 </div>
               </div>
 
+              {/* Grouped Bar Chart with Target Outline */}
+              <div className="h-72 w-full pt-2">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={proficiencyData}
+                    margin={{ top: 25, right: 15, left: 5, bottom: 45 }}
+                    barSize={24}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f5f5f7" className="stroke-[#f0f0f0] dark:stroke-[#27272F]" />
+                    <XAxis
+                      dataKey="skill"
+                      axisLine={{ stroke: '#27272F' }}
+                      tickLine={false}
+                      interval={0}
+                      height={55}
+                      tick={<CustomBarXAxisTick />}
+                    />
+                    <YAxis
+                      domain={[0, 100]}
+                      ticks={[0, 20, 40, 60, 80, 100]}
+                      tickFormatter={(val) => `${val}%`}
+                      tick={{ fill: '#A1A1AA', fontSize: 10, fontWeight: 600 }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <RechartsTooltip
+                      cursor={{ fill: 'rgba(201,208,214,0.06)' }}
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          const d = payload[0].payload
+                          return (
+                            <div className="bg-[#1d1d1f] dark:bg-[#0E0E12] border border-gray-700 dark:border-[#27272F] text-white p-2.5 rounded-xl shadow-xl text-xs space-y-1">
+                              <div className="font-bold border-b border-gray-700 pb-1 text-[#dbeafc]">{d.name || d.skill}</div>
+                              <div className="flex justify-between gap-4">
+                                <span className="text-gray-300">Your Level:</span>
+                                <span className="font-bold text-[#C9D0D6]">{d.current}%</span>
+                              </div>
+                              <div className="flex justify-between gap-4">
+                                <span className="text-gray-300">Target Level:</span>
+                                <span className="font-bold text-gray-200">{d.target}%</span>
+                              </div>
+                              <div className="flex justify-between gap-4 text-[11px] pt-1 text-gray-400">
+                                <span>Gap:</span>
+                                <span className={d.gap > 20 ? 'text-rose-400 font-bold' : 'text-emerald-400 font-bold'}>{d.gap}%</span>
+                              </div>
+                            </div>
+                          )
+                        }
+                        return null
+                      }}
+                    />
+                    <Bar
+                      dataKey="current"
+                      shape={<CustomBarWithTarget />}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+
               {/* CARD 2: Skill Radar (3.5 of 12 cols) */}
-              <div className="lg:col-span-3 bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+              <div className="lg:col-span-3 bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
                 <div>
-                  <div className="flex items-center justify-between pb-3 border-b border-[#f5f5f7] dark:border-[#1E2638]">
+                  <div className="flex items-center justify-between pb-3 border-b border-[#f5f5f7] dark:border-[#202026]">
                     <div className="flex items-center gap-2">
                       <h2 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">
                         Skill Radar
                       </h2>
                       <Info
-                        className="w-3.5 h-3.5 text-[#86868b] dark:text-[#64748B] cursor-pointer hover:text-[#0066cc] dark:hover:text-[#38BDF8]"
+                        className="w-3.5 h-3.5 text-[#86868b] dark:text-[#64748B] cursor-pointer hover:text-[#0066cc] dark:hover:text-[#C9D0D6]"
                         title="Multidimensional visualization of technical competencies vs role benchmarks."
                       />
                     </div>
@@ -787,7 +787,7 @@ export default function SkillInsightsScreen() {
                   <div className="h-64 w-full flex items-center justify-center pt-2">
                     <ResponsiveContainer width="100%" height="100%">
                       <RadarChart data={radarData} outerRadius="56%">
-                        <PolarGrid stroke="#334155" className="stroke-[#e0e0e0] dark:stroke-[#242E40]" />
+                        <PolarGrid stroke="#334155" className="stroke-[#e0e0e0] dark:stroke-[#27272F]" />
                         <PolarAngleAxis
                           dataKey="skill"
                           tick={{ fill: '#CBD5E1', fontSize: 10, fontWeight: 600 }}
@@ -809,7 +809,7 @@ export default function SkillInsightsScreen() {
                         <Radar
                           name="Target Level"
                           dataKey="target"
-                          stroke="#64748B"
+                          stroke="#71717A"
                           fill="transparent"
                           strokeDasharray="4 4"
                           strokeWidth={1.5}
@@ -817,11 +817,11 @@ export default function SkillInsightsScreen() {
                         <Radar
                           name="Your Level"
                           dataKey="current"
-                          stroke="#38BDF8"
-                          fill="#38BDF8"
+                          stroke="#C9D0D6"
+                          fill="#C9D0D6"
                           fillOpacity={0.25}
                           strokeWidth={2.5}
-                          dot={{ r: 3.5, fill: '#38BDF8', strokeWidth: 1.5, stroke: '#0E131E' }}
+                          dot={{ r: 3.5, fill: '#C9D0D6', strokeWidth: 1.5, stroke: '#0E0E12' }}
                         />
                       </RadarChart>
                     </ResponsiveContainer>
@@ -829,28 +829,28 @@ export default function SkillInsightsScreen() {
                 </div>
 
                 {/* Radar Legend */}
-                <div className="flex items-center justify-center gap-4 text-xs font-medium text-[#333333] dark:text-[#CBD5E1] pt-2 border-t border-[#f5f5f7] dark:border-[#1E2638]">
+                <div className="flex items-center justify-center gap-4 text-xs font-medium text-[#333333] dark:text-[#CBD5E1] pt-2 border-t border-[#f5f5f7] dark:border-[#202026]">
                   <div className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#0066cc] dark:bg-[#38BDF8]" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#0066cc] dark:bg-[#C9D0D6]" />
                     <span>Your Level</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#c3c4c5] dark:bg-[#64748B]" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#c3c4c5] dark:bg-[#71717A]" />
                     <span>Target Level</span>
                   </div>
                 </div>
               </div>
 
               {/* CARD 3: Top Skill Gaps (3 of 12 cols) */}
-              <div className="lg:col-span-3 bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+              <div className="lg:col-span-3 bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
                 <div>
-                  <div className="flex items-center justify-between pb-3 border-b border-[#f5f5f7] dark:border-[#1E2638]">
+                  <div className="flex items-center justify-between pb-3 border-b border-[#f5f5f7] dark:border-[#202026]">
                     <div className="flex items-center gap-2">
                       <h2 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">
                         Top Skill Gaps
                       </h2>
                       <Info
-                        className="w-3.5 h-3.5 text-[#86868b] dark:text-[#64748B] cursor-pointer hover:text-[#0066cc] dark:hover:text-[#38BDF8]"
+                        className="w-3.5 h-3.5 text-[#86868b] dark:text-[#64748B] cursor-pointer hover:text-[#0066cc] dark:hover:text-[#C9D0D6]"
                         title="Difference between your current proficiency and the target proficiency for this career goal."
                       />
                     </div>
@@ -867,11 +867,11 @@ export default function SkillInsightsScreen() {
                       return (
                         <div
                           key={gap.title}
-                          className="p-3 rounded-xl border border-[#f5f5f7] dark:border-[#1E2638] hover:border-[#0066cc] dark:hover:border-[#38BDF8] hover:bg-[#fafafb] dark:hover:bg-[#0E131E] cursor-pointer transition-all flex items-center justify-between"
+                          className="p-3 rounded-xl border border-[#f5f5f7] dark:border-[#202026] hover:border-[#0066cc] dark:hover:border-[#C9D0D6] hover:bg-[#fafafb] dark:hover:bg-[#0E0E12] cursor-pointer transition-all flex items-center justify-between"
                           onClick={() => setSelectedSkillModal(gap)}
                         >
                           <div className="flex items-center gap-2.5">
-                            <span className="w-8 h-8 rounded-lg bg-[#eaf2fc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center flex-none">
+                            <span className="w-8 h-8 rounded-lg bg-[#eaf2fc] dark:bg-[#18181D] text-[#0066cc] dark:text-[#C9D0D6] flex items-center justify-center flex-none">
                               <GapIcon className="w-4 h-4" />
                             </span>
                             <div>
@@ -904,15 +904,15 @@ export default function SkillInsightsScreen() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6">
               
               {/* CARD 1: Learning Trend (Large, 5.5 of 12 cols) */}
-              <div className="lg:col-span-6 bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+              <div className="lg:col-span-6 bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
                 <div>
-                  <div className="flex items-center justify-between pb-3 border-b border-[#f5f5f7] dark:border-[#1E2638]">
+                  <div className="flex items-center justify-between pb-3 border-b border-[#f5f5f7] dark:border-[#202026]">
                     <div className="flex items-center gap-2">
                       <h2 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">
                         Learning Trend
                       </h2>
                       <Info
-                        className="w-3.5 h-3.5 text-[#86868b] dark:text-[#64748B] cursor-pointer hover:text-[#0066cc] dark:hover:text-[#38BDF8]"
+                        className="w-3.5 h-3.5 text-[#86868b] dark:text-[#64748B] cursor-pointer hover:text-[#0066cc] dark:hover:text-[#C9D0D6]"
                         title="Skill readiness evolution across consecutive study weeks."
                       />
                     </div>
@@ -922,14 +922,14 @@ export default function SkillInsightsScreen() {
                       <button
                         type="button"
                         onClick={() => setIsTrendDropdownOpen((v) => !v)}
-                        className="flex items-center gap-1.5 px-3 py-1 bg-[#f5f5f7] dark:bg-[#1E293B] border border-[#f0f0f0] dark:border-[#242E40] rounded-lg text-xs font-semibold text-[#1d1d1f] dark:text-white hover:bg-gray-100 dark:hover:bg-[#242E40]"
+                        className="flex items-center gap-1.5 px-3 py-1 bg-[#f5f5f7] dark:bg-[#18181D] border border-[#f0f0f0] dark:border-[#27272F] rounded-lg text-xs font-semibold text-[#1d1d1f] dark:text-white hover:bg-gray-100 dark:hover:bg-[#27272F]"
                       >
                         <span>{trendTimeframe}</span>
                         <ChevronDown className="w-3.5 h-3.5 text-[#7a7a7a] dark:text-[#94A3B8]" />
                       </button>
 
                       {isTrendDropdownOpen && (
-                        <div className="absolute right-0 mt-1 w-32 bg-white dark:bg-[#141A26] rounded-lg border border-[#e0e0e0] dark:border-[#242E40] shadow-lg p-1 z-20">
+                        <div className="absolute right-0 mt-1 w-32 bg-white dark:bg-[#121216] rounded-lg border border-[#e0e0e0] dark:border-[#27272F] shadow-lg p-1 z-20">
                           {['Last 4 Weeks', 'Last 8 Weeks', 'All Time'].map((tf) => (
                             <button
                               key={tf}
@@ -938,7 +938,7 @@ export default function SkillInsightsScreen() {
                                 setTrendTimeframe(tf)
                                 setIsTrendDropdownOpen(false)
                               }}
-                              className="w-full text-left px-2.5 py-1.5 text-xs font-medium hover:bg-[#eaf2fc] dark:hover:bg-[#1E293B] hover:text-[#0066cc] dark:hover:text-[#38BDF8] rounded"
+                              className="w-full text-left px-2.5 py-1.5 text-xs font-medium hover:bg-[#eaf2fc] dark:hover:bg-[#18181D] hover:text-[#0066cc] dark:hover:text-[#C9D0D6] rounded"
                             >
                               {tf}
                             </button>
@@ -948,28 +948,28 @@ export default function SkillInsightsScreen() {
                     </div>
                   </div>
 
-                  {/* Area Chart with Soft Violet Gradient */}
+                  {/* Area Chart with Soft Gradient */}
                   <div className="h-44 w-full pt-3 relative">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={trendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                         <defs>
-                          <linearGradient id="violetGradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#38BDF8" stopOpacity={0.35} />
-                            <stop offset="95%" stopColor="#38BDF8" stopOpacity={0.0} />
+                          <linearGradient id="silverGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#C9D0D6" stopOpacity={0.35} />
+                            <stop offset="95%" stopColor="#C9D0D6" stopOpacity={0.0} />
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f5f5f7" className="stroke-[#f0f0f0] dark:stroke-[#242E40]" />
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f5f5f7" className="stroke-[#f0f0f0] dark:stroke-[#27272F]" />
                         <XAxis
                           dataKey="week"
-                          tick={{ fill: '#94A3B8', fontSize: 11, fontWeight: 600 }}
-                          axisLine={{ stroke: '#242E40' }}
+                          tick={{ fill: '#A1A1AA', fontSize: 11, fontWeight: 600 }}
+                          axisLine={{ stroke: '#27272F' }}
                           tickLine={false}
                         />
                         <YAxis
                           domain={[0, 100]}
                           ticks={[0, 20, 40, 60, 80, 100]}
                           tickFormatter={(v) => `${v}%`}
-                          tick={{ fill: '#94A3B8', fontSize: 10, fontWeight: 600 }}
+                          tick={{ fill: '#A1A1AA', fontSize: 10, fontWeight: 600 }}
                           axisLine={false}
                           tickLine={false}
                         />
@@ -977,7 +977,7 @@ export default function SkillInsightsScreen() {
                           content={({ active, payload }) => {
                             if (active && payload && payload.length) {
                               return (
-                                <div className="bg-[#1d1d1f] dark:bg-[#0E131E] border border-gray-700 dark:border-[#242E40] text-white px-2.5 py-1.5 rounded-lg text-xs font-bold shadow-lg">
+                                <div className="bg-[#1d1d1f] dark:bg-[#0E0E12] border border-gray-700 dark:border-[#27272F] text-white px-2.5 py-1.5 rounded-lg text-xs font-bold shadow-lg">
                                   {payload[0].payload.week}: {payload[0].value}% Readiness
                                 </div>
                               )
@@ -988,18 +988,18 @@ export default function SkillInsightsScreen() {
                         <Area
                           type="monotone"
                           dataKey="readiness"
-                          stroke="#38BDF8"
+                          stroke="#C9D0D6"
                           strokeWidth={2.5}
                           fillOpacity={1}
-                          fill="url(#violetGradient)"
-                          dot={{ fill: '#38BDF8', stroke: '#0E131E', strokeWidth: 2, r: 4 }}
-                          activeDot={{ fill: '#38BDF8', stroke: '#ffffff', strokeWidth: 2, r: 6 }}
+                          fill="url(#silverGradient)"
+                          dot={{ fill: '#C9D0D6', stroke: '#0E0E12', strokeWidth: 2, r: 4 }}
+                          activeDot={{ fill: '#C9D0D6', stroke: '#ffffff', strokeWidth: 2, r: 6 }}
                         />
                       </AreaChart>
                     </ResponsiveContainer>
 
                     {/* Real current readiness, pinned at the latest week */}
-                    <div className="absolute top-1 right-2 sm:right-4 bg-[#0066cc] text-white text-[11px] font-extrabold px-2 py-0.5 rounded-md shadow-md">
+                    <div className="absolute top-1 right-2 sm:right-4 bg-[#0066cc] dark:bg-[#C9D0D6] text-white dark:text-[#09090B] text-[11px] font-extrabold px-2 py-0.5 rounded-md shadow-md">
                       {roadmap.percent}%
                     </div>
                   </div>
@@ -1022,21 +1022,21 @@ export default function SkillInsightsScreen() {
               </div>
 
               {/* CARD 2: Skill Category Breakdown (Donut Chart, 3.5 of 12 cols) */}
-              <div className="lg:col-span-3 bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+              <div className="lg:col-span-3 bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
                 <div>
-                  <div className="flex items-center justify-between pb-2 border-b border-[#f5f5f7] dark:border-[#1E2638]">
+                  <div className="flex items-center justify-between pb-2 border-b border-[#f5f5f7] dark:border-[#202026]">
                     <div className="flex items-center gap-2">
                       <h2 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">
                         Skill Category Breakdown
                       </h2>
                       <Info
-                        className="w-3.5 h-3.5 text-[#86868b] dark:text-[#64748B] cursor-pointer hover:text-[#0066cc] dark:hover:text-[#38BDF8]"
+                        className="w-3.5 h-3.5 text-[#86868b] dark:text-[#64748B] cursor-pointer hover:text-[#0066cc] dark:hover:text-[#C9D0D6]"
                         title="Distribution of learning content and assessments by domain."
                       />
                     </div>
                   </div>
 
-                  {/* Donut Chart with Centered 78% Callout */}
+                  {/* Donut Chart with Centered Callout */}
                   <div className="h-44 w-full relative flex items-center justify-center pt-1">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
@@ -1059,7 +1059,7 @@ export default function SkillInsightsScreen() {
                             if (active && payload && payload.length) {
                               const d = payload[0].payload
                               return (
-                                <div className="bg-[#1d1d1f] dark:bg-[#0E131E] text-white px-2 py-1 rounded-md text-xs font-bold">
+                                <div className="bg-[#1d1d1f] dark:bg-[#0E0E12] text-white px-2 py-1 rounded-md text-xs font-bold">
                                   {d.name}: {d.value}%
                                 </div>
                               )
@@ -1082,7 +1082,7 @@ export default function SkillInsightsScreen() {
                   </div>
 
                   {/* Clean Legend */}
-                  <div className="grid grid-cols-2 gap-x-2 gap-y-1.5 text-[11px] font-medium text-[#333333] dark:text-[#CBD5E1] pt-2 border-t border-[#f5f5f7] dark:border-[#1E2638]">
+                  <div className="grid grid-cols-2 gap-x-2 gap-y-1.5 text-[11px] font-medium text-[#333333] dark:text-[#CBD5E1] pt-2 border-t border-[#f5f5f7] dark:border-[#202026]">
                     {categoryData.map((item) => (
                       <div key={item.name} className="flex items-center justify-between pr-1">
                         <div className="flex items-center gap-1.5 truncate">
@@ -1097,15 +1097,15 @@ export default function SkillInsightsScreen() {
               </div>
 
               {/* CARD 3: Recommended Focus (Actionable Card, 3 of 12 cols) */}
-              <div className="lg:col-span-3 bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+              <div className="lg:col-span-3 bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
                 <div>
-                  <div className="flex items-center justify-between pb-2 border-b border-[#f5f5f7] dark:border-[#1E2638]">
+                  <div className="flex items-center justify-between pb-2 border-b border-[#f5f5f7] dark:border-[#202026]">
                     <div className="flex items-center gap-2">
                       <h2 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">
                         Recommended Focus
                       </h2>
                       <Info
-                        className="w-3.5 h-3.5 text-[#86868b] dark:text-[#64748B] cursor-pointer hover:text-[#0066cc] dark:hover:text-[#38BDF8]"
+                        className="w-3.5 h-3.5 text-[#86868b] dark:text-[#64748B] cursor-pointer hover:text-[#0066cc] dark:hover:text-[#C9D0D6]"
                         title="AI-prioritized roadmap steps based on your current skill gaps."
                       />
                     </div>
@@ -1116,7 +1116,7 @@ export default function SkillInsightsScreen() {
                     <div className="mt-2.5 p-2.5 rounded-xl bg-[#ECFDF3] dark:bg-emerald-950/40 border border-[#D1FADF] dark:border-emerald-800/60 flex items-start gap-2">
                       <Shield className="w-4 h-4 text-[#22A06B] dark:text-emerald-400 flex-none mt-0.5" />
                       <p className="text-[11px] font-bold text-[#1d1d1f] dark:text-white leading-tight">
-                        Next Priority: Complete <span className="text-[#0066cc] dark:text-[#38BDF8]">{cap(biggestGap.tag)}</span> to close your biggest real gap
+                        Next Priority: Complete <span className="text-[#0066cc] dark:text-[#C9D0D6]">{cap(biggestGap.tag)}</span> to close your biggest real gap
                       </p>
                     </div>
                   )}
@@ -1131,21 +1131,21 @@ export default function SkillInsightsScreen() {
                       return (
                         <div
                           key={item.title}
-                          className="p-3 rounded-xl border border-[#f5f5f7] dark:border-[#1E2638] hover:border-[#0066cc] dark:hover:border-[#38BDF8] hover:bg-[#fafafb] dark:hover:bg-[#0E131E] cursor-pointer transition-all flex items-center justify-between group"
+                          className="p-3 rounded-xl border border-[#f5f5f7] dark:border-[#202026] hover:border-[#0066cc] dark:hover:border-[#C9D0D6] hover:bg-[#fafafb] dark:hover:bg-[#0E0E12] cursor-pointer transition-all flex items-center justify-between group"
                           onClick={() => navigate('/dashboard')}
                         >
                           <div className="flex items-center gap-2.5">
-                            <span className="w-7 h-7 rounded-lg bg-[#eaf2fc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center flex-none">
+                            <span className="w-7 h-7 rounded-lg bg-[#eaf2fc] dark:bg-[#18181D] text-[#0066cc] dark:text-[#C9D0D6] flex items-center justify-center flex-none">
                               <ItemIcon className="w-3.5 h-3.5" />
                             </span>
                             <div>
-                              <h4 className="font-bold text-xs text-[#1d1d1f] dark:text-white group-hover:text-[#0066cc] dark:group-hover:text-[#38BDF8]">
+                              <h4 className="font-bold text-xs text-[#1d1d1f] dark:text-white group-hover:text-[#0066cc] dark:group-hover:text-[#C9D0D6]">
                                 {item.title}
                               </h4>
                               <p className="text-[10px] text-[#7a7a7a] dark:text-[#94A3B8]">{item.subtitle}</p>
                             </div>
                           </div>
-                          <ChevronRight className="w-4 h-4 text-[#7a7a7a] dark:text-[#94A3B8] group-hover:text-[#0066cc] dark:group-hover:text-[#38BDF8] transition-transform group-hover:translate-x-0.5" />
+                          <ChevronRight className="w-4 h-4 text-[#7a7a7a] dark:text-[#94A3B8] group-hover:text-[#0066cc] dark:group-hover:text-[#C9D0D6] transition-transform group-hover:translate-x-0.5" />
                         </div>
                       )
                     })}
@@ -1159,7 +1159,7 @@ export default function SkillInsightsScreen() {
                 SECONDARY DEEP ANALYTICS & AI INSIGHTS
                 (Heatmap Matrix, Learning Velocity, Time Spent, Strengths, AI Insight)
                --------------------------------------------------------------------- */}
-            <div className="pt-6 border-t border-[#f0f0f0] dark:border-[#1E2638] space-y-6">
+            <div className="pt-6 border-t border-[#f0f0f0] dark:border-[#202026] space-y-6">
               
               <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
                 <div>
@@ -1176,8 +1176,8 @@ export default function SkillInsightsScreen() {
                     onClick={() => setActiveTab('overview')}
                     className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                       activeTab === 'overview'
-                        ? 'bg-[#0066cc] dark:bg-[#38BDF8] text-white dark:text-[#0E131E] shadow-sm'
-                        : 'bg-[#f5f5f7] dark:bg-[#1E293B] text-[#333333] dark:text-[#CBD5E1] hover:text-[#1d1d1f] dark:hover:text-white'
+                        ? 'bg-[#0066cc] dark:bg-[#C9D0D6] text-white dark:text-[#09090B] shadow-sm'
+                        : 'bg-[#f5f5f7] dark:bg-[#18181D] text-[#333333] dark:text-[#CBD5E1] hover:text-[#1d1d1f] dark:hover:text-white'
                     }`}
                   >
                     Intelligence Grid
@@ -1187,8 +1187,8 @@ export default function SkillInsightsScreen() {
                     onClick={() => setActiveTab('heatmap')}
                     className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                       activeTab === 'heatmap'
-                        ? 'bg-[#0066cc] dark:bg-[#38BDF8] text-white dark:text-[#0E131E] shadow-sm'
-                        : 'bg-[#f5f5f7] dark:bg-[#1E293B] text-[#333333] dark:text-[#CBD5E1] hover:text-[#1d1d1f] dark:hover:text-white'
+                        ? 'bg-[#0066cc] dark:bg-[#C9D0D6] text-white dark:text-[#09090B] shadow-sm'
+                        : 'bg-[#f5f5f7] dark:bg-[#18181D] text-[#333333] dark:text-[#CBD5E1] hover:text-[#1d1d1f] dark:hover:text-white'
                     }`}
                   >
                     Skill-Gap Heatmap
@@ -1198,7 +1198,7 @@ export default function SkillInsightsScreen() {
 
               {activeTab === 'heatmap' ? (
                 /* SKILL GAP HEATMAP MATRIX */
-                <div className="bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-6 shadow-sm">
+                <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-6 shadow-sm">
                   <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
                     <span className="font-bold text-sm text-[#1d1d1f] dark:text-white">
                       Tiered Skill-Gap Matrix (Foundations → Intermediate → Advanced)
@@ -1213,7 +1213,7 @@ export default function SkillInsightsScreen() {
                   <div className="overflow-x-auto">
                     <table className="w-full text-xs text-left">
                       <thead>
-                        <tr className="border-b border-[#f0f0f0] dark:border-[#1E2638] text-[#7a7a7a] dark:text-[#94A3B8]">
+                        <tr className="border-b border-[#f0f0f0] dark:border-[#202026] text-[#7a7a7a] dark:text-[#94A3B8]">
                           <th className="py-3 px-4 font-bold uppercase tracking-wider text-[11px]">Tier Level</th>
                           {heatmapSkills.map((s) => (
                             <th key={s.tag} className="py-3 px-4 font-bold text-center text-[#1d1d1f] dark:text-white">{cap(s.tag)}</th>
@@ -1222,7 +1222,7 @@ export default function SkillInsightsScreen() {
                       </thead>
                       <tbody>
                         {heatmapData.map((row) => (
-                          <tr key={row.level} className="border-b border-[#f5f5f7] dark:border-[#1E2638] hover:bg-gray-50/50 dark:hover:bg-[#101622]/50 transition-colors">
+                          <tr key={row.level} className="border-b border-[#f5f5f7] dark:border-[#202026] hover:bg-gray-50/50 dark:hover:bg-[#18181D]/50 transition-colors">
                             <td className="py-3.5 px-4 font-extrabold text-[#1d1d1f] dark:text-white">{row.level}</td>
                             {heatmapSkills.map((s) => {
                               const val = row[s.tag]
@@ -1249,7 +1249,7 @@ export default function SkillInsightsScreen() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6">
                   
                   {/* Card 1: Learning Velocity */}
-                  <div className="bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
+                  <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-xs font-bold text-[#7a7a7a] dark:text-[#94A3B8] uppercase tracking-wider">
@@ -1267,20 +1267,20 @@ export default function SkillInsightsScreen() {
                     <div className="h-10 w-full mt-3">
                       <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={trendData.map((d) => ({ v: d.readiness }))}>
-                          <Line type="monotone" dataKey="v" stroke="#0066cc" strokeWidth={2} dot={false} />
+                          <Line type="monotone" dataKey="v" stroke="#C9D0D6" strokeWidth={2} dot={false} />
                         </LineChart>
                       </ResponsiveContainer>
                     </div>
                   </div>
 
                   {/* Card 2: Time Spent by Category */}
-                  <div className="bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
+                  <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-xs font-bold text-[#7a7a7a] dark:text-[#94A3B8] uppercase tracking-wider">
                           Time Spent
                         </span>
-                        <span className="text-[11px] font-bold text-[#0066cc] dark:text-[#38BDF8]">{totalRealHours.toFixed(1)} hrs</span>
+                        <span className="text-[11px] font-bold text-[#0066cc] dark:text-[#C9D0D6]">{totalRealHours.toFixed(1)} hrs</span>
                       </div>
                       <div className="space-y-1.5 mt-2">
                         {timeSpentData.map((item) => (
@@ -1294,7 +1294,7 @@ export default function SkillInsightsScreen() {
                   </div>
 
                   {/* Card 3: Top Strengths */}
-                  <div className="bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
+                  <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-xs font-bold text-[#7a7a7a] dark:text-[#94A3B8] uppercase tracking-wider">
@@ -1322,9 +1322,9 @@ export default function SkillInsightsScreen() {
                   </div>
 
                   {/* Card 4: AI-Powered PathFinder Explanation */}
-                  <div className="bg-[#eaf2fc] dark:bg-[#1E293B] border border-[#dcecfd] dark:border-[#242E40] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
+                  <div className="bg-[#eaf2fc] dark:bg-[#18181D] border border-[#dcecfd] dark:border-[#27272F] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
                     <div>
-                      <div className="flex items-center gap-1.5 text-[#0066cc] dark:text-[#38BDF8] mb-1.5">
+                      <div className="flex items-center gap-1.5 text-[#0066cc] dark:text-[#C9D0D6] mb-1.5">
                         <Sparkles className="w-4 h-4" />
                         <span className="text-xs font-bold font-['Manrope']">PathFinder insight</span>
                       </div>
@@ -1345,7 +1345,7 @@ export default function SkillInsightsScreen() {
                         openAICoach()
                         sendToAICoach(biggestGap ? `Why should I prioritize ${cap(biggestGap.tag)}?` : 'What should I focus on next?')
                       }}
-                      className="mt-3 text-xs font-bold text-[#0066cc] dark:text-[#38BDF8] hover:underline flex items-center gap-1 self-start cursor-pointer"
+                      className="mt-3 text-xs font-bold text-[#0066cc] dark:text-[#C9D0D6] hover:underline flex items-center gap-1 self-start cursor-pointer"
                     >
                       <span>Ask PathFinder why</span>
                       <span>→</span>
@@ -1367,7 +1367,7 @@ export default function SkillInsightsScreen() {
             onClick={() => setSelectedSkillModal(null)}
           >
             <div
-              className="bg-white dark:bg-[#141A26] rounded-2xl border border-[#e0e0e0] dark:border-[#242E40] shadow-2xl max-w-md w-full p-6 relative animate-in zoom-in-95 duration-150"
+              className="bg-white dark:bg-[#121216] rounded-2xl border border-[#e0e0e0] dark:border-[#27272F] shadow-2xl max-w-md w-full p-6 relative animate-in zoom-in-95 duration-150"
               onClick={(e) => e.stopPropagation()}
             >
               <button
@@ -1378,7 +1378,7 @@ export default function SkillInsightsScreen() {
                 ✕
               </button>
               
-              <div className="flex items-center gap-2 text-xs font-bold text-[#0066cc] dark:text-[#38BDF8] bg-[#eaf2fc] dark:bg-[#1E293B] px-2.5 py-1 rounded-md w-fit mb-3">
+              <div className="flex items-center gap-2 text-xs font-bold text-[#0066cc] dark:text-[#C9D0D6] bg-[#eaf2fc] dark:bg-[#18181D] px-2.5 py-1 rounded-md w-fit mb-3">
                 <span>Skill Deep-Dive</span>
               </div>
 
@@ -1389,14 +1389,14 @@ export default function SkillInsightsScreen() {
                 {selectedSkillModal.desc}
               </p>
 
-              <div className="grid grid-cols-3 gap-3 p-3 bg-[#fafafb] dark:bg-[#0E131E] rounded-xl border border-[#f0f0f0] dark:border-[#242E40] text-center mb-4">
+              <div className="grid grid-cols-3 gap-3 p-3 bg-[#fafafb] dark:bg-[#0E0E12] rounded-xl border border-[#f0f0f0] dark:border-[#27272F] text-center mb-4">
                 <div>
                   <span className="text-[10px] text-[#7a7a7a] dark:text-[#94A3B8] font-bold block">CURRENT</span>
                   <span className="text-base font-extrabold text-[#1d1d1f] dark:text-white">{selectedSkillModal.current}</span>
                 </div>
                 <div>
                   <span className="text-[10px] text-[#7a7a7a] dark:text-[#94A3B8] font-bold block">TARGET</span>
-                  <span className="text-base font-extrabold text-[#0066cc] dark:text-[#38BDF8]">{selectedSkillModal.target}</span>
+                  <span className="text-base font-extrabold text-[#0066cc] dark:text-[#C9D0D6]">{selectedSkillModal.target}</span>
                 </div>
                 <div>
                   <span className="text-[10px] text-[#7a7a7a] dark:text-[#94A3B8] font-bold block">PRIORITY</span>
@@ -1423,7 +1423,7 @@ export default function SkillInsightsScreen() {
                     openAICoach()
                     sendToAICoach(`Explain key study topics for ${skillName}`)
                   }}
-                  className="px-4 py-2.5 border border-[#0066cc] dark:border-[#38BDF8] text-[#0066cc] dark:text-[#38BDF8] hover:bg-[#eaf2fc] dark:hover:bg-[#1E293B] font-bold text-xs rounded-xl transition-all cursor-pointer"
+                  className="px-4 py-2.5 border border-[#0066cc] dark:border-[#27272F] text-[#0066cc] dark:text-[#C9D0D6] hover:bg-[#eaf2fc] dark:hover:bg-[#18181D] font-bold text-xs rounded-xl transition-all cursor-pointer"
                 >
                   Ask Coach ✨
                 </button>

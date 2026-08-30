@@ -16,7 +16,7 @@ export default function ThemeToggle({ className = '' }) {
       onClick={toggleTheme}
       className={`relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer select-none ${
         isDark
-          ? 'bg-[#181D26] hover:bg-[#202735] text-[#F3F4F6] border border-[#2D3748] shadow-[0_2px_8px_rgba(0,0,0,0.3)] hover:border-[#3B82F6]'
+          ? 'bg-[#121216] hover:bg-[#18181D] text-[#F8FAFC] border border-[#27272F] shadow-[0_2px_8px_rgba(0,0,0,0.5)] hover:border-[#C9D0D6]'
           : 'bg-white hover:bg-[#F4F6F9] text-[#1D1D1F] border border-[#E0E0E0] shadow-2xs hover:border-[#0066CC]'
       } ${className}`}
       title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}

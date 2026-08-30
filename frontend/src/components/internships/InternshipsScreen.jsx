@@ -26,16 +26,16 @@ function ApplyConfirmModal({ internship, onConfirm, onSaveForLater, onClose }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
       <div
-        className="relative z-10 w-full max-w-md bg-white dark:bg-[#141A26] rounded-3xl border border-[#e0e0e0] dark:border-[#242E40] p-6 shadow-2xl"
+        className="relative z-10 w-full max-w-md bg-white dark:bg-[#121216] rounded-3xl border border-[#e0e0e0] dark:border-[#27272F] p-6 shadow-2xl"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-50 dark:bg-blue-900/20 text-[#0066cc] dark:text-[#38BDF8] border border-blue-200 dark:border-blue-800/40">
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-50 dark:bg-zinc-800 text-[#0066cc] dark:text-[#C9D0D6] border border-blue-200 dark:border-[#27272F]">
             Application Tracking
           </span>
           <button
             onClick={onClose}
-            className="w-7 h-7 rounded-full bg-[#fafafc] dark:bg-[#1E2638] text-[#7a7a7a] hover:text-[#1d1d1f] dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+            className="w-7 h-7 rounded-full bg-[#fafafc] dark:bg-[#18181D] text-[#7a7a7a] hover:text-[#1d1d1f] dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
@@ -52,14 +52,14 @@ function ApplyConfirmModal({ internship, onConfirm, onSaveForLater, onClose }) {
           <button
             type="button"
             onClick={() => onConfirm(internship.id, 'applied')}
-            className="w-full py-2.5 px-4 rounded-xl bg-[#0066cc] hover:bg-[#004fa3] dark:bg-[#38BDF8] dark:hover:bg-[#0ea5e9] text-white dark:text-[#0B0E14] font-bold text-xs text-center transition-all shadow-sm cursor-pointer"
+            className="w-full py-2.5 px-4 rounded-xl bg-[#0066cc] hover:bg-[#004fa3] dark:bg-[#C9D0D6] dark:hover:bg-[#CBD5E1] text-white dark:text-[#09090B] font-bold text-xs text-center transition-all shadow-sm cursor-pointer"
           >
             ✓ Yes, I Submitted My Application
           </button>
           <button
             type="button"
             onClick={() => onSaveForLater(internship.id, 'saved')}
-            className="w-full py-2.5 px-4 rounded-xl border border-[#0066cc] dark:border-[#38BDF8] text-[#0066cc] dark:text-[#38BDF8] font-bold text-xs text-center hover:bg-[#eaf2fc] dark:hover:bg-white/5 transition-colors cursor-pointer"
+            className="w-full py-2.5 px-4 rounded-xl border border-[#0066cc] dark:border-[#27272F] text-[#0066cc] dark:text-[#C9D0D6] font-bold text-xs text-center hover:bg-[#eaf2fc] dark:hover:bg-[#18181D] transition-colors cursor-pointer"
           >
             Save for Later
           </button>
@@ -81,7 +81,7 @@ function InternshipDetailModal({ internship, applied, onVisitBoard, onToggleTrac
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
       <div
-        className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-[#141A26] rounded-3xl border border-[#e0e0e0] dark:border-[#242E40] shadow-[0_32px_80px_rgba(0,0,0,0.22)]"
+        className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-[#121216] rounded-3xl border border-[#e0e0e0] dark:border-[#27272F] shadow-[0_32px_80px_rgba(0,0,0,0.22)]"
         onClick={e => e.stopPropagation()}
       >
         {/* Header Banner */}
@@ -144,8 +144,8 @@ function InternshipDetailModal({ internship, applied, onVisitBoard, onToggleTrac
                 val: fmtDate(internship.published_at)
               },
             ].map(item => (
-              <div key={item.label} className="flex flex-col gap-1 bg-[#fafafc] dark:bg-[#0d1117] rounded-xl p-3 border border-[#f0f0f0] dark:border-[#1a2032]">
-                <span className="text-[#0066cc] dark:text-[#38BDF8]">{item.icon}</span>
+              <div key={item.label} className="flex flex-col gap-1 bg-[#fafafc] dark:bg-[#0E0E12] rounded-xl p-3 border border-[#f0f0f0] dark:border-[#27272F]">
+                <span className="text-[#0066cc] dark:text-[#C9D0D6]">{item.icon}</span>
                 <span className="text-[10px] font-semibold uppercase tracking-wide text-[#7a7a7a] dark:text-[#9CA3AF]">{item.label}</span>
                 <span className="text-xs sm:text-sm font-bold text-[#1d1d1f] dark:text-white truncate">{item.val}</span>
               </div>
@@ -158,7 +158,7 @@ function InternshipDetailModal({ internship, applied, onVisitBoard, onToggleTrac
               <h3 className="font-['Manrope'] font-bold text-sm text-[#1d1d1f] dark:text-white mb-2">Key Skills & Technologies</h3>
               <div className="flex flex-wrap gap-2">
                 {internship.skills_required.map((skill, i) => (
-                  <span key={i} className="px-3 py-1 rounded-full text-xs font-semibold bg-[#eaf2fc] dark:bg-[rgba(41,151,255,0.18)] text-[#0066cc] dark:text-[#38BDF8] border border-[#cfe4fb] dark:border-[rgba(41,151,255,0.3)]">
+                  <span key={i} className="px-3 py-1 rounded-full text-xs font-semibold bg-[#eaf2fc] dark:bg-[rgba(201,208,214,0.15)] text-[#0066cc] dark:text-[#C9D0D6] border border-[#cfe4fb] dark:border-[rgba(201,208,214,0.25)]">
                     {skill}
                   </span>
                 ))}
@@ -170,7 +170,7 @@ function InternshipDetailModal({ internship, applied, onVisitBoard, onToggleTrac
           {internship.description && (
             <div>
               <h3 className="font-['Manrope'] font-bold text-sm text-[#1d1d1f] dark:text-white mb-1.5">Job Overview</h3>
-              <div className="text-xs sm:text-sm text-[#6e6e73] dark:text-[#9CA3AF] leading-relaxed max-h-56 overflow-y-auto pr-2 bg-[#fcfcfd] dark:bg-[#0d1117] p-3.5 rounded-xl border border-[#f0f0f0] dark:border-[#1a2032]">
+              <div className="text-xs sm:text-sm text-[#6e6e73] dark:text-[#9CA3AF] leading-relaxed max-h-56 overflow-y-auto pr-2 bg-[#fcfcfd] dark:bg-[#0E0E12] p-3.5 rounded-xl border border-[#f0f0f0] dark:border-[#27272F]">
                 {internship.description}
               </div>
             </div>
@@ -181,7 +181,7 @@ function InternshipDetailModal({ internship, applied, onVisitBoard, onToggleTrac
             <button
               type="button"
               onClick={() => onVisitBoard(internship)}
-              className="flex-1 py-3 rounded-xl bg-[#0066cc] hover:bg-[#004fa3] dark:bg-[#38BDF8] dark:hover:bg-[#0ea5e9] text-white dark:text-[#0B0E14] font-bold text-sm text-center transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+              className="flex-1 py-3 rounded-xl bg-[#0066cc] hover:bg-[#004fa3] dark:bg-[#C9D0D6] dark:hover:bg-[#CBD5E1] text-white dark:text-[#09090B] font-bold text-sm text-center transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
             >
               <span>Apply on Official Board ↗</span>
             </button>
@@ -191,7 +191,7 @@ function InternshipDetailModal({ internship, applied, onVisitBoard, onToggleTrac
               className={`px-4 py-3 rounded-xl border font-bold text-xs transition-colors cursor-pointer ${
                 applied
                   ? 'border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20'
-                  : 'border-[#0066cc] dark:border-[#38BDF8] text-[#0066cc] dark:text-[#38BDF8] hover:bg-[#eaf2fc] dark:hover:bg-white/5'
+                  : 'border-[#0066cc] dark:border-[#27272F] text-[#0066cc] dark:text-[#C9D0D6] hover:bg-[#eaf2fc] dark:hover:bg-[#18181D]'
               }`}
             >
               {applied ? 'Undo Applied' : 'Mark as Applied'}
@@ -199,7 +199,7 @@ function InternshipDetailModal({ internship, applied, onVisitBoard, onToggleTrac
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-3 rounded-xl border border-[#e0e0e0] dark:border-[#242E40] text-[#1d1d1f] dark:text-white font-semibold text-sm hover:bg-[#f5f5f7] dark:hover:bg-white/5 transition-colors cursor-pointer"
+              className="px-4 py-3 rounded-xl border border-[#e0e0e0] dark:border-[#27272F] text-[#7a7a7a] hover:text-[#1d1d1f] dark:hover:text-white font-semibold text-xs transition-colors cursor-pointer"
             >
               Close
             </button>
@@ -213,7 +213,7 @@ function InternshipDetailModal({ internship, applied, onVisitBoard, onToggleTrac
 function InternshipCard({ internship, applied, onVisitBoard, onToggleTrack, onView }) {
   return (
     <div
-      className="group bg-white dark:bg-[#141A26] rounded-2xl border border-[#e0e0e0] dark:border-[#242E40] p-5 shadow-sm hover:shadow-[0_8px_32px_rgba(0,102,204,0.10)] dark:hover:shadow-[0_8px_32px_rgba(56,189,248,0.08)] transition-all duration-200 hover:-translate-y-0.5 cursor-pointer flex flex-col justify-between"
+      className="group bg-white dark:bg-[#121216] rounded-2xl border border-[#e0e0e0] dark:border-[#27272F] p-5 shadow-sm hover:shadow-[0_8px_32px_rgba(0,102,204,0.10)] dark:hover:shadow-[0_8px_32px_rgba(0,0,0,0.5)] transition-all duration-200 hover:-translate-y-0.5 cursor-pointer flex flex-col justify-between"
       onClick={() => onView(internship)}
     >
       <div className="flex flex-col gap-3">
@@ -221,7 +221,7 @@ function InternshipCard({ internship, applied, onVisitBoard, onToggleTrack, onVi
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1">
             <div className="flex items-center gap-2 flex-wrap mb-1">
-              <span className="text-xs font-extrabold uppercase tracking-wider text-[#0066cc] dark:text-[#38BDF8]">
+              <span className="text-xs font-extrabold uppercase tracking-wider text-[#0066cc] dark:text-[#C9D0D6]">
                 {internship.company}
               </span>
               {internship.is_remote && (
@@ -230,11 +230,11 @@ function InternshipCard({ internship, applied, onVisitBoard, onToggleTrack, onVi
                 </span>
               )}
             </div>
-            <h3 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white leading-tight group-hover:text-[#0066cc] dark:group-hover:text-[#38BDF8] transition-colors line-clamp-2">
+            <h3 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white leading-tight group-hover:text-[#0066cc] dark:group-hover:text-[#C9D0D6] transition-colors line-clamp-2">
               {internship.title}
             </h3>
           </div>
-          <div className="w-8 h-8 rounded-xl bg-[#eaf2fc] dark:bg-[rgba(41,151,255,0.18)] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center flex-none">
+          <div className="w-8 h-8 rounded-xl bg-[#eaf2fc] dark:bg-[#18181D] text-[#0066cc] dark:text-[#C9D0D6] flex items-center justify-center flex-none">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
           </div>
         </div>
@@ -255,7 +255,7 @@ function InternshipCard({ internship, applied, onVisitBoard, onToggleTrack, onVi
         {internship.skills_required?.length > 0 && (
           <div className="flex flex-wrap gap-1.5 pt-1">
             {internship.skills_required.slice(0, 4).map((sk, i) => (
-              <span key={i} className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-[#fafafc] dark:bg-[#1E2638] text-[#555] dark:text-[#CBD5E1] border border-[#f0f0f0] dark:border-[#28303F]">
+              <span key={i} className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-[#fafafc] dark:bg-[#18181D] text-[#555] dark:text-[#CBD5E1] border border-[#f0f0f0] dark:border-[#27272F]">
                 {sk}
               </span>
             ))}
@@ -267,7 +267,7 @@ function InternshipCard({ internship, applied, onVisitBoard, onToggleTrack, onVi
       </div>
 
       {/* Footer CTA */}
-      <div className="mt-4 pt-3 border-t border-[#f0f0f0] dark:border-[#242E40] flex items-center justify-between gap-2">
+      <div className="mt-4 pt-3 border-t border-[#f0f0f0] dark:border-[#27272F] flex items-center justify-between gap-2">
         <span className="text-xs font-semibold text-[#1d1d1f] dark:text-white truncate">
           {internship.stipend || 'Competitive'}
         </span>
@@ -275,7 +275,7 @@ function InternshipCard({ internship, applied, onVisitBoard, onToggleTrack, onVi
           <button
             type="button"
             onClick={e => { e.stopPropagation(); onVisitBoard(internship) }}
-            className="px-3 py-1.5 rounded-xl font-bold text-xs bg-[#0066cc] hover:bg-[#004fa3] dark:bg-[#38BDF8] dark:hover:bg-[#0ea5e9] text-white dark:text-[#0B0E14] shadow-sm flex items-center gap-1 cursor-pointer"
+            className="px-3 py-1.5 rounded-xl font-bold text-xs bg-[#0066cc] hover:bg-[#004fa3] dark:bg-[#C9D0D6] dark:hover:bg-[#CBD5E1] text-white dark:text-[#09090B] shadow-sm flex items-center gap-1 cursor-pointer"
           >
             <span>Apply on Website ↗</span>
           </button>
@@ -299,7 +299,7 @@ function InternshipCard({ internship, applied, onVisitBoard, onToggleTrack, onVi
               type="button"
               title="Track application status"
               onClick={e => { e.stopPropagation(); onToggleTrack(internship.id, 'tracked') }}
-              className="px-2.5 py-1.5 rounded-xl font-bold text-xs border border-[#e0e0e0] dark:border-[#242E40] text-[#7a7a7a] hover:text-[#0066cc] dark:hover:text-[#38BDF8] hover:border-[#0066cc] dark:hover:border-[#38BDF8] transition-colors cursor-pointer"
+              className="px-2.5 py-1.5 rounded-xl font-bold text-xs border border-[#e0e0e0] dark:border-[#27272F] text-[#7a7a7a] hover:text-[#0066cc] dark:hover:text-[#C9D0D6] hover:border-[#0066cc] dark:hover:border-[#C9D0D6] transition-colors cursor-pointer"
             >
               Track
             </button>
@@ -421,7 +421,7 @@ export default function InternshipsScreen() {
         {/* Toast */}
         {toast && (
           <div className={`fixed top-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl shadow-2xl text-sm font-semibold flex items-center gap-2 transition-all ${
-            toast.type === 'error' ? 'bg-red-500 text-white' : 'bg-[#0066cc] text-white dark:bg-[#38BDF8] dark:text-[#0B0E14]'
+            toast.type === 'error' ? 'bg-red-500 text-white' : 'bg-[#0066cc] text-white dark:bg-[#C9D0D6] dark:text-[#09090B]'
           }`}>
             <span>{toast.msg}</span>
           </div>
@@ -471,7 +471,7 @@ export default function InternshipsScreen() {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex border-b border-[#e0e0e0] dark:border-[#242E40]">
+        <div className="flex border-b border-[#e0e0e0] dark:border-[#27272F]">
           {[
             { id: 'discover', label: 'Discover Internships', count: filtered.length },
             { id: 'mine', label: 'My Applications', count: myInternships.length },
@@ -481,7 +481,7 @@ export default function InternshipsScreen() {
               onClick={() => setTab(t.id)}
               className={`pb-3 px-4 text-sm font-bold border-b-2 transition-all flex items-center gap-2 cursor-pointer ${
                 tab === t.id
-                  ? 'border-[#0066cc] text-[#0066cc] dark:border-[#38BDF8] dark:text-[#38BDF8]'
+                  ? 'border-[#0066cc] text-[#0066cc] dark:border-[#C9D0D6] dark:text-[#C9D0D6]'
                   : 'border-transparent text-[#7a7a7a] hover:text-[#1d1d1f] dark:hover:text-white'
               }`}
             >
@@ -503,7 +503,7 @@ export default function InternshipsScreen() {
                     placeholder="Search title, company, or location…"
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2 rounded-xl border border-[#e0e0e0] dark:border-[#242E40] bg-white dark:bg-[#141A26] text-sm text-[#1d1d1f] dark:text-white placeholder-[#888] focus:outline-none focus:border-[#0066cc] dark:focus:border-[#38BDF8]"
+                    className="w-full pl-9 pr-4 py-2 rounded-xl border border-[#e0e0e0] dark:border-[#27272F] bg-white dark:bg-[#0E0E12] text-sm text-[#1d1d1f] dark:text-white placeholder-[#888] focus:outline-none focus:border-[#0066cc] dark:focus:border-[#C9D0D6]"
                   />
                   <svg className="absolute left-3 top-2.5 text-[#888]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                 </div>
@@ -516,15 +516,15 @@ export default function InternshipsScreen() {
                   onClick={() => setRemoteOnly(!remoteOnly)}
                   className={`flex items-center gap-2.5 text-xs sm:text-sm font-semibold cursor-pointer select-none px-3.5 py-2 rounded-xl border transition-all duration-200 shadow-2xs active:scale-[0.98] ${
                     remoteOnly
-                      ? 'border-[#0066CC] dark:border-[#38BDF8] bg-[#EAF2FC]/80 dark:bg-[#132238] text-[#0066CC] dark:text-[#38BDF8] shadow-sm shadow-[#0066CC]/10'
-                      : 'border-[#E0E0E0] dark:border-[#242E40] bg-white dark:bg-[#141A26] text-[#1D1D1F] dark:text-[#E2E8F0] hover:border-[#0066CC]/60 dark:hover:border-[#38BDF8]/60'
+                      ? 'border-[#0066CC] dark:border-[#C9D0D6] bg-[#EAF2FC]/80 dark:bg-[#18181D] text-[#0066CC] dark:text-[#C9D0D6] shadow-sm shadow-[#0066CC]/10'
+                      : 'border-[#E0E0E0] dark:border-[#27272F] bg-white dark:bg-[#121216] text-[#1D1D1F] dark:text-[#E2E8F0] hover:border-[#0066CC]/60 dark:hover:border-[#C9D0D6]/60'
                   }`}
                 >
                   <div
                     className={`w-4 h-4 rounded-[5px] flex items-center justify-center border transition-all duration-200 ${
                       remoteOnly
-                        ? 'bg-[#0066CC] dark:bg-[#38BDF8] border-[#0066CC] dark:border-[#38BDF8] text-white dark:text-[#0B0F17]'
-                        : 'bg-white dark:bg-[#1C2536] border-[#D0D5DD] dark:border-[#334155]'
+                        ? 'bg-[#0066CC] dark:bg-[#C9D0D6] border-[#0066CC] dark:border-[#C9D0D6] text-white dark:text-[#09090B]'
+                        : 'bg-white dark:bg-[#18181D] border-[#D0D5DD] dark:border-[#27272F]'
                     }`}
                   >
                     {remoteOnly && (
@@ -555,8 +555,8 @@ export default function InternshipsScreen() {
                       onClick={() => setSelectedCategory(cat)}
                       className={`flex-none px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer ${
                         selectedCategory === cat
-                          ? 'bg-[#0066cc] dark:bg-[#38BDF8] text-white dark:text-[#0B0E14] border-[#0066cc] dark:border-[#38BDF8]'
-                          : 'bg-white dark:bg-[#141A26] text-[#333] dark:text-[#D1D5DB] border-[#e0e0e0] dark:border-[#242E40] hover:border-[#0066cc] dark:hover:border-[#38BDF8]'
+                          ? 'bg-[#0066cc] dark:bg-[#C9D0D6] text-white dark:text-[#09090B] border-[#0066cc] dark:border-[#C9D0D6]'
+                          : 'bg-white dark:bg-[#121216] text-[#333] dark:text-[#D1D5DB] border-[#e0e0e0] dark:border-[#27272F] hover:border-[#0066cc] dark:hover:border-[#C9D0D6]'
                       }`}
                     >
                       {cat}
@@ -589,12 +589,12 @@ export default function InternshipsScreen() {
               </div>
             )}
             {!loading && !error && filtered.length === 0 && (
-              <div className="flex flex-col items-center gap-3 py-16 bg-white dark:bg-[#141A26] rounded-2xl border border-[#e0e0e0] dark:border-[#242E40]">
+              <div className="flex flex-col items-center gap-3 py-16 bg-white dark:bg-[#121216] rounded-2xl border border-[#e0e0e0] dark:border-[#27272F]">
                 <p className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">No Internships Found</p>
                 <p className="text-xs sm:text-sm text-[#7a7a7a] dark:text-[#9CA3AF] text-center max-w-sm">
                   No internship openings match your active filter and search criteria.
                 </p>
-                <button onClick={() => { setSelectedCategory('All'); setRemoteOnly(false); setSearchQuery('') }} className="mt-2 text-xs font-bold text-[#0066cc] dark:text-[#38BDF8] cursor-pointer">
+                <button onClick={() => { setSelectedCategory('All'); setRemoteOnly(false); setSearchQuery('') }} className="mt-2 text-xs font-bold text-[#0066cc] dark:text-[#C9D0D6] cursor-pointer">
                   Reset all filters
                 </button>
               </div>
@@ -621,7 +621,7 @@ export default function InternshipsScreen() {
         {tab === 'mine' && (
           <div className="flex flex-col gap-4">
             {myInternships.length === 0 ? (
-              <div className="flex flex-col items-center gap-3 py-16 bg-white dark:bg-[#141A26] rounded-2xl border border-[#e0e0e0] dark:border-[#242E40]">
+              <div className="flex flex-col items-center gap-3 py-16 bg-white dark:bg-[#121216] rounded-2xl border border-[#e0e0e0] dark:border-[#27272F]">
                 <p className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">No Applications Tracked</p>
                 <p className="text-xs sm:text-sm text-[#7a7a7a] dark:text-[#9CA3AF] text-center max-w-xs">
                   Click "Apply on Website" or "Track" on any internship in Discover to automatically track its progress here.
@@ -635,10 +635,10 @@ export default function InternshipsScreen() {
                 const currentStatus = item.application_status || 'applied'
                 const stageObj = STATUS_STAGES.find(s => s.id === currentStatus) || STATUS_STAGES[0]
                 return (
-                  <div key={item.id} className="bg-white dark:bg-[#141A26] rounded-2xl border border-[#e0e0e0] dark:border-[#242E40] p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm">
+                  <div key={item.id} className="bg-white dark:bg-[#121216] rounded-2xl border border-[#e0e0e0] dark:border-[#27272F] p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm">
                     <div className="flex flex-col gap-1.5 flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-xs font-bold uppercase text-[#0066cc] dark:text-[#38BDF8]">{item.company}</span>
+                        <span className="text-xs font-bold uppercase text-[#0066cc] dark:text-[#C9D0D6]">{item.company}</span>
                         <h3 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">{item.title}</h3>
                         <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase border ${stageObj.color}`}>
                           {stageObj.label}
@@ -656,8 +656,8 @@ export default function InternshipsScreen() {
                         value={currentStatus}
                         onChange={val => handleStatusChange(item.id, val)}
                         options={STATUS_STAGES.map(s => ({ value: s.id, label: s.label }))}
-                        buttonClassName="!py-1.5 !px-3 !rounded-xl !text-xs !font-bold !bg-[#fafafc] dark:!bg-[#1a2032] border-[#e0e0e0] dark:border-[#242E40]"
-                        menuClassName="!rounded-xl border-[#e0e0e0] dark:border-[#242E40]"
+                        buttonClassName="!py-1.5 !px-3 !rounded-xl !text-xs !font-bold !bg-[#fafafc] dark:!bg-[#18181D] border-[#e0e0e0] dark:border-[#27272F]"
+                        menuClassName="!rounded-xl border-[#e0e0e0] dark:border-[#27272F]"
                         ariaLabel={`Change stage for ${item.title}`}
                       />
                       <button
@@ -671,7 +671,7 @@ export default function InternshipsScreen() {
                         href={item.apply_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-3 py-1.5 rounded-xl border border-[#0066cc] dark:border-[#38BDF8] text-[#0066cc] dark:text-[#38BDF8] text-xs font-bold hover:bg-[#eaf2fc] dark:hover:bg-white/5 transition-colors"
+                        className="px-3 py-1.5 rounded-xl border border-[#0066cc] dark:border-[#27272F] text-[#0066cc] dark:text-[#C9D0D6] text-xs font-bold hover:bg-[#eaf2fc] dark:hover:bg-[#18181D] transition-colors"
                       >
                         View Job ↗
                       </a>

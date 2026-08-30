@@ -105,18 +105,18 @@ const STYLES = `
 .rx-card .r-ic.ic-project { background: #FDF2F8; color: #EC4899; border: 1px solid #FCE7F3; }
 .rx-card .r-ic.ic-doc { background: #f5f5f5; color: #6e6e73; border: 1px solid #e5e5e5; }
 
-/* ── Dark Mode Overrides ─── */
+/* ── Dark Mode Overrides (Obsidian Black + Chrome Silver) ─── */
 html.dark .rx {
-  --navy: #F9FAFB;
-  --slate: #94A3B8;
-  --muted: #64748B;
-  --border: #242E40;
-  --border-l: #1E2638;
-  --page: #0B0E14;
-  --card: #141A26;
-  --vsoft: #1E293B;
-  --vsoft-2: #101622;
-  --vbd: #242E40;
+  --navy: #F8FAFC;
+  --slate: #A1A1AA;
+  --muted: #71717A;
+  --border: #27272F;
+  --border-l: #202026;
+  --page: #09090B;
+  --card: #121216;
+  --vsoft: #18181D;
+  --vsoft-2: #0E0E12;
+  --vbd: #27272F;
   --green-bg: rgba(22, 163, 74, 0.15);
 }
 html.dark .rx-card,
@@ -128,16 +128,16 @@ html.dark .rx-filter,
 html.dark .rx-chip,
 html.dark .rx-sort,
 html.dark .rx-search .s-in {
-  background: #141A26 !important;
-  border-color: #242E40 !important;
-  color: #F9FAFB !important;
+  background: #121216 !important;
+  border-color: #27272F !important;
+  color: #F8FAFC !important;
 }
 
 /* Stat strip icon boxes in dark mode */
 html.dark .rx-stat .s-ic.ic-star {
-  background: rgba(56, 189, 248, 0.15) !important;
-  color: #38BDF8 !important;
-  border: 1px solid rgba(56, 189, 248, 0.35) !important;
+  background: rgba(201, 208, 214, 0.15) !important;
+  color: #C9D0D6 !important;
+  border: 1px solid rgba(201, 208, 214, 0.35) !important;
 }
 html.dark .rx-stat .s-ic.ic-check {
   background: rgba(34, 197, 94, 0.15) !important;
@@ -145,9 +145,9 @@ html.dark .rx-stat .s-ic.ic-check {
   border: 1px solid rgba(34, 197, 94, 0.35) !important;
 }
 html.dark .rx-stat .s-ic.ic-saved {
-  background: rgba(96, 165, 250, 0.15) !important;
-  color: #60A5FA !important;
-  border: 1px solid rgba(96, 165, 250, 0.35) !important;
+  background: rgba(201, 208, 214, 0.15) !important;
+  color: #C9D0D6 !important;
+  border: 1px solid rgba(201, 208, 214, 0.35) !important;
 }
 html.dark .rx-stat .s-ic.ic-time {
   background: rgba(245, 158, 11, 0.15) !important;
@@ -158,19 +158,19 @@ html.dark .rx-stat .s-ic.ic-time {
 /* Course and Resource icons in dark mode */
 html.dark .rx-card .r-ic.ic-course,
 html.dark .rx-card .r-ic.ic-video {
-  background: rgba(56, 189, 248, 0.15) !important;
-  color: #38BDF8 !important;
-  border: 1px solid rgba(56, 189, 248, 0.35) !important;
+  background: rgba(201, 208, 214, 0.15) !important;
+  color: #C9D0D6 !important;
+  border: 1px solid rgba(201, 208, 214, 0.35) !important;
 }
 html.dark .rx-card .r-ic.ic-article {
-  background: rgba(96, 165, 250, 0.15) !important;
-  color: #60A5FA !important;
-  border: 1px solid rgba(96, 165, 250, 0.35) !important;
+  background: rgba(201, 208, 214, 0.15) !important;
+  color: #C9D0D6 !important;
+  border: 1px solid rgba(201, 208, 214, 0.35) !important;
 }
 html.dark .rx-card .r-ic.ic-practice {
-  background: rgba(14, 165, 233, 0.15) !important;
-  color: #38BDF8 !important;
-  border: 1px solid rgba(14, 165, 233, 0.35) !important;
+  background: rgba(201, 208, 214, 0.15) !important;
+  color: #C9D0D6 !important;
+  border: 1px solid rgba(201, 208, 214, 0.35) !important;
 }
 html.dark .rx-card .r-ic.ic-project {
   background: rgba(244, 114, 182, 0.15) !important;
@@ -184,45 +184,45 @@ html.dark .rx-card .r-ic.ic-doc {
 }
 
 html.dark .rx-insight {
-  background: linear-gradient(160deg, #142036, #0E131E) !important;
-  border-color: #242E40 !important;
+  background: linear-gradient(160deg, #18181D, #0E0E12) !important;
+  border-color: #27272F !important;
 }
 html.dark .rx-card .r-type {
-  color: #38BDF8 !important;
+  color: #C9D0D6 !important;
 }
 html.dark .rx-card .r-title {
   color: #FFFFFF !important;
 }
 html.dark .rx-card .r-desc {
-  color: #94A3B8 !important;
+  color: #A1A1AA !important;
 }
 html.dark .rx-card .r-tag {
-  background: #0E131E !important;
+  background: #0E0E12 !important;
   color: #CBD5E1 !important;
-  border: 1px solid #1E2638 !important;
+  border: 1px solid #202026 !important;
 }
 html.dark .rx-card .r-save {
-  background: #0E131E !important;
-  border-color: #242E40 !important;
-  color: #94A3B8 !important;
+  background: #0E0E12 !important;
+  border-color: #27272F !important;
+  color: #A1A1AA !important;
 }
 html.dark .rx-saved-item .s-ic {
-  background: rgba(56, 189, 248, 0.15) !important;
-  color: #38BDF8 !important;
-  border: 1px solid rgba(56, 189, 248, 0.25) !important;
+  background: rgba(201, 208, 214, 0.15) !important;
+  color: #C9D0D6 !important;
+  border: 1px solid rgba(201, 208, 214, 0.25) !important;
 }
 html.dark .rx-plan-item .chk {
-  border-color: #334155 !important;
-  background: #0E131E !important;
+  border-color: #27272F !important;
+  background: #0E0E12 !important;
 }
 html.dark .rx-plan-item.done .chk {
   background: #16A34A !important;
   border-color: #16A34A !important;
 }
 html.dark .rx-btn.ghost {
-  background: #141A26 !important;
-  border-color: #38BDF8 !important;
-  color: #38BDF8 !important;
+  background: #121216 !important;
+  border-color: #C9D0D6 !important;
+  color: #C9D0D6 !important;
 }
 html.dark .rx-chip.on {
   background: #0066cc !important;
@@ -230,15 +230,15 @@ html.dark .rx-chip.on {
   color: #ffffff !important;
 }
 html.dark .rx-search input {
-  color: #F9FAFB !important;
+  color: #F8FAFC !important;
 }
 html.dark .rx-search .kbd {
-  background: #0E131E !important;
-  border-color: #242E40 !important;
-  color: #94A3B8 !important;
+  background: #0E0E12 !important;
+  border-color: #27272F !important;
+  color: #A1A1AA !important;
 }
 html.dark .rx-bar {
-  background: #1E2638 !important;
+  background: #202026 !important;
 }
 
 /* ── Main column (lives inside AppShell's .pf-content) ─── */
@@ -637,7 +637,7 @@ export default function ResourcesScreen() {
           />
           <button
             type="button"
-            className="flex items-center gap-2 px-3.5 sm:px-4 py-2 border border-[#0066cc] dark:border-[#38BDF8] text-[#0066cc] dark:text-[#38BDF8] hover:bg-[#0066cc] dark:hover:bg-[#38BDF8] hover:text-white dark:hover:text-[#0E131E] rounded-xl text-xs font-bold transition-all shadow-2xs active:scale-[0.98] flex-none cursor-pointer"
+            className="flex items-center gap-2 px-3.5 sm:px-4 py-2 border border-[#0066cc] dark:border-[#27272F] text-[#0066cc] dark:text-[#C9D0D6] hover:bg-[#0066cc] dark:hover:bg-[#18181D] hover:text-white dark:hover:text-white rounded-xl text-xs font-bold transition-all shadow-2xs active:scale-[0.98] flex-none cursor-pointer"
             onClick={() => (path || roadmap.path) && navigate(`/roadmap/${(path || roadmap.path).id}`)}
           >
             {I.map}
@@ -649,7 +649,7 @@ export default function ResourcesScreen() {
     >
     <div className="rx">{whyOpen && (
         <div onClick={() => setWhyOpen(false)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.6)",display:"grid",placeItems:"center",zIndex:80,padding:20}}>
-          <div onClick={(e)=>e.stopPropagation()} className="bg-white dark:bg-[#141A26] border border-[#cfe4fb] dark:border-[#242E40]" style={{borderRadius:16,padding:22,maxWidth:460,width:"100%",boxShadow:"0 20px 40px rgba(0,0,0,.4)"}}>
+          <div onClick={(e)=>e.stopPropagation()} className="bg-white dark:bg-[#121216] border border-[#cfe4fb] dark:border-[#27272F]" style={{borderRadius:16,padding:22,maxWidth:460,width:"100%",boxShadow:"0 20px 40px rgba(0,0,0,.4)"}}>
             <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
               <span className="s-ic ic-star" style={{width:34,height:34,borderRadius:10,display:"grid",placeItems:"center"}}>{I.spark}</span>
               <h3 style={{margin:0,fontFamily:"Manrope,sans-serif",fontSize:17,fontWeight:800}} className="text-[#1d1d1f] dark:text-white">Why these resources?</h3>
@@ -680,7 +680,7 @@ export default function ResourcesScreen() {
         </div>
 
         {showFilters && (
-          <div className="bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40]" style={{borderRadius:12,padding:'14px 16px',display:'flex',gap:22,flexWrap:'wrap',alignItems:'flex-end'}}>
+          <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F]" style={{borderRadius:12,padding:'14px 16px',display:'flex',gap:22,flexWrap:'wrap',alignItems:'flex-end'}}>
             <div>
               <div style={{fontSize:11.5,fontWeight:700,letterSpacing:.05,color:'var(--muted)',textTransform:'uppercase',marginBottom:6}}>Difficulty</div>
               <div style={{display:'flex',gap:6}}>
@@ -852,7 +852,7 @@ export default function ResourcesScreen() {
                   value={webQuery}
                   onChange={(e) => setWebQuery(e.target.value)}
                   placeholder="e.g. machine learning, React, SQL..."
-                  className="bg-white dark:bg-[#0E131E] border border-[#e0e0e0] dark:border-[#242E40] text-[#1d1d1f] dark:text-white"
+                  className="bg-white dark:bg-[#0E0E12] border border-[#e0e0e0] dark:border-[#27272F] text-[#1d1d1f] dark:text-white"
                   style={{
                     flex: 1, minWidth: 0, fontSize: 13, padding: '8px 10px',
                     borderRadius: 8, outline: 'none',

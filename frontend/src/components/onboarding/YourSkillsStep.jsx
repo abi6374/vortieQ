@@ -59,7 +59,7 @@ export default function YourSkillsStep({
   ).slice(0, 6)
 
   return (
-    <div className="w-full max-w-[1140px] bg-white dark:bg-[#0E1522] rounded-2xl border border-[#f0f0f0] dark:border-[#202B3C] shadow-[0_14px_38px_rgba(25,49,75,0.08)] dark:shadow-[0_14px_38px_rgba(0,0,0,0.5)] p-6 sm:p-10 flex flex-col justify-between overflow-hidden transition-colors min-h-[580px]">
+    <div className="w-full max-w-[1140px] bg-white dark:bg-[#121216] rounded-2xl border border-[#f0f0f0] dark:border-[#27272F] shadow-[0_14px_38px_rgba(25,49,75,0.08)] dark:shadow-[0_14px_38px_rgba(0,0,0,0.5)] p-6 sm:p-10 flex flex-col justify-between overflow-hidden transition-colors min-h-[580px]">
       
       <div>
         {/* Top Header Row with ThemeToggle only (No account option) */}
@@ -93,10 +93,10 @@ export default function YourSkillsStep({
         </div>
 
         {/* Centered DETECTED SKILLS & STACKS CARD (NO % badges) */}
-        <div className="max-w-[960px] mx-auto rounded-2xl border border-[#e6e6e6] dark:border-[#202B3C] bg-white dark:bg-[#101726] shadow-sm overflow-hidden p-6 transition-colors">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#f0f0f0] dark:border-[#1E293B]">
+        <div className="max-w-[960px] mx-auto rounded-2xl border border-[#e6e6e6] dark:border-[#27272F] bg-white dark:bg-[#18181D] shadow-sm overflow-hidden p-6 transition-colors">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#f0f0f0] dark:border-[#27272F]">
             <div className="flex items-center gap-3">
-              <span className="grid place-items-center rounded-xl flex-none w-10 h-10 bg-[#eaf2fc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8]">
+              <span className="grid place-items-center rounded-xl flex-none w-10 h-10 bg-[#eaf2fc] dark:bg-[#27272F] text-[#0066cc] dark:text-[#C9D0D6]">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
                 </svg>
@@ -119,7 +119,7 @@ export default function YourSkillsStep({
                   value={newSkillInput}
                   onChange={(e) => setNewSkillInput(e.target.value)}
                   placeholder="+ Add another skill..."
-                  className="w-full sm:w-[220px] rounded-xl border border-[#D8DFEB] dark:border-[#263750] bg-[#fbfbfb] dark:bg-[#0E1522] px-3.5 py-2 text-xs font-semibold text-[#1d1d1f] dark:text-[#F8FAFC] placeholder-[#7a7a7a] dark:placeholder-[#64748B] focus:outline-none focus:border-[#0066cc] dark:focus:border-[#38BDF8] focus:ring-2 focus:ring-[#0066cc]/15 transition-all"
+                  className="w-full sm:w-[220px] rounded-xl border border-[#D8DFEB] dark:border-[#27272F] bg-[#fbfbfb] dark:bg-[#0E0E12] px-3.5 py-2 text-xs font-semibold text-[#1d1d1f] dark:text-[#F8FAFC] placeholder-[#7a7a7a] dark:placeholder-[#71717A] focus:outline-none focus:border-[#0066cc] dark:focus:border-[#C9D0D6] focus:ring-2 focus:ring-[#0066cc]/15 transition-all"
                 />
               </div>
               <button
@@ -135,8 +135,8 @@ export default function YourSkillsStep({
           {/* Skill Pills Container / Empty State */}
           <div className="pt-5">
             {currentTopics.length === 0 ? (
-              <div className="py-10 px-4 text-center rounded-xl border-2 border-dashed border-[#e6e6e6] dark:border-[#202B3C] bg-[#fafbfc] dark:bg-[#0E1522]">
-                <div className="w-12 h-12 rounded-2xl bg-[#eaf2fc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] grid place-items-center mx-auto mb-3">
+              <div className="py-10 px-4 text-center rounded-xl border-2 border-dashed border-[#e6e6e6] dark:border-[#27272F] bg-[#fafbfc] dark:bg-[#0E0E12]">
+                <div className="w-12 h-12 rounded-2xl bg-[#eaf2fc] dark:bg-[#27272F] text-[#0066cc] dark:text-[#C9D0D6] grid place-items-center mx-auto mb-3">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="12" cy="12" r="10" />
                     <line x1="12" y1="8" x2="12" y2="12" />
@@ -155,7 +155,7 @@ export default function YourSkillsStep({
                 {currentTopics.map((t) => (
                   <span
                     key={t.name}
-                    className="group inline-flex items-center gap-2 rounded-xl bg-[#f0f4f9] dark:bg-[#172236] border border-[#dce4f0] dark:border-[#223552] text-[#1d1d1f] dark:text-[#F8FAFC] px-3.5 py-2 text-[13.5px] font-semibold shadow-xs hover:border-[#0066cc] dark:hover:border-[#38BDF8] transition-all"
+                    className="group inline-flex items-center gap-2 rounded-xl bg-[#f0f4f9] dark:bg-[#18181D] border border-[#dce4f0] dark:border-[#27272F] text-[#1d1d1f] dark:text-[#F8FAFC] px-3.5 py-2 text-[13.5px] font-semibold shadow-xs hover:border-[#0066cc] dark:hover:border-[#C9D0D6] transition-all"
                   >
                     <span>{t.name}</span>
                     <button
@@ -176,7 +176,7 @@ export default function YourSkillsStep({
 
             {/* Quick Add Suggestions */}
             {unaddedSuggestions.length > 0 && (
-              <div className="mt-5 pt-4 border-t border-[#f0f0f0] dark:border-[#1E293B] flex items-center gap-2 flex-wrap">
+              <div className="mt-5 pt-4 border-t border-[#f0f0f0] dark:border-[#27272F] flex items-center gap-2 flex-wrap">
                 <span className="text-xs font-bold text-[#7a7a7a] dark:text-[#94A3B8] uppercase tracking-wider mr-1">
                   Quick Add:
                 </span>
@@ -185,7 +185,7 @@ export default function YourSkillsStep({
                     key={s}
                     type="button"
                     onClick={() => handleAddSkill(s)}
-                    className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-lg border border-[#e6e6e6] dark:border-[#2D3A4F] bg-white dark:bg-[#141C2B] text-[#494949] dark:text-[#CBD5E1] hover:border-[#0066cc] hover:text-[#0066cc] dark:hover:border-[#38BDF8] dark:hover:text-[#38BDF8] transition-all cursor-pointer shadow-2xs"
+                    className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-lg border border-[#e6e6e6] dark:border-[#27272F] bg-white dark:bg-[#18181D] text-[#494949] dark:text-[#CBD5E1] hover:border-[#0066cc] hover:text-[#0066cc] dark:hover:border-[#C9D0D6] dark:hover:text-[#C9D0D6] transition-all cursor-pointer shadow-2xs"
                   >
                     <span>+</span>
                     <span>{s}</span>

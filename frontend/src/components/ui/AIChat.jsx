@@ -73,62 +73,62 @@ const STYLES = `
 .pfchat-send:hover:not(:disabled){ background:#004fa3; }
 .pfchat-ctx{ font-size:11px; color:#86868b; margin-top:7px; text-align:center; }
 
-/* --- Dark Theme Support --- */
+/* --- Dark Theme Support (Obsidian Black + Chrome Silver) --- */
 html.dark .pfchat-fab, [data-theme="dark"] .pfchat-fab {
-  background:#141A26; border-color:#242E40; box-shadow:0 8px 22px rgba(0,0,0,.5);
+  background:#121216; border-color:#27272F; box-shadow:0 8px 22px rgba(0,0,0,.7);
 }
 html.dark .pfchat-fab:hover, [data-theme="dark"] .pfchat-fab:hover {
-  box-shadow:0 12px 28px rgba(0,102,204,.35); border-color:#38BDF8;
+  box-shadow:0 12px 28px rgba(0,0,0,.85); border-color:#C9D0D6;
 }
 html.dark .pfchat-fab span, [data-theme="dark"] .pfchat-fab span {
-  color:#F9FAFB;
+  color:#C9D0D6;
 }
 
 html.dark .pfchat-panel, [data-theme="dark"] .pfchat-panel {
-  background:#141A26; border-color:#242E40; box-shadow:0 18px 48px rgba(0,0,0,.65);
+  background:#121216; border-color:#27272F; box-shadow:0 18px 48px rgba(0,0,0,.8);
 }
 html.dark .pfchat-head, [data-theme="dark"] .pfchat-head {
-  border-bottom-color:#1E2638;
+  border-bottom-color:#202026;
 }
 html.dark .pfchat-head .n, [data-theme="dark"] .pfchat-head .n {
-  color:#F9FAFB;
+  color:#F8FAFC;
 }
 html.dark .pfchat-head button, [data-theme="dark"] .pfchat-head button {
-  color:#94A3B8;
+  color:#C9D0D6;
 }
 html.dark .pfchat-head button:hover, [data-theme="dark"] .pfchat-head button:hover {
-  background:#1E2638; color:#F9FAFB;
+  background:#202026; color:#FFFFFF;
 }
 
 html.dark .pfchat-body, [data-theme="dark"] .pfchat-body {
-  background:#0E131E;
+  background:#0E0E12;
 }
 html.dark .pfchat-empty, [data-theme="dark"] .pfchat-empty {
-  color:#94A3B8;
+  color:#A1A1AA;
 }
 html.dark .pfchat-empty b, [data-theme="dark"] .pfchat-empty b {
-  color:#F9FAFB;
+  color:#C9D0D6;
 }
 
 html.dark .pfchat-sugg button, [data-theme="dark"] .pfchat-sugg button {
-  background:#141A26; border-color:#242E40; color:#F9FAFB;
+  background:#121216; border-color:#27272F; color:#C9D0D6;
 }
 html.dark .pfchat-sugg button:hover, [data-theme="dark"] .pfchat-sugg button:hover {
-  border-color:#38BDF8; background:#1E293B;
+  border-color:#C9D0D6; background:#18181D; color:#FFFFFF;
 }
 
 html.dark .pfchat-msg.assistant, [data-theme="dark"] .pfchat-msg.assistant {
-  background:#141A26; color:#F9FAFB; border-color:#242E40;
+  background:#18181D; color:#F8FAFC; border-color:#27272F;
 }
 html.dark .pfchat-msg.user, [data-theme="dark"] .pfchat-msg.user {
-  background:#0066cc; color:#FFFFFF;
+  background:#C9D0D6; color:#09090B; font-weight:600;
 }
 
 html.dark .pfchat-typing, [data-theme="dark"] .pfchat-typing {
-  background:#141A26; border-color:#242E40;
+  background:#18181D; border-color:#27272F;
 }
 html.dark .pfchat-typing i, [data-theme="dark"] .pfchat-typing i {
-  background:#64748B;
+  background:#A1A1AA;
 }
 
 html.dark .pfchat-err, [data-theme="dark"] .pfchat-err {
@@ -139,30 +139,29 @@ html.dark .pfchat-err button, [data-theme="dark"] .pfchat-err button {
 }
 
 html.dark .pfchat-foot, [data-theme="dark"] .pfchat-foot {
-  border-top-color:#1E2638; background:#141A26;
+  border-top-color:#202026; background:#121216;
 }
 html.dark .pfchat-in, [data-theme="dark"] .pfchat-in {
-  border-color:#242E40; background:#0E131E;
+  border-color:#27272F; background:#0E0E12;
 }
 html.dark .pfchat-in:focus-within, [data-theme="dark"] .pfchat-in:focus-within {
-  border-color:#38BDF8; box-shadow:0 0 0 3px rgba(56,189,248,.18);
+  border-color:#C9D0D6; box-shadow:0 0 0 3px rgba(201,208,214,.2);
 }
 html.dark .pfchat-in textarea, [data-theme="dark"] .pfchat-in textarea {
-  color:#F9FAFB; background:transparent;
+  color:#F8FAFC; background:transparent;
 }
 html.dark .pfchat-in textarea::placeholder, [data-theme="dark"] .pfchat-in textarea::placeholder {
-  color:#64748B;
+  color:#71717A;
 }
 
 html.dark .pfchat-send, [data-theme="dark"] .pfchat-send {
-  background:#0066cc; color:#FFFFFF;
+  background:#C9D0D6; color:#09090B;
 }
 html.dark .pfchat-send:hover:not(:disabled), [data-theme="dark"] .pfchat-send:hover:not(:disabled) {
-  background:#0052a3;
+  background:#B4BCC3;
 }
-
 html.dark .pfchat-ctx, [data-theme="dark"] .pfchat-ctx {
-  color:#64748B;
+  color:#A1A1AA;
 }
 
 @media (prefers-reduced-motion:reduce){ .pfchat-typing i{ animation:none } .pfchat-fab{ transition:none } }
