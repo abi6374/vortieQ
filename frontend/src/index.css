@@ -475,7 +475,7 @@ html.dark [class*="text-gray-900"] {
 }
 
 html.dark p,
-html.dark span:not([class*="text-[#0066cc]"]):not([class*="text-[#22A06B]"]):not([class*="text-red-"]):not([class*="text-emerald-"]):not([class*="text-amber-"]):not([class*="text-blue-"]):not([class*="text-white"]):not([class*="text-[#FBBF24]"]),
+html.dark span:not([class*="text-[#0066cc]"]):not([class*="text-[#22A06B]"]):not([class*="text-red-"]):not([class*="text-emerald-"]):not([class*="text-amber-"]):not([class*="text-blue-"]):not([class*="text-white"]):not([class*="text-[#FBBF24]"]):not([class*="text-transparent"]):not([class*="bg-clip-text"]),
 html.dark label,
 html.dark [class*="text-[#333333]"],
 html.dark [class*="text-[#444444]"],

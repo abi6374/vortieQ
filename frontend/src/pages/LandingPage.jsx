@@ -121,8 +121,11 @@ export default function LandingPage() {
         </div>
 
         {/* BALBOA Loud Monumental Display Headline */}
-        <h1 className="font-balboa text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight text-[#1D1D1F] dark:text-white leading-[0.9] text-balance max-w-5xl">
-          CRUSH THE <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#0066CC] via-[#0080FF] to-[#38BDF8]">SKILL GAP</span>
+        <h1 className="font-balboa text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight leading-[0.9] text-balance max-w-5xl">
+          <span className="text-[#1D1D1F] dark:text-white">CRUSH THE </span>
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#0066CC] via-[#0080FF] to-[#38BDF8] dark:from-[#2997FF] dark:via-[#38BDF8] dark:to-[#67E8F9]">
+            SKILL GAP
+          </span>
         </h1>
 
         {/* Subheading & Decrypted Role Scrambler */}
