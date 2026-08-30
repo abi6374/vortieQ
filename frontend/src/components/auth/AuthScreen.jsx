@@ -57,13 +57,15 @@ const STYLES = `
 .pfa .hero h1{ font-family:"Manrope",sans-serif; font-weight:800; font-size:clamp(26px,2.6vw,36px);
   line-height:1.14; letter-spacing:-.025em; margin:0 0 14px; text-wrap:balance; color:var(--navy); }
 .pfa .hero p{ font-size:15px; line-height:1.55; color:var(--slate); margin:0; max-width:32ch; }
-.pfa .privacy{ display:flex; align-items:center; gap:10px; color:var(--slate); font-size:13px; font-weight:500; flex:none; }
+.pfa .privacy{ display:flex; align-items:center; justify-content:center; gap:10px; color:var(--slate); font-size:13px; font-weight:500; flex:none; width:100%; text-align:center; }
 .pfa .privacy svg{ color:var(--violet); flex:none; }
 
 .pfa .form-panel{ background:rgba(255,255,255,0.55); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
   padding:36px 48px;
-  display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; }
-.pfa .form{ width:100%; max-width:400px; }
+  display:flex; flex-direction:column; align-items:center; justify-content:flex-start; height:100%; }
+.pfa .form{ width:100%; max-width:400px; height:100%; display:flex; flex-direction:column; }
+.pfa .form-tabs-header{ flex:none; width:100%; }
+.pfa .form-body{ flex:1; display:flex; flex-direction:column; justify-content:center; width:100%; }
 .pfa .tabs{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:2px; }
 .pfa .tab{ background:none; border:none; cursor:pointer; padding:6px 4px 10px;
   font:600 16px/1 "Inter",sans-serif; color:var(--navy); position:relative; text-align:center; }
@@ -516,104 +518,108 @@ export default function AuthScreen({ initialMode = 'signin' }) {
         {/* RIGHT: Interactive Authentication Form */}
         <section className="form-panel">
           <div className="form">
-            <div className="tabs">
-              <button type="button" className={`tab ${!isCreate ? 'active' : ''}`} onClick={() => switchMode('signin')}>Sign in</button>
-              <button type="button" className={`tab ${isCreate ? 'active' : ''}`} onClick={() => switchMode('create')}>Create account</button>
-            </div>
-            <div className="tabs" style={{ marginBottom: 0 }}>
-              <p className="tab-help left">&nbsp;</p>
-              <p className="tab-help">New here? Set up your learner profile in minutes.</p>
-            </div>
-
-            <div className="welcome">
-              <h2>{isCreate ? 'Create your account' : 'Welcome back'}</h2>
-              <p>{isCreate ? 'Set up your learner profile in minutes.' : 'Sign in to continue your learning journey.'}</p>
+            <div className="form-tabs-header">
+              <div className="tabs">
+                <button type="button" className={`tab ${!isCreate ? 'active' : ''}`} onClick={() => switchMode('signin')}>Sign in</button>
+                <button type="button" className={`tab ${isCreate ? 'active' : ''}`} onClick={() => switchMode('create')}>Create account</button>
+              </div>
+              <div className="tabs" style={{ marginBottom: 0 }}>
+                <p className="tab-help left">&nbsp;</p>
+                <p className="tab-help">New here? Set up your learner profile in minutes.</p>
+              </div>
             </div>
 
-            <form onSubmit={handleSubmit}>
-              {isCreate && (
+            <div className="form-body">
+              <div className="welcome">
+                <h2>{isCreate ? 'Create your account' : 'Welcome back'}</h2>
+                <p>{isCreate ? 'Set up your learner profile in minutes.' : 'Sign in to continue your learning journey.'}</p>
+              </div>
+
+              <form onSubmit={handleSubmit}>
+                {isCreate && (
+                  <div className="field">
+                    <label htmlFor="pfa-name">Full name</label>
+                    <div className="input">
+                      <span className="lead" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg></span>
+                      <input id="pfa-name" type="text" required value={fullName} onChange={onField(setFullName)} placeholder="HackerEarth Team ?" autoComplete="name" />
+                    </div>
+                  </div>
+                )}
+
                 <div className="field">
-                  <label htmlFor="pfa-name">Full name</label>
+                  <label htmlFor="pfa-email">Email address</label>
                   <div className="input">
-                    <span className="lead" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg></span>
-                    <input id="pfa-name" type="text" required value={fullName} onChange={onField(setFullName)} placeholder="HackerEarth Team ?" autoComplete="name" />
+                    <span className="lead" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="3" /><path d="m3 6 9 7 9-7" /></svg></span>
+                    <input id="pfa-email" type="email" required value={email} onChange={onField(setEmail)} placeholder="you@example.com" autoComplete="email" />
                   </div>
                 </div>
-              )}
 
-              <div className="field">
-                <label htmlFor="pfa-email">Email address</label>
-                <div className="input">
-                  <span className="lead" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="3" /><path d="m3 6 9 7 9-7" /></svg></span>
-                  <input id="pfa-email" type="email" required value={email} onChange={onField(setEmail)} placeholder="you@example.com" autoComplete="email" />
+                <div className="field">
+                  <label htmlFor="pfa-pw">Password</label>
+                  <div className="input">
+                    <span className="lead" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg></span>
+                    <input id="pfa-pw" type={showPw ? 'text' : 'password'} required minLength={6} value={password} onChange={onField(setPassword)} placeholder="Enter your password" autoComplete={isCreate ? 'new-password' : 'current-password'} />
+                    <button type="button" className="toggle" onClick={() => setShowPw((s) => !s)} aria-label={showPw ? 'Hide password' : 'Show password'}>
+                      {showPw ? (
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
+                          <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
+                          <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
+                          <line x1="2" x2="22" y1="2" y2="22" />
+                        </svg>
+                      ) : (
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                          <circle cx="12" cy="12" r="3" />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
                 </div>
-              </div>
 
-              <div className="field">
-                <label htmlFor="pfa-pw">Password</label>
-                <div className="input">
-                  <span className="lead" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg></span>
-                  <input id="pfa-pw" type={showPw ? 'text' : 'password'} required minLength={6} value={password} onChange={onField(setPassword)} placeholder="Enter your password" autoComplete={isCreate ? 'new-password' : 'current-password'} />
-                  <button type="button" className="toggle" onClick={() => setShowPw((s) => !s)} aria-label={showPw ? 'Hide password' : 'Show password'}>
-                    {showPw ? (
-                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
-                        <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
-                        <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
-                        <line x1="2" x2="22" y1="2" y2="22" />
-                      </svg>
-                    ) : (
-                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-                        <circle cx="12" cy="12" r="3" />
-                      </svg>
-                    )}
-                  </button>
+                <div className="utility">
+                  <label className="remember">
+                    <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
+                    <span className="checkbox" aria-hidden="true"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg></span>
+                    Remember me
+                  </label>
+                  <button type="button" className="forgot">Forgot password?</button>
                 </div>
-              </div>
 
-              <div className="utility">
-                <label className="remember">
-                  <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
-                  <span className="checkbox" aria-hidden="true"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg></span>
-                  Remember me
-                </label>
-                <button type="button" className="forgot">Forgot password?</button>
-              </div>
-
-              <button type="submit" className="btn btn-primary" disabled={isLoading}>
-                {isLoading && <span className="spin" />}
-                {isCreate ? 'Create account' : 'Sign in'}
-              </button>
-
-              <div className="divider-row"><span className="line" /><span className="or">OR</span><span className="line" /></div>
-
-              <button type="button" className="btn btn-github" onClick={handleGithubSignIn} disabled={isLoading}>
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
-                </svg>
-                Continue with GitHub
-              </button>
-
-              <button type="button" className="btn btn-google" onClick={handleGoogleSignIn} disabled={isLoading}>
-                <svg width="17" height="17" viewBox="0 0 48 48" aria-hidden="true">
-                  <path fill="#4285F4" d="M45.1 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h11.8c-.5 2.7-2 5-4.4 6.6v5.5h7.1c4.2-3.8 6.6-9.5 6.6-16.1z" />
-                  <path fill="#34A853" d="M24 46c6 0 11-2 14.6-5.4l-7.1-5.5c-2 1.3-4.5 2.1-7.5 2.1-5.8 0-10.6-3.9-12.4-9.1H4.3v5.7C7.9 41.1 15.4 46 24 46z" />
-                  <path fill="#FBBC05" d="M11.6 28.1c-.5-1.3-.7-2.7-.7-4.1s.3-2.8.7-4.1v-5.7H4.3C2.8 17.1 2 20.4 2 24s.8 6.9 2.3 9.8l7.3-5.7z" />
-                  <path fill="#EA4335" d="M24 10.8c3.3 0 6.2 1.1 8.5 3.3l6.3-6.3C35 4.1 30 2 24 2 15.4 2 7.9 6.9 4.3 14.2l7.3 5.7C13.4 14.7 18.2 10.8 24 10.8z" />
-                </svg>
-                Continue with Google
-              </button>
-
-              <p className="signup-foot">
-                {isCreate ? 'Already have an account? ' : 'New to PathFinder? '}
-                <button type="button" onClick={() => switchMode(isCreate ? 'signin' : 'create')}>
-                  {isCreate ? 'Sign in' : 'Create account'}
+                <button type="submit" className="btn btn-primary" disabled={isLoading}>
+                  {isLoading && <span className="spin" />}
+                  {isCreate ? 'Create account' : 'Sign in'}
                 </button>
-              </p>
 
-              {(oauthError || error) && <p className="err">{oauthError || error}</p>}
-            </form>
+                <div className="divider-row"><span className="line" /><span className="or">OR</span><span className="line" /></div>
+
+                <button type="button" className="btn btn-github" onClick={handleGithubSignIn} disabled={isLoading}>
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+                  </svg>
+                  Continue with GitHub
+                </button>
+
+                <button type="button" className="btn btn-google" onClick={handleGoogleSignIn} disabled={isLoading}>
+                  <svg width="17" height="17" viewBox="0 0 48 48" aria-hidden="true">
+                    <path fill="#4285F4" d="M45.1 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h11.8c-.5 2.7-2 5-4.4 6.6v5.5h7.1c4.2-3.8 6.6-9.5 6.6-16.1z" />
+                    <path fill="#34A853" d="M24 46c6 0 11-2 14.6-5.4l-7.1-5.5c-2 1.3-4.5 2.1-7.5 2.1-5.8 0-10.6-3.9-12.4-9.1H4.3v5.7C7.9 41.1 15.4 46 24 46z" />
+                    <path fill="#FBBC05" d="M11.6 28.1c-.5-1.3-.7-2.7-.7-4.1s.3-2.8.7-4.1v-5.7H4.3C2.8 17.1 2 20.4 2 24s.8 6.9 2.3 9.8l7.3-5.7z" />
+                    <path fill="#EA4335" d="M24 10.8c3.3 0 6.2 1.1 8.5 3.3l6.3-6.3C35 4.1 30 2 24 2 15.4 2 7.9 6.9 4.3 14.2l7.3 5.7C13.4 14.7 18.2 10.8 24 10.8z" />
+                  </svg>
+                  Continue with Google
+                </button>
+
+                <p className="signup-foot">
+                  {isCreate ? 'Already have an account? ' : 'New to PathFinder? '}
+                  <button type="button" onClick={() => switchMode(isCreate ? 'signin' : 'create')}>
+                    {isCreate ? 'Sign in' : 'Create account'}
+                  </button>
+                </p>
+
+                {(oauthError || error) && <p className="err">{oauthError || error}</p>}
+              </form>
+            </div>
           </div>
         </section>
       </motion.div>
