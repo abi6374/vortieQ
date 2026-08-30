@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import apiClient from '../../lib/apiClient'
-import UserProfileDropdown from '../ui/UserProfileDropdown'
 import ThemeToggle from '../ui/ThemeToggle'
 import { useAuth } from '../../hooks/useAuth'
 
@@ -88,10 +87,7 @@ export default function GitHubIntegrationStep({
       {/* Top Header Row with ThemeToggle & conditional Profile Dropdown */}
       <div className="pt-6 sm:pt-8 pb-3 px-6 sm:px-10 relative">
         <div className="flex items-center justify-end mb-2">
-          <div className="flex items-center gap-2 sm:gap-2.5">
-            <ThemeToggle />
-            {hasExistingPath && <UserProfileDropdown />}
-          </div>
+          <ThemeToggle />
         </div>
 
         <div className="text-center mt-2 max-w-2xl mx-auto">

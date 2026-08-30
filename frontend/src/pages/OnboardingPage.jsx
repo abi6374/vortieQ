@@ -6,21 +6,24 @@ import GoalConfirm from '../components/onboarding/GoalConfirm'
 import GeneratingOverlay from '../components/onboarding/GeneratingOverlay'
 import LearnerIntakeWorkspace from '../components/onboarding/LearnerIntakeWorkspace'
 import GitHubIntegrationStep from '../components/onboarding/GitHubIntegrationStep'
-import AssessSkills from '../components/onboarding/AssessSkills'
+import YourSkillsStep from '../components/onboarding/YourSkillsStep'
+import SkillConfidenceStep from '../components/onboarding/SkillConfidenceStep'
 import GoalCompass from '../components/onboarding/GoalCompass'
 import SetupSidebar from '../components/onboarding/SetupSidebar'
 import api, { genIdempotencyKey } from '../lib/apiClient'
 
 /**
- * Onboarding is a 5-step unified wizard:
+ * Onboarding is a 7-step unified wizard:
  *   1. Learner Intake (Resume upload + Background description)
  *   2. GitHub Integration (Optional - repository & stack extraction)
- *   3. Assess Skills (Self-assessment & confirmation)
- *   4. Set your Goal (Goal Compass & Ambition-Readiness)
- *   5. Create Roadmap (Generation & transition to Dashboard)
+ *   3. Your Skill (Detected skills & stacks review)
+ *   4. Your Confidence Level (Fine-tune level per skill)
+ *   5. Set your Goal (Goal Compass & Ambition-Readiness)
+ *   6. Create Roadmap (Generation overlay)
+ *   7. Track Progress (Roadmap dashboard)
  */
 export default function OnboardingPage() {
-  const [phase, setPhase] = useState('intake') // 'intake' | 'github' | 'topics' | 'goalcompass' | 'chat' | 'confirm' | 'generating'
+  const [phase, setPhase] = useState('intake') // 'intake' | 'github' | 'skills' | 'confidence' | 'goalcompass' | 'chat' | 'confirm' | 'generating'
   const [goalText, setGoalText] = useState('')
   const [extractedProfile, setExtractedProfile] = useState(null)
   const [resumeTopics, setResumeTopics] = useState([])       // from LLM/GitHub extraction
@@ -135,8 +138,8 @@ export default function OnboardingPage() {
       localStorage.getItem(`pf_github_preference_${userId}`) === 'connected'
 
     if (isGithubConnected) {
-      // Already connected -> skip to Step 3: Assess Skills
-      setPhase('topics')
+      // Already connected -> skip to Step 3: Your Skill
+      setPhase('skills')
     } else {
       // Not connected -> proceed to Step 2: GitHub Integration
       setPhase('github')
@@ -150,7 +153,7 @@ export default function OnboardingPage() {
       setTopicRatings([])
       setDetectedYears(0)
     }
-    setPhase('goalcompass')
+    setPhase('skills')
   }
 
   // ------------- Step 2: GitHub Integration callback
@@ -169,8 +172,14 @@ export default function OnboardingPage() {
     }
   }
 
-  // ------------- Step 3: Assess Skills continue → Goal Compass
-  const handleTopicsContinue = (ratings) => {
+  // ------------- Step 3: Your Skill continue → Step 4: Your Confidence Level
+  const handleSkillsContinue = (updatedTopics) => {
+    setResumeTopics(updatedTopics)
+    setPhase('confidence')
+  }
+
+  // ------------- Step 4: Your Confidence Level continue → Step 5: Goal Compass
+  const handleConfidenceContinue = (ratings) => {
     setTopicRatings(ratings)
     setPhase('goalcompass')
   }
@@ -353,45 +362,61 @@ export default function OnboardingPage() {
             githubData={githubData}
             hasExistingPath={hasExistingPath}
             onGithubSynced={handleGithubSynced}
-            onContinue={() => setPhase('topics')}
-            onSkip={() => setPhase('topics')}
+            onContinue={() => setPhase('skills')}
+            onSkip={() => setPhase('skills')}
           />
         </div>
       </div>
     )
   }
 
-  // Step 3: Assess Skills Step
-  if (phase === 'topics') {
+  // Step 3: Your Skill (Review & manage detected skills & stacks)
+  if (phase === 'skills' || phase === 'topics') {
     return (
       <div className="min-h-screen flex bg-[#f5f5f7] dark:bg-[#0B0E14]">
         <SetupSidebar current={3} />
         <div className="flex-1 flex flex-col items-center justify-start px-4 py-8 lg:py-10 overflow-y-auto">
-          <AssessSkills
+          <YourSkillsStep
             topics={resumeTopics}
             detectedYears={detectedYears}
-            onContinue={handleTopicsContinue}
-            onBack={() => setPhase('intake')}
-            onSkip={() => { setTopicRatings([]); setPhase('goalcompass') }}
+            onContinue={handleSkillsContinue}
+            onBack={() => setPhase(githubData ? 'github' : 'intake')}
           />
         </div>
       </div>
     )
   }
 
-  // Step 4 & 5: Goal Compass & Generating Overlay
+  // Step 4: Your Confidence Level (Fine-tune level per skill)
+  if (phase === 'confidence') {
+    return (
+      <div className="min-h-screen flex bg-[#f5f5f7] dark:bg-[#0B0E14]">
+        <SetupSidebar current={4} />
+        <div className="flex-1 flex flex-col items-center justify-start px-4 py-8 lg:py-10 overflow-y-auto">
+          <SkillConfidenceStep
+            topics={resumeTopics}
+            detectedYears={detectedYears}
+            onContinue={handleConfidenceContinue}
+            onBack={() => setPhase('skills')}
+          />
+        </div>
+      </div>
+    )
+  }
+
+  // Step 5 & 6: Goal Compass & Generating Overlay
   if (phase === 'goalcompass' || phase === 'generating') {
     return (
       <>
         <div ref={bgRef} className="min-h-screen flex bg-[#f5f5f7] dark:bg-[#0B0E14]">
-          <SetupSidebar current={phase === 'generating' ? 5 : 4} />
+          <SetupSidebar current={phase === 'generating' ? 6 : 5} />
           <div className="flex-1 flex flex-col items-center justify-start px-4 py-8 lg:py-10 overflow-y-auto">
             <GoalCompass
-              topicRatings={topicRatings}
+              topicRatings={topicRatings.length > 0 ? topicRatings : resumeTopics}
               detectedYears={detectedYears}
               initialGoal={goalText}
               onCreate={handleCreatePlan}
-              onBack={() => setPhase(resumeTopics.length > 0 ? 'topics' : 'intake')}
+              onBack={() => setPhase('confidence')}
             />
             {error && phase !== 'generating' && (
               <p className="mt-4 text-center text-sm text-red-700 bg-red-100 rounded-lg py-2 px-4 max-w-md">

@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react'
-import UserProfileDropdown from '../ui/UserProfileDropdown'
 import ThemeToggle from '../ui/ThemeToggle'
 
 /**
@@ -556,9 +555,6 @@ export default function GoalCompass({ topicRatings = [], detectedYears = 0, init
 
       <div className="head">
         <div className="head-left">
-          <span className="step-badge">
-            Step 4 · Goal Compass
-          </span>
           <div className="head-title-row">
             <span className="head-icon" aria-hidden="true">
               <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -574,7 +570,6 @@ export default function GoalCompass({ topicRatings = [], detectedYears = 0, init
         </div>
         <div className="flex items-center gap-2 sm:gap-2.5">
           <ThemeToggle />
-          <UserProfileDropdown />
         </div>
       </div>
 
