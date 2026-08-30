@@ -250,6 +250,88 @@ def ingest_web_result(result: dict, skill_tags: list[str] | None = None, difficu
     return resource
 
 
+def ingest_youtube_result(video: dict, skill_tags: list[str] | None = None, difficulty: str | None = None) -> dict | None:
+    """Ingests ONE already-validated youtube_provider.YouTubeProviderAdapter.
+    search_videos() result into provider_resources with real provenance.
+    Every field here already comes from the YouTube Data API itself,
+    independently checked as public/embeddable with a real parseable
+    duration (see youtube_provider.py) - this function persists that,
+    never re-derives or guesses any of it.
+
+    Deduplicates by BOTH the provider-native external_id (the YouTube
+    video ID - migration 014's partial unique index on
+    (source, external_id), the one truly stable identifier YouTube itself
+    guarantees is unique) and canonical_url, since a video could
+    conceivably already exist under either key. Returns None (never a
+    placeholder) if the input is missing a required field - defensive
+    against a malformed dict reaching this function from anywhere other
+    than the adapter's own validated output.
+    """
+    external_id = (video.get("external_id") or "").strip()
+    title = (video.get("title") or "").strip()
+    raw_url = (video.get("canonical_url") or "").strip()
+    if not external_id or not title or not raw_url:
+        return None
+    url = canonicalize_url(raw_url)
+
+    existing = (
+        supabase_client.table("provider_resources").select("*")
+        .eq("source", "youtube").eq("external_id", external_id).execute()
+    )
+    if existing.data:
+        return existing.data[0]
+    existing = supabase_client.table("provider_resources").select("*").eq("canonical_url", url).execute()
+    if existing.data:
+        return existing.data[0]
+
+    resource_type = video.get("resource_type") or "video"
+    row = {
+        "source": "youtube",
+        "provider": "YouTube",
+        "external_id": external_id,
+        "canonical_url": url,
+        "title": title,
+        "description": (video.get("description") or "")[:2000],
+        "skill_tags": skill_tags or [],
+        "difficulty": difficulty if difficulty in ("beginner", "intermediate", "advanced") else None,
+        "duration_hrs": video.get("duration_hrs"),
+        "language": video.get("language") or "en",
+        "cost": "free",
+        "format": resource_type if resource_type in ("video", "playlist") else "video",
+        "channel_id": video.get("channel_id") or "",
+        "channel_title": video.get("channel_title") or "",
+        "published_at": video.get("published_at"),
+        "quality_score": video.get("quality_score"),
+        "quality_reasons": video.get("quality_reasons") or [],
+        # youtube.com is already in TRUSTED_PROVIDER_DOMAINS, but computed
+        # via the real function rather than hardcoded True, so this stays
+        # correct if that allowlist is ever restructured.
+        "is_trusted_domain": is_trusted_provider_domain(url),
+        # Not "unverified" like ingest_web_result's initial state - the
+        # adapter already independently confirmed public/embeddable via
+        # the API itself, a stronger signal than the HTTP reachability
+        # check below. That check still runs for the SAME audit trail
+        # every other provider gets (defense in depth: e.g. a network
+        # block on the app's own reachability check, or a since-changed
+        # status), and can downgrade this to unavailable, but does not
+        # need to independently "confirm available" first.
+        "availability_status": "available",
+    }
+    inserted = supabase_client.table("provider_resources").insert(row).execute()
+    if not inserted.data:
+        return None
+    resource = inserted.data[0]
+
+    verdict = record_verification(resource["id"], url)
+    status = "available" if verdict["passed"] else "unavailable"
+    supabase_client.table("provider_resources").update({
+        "availability_status": status,
+        "last_checked_at": datetime.now(timezone.utc).isoformat(),
+    }).eq("id", resource["id"]).execute()
+    resource["availability_status"] = status
+    return resource
+
+
 def _guess_provider(url: str) -> str:
     host = urlparse(url).netloc.lower().replace("www.", "")
     return host.split(".")[0].capitalize() if host else "Web"
@@ -300,6 +382,16 @@ def promote_to_course(provider_resource_id: str) -> dict | None:
         "skill_tags": tags,
         "prerequisites": [],
         "embedding": emb,
+        # Real provenance carried forward when present (migration 014) -
+        # "include freshness and provenance in recommendation
+        # explanations" needs this to survive promotion, not just live in
+        # the pre-promotion provider_resources row. None for any resource
+        # that never had these (e.g. a plain web_search result) - never
+        # fabricated for a source that doesn't have a real value.
+        "external_id": resource.get("external_id"),
+        "channel_id": resource.get("channel_id"),
+        "channel_title": resource.get("channel_title"),
+        "published_at": resource.get("published_at"),
         "source": "provider_resource",
         "provider_resource_id": resource["id"],
         "last_verified_at": resource.get("last_checked_at") or datetime.now(timezone.utc).isoformat(),

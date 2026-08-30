@@ -165,6 +165,119 @@ class TestIngestWebResult:
         assert update_call["availability_status"] == "unavailable"
 
 
+def _youtube_video(
+    external_id="dQw4w9WgXcQ",
+    title="Real Python Tutorial",
+    canonical_url=None,
+):
+    return {
+        "external_id": external_id,
+        "canonical_url": canonical_url or f"https://www.youtube.com/watch?v={external_id}",
+        "title": title,
+        "description": "A real tutorial description.",
+        "channel_id": "UC_real_channel",
+        "channel_title": "Real Channel",
+        "published_at": "2024-01-01T00:00:00Z",
+        "language": "en",
+        "duration_hrs": 0.42,
+        "resource_type": "video",
+        "provider": "YouTube",
+        "quality_score": 0.6,
+        "quality_reasons": ["duration fits a typical tutorial length (5-90 min)"],
+    }
+
+
+class TestIngestYoutubeResult:
+    def test_rejects_video_missing_required_fields(self):
+        assert catalog_service.ingest_youtube_result({}) is None
+        assert catalog_service.ingest_youtube_result({"external_id": "x"}) is None
+
+    def test_dedups_by_external_id_without_reinserting(self):
+        mock_supabase = MagicMock()
+        mock_table = MagicMock()
+        mock_supabase.table.return_value = mock_table
+        mock_table.select.return_value.eq.return_value.eq.return_value.execute.return_value = MagicMock(
+            data=[{"id": "existing-id", "external_id": "dQw4w9WgXcQ"}]
+        )
+        with patch("app.services.catalog_service.supabase_client", mock_supabase):
+            result = catalog_service.ingest_youtube_result(_youtube_video())
+        assert result["id"] == "existing-id"
+        mock_table.insert.assert_not_called()
+
+    def test_dedups_by_canonical_url_when_external_id_lookup_misses(self):
+        mock_supabase = MagicMock()
+        mock_table = MagicMock()
+        mock_supabase.table.return_value = mock_table
+        # First lookup (by source+external_id) misses; second (by canonical_url) hits.
+        mock_table.select.return_value.eq.return_value.eq.return_value.execute.return_value = MagicMock(data=[])
+        mock_table.select.return_value.eq.return_value.execute.return_value = MagicMock(
+            data=[{"id": "existing-by-url", "canonical_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"}]
+        )
+        with patch("app.services.catalog_service.supabase_client", mock_supabase):
+            result = catalog_service.ingest_youtube_result(_youtube_video())
+        assert result["id"] == "existing-by-url"
+        mock_table.insert.assert_not_called()
+
+    def test_new_video_is_inserted_with_real_provenance_and_verified(self):
+        mock_supabase = MagicMock()
+        mock_table = MagicMock()
+        mock_supabase.table.return_value = mock_table
+        mock_table.select.return_value.eq.return_value.eq.return_value.execute.return_value = MagicMock(data=[])
+        mock_table.select.return_value.eq.return_value.execute.return_value = MagicMock(data=[])
+        mock_table.insert.return_value.execute.return_value = MagicMock(
+            data=[{"id": "new-yt-id", "canonical_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"}]
+        )
+        with patch("app.services.catalog_service.supabase_client", mock_supabase), \
+             patch("app.services.catalog_service._check_url", return_value={
+                 "https_ok": True, "domain_allowed": True, "reachable": True, "http_status": 200,
+             }):
+            result = catalog_service.ingest_youtube_result(_youtube_video(), skill_tags=["Python"])
+        assert result is not None
+        insert_payload = mock_table.insert.call_args_list[0].args[0]
+        assert insert_payload["source"] == "youtube"
+        assert insert_payload["provider"] == "YouTube"
+        assert insert_payload["external_id"] == "dQw4w9WgXcQ"
+        assert insert_payload["channel_id"] == "UC_real_channel"
+        assert insert_payload["format"] == "video"
+        assert insert_payload["cost"] == "free"
+        assert insert_payload["is_trusted_domain"] is True  # youtube.com is in TRUSTED_PROVIDER_DOMAINS
+        assert insert_payload["quality_score"] == 0.6
+
+    def test_duplicate_canonical_urls_with_tracking_params_still_dedup(self):
+        """A video reached via a tracking-param-decorated URL must
+        canonicalize to the same key as the plain one before either
+        dedup lookup."""
+        mock_supabase = MagicMock()
+        mock_table = MagicMock()
+        mock_supabase.table.return_value = mock_table
+        mock_table.select.return_value.eq.return_value.eq.return_value.execute.return_value = MagicMock(data=[])
+        mock_table.select.return_value.eq.return_value.execute.return_value = MagicMock(
+            data=[{"id": "existing-id"}]
+        )
+        video = _youtube_video(canonical_url="https://www.youtube.com/watch?v=dQw4w9WgXcQ&utm_source=share")
+        with patch("app.services.catalog_service.supabase_client", mock_supabase):
+            result = catalog_service.ingest_youtube_result(video)
+        assert result["id"] == "existing-id"
+        looked_up_url = mock_table.select.return_value.eq.call_args[0][1]
+        assert looked_up_url == "https://www.youtube.com/watch?v=dQw4w9WgXcQ"  # tracking param stripped
+
+    def test_unreachable_video_marked_unavailable_not_dropped(self):
+        mock_supabase = MagicMock()
+        mock_table = MagicMock()
+        mock_supabase.table.return_value = mock_table
+        mock_table.select.return_value.eq.return_value.eq.return_value.execute.return_value = MagicMock(data=[])
+        mock_table.select.return_value.eq.return_value.execute.return_value = MagicMock(data=[])
+        mock_table.insert.return_value.execute.return_value = MagicMock(
+            data=[{"id": "yt-dead-id", "canonical_url": "https://www.youtube.com/watch?v=deadvideo1"}]
+        )
+        with patch("app.services.catalog_service.supabase_client", mock_supabase), \
+             patch("app.services.catalog_service._check_url", return_value={
+                 "https_ok": True, "domain_allowed": True, "reachable": False, "http_status": 404,
+             }):
+            result = catalog_service.ingest_youtube_result(_youtube_video(external_id="deadvideo1"))
+        assert result["availability_status"] == "unavailable"
+
+
 class TestPromoteToCourse:
     def test_refuses_to_promote_an_unverified_resource(self):
         mock_supabase = MagicMock()
