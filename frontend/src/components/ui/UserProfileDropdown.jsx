@@ -57,14 +57,14 @@ export default function UserProfileDropdown({ light = false }) {
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        className={`flex items-center gap-2 px-3 py-1.5 rounded-full bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] hover:border-[#0066cc] dark:hover:border-[#C9D0D6] transition-all shadow-xs cursor-pointer select-none ${
-          isOpen ? 'ring-2 ring-[#0066cc]/20 dark:ring-[#C9D0D6]/20 border-[#0066cc] dark:border-[#C9D0D6]' : ''
+        className={`flex items-center gap-2 px-3 py-1.5 rounded-full bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] hover:border-[#0066cc] dark:hover:border-[#A9D8FF] transition-all shadow-xs cursor-pointer select-none ${
+          isOpen ? 'ring-2 ring-[#0066cc]/20 dark:ring-[#A9D8FF]/20 border-[#0066cc] dark:border-[#A9D8FF]' : ''
         }`}
         aria-expanded={isOpen}
         aria-haspopup="true"
       >
         {/* Avatar Circle with initials */}
-        <span className="w-8 h-8 rounded-lg bg-[#0066cc] text-white font-bold text-xs flex items-center justify-center shadow-xs flex-shrink-0">
+        <span className="w-8 h-8 rounded-lg bg-[#0066cc] dark:bg-[#A9D8FF] text-white dark:text-black font-bold text-xs flex items-center justify-center shadow-xs flex-shrink-0">
           {initials}
         </span>
 
@@ -84,7 +84,7 @@ export default function UserProfileDropdown({ light = false }) {
           strokeLinecap="round"
           strokeLinejoin="round"
           className={`text-[#7a7a7a] dark:text-[#A1A1AA] transition-transform duration-150 ${
-            isOpen ? 'rotate-180 text-[#0066cc] dark:text-[#C9D0D6]' : ''
+            isOpen ? 'rotate-180 text-[#0066cc] dark:text-[#A9D8FF]' : ''
           }`}
         >
           <path d="m6 9 6 6 6-6" />
@@ -105,7 +105,7 @@ export default function UserProfileDropdown({ light = false }) {
           {/* User Header Details */}
           <div className="px-4 py-3 border-b border-[#f0f0f0] dark:border-[#202026]">
             <div className="flex items-center gap-3">
-              <span className="w-10 h-10 rounded-xl bg-[#0066cc] text-white font-extrabold text-sm flex items-center justify-center shadow-xs">
+              <span className="w-10 h-10 rounded-xl bg-[#0066cc] dark:bg-[#A9D8FF] text-white dark:text-black font-extrabold text-sm flex items-center justify-center shadow-xs">
                 {initials}
               </span>
               <div className="min-w-0 flex-1">
@@ -129,7 +129,7 @@ export default function UserProfileDropdown({ light = false }) {
                 setIsOpen(false)
                 navigate('/account')
               }}
-              className="w-full text-left px-4 py-2.5 text-xs sm:text-sm font-semibold text-[#333333] dark:text-[#E2E8F0] hover:text-[#0066cc] dark:hover:text-[#C9D0D6] hover:bg-[#eaf2fc] dark:hover:bg-[#18181D] flex items-center gap-3 transition-colors cursor-pointer"
+              className="w-full text-left px-4 py-2.5 text-xs sm:text-sm font-semibold text-[#333333] dark:text-[#E2E8F0] hover:text-[#0066cc] dark:hover:text-[#A9D8FF] hover:bg-[#eaf2fc] dark:hover:bg-[#18181D] flex items-center gap-3 transition-colors cursor-pointer"
             >
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
@@ -144,7 +144,7 @@ export default function UserProfileDropdown({ light = false }) {
                 setIsOpen(false)
                 navigate('/settings')
               }}
-              className="w-full text-left px-4 py-2.5 text-xs sm:text-sm font-semibold text-[#333333] dark:text-[#E2E8F0] hover:text-[#0066cc] dark:hover:text-[#C9D0D6] hover:bg-[#eaf2fc] dark:hover:bg-[#18181D] flex items-center gap-3 transition-colors cursor-pointer"
+              className="w-full text-left px-4 py-2.5 text-xs sm:text-sm font-semibold text-[#333333] dark:text-[#E2E8F0] hover:text-[#0066cc] dark:hover:text-[#A9D8FF] hover:bg-[#eaf2fc] dark:hover:bg-[#18181D] flex items-center gap-3 transition-colors cursor-pointer"
             >
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="3" />

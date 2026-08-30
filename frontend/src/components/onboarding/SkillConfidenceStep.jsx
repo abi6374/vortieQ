@@ -29,14 +29,14 @@ function Radio({ on, small }) {
     <span
       className={`rounded-full grid place-items-center flex-none border-2 transition-all ${
         on
-          ? 'border-[#0066cc] dark:border-[#C9D0D6] bg-white dark:bg-[#18181D]'
+          ? 'border-[#0066cc] dark:border-[#A9D8FF] bg-white dark:bg-[#18181D]'
           : 'border-[#d0d0d5] dark:border-[#27272F] bg-white dark:bg-[#121216]'
       }`}
       style={{ width: sz, height: sz }}
     >
       {on && (
         <span
-          className="rounded-full bg-[#0066cc] dark:bg-[#C9D0D6]"
+          className="rounded-full bg-[#0066cc] dark:bg-[#A9D8FF]"
           style={{ width: dot, height: dot }}
         />
       )}
@@ -54,7 +54,7 @@ function SkillLevelPanel({ topic, level, onLevel }) {
       {/* header */}
       <div className="flex items-center gap-4 px-5 py-4">
         <div
-          className="grid place-items-center rounded-xl text-white dark:text-[#09090B] font-bold flex-none bg-[#0066cc] dark:bg-[#C9D0D6] shadow-[0_4px_12px_rgba(0,102,204,.25)] dark:shadow-[0_4px_12px_rgba(201,208,214,.25)]"
+          className="grid place-items-center rounded-xl text-white dark:text-black font-bold flex-none bg-[#0066cc] dark:bg-[#A9D8FF] shadow-[0_4px_12px_rgba(0,102,204,.25)] dark:shadow-[0_4px_12px_rgba(169,216,255,.25)]"
           style={{ width: 44, height: 44 }}
         >
           {topic.name.slice(0, 2).toUpperCase()}
@@ -65,7 +65,7 @@ function SkillLevelPanel({ topic, level, onLevel }) {
         <span className="flex-1" />
         {pct !== null ? (
           <span className="flex items-baseline gap-1.5">
-            <span className="font-extrabold tabular-nums text-[#0066cc] dark:text-[#C9D0D6]" style={{ fontSize: 20 }}>{pct}%</span>
+            <span className="font-extrabold tabular-nums text-[#0066cc] dark:text-[#A9D8FF]" style={{ fontSize: 20 }}>{pct}%</span>
             <span className="text-xs sm:text-sm text-[#494949] dark:text-[#94A3B8]">inferred</span>
           </span>
         ) : (
@@ -116,12 +116,12 @@ function SkillLevelPanel({ topic, level, onLevel }) {
                   onClick={() => onLevel(key)}
                   className={`text-left rounded-xl transition-all cursor-pointer p-3 sm:p-3.5 border-2 ${
                     active
-                      ? 'border-[#0066cc] dark:border-[#C9D0D6] bg-gradient-to-br from-white to-[#eaf2fc] dark:from-[#18181D] dark:to-[#27272F] shadow-[0_0_0_3px_rgba(0,102,204,.07)] dark:shadow-[0_0_0_3px_rgba(201,208,214,.15)]'
-                      : 'border-[#e6e6e6] dark:border-[#27272F] bg-white dark:bg-[#121216] hover:border-[#abd2fb] dark:hover:border-[#C9D0D6]'
+                      ? 'border-[#0066cc] dark:border-[#A9D8FF] bg-gradient-to-br from-white to-[#eaf2fc] dark:from-[#18181D] dark:to-[#27272F] shadow-[0_0_0_3px_rgba(0,102,204,.07)] dark:shadow-[0_0_0_3px_rgba(169,216,255,.15)]'
+                      : 'border-[#e6e6e6] dark:border-[#27272F] bg-white dark:bg-[#121216] hover:border-[#abd2fb] dark:hover:border-[#A9D8FF]'
                   }`}
                 >
                   <span className="flex items-center justify-between gap-1.5">
-                    <span className={`font-bold text-sm ${active ? 'text-[#004fa3] dark:text-[#C9D0D6]' : 'text-[#1d1d1f] dark:text-[#F8FAFC]'}`}>
+                    <span className={`font-bold text-sm ${active ? 'text-[#004fa3] dark:text-[#A9D8FF]' : 'text-[#1d1d1f] dark:text-[#F8FAFC]'}`}>
                       {LEVEL_META[key].label}
                     </span>
                     <Radio on={active} small />
@@ -135,7 +135,7 @@ function SkillLevelPanel({ topic, level, onLevel }) {
           </div>
 
           <div className="mt-3.5 flex items-center gap-3.5 rounded-xl border px-4 py-3 bg-[#eaf2fc] dark:bg-[#121216] border-[#d8e9fb] dark:border-[#27272F] transition-colors">
-            <span className="grid place-items-center rounded-full flex-none w-9 h-9 bg-[#dbeafc] dark:bg-[#27272F] text-[#0066cc] dark:text-[#C9D0D6]">
+            <span className="grid place-items-center rounded-full flex-none w-9 h-9 bg-[#dbeafc] dark:bg-[#A9D8FF]/20 text-[#0066cc] dark:text-[#A9D8FF]">
               <svg
                 width="18"
                 height="18"
@@ -151,7 +151,7 @@ function SkillLevelPanel({ topic, level, onLevel }) {
               </svg>
             </span>
             <div>
-              <div className="text-[11px] font-bold tracking-wide uppercase text-[#0066cc] dark:text-[#C9D0D6]">
+              <div className="text-[11px] font-bold tracking-wide uppercase text-[#0066cc] dark:text-[#A9D8FF]">
                 Key concepts · {LEVEL_META[level].label}
               </div>
               <div className="font-semibold text-[#1d1d1f] dark:text-[#F8FAFC] leading-snug text-[14px]">
@@ -247,13 +247,11 @@ export default function SkillConfidenceStep({
         <button
           type="button"
           onClick={submit}
-          className="inline-flex items-center justify-center gap-2 text-white font-bold rounded-xl cursor-pointer transition-all"
+          className="inline-flex items-center justify-center gap-2 bg-gradient-to-b from-[#0071e3] to-[#0066cc] dark:from-[#A9D8FF] dark:to-[#A9D8FF] dark:bg-[#A9D8FF] text-white dark:text-black font-bold rounded-xl cursor-pointer transition-all shadow-[0_8px_20px_rgba(0,102,204,.30)] dark:shadow-[0_8px_20px_rgba(169,216,255,.4)]"
           style={{
             minWidth: 200,
             height: 52,
             fontSize: 16,
-            background: `linear-gradient(180deg,#0071e3,${V})`,
-            boxShadow: '0 8px 20px rgba(0,102,204,.30)',
           }}
         >
           <span>Continue</span>

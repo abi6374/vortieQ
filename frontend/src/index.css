@@ -33,14 +33,14 @@
 :root.dark,
 html.dark,
 [data-theme="dark"] {
-  --violet: #C9D0D6;
-  --violet-dark: #A8B1BA;
-  --violet-focus: #C9D0D6;
+  --violet: #A9D8FF;
+  --violet-dark: #8ECAFF;
+  --violet-focus: #A9D8FF;
   --navy: #F8FAFC;
   --slate: #E2E8F0;
   --muted: #A1A1AA;
-  --lavender: rgba(201, 208, 214, 0.14);
-  --lav-icon: rgba(201, 208, 214, 0.22);
+  --lavender: rgba(169, 216, 255, 0.14);
+  --lav-icon: rgba(169, 216, 255, 0.22);
   --card-bd: #27272F;
   --divider: #202026;
   --bg-main: #09090B;
@@ -48,6 +48,8 @@ html.dark,
   --pearl: #18181D;
   --silver: #C9D0D6;
   --silver-dark: #8B949E;
+  --clear-sky: #A9D8FF;
+  --clear-sky-hover: #8ECAFF;
   --green: #34D399;
   --green-surface: rgba(52, 211, 153, 0.16);
   --amber: #FBBF24;
@@ -509,7 +511,7 @@ html.dark [class*="text-gray-900"] {
 }
 
 html.dark p,
-html.dark span:not([class*="text-[#0066cc]"]):not([class*="text-[#22A06B]"]):not([class*="text-red-"]):not([class*="text-emerald-"]):not([class*="text-amber-"]):not([class*="text-blue-"]):not([class*="text-white"]):not([class*="text-[#FBBF24]"]):not([class*="text-transparent"]):not([class*="bg-clip-text"]),
+html.dark span:not([class*="font-shadow"]):not([class*="text-[#0066cc]"]):not([class*="text-[#0066CC]"]):not([class*="dark:text-[#0066cc]"]):not([class*="dark:text-[#0066CC]"]):not([class*="text-[#22A06B]"]):not([class*="text-red-"]):not([class*="text-emerald-"]):not([class*="text-amber-"]):not([class*="text-blue-"]):not([class*="text-white"]):not([class*="text-[#FBBF24]"]):not([class*="text-transparent"]):not([class*="bg-clip-text"]),
 html.dark label,
 html.dark [class*="text-[#333333]"],
 html.dark [class*="text-[#444444]"],
@@ -808,16 +810,66 @@ html.dark .pfchat-in textarea::placeholder,
 }
 html.dark .pfchat-send,
 [data-theme="dark"] .pfchat-send {
-  background-color: #C9D0D6 !important;
-  color: #09090B !important;
+  background-color: #A9D8FF !important;
+  color: #000000 !important;
+  font-weight: bold !important;
 }
 html.dark .pfchat-send:hover:not(:disabled),
 [data-theme="dark"] .pfchat-send:hover:not(:disabled) {
-  background-color: #B4BCC3 !important;
+  background-color: #8ECAFF !important;
+  color: #000000 !important;
+}
+html.dark .pfchat-send svg,
+[data-theme="dark"] .pfchat-send svg {
+  color: #000000 !important;
+  stroke: #000000 !important;
 }
 html.dark .pfchat-ctx,
 [data-theme="dark"] .pfchat-ctx {
   color: #A1A1AA !important;
+}
+
+/* 9. Global Clear Sky (#A9D8FF) Buttons & Logos in Dark Mode */
+html.dark .btn-primary,
+html.dark button.btn-primary,
+html.dark a.btn-primary,
+html.dark .pf-btn-primary,
+html.dark .bg-primary-btn {
+  background-color: #A9D8FF !important;
+  color: #000000 !important;
+  font-weight: 700 !important;
+}
+html.dark .btn-primary:hover,
+html.dark button.btn-primary:hover,
+html.dark a.btn-primary:hover,
+html.dark .pf-btn-primary:hover,
+html.dark .bg-primary-btn:hover {
+  background-color: #8ECAFF !important;
+  color: #000000 !important;
+}
+html.dark .btn-primary svg,
+html.dark button.btn-primary svg,
+html.dark a.btn-primary svg,
+html.dark .pf-btn-primary svg,
+html.dark .bg-primary-btn svg {
+  stroke: #000000 !important;
+  color: #000000 !important;
+}
+
+/* Logo icon containers in Dark Mode (Clear Sky #A9D8FF with black icon) */
+html.dark .pf-logo-box,
+html.dark [data-pf-logo] {
+  background: #A9D8FF !important;
+  background-color: #A9D8FF !important;
+}
+html.dark .pf-logo-box svg,
+html.dark [data-pf-logo] svg {
+  stroke: #000000 !important;
+  color: #000000 !important;
+}
+html.dark .pf-logo-box polygon,
+html.dark [data-pf-logo] polygon {
+  fill: #000000 !important;
 }
 
 /* 9. Recharts SVG Charts & Data Visuals in Dark Mode */

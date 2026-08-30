@@ -25,10 +25,10 @@ export default function SetupSidebar({ current = 1 }) {
     <aside className="hidden md:block flex-none w-[270px] border-r border-[#f0f0f0] dark:border-[#27272F] p-7 bg-gradient-to-b from-white to-[#f9fcff] dark:from-[#121216] dark:to-[#09090B] transition-colors">
       {/* Brand Header */}
       <div className="flex items-center gap-3 mb-10">
-        <span className="grid place-items-center rounded-xl text-white flex-shrink-0 w-[38px] height-[38px] bg-gradient-to-br from-[#0071e3] to-[#0066cc] shadow-[0_4px_14px_rgba(0,102,204,0.35)] p-2">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <span className="grid place-items-center rounded-xl text-white flex-shrink-0 w-[38px] h-[38px] bg-gradient-to-br from-[#0071e3] to-[#0066cc] dark:from-[#A9D8FF] dark:to-[#A9D8FF] dark:bg-[#A9D8FF] shadow-[0_4px_14px_rgba(0,102,204,0.35)] p-2">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" className="dark:stroke-black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="9" />
-            <polygon points="16 8 10.5 10.5 8 16 13.5 13.5" fill="#fff" stroke="none" />
+            <polygon points="16 8 10.5 10.5 8 16 13.5 13.5" fill="#fff" className="dark:fill-black" stroke="none" />
           </svg>
         </span>
         <span className="font-['Manrope'] font-extrabold text-[#1d1d1f] dark:text-white text-xl tracking-tight">
@@ -54,9 +54,9 @@ export default function SetupSidebar({ current = 1 }) {
                 <span
                   className={`absolute left-[17px] top-9 bottom-0 w-[2px] ${
                     done
-                      ? 'bg-gradient-to-b from-[#22A06B] to-[#0066cc]'
+                      ? 'bg-gradient-to-b from-[#22A06B] to-[#0066cc] dark:to-[#A9D8FF]'
                       : active
-                      ? 'bg-gradient-to-b from-[#0066cc] to-[#e6e6e6] dark:to-[#27272F]'
+                      ? 'bg-gradient-to-b from-[#0066cc] dark:from-[#A9D8FF] to-[#e6e6e6] dark:to-[#27272F]'
                       : 'bg-[#e9e9e9] dark:bg-[#202026]'
                   }`}
                 />
@@ -68,7 +68,7 @@ export default function SetupSidebar({ current = 1 }) {
                   done
                     ? 'border-[#22A06B] bg-[#ECFDF3] dark:bg-emerald-950/40 text-[#22A06B] dark:text-emerald-400'
                     : active
-                    ? 'border-[#0066cc] dark:border-[#C9D0D6] bg-[#0066cc] dark:bg-[#C9D0D6] text-white dark:text-[#09090B] shadow-[0_4px_14px_rgba(0,102,204,0.40)]'
+                    ? 'border-[#0066cc] dark:border-[#A9D8FF] bg-[#0066cc] dark:bg-[#A9D8FF] text-white dark:text-black shadow-[0_4px_14px_rgba(0,102,204,0.40)]'
                     : 'border-[#e6e6e6] dark:border-[#27272F] bg-white dark:bg-[#18181D] text-[#7a7a7a] dark:text-[#94A3B8]'
                 }`}
               >
@@ -86,7 +86,7 @@ export default function SetupSidebar({ current = 1 }) {
                 <div
                   className={`text-[15px] font-bold ${
                     active
-                      ? 'text-[#0066cc] dark:text-[#C9D0D6]'
+                      ? 'text-[#0066cc] dark:text-[#A9D8FF]'
                       : done
                       ? 'text-[#1d1d1f] dark:text-white'
                       : 'text-[#555555] dark:text-[#94A3B8]'

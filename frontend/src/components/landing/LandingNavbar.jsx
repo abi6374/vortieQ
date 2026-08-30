@@ -44,14 +44,14 @@ export default function LandingNavbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
         {/* Brand Logo */}
         <Link to="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0066CC] to-[#004FA3] flex items-center justify-center text-white shadow-md shadow-[#0066CC]/25 group-hover:scale-105 transition-transform duration-200">
-            <Compass className="w-5 h-5 animate-spin-slow" />
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0066CC] to-[#004FA3] dark:from-[#A9D8FF] dark:to-[#A9D8FF] dark:bg-[#A9D8FF] flex items-center justify-center text-white dark:text-black shadow-md shadow-[#0066CC]/25 dark:shadow-[0_4px_16px_rgba(169,216,255,0.35)] group-hover:scale-105 transition-transform duration-200">
+            <Compass className="w-5 h-5 animate-spin-slow text-white dark:text-black" />
           </div>
           <div className="flex flex-col">
             <span className="font-sans font-extrabold text-xl tracking-tight text-[#1D1D1F] dark:text-[#F8FAFC]">
               PathFinder
             </span>
-            <span className="text-[10px] font-bold text-[#0066CC] dark:text-[#C9D0D6] tracking-wider -mt-1 font-mono uppercase">
+            <span className="text-[10px] font-bold text-[#0066CC] dark:text-[#A9D8FF] tracking-wider -mt-1 font-mono uppercase">
               Adaptive AI
             </span>
           </div>
@@ -62,38 +62,38 @@ export default function LandingNavbar() {
           <button
             type="button"
             onClick={() => scrollTo('features')}
-            className="hover:text-[#0066CC] dark:hover:text-[#C9D0D6] transition-colors"
+            className="hover:text-[#0066CC] dark:hover:text-[#A9D8FF] transition-colors"
           >
             Platform Pillars
           </button>
           <button
             type="button"
             onClick={() => scrollTo('demo')}
-            className="hover:text-[#0066CC] dark:hover:text-[#C9D0D6] transition-colors flex items-center gap-1.5"
+            className="hover:text-[#0066CC] dark:hover:text-[#A9D8FF] transition-colors flex items-center gap-1.5"
           >
             <span>Live Demo</span>
-            <span className="px-1.5 py-0.5 rounded-full text-[9px] font-extrabold bg-[#EAF2FC] dark:bg-[#18181D] text-[#0066CC] dark:text-[#C9D0D6] border border-transparent dark:border-[rgba(201,208,214,0.2)]">
+            <span className="px-1.5 py-0.5 rounded-full text-[9px] font-extrabold bg-[#EAF2FC] dark:bg-[#A9D8FF]/15 text-[#0066CC] dark:text-[#A9D8FF] border border-transparent dark:border-[#A9D8FF]/30">
               TRY
             </span>
           </button>
           <button
             type="button"
             onClick={() => scrollTo('coach')}
-            className="hover:text-[#0066CC] dark:hover:text-[#C9D0D6] transition-colors"
+            className="hover:text-[#0066CC] dark:hover:text-[#A9D8FF] transition-colors"
           >
             AI Coach
           </button>
           <button
             type="button"
             onClick={() => scrollTo('comparison')}
-            className="hover:text-[#0066CC] dark:hover:text-[#C9D0D6] transition-colors"
+            className="hover:text-[#0066CC] dark:hover:text-[#A9D8FF] transition-colors"
           >
             Comparison
           </button>
           <button
             type="button"
             onClick={() => scrollTo('tech-stack')}
-            className="hover:text-[#0066CC] dark:hover:text-[#C9D0D6] transition-colors"
+            className="hover:text-[#0066CC] dark:hover:text-[#A9D8FF] transition-colors"
           >
             Supported Skills
           </button>
@@ -106,7 +106,7 @@ export default function LandingNavbar() {
             type="button"
             onClick={toggleTheme}
             aria-label="Toggle Theme"
-            className="w-9 h-9 rounded-xl border border-[#E0E0E0] dark:border-[#27272F] bg-white/80 dark:bg-[#18181D]/80 text-[#333333] dark:text-[#CBD5E1] flex items-center justify-center hover:border-[#0066CC] dark:hover:border-[#C9D0D6] transition-colors shadow-xs"
+            className="w-9 h-9 rounded-xl border border-[#E0E0E0] dark:border-[#27272F] bg-white/80 dark:bg-[#18181D]/80 text-[#333333] dark:text-[#CBD5E1] flex items-center justify-center hover:border-[#0066CC] dark:hover:border-[#A9D8FF] transition-colors shadow-xs"
           >
             {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-700" />}
           </button>
@@ -115,7 +115,7 @@ export default function LandingNavbar() {
             <SpecularButton
               size="sm"
               radius={12}
-              lineColor={isDark ? '#C9D0D6' : '#000000'}
+              lineColor={isDark ? '#A9D8FF' : '#000000'}
               baseColor={isDark ? '#18181D' : '#000000'}
               intensity={1.25}
               thickness={1.5}
@@ -123,7 +123,7 @@ export default function LandingNavbar() {
               followMouse
               proximity={200}
               onClick={() => navigate('/dashboard')}
-              className="!py-2 !px-4 !rounded-xl !bg-[#0066CC] hover:!bg-[#0052A3] !text-white font-semibold text-sm shadow-md shadow-[#0066CC]/25 hover:shadow-lg transition-all group inline-flex items-center gap-2"
+              className="!py-2 !px-4 !rounded-xl !bg-[#0066CC] dark:!bg-[#A9D8FF] hover:!bg-[#0052A3] dark:hover:!bg-[#8ECAFF] !text-white dark:!text-black font-semibold text-sm shadow-md shadow-[#0066CC]/25 dark:shadow-[0_4px_16px_rgba(169,216,255,0.35)] hover:shadow-lg transition-all group inline-flex items-center gap-2"
             >
               <span>Dashboard</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
@@ -132,14 +132,14 @@ export default function LandingNavbar() {
             <>
               <Link
                 to="/auth"
-                className="hidden sm:inline-flex items-center px-4 py-2 rounded-xl text-sm font-semibold text-[#1D1D1F] dark:text-[#E2E8F0] hover:text-[#0066CC] dark:hover:text-[#C9D0D6] transition-colors"
+                className="hidden sm:inline-flex items-center px-4 py-2 rounded-xl text-sm font-semibold text-[#1D1D1F] dark:text-[#E2E8F0] hover:text-[#0066CC] dark:hover:text-[#A9D8FF] transition-colors"
               >
                 Sign In
               </Link>
               <SpecularButton
                 size="sm"
                 radius={12}
-                lineColor={isDark ? '#C9D0D6' : '#000000'}
+                lineColor={isDark ? '#A9D8FF' : '#000000'}
                 baseColor={isDark ? '#18181D' : '#000000'}
                 intensity={1.25}
                 thickness={1.5}
@@ -147,7 +147,7 @@ export default function LandingNavbar() {
                 followMouse
                 proximity={200}
                 onClick={() => navigate('/auth')}
-                className="!py-2 !px-4 !rounded-xl !bg-[#0066CC] hover:!bg-[#0052A3] !text-white font-semibold text-sm shadow-md shadow-[#0066CC]/25 hover:shadow-lg transition-all group inline-flex items-center gap-2"
+                className="!py-2 !px-4 !rounded-xl !bg-[#0066CC] dark:!bg-[#A9D8FF] hover:!bg-[#0052A3] dark:hover:!bg-[#8ECAFF] !text-white dark:!text-black font-semibold text-sm shadow-md shadow-[#0066CC]/25 dark:shadow-[0_4px_16px_rgba(169,216,255,0.35)] hover:shadow-lg transition-all group inline-flex items-center gap-2"
               >
                 <span>Get Started</span>
                 <Sparkles className="w-4 h-4 group-hover:rotate-12 transition-transform" />

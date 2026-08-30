@@ -489,7 +489,7 @@ export default function PersonalizedRoadmap({
           <button
             type="button"
             onClick={() => navigate('/onboarding')}
-            className="px-2.5 py-1 rounded-lg border border-[#e0e0e0] hover:border-[#0066cc] hover:bg-[#eaf2fc] text-[#0066cc] text-xs font-bold transition-colors cursor-pointer flex-none"
+            className="px-2.5 py-1 rounded-lg border border-[#e0e0e0] dark:border-[#27272F] hover:border-[#0066cc] dark:hover:border-[#A9D8FF] hover:bg-[#eaf2fc] dark:hover:bg-[#A9D8FF]/20 text-[#0066cc] dark:text-[#A9D8FF] text-xs font-bold transition-colors cursor-pointer flex-none"
           >
             Replan
           </button>
@@ -498,10 +498,10 @@ export default function PersonalizedRoadmap({
     >
       {/* Page header */}
       <div className="mb-6 relative z-10">
-        <h1 className="font-['Manrope'] font-extrabold text-2xl sm:text-3xl text-[#1d1d1f] tracking-tight">
+        <h1 className="font-['Manrope'] font-extrabold text-2xl sm:text-3xl text-[#1d1d1f] dark:text-white tracking-tight">
           Your path to: {cleanGoalTitle}
         </h1>
-        <p className="text-sm sm:text-base text-[#333333] mt-1 font-normal">
+        <p className="text-sm sm:text-base text-[#333333] dark:text-[#94A3B8] mt-1 font-normal">
           Personalized roadmap calibrated from your skills and weekly availability.
         </p>
       </div>
@@ -519,7 +519,7 @@ export default function PersonalizedRoadmap({
       {/* 3 Top Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-6 mb-6">
         <div className="pf-glass-card p-5 sm:p-6 flex items-center gap-5 sm:gap-6">
-          <span className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#eaf2fc] to-[#dbeafc] text-[#0066cc] flex items-center justify-center flex-none shadow-sm mr-1">
+          <span className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#eaf2fc] to-[#dbeafc] dark:from-[#A9D8FF]/20 dark:to-[#A9D8FF]/10 text-[#0066cc] dark:text-[#A9D8FF] flex items-center justify-center flex-none shadow-sm mr-1">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
               <line x1="16" y1="2" x2="16" y2="6" />
@@ -528,27 +528,27 @@ export default function PersonalizedRoadmap({
             </svg>
           </span>
           <div>
-            <div className="font-['Manrope'] font-extrabold text-2xl sm:text-[28px] text-[#1d1d1f] leading-none tracking-tight">
+            <div className="font-['Manrope'] font-extrabold text-2xl sm:text-[28px] text-[#1d1d1f] dark:text-white leading-none tracking-tight">
               {weekTabs.length}
             </div>
-            <div className="text-xs sm:text-sm font-semibold text-[#555555] mt-1.5">
+            <div className="text-xs sm:text-sm font-semibold text-[#555555] dark:text-[#94A3B8] mt-1.5">
               weeks total
             </div>
           </div>
         </div>
 
         <div className="pf-glass-card p-5 sm:p-6 flex items-center gap-5 sm:gap-6">
-          <span className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#eaf2fc] to-[#dbeafc] text-[#0066cc] flex items-center justify-center flex-none shadow-sm mr-1">
+          <span className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#eaf2fc] to-[#dbeafc] dark:from-[#A9D8FF]/20 dark:to-[#A9D8FF]/10 text-[#0066cc] dark:text-[#A9D8FF] flex items-center justify-center flex-none shadow-sm mr-1">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10" />
               <polyline points="12 6 12 12 16 14" />
             </svg>
           </span>
           <div>
-            <div className="font-['Manrope'] font-extrabold text-2xl sm:text-[28px] text-[#1d1d1f] leading-none tracking-tight">
+            <div className="font-['Manrope'] font-extrabold text-2xl sm:text-[28px] text-[#1d1d1f] dark:text-white leading-none tracking-tight">
               {currentWeekData.totalHrs}
             </div>
-            <div className="text-xs sm:text-sm font-semibold text-[#555555] mt-1.5">
+            <div className="text-xs sm:text-sm font-semibold text-[#555555] dark:text-[#94A3B8] mt-1.5">
               hrs/week
             </div>
           </div>
@@ -562,10 +562,10 @@ export default function PersonalizedRoadmap({
             </svg>
           </span>
           <div>
-            <div className="font-['Manrope'] font-extrabold text-2xl sm:text-[28px] text-[#1d1d1f] leading-none tracking-tight">
+            <div className="font-['Manrope'] font-extrabold text-2xl sm:text-[28px] text-[#1d1d1f] dark:text-white leading-none tracking-tight">
               {roadmap.percent}%
             </div>
-            <div className="text-xs sm:text-sm font-semibold text-[#555555] mt-1.5">
+            <div className="text-xs sm:text-sm font-semibold text-[#555555] dark:text-[#94A3B8] mt-1.5">
               curriculum completed
             </div>
           </div>
@@ -579,7 +579,7 @@ export default function PersonalizedRoadmap({
         <div className="pf-glass-card p-6 sm:p-7 flex flex-col justify-between min-w-0">
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-['Manrope'] font-bold text-lg text-[#1d1d1f]">
+              <h2 className="font-['Manrope'] font-bold text-lg text-[#1d1d1f] dark:text-white">
                 Your learning roadmap
               </h2>
             </div>
@@ -601,12 +601,12 @@ export default function PersonalizedRoadmap({
                       isSelected
                         ? isComplete
                           ? 'bg-[#22A06B] dark:bg-emerald-500 text-white shadow-xs'
-                          : 'bg-[#0066cc] text-white shadow-xs'
+                          : 'bg-[#0066cc] dark:bg-[#A9D8FF] text-white dark:text-black font-bold shadow-xs'
                         : isComplete
                         ? 'bg-[#ECFDF3] dark:bg-emerald-950/40 text-[#22A06B] dark:text-emerald-400 border border-[#B7E7C9] dark:border-emerald-800/60 hover:bg-emerald-100/60'
                         : isLocked
                         ? 'bg-[#fafbfc] dark:bg-[#0E0E12] text-[#86868b] dark:text-[#94A3B8] border border-[#f0f0f0] dark:border-[#27272F] opacity-85'
-                        : 'bg-[#f5f5f7] dark:bg-[#18181D] text-[#333333] dark:text-[#CBD5E1] hover:bg-[#eaf2fc] dark:hover:bg-[#27272F] hover:text-[#0066cc] dark:hover:text-[#C9D0D6]'
+                        : 'bg-[#f5f5f7] dark:bg-[#18181D] text-[#333333] dark:text-[#CBD5E1] hover:bg-[#eaf2fc] dark:hover:bg-[#A9D8FF]/15 hover:text-[#0066cc] dark:hover:text-[#A9D8FF]'
                     }`}
                   >
                     {isComplete ? (
@@ -648,7 +648,7 @@ export default function PersonalizedRoadmap({
                     Week Completed
                   </span>
                 ) : selectedWeek === 'Week 1' || (currentWeekData.tasks.some(t => !completedTaskIds.has(t.id)) && !currentWeekData.isLocked) ? (
-                  <span className="bg-[#eaf2fc] dark:bg-[#18181D] text-[#0066cc] dark:text-[#C9D0D6] font-bold text-xs px-2.5 py-0.5 rounded-full">
+                  <span className="bg-[#eaf2fc] dark:bg-[#A9D8FF]/20 text-[#0066cc] dark:text-[#A9D8FF] font-bold text-xs px-2.5 py-0.5 rounded-full">
                     Current week
                   </span>
                 ) : null}
@@ -674,7 +674,7 @@ export default function PersonalizedRoadmap({
                     <div className={`border rounded-xl p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-colors ${
                       isCompleted
                         ? 'border-[#22A06B]/30 dark:border-emerald-800/60 bg-[#F6FEF9] dark:bg-emerald-950/20'
-                        : 'border-[#e0e0e0] dark:border-[#27272F] bg-white dark:bg-[#121216] hover:border-[#0066cc]/40 dark:hover:border-[#C9D0D6]/40'
+                        : 'border-[#e0e0e0] dark:border-[#27272F] bg-white dark:bg-[#121216] hover:border-[#0066cc]/40 dark:hover:border-[#A9D8FF]/40'
                     }`}>
                       <div className="flex items-center gap-3.5 min-w-0 flex-1">
                         {/* Checkbox button */}
@@ -684,7 +684,7 @@ export default function PersonalizedRoadmap({
                           className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0 cursor-pointer ${
                             isCompleted
                               ? 'bg-[#22A06B] dark:bg-emerald-500 border-[#22A06B] dark:border-emerald-500 text-white shadow-xs'
-                              : 'border-[#d2d2d7] dark:border-[#3F3F46] hover:border-[#0066cc] dark:hover:border-[#C9D0D6]'
+                              : 'border-[#d2d2d7] dark:border-[#3F3F46] hover:border-[#0066cc] dark:hover:border-[#A9D8FF]'
                           }`}
                           aria-label="Toggle task completion"
                         >
@@ -699,7 +699,7 @@ export default function PersonalizedRoadmap({
                         <span className={`w-9 h-9 rounded-lg flex items-center justify-center flex-none font-bold text-sm ${
                           isCompleted
                             ? 'bg-emerald-100/70 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60'
-                            : 'bg-[#eaf2fc] dark:bg-[#18181D] text-[#0066cc] dark:text-[#C9D0D6] border border-[#cfe4fb] dark:border-[#27272F]'
+                            : 'bg-[#eaf2fc] dark:bg-[#A9D8FF]/20 text-[#0066cc] dark:text-[#A9D8FF] border border-[#cfe4fb] dark:border-[#A9D8FF]/30'
                         }`}>
                           {renderTaskTypeIcon(resBadge, isCompleted)}
                         </span>
@@ -721,7 +721,7 @@ export default function PersonalizedRoadmap({
                               <span className={`flex-none text-[10px] font-bold px-1.5 py-0.5 rounded-full no-underline ${
                                 isCompleted
                                   ? 'bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300'
-                                  : 'text-[#0066cc] dark:text-[#C9D0D6] bg-[#eaf2fc] dark:bg-[#18181D] border border-[#cfe4fb] dark:border-[#27272F]'
+                                  : 'text-[#0066cc] dark:text-[#A9D8FF] bg-[#eaf2fc] dark:bg-[#A9D8FF]/20 border border-[#cfe4fb] dark:border-[#A9D8FF]/30'
                               }`}>
                                 Part {task.partNumber}/{task.partTotal}
                               </span>
@@ -743,7 +743,7 @@ export default function PersonalizedRoadmap({
                           className={`text-xs font-semibold px-2.5 py-1 rounded-lg ${
                             isCompleted
                               ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-100/70 dark:bg-emerald-950/70 border border-emerald-200 dark:border-emerald-800/60'
-                              : 'text-[#0066cc] dark:text-[#C9D0D6] bg-[#eaf2fc] dark:bg-[#18181D] border border-[#cfe4fb] dark:border-[#27272F]'
+                              : 'text-[#0066cc] dark:text-[#A9D8FF] bg-[#eaf2fc] dark:bg-[#A9D8FF]/20 border border-[#cfe4fb] dark:border-[#A9D8FF]/30'
                           }`}
                           title={task.partTotal > 1 ? `${task.duration_hrs}h this week of ${task.fullDurationHrs}h total` : undefined}
                         >
@@ -755,7 +755,7 @@ export default function PersonalizedRoadmap({
                             type="button"
                             onClick={() => handleOpenRerecommend(task)}
                             title="Re-recommend an alternative for this topic"
-                            className="px-2.5 py-1 bg-white dark:bg-[#18181D] border border-[#e0e0e0] dark:border-[#27272F] hover:border-[#0066cc] dark:hover:border-[#C9D0D6] hover:text-[#0066cc] dark:hover:text-[#C9D0D6] rounded-lg text-xs font-semibold text-[#555555] dark:text-[#CBD5E1] transition-all flex items-center gap-1 cursor-pointer"
+                            className="px-2.5 py-1 bg-white dark:bg-[#18181D] border border-[#e0e0e0] dark:border-[#27272F] hover:border-[#0066cc] dark:hover:border-[#A9D8FF] hover:text-[#0066cc] dark:hover:text-[#A9D8FF] rounded-lg text-xs font-semibold text-[#555555] dark:text-[#CBD5E1] transition-all flex items-center gap-1 cursor-pointer"
                           >
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
                               <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
@@ -773,7 +773,7 @@ export default function PersonalizedRoadmap({
                           className={`text-xs font-semibold hover:underline whitespace-nowrap cursor-pointer ${
                             isCompleted
                               ? 'text-emerald-600 dark:text-emerald-400'
-                              : 'text-[#0066cc] dark:text-[#C9D0D6]'
+                              : 'text-[#0066cc] dark:text-[#A9D8FF]'
                           }`}
                         >
                           Why this?
@@ -784,7 +784,7 @@ export default function PersonalizedRoadmap({
                             href={task.resource_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="px-2.5 py-1 bg-white dark:bg-[#18181D] border border-[#e0e0e0] dark:border-[#27272F] hover:border-[#0066cc] dark:hover:border-[#C9D0D6] hover:text-[#0066cc] dark:hover:text-[#C9D0D6] rounded-lg text-xs font-semibold text-[#333333] dark:text-white transition-colors"
+                            className="px-2.5 py-1 bg-white dark:bg-[#18181D] border border-[#e0e0e0] dark:border-[#27272F] hover:border-[#0066cc] dark:hover:border-[#A9D8FF] hover:text-[#0066cc] dark:hover:text-[#A9D8FF] rounded-lg text-xs font-semibold text-[#333333] dark:text-white transition-colors"
                           >
                             Open ↗
                           </a>
@@ -794,15 +794,15 @@ export default function PersonalizedRoadmap({
 
                     {/* Expanded "Why this task?" explanation */}
                     {isExpanded && (
-                      <div className="bg-[#eaf2fc] dark:bg-[#18181D] border-l-[3.5px] border-[#0066cc] dark:border-[#C9D0D6] rounded-xl p-4 sm:p-5 relative animate-in fade-in duration-150 shadow-2xs">
+                      <div className="bg-[#eaf2fc] dark:bg-[#18181D] border-l-[3.5px] border-[#0066cc] dark:border-[#A9D8FF] rounded-xl p-4 sm:p-5 relative animate-in fade-in duration-150 shadow-2xs">
                         <div className="flex items-center justify-between mb-1.5">
-                          <span className="font-['Manrope'] font-bold text-xs sm:text-sm text-[#0066cc] dark:text-[#C9D0D6]">
+                          <span className="font-['Manrope'] font-bold text-xs sm:text-sm text-[#0066cc] dark:text-[#A9D8FF]">
                             Why this recommendation?
                           </span>
                           <button
                             type="button"
                             onClick={() => toggleWhy(task.id)}
-                            className="text-[#0066cc] dark:text-[#C9D0D6] hover:opacity-75 focus:outline-none cursor-pointer"
+                            className="text-[#0066cc] dark:text-[#A9D8FF] hover:opacity-75 focus:outline-none cursor-pointer"
                           >
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                               <polyline points="18 15 12 9 6 15" />
@@ -836,7 +836,7 @@ export default function PersonalizedRoadmap({
                       onClick={() => handleMilestoneClick(node)}
                       className={`flex-none rounded-xl p-2.5 sm:p-3 flex flex-col items-center justify-center text-center cursor-pointer transition-all min-w-[95px] sm:min-w-[110px] border ${
                         isSelected
-                          ? 'border-2 border-[#0066cc] dark:border-[#C9D0D6] bg-[#eaf2fc] dark:bg-[#18181D] shadow-xs ring-2 ring-[#0066cc]/10 dark:ring-[#C9D0D6]/10'
+                          ? 'border-2 border-[#0066cc] dark:border-[#A9D8FF] bg-[#eaf2fc] dark:bg-[#A9D8FF]/15 shadow-xs ring-2 ring-[#0066cc]/10 dark:ring-[#A9D8FF]/20'
                           : node.isComplete
                           ? 'border-[#22A06B]/50 bg-[#F6FEF9] dark:bg-emerald-950/30 shadow-2xs hover:border-[#22A06B]'
                           : 'border-[#e0e0e0] dark:border-[#27272F] bg-white dark:bg-[#121216] hover:border-[#d2d2d7] dark:hover:border-[#71717A]'
@@ -845,7 +845,7 @@ export default function PersonalizedRoadmap({
                       <span
                         className={`w-6 h-6 rounded-full font-bold text-xs flex items-center justify-center mb-1 ${
                           isSelected
-                            ? 'bg-[#0066cc] dark:bg-[#C9D0D6] text-white dark:text-[#09090B] shadow-xs'
+                            ? 'bg-[#0066cc] dark:bg-[#A9D8FF] text-white dark:text-black shadow-xs'
                             : node.isComplete
                             ? 'bg-[#22A06B] text-white shadow-xs'
                             : node.isLocked

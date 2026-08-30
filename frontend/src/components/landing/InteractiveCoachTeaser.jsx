@@ -27,11 +27,11 @@ export default function InteractiveCoachTeaser() {
   const [selected, setSelected] = useState(0)
 
   return (
-    <div className="w-full max-w-4xl mx-auto rounded-3xl border border-[#E0E0E0] dark:border-[#263348] bg-white/95 dark:bg-[#111726]/95 backdrop-blur-md shadow-2xl p-6 sm:p-8 relative overflow-hidden will-change-transform">
-      <div className="flex items-center justify-between pb-6 border-b border-[#F0F0F0] dark:border-[#1E293B]">
+    <div className="w-full max-w-4xl mx-auto rounded-3xl border border-[#E0E0E0] dark:border-[#27272F] bg-white/95 dark:bg-[#121216]/95 backdrop-blur-md shadow-2xl p-6 sm:p-8 relative overflow-hidden will-change-transform">
+      <div className="flex items-center justify-between pb-6 border-b border-[#F0F0F0] dark:border-[#202026]">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0066CC] to-[#004FA3] flex items-center justify-center text-white shadow-md shadow-[#0066CC]/20">
-            <Bot className="w-5 h-5" />
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0066CC] to-[#004FA3] dark:from-[#A9D8FF] dark:to-[#A9D8FF] dark:bg-[#A9D8FF] flex items-center justify-center text-white dark:text-black shadow-md shadow-[#0066CC]/20">
+            <Bot className="w-5 h-5 text-white dark:text-black" />
           </div>
           <div>
             <h3 className="font-sans font-bold text-lg text-[#1D1D1F] dark:text-[#F8FAFC] flex items-center gap-2">
@@ -47,7 +47,7 @@ export default function InteractiveCoachTeaser() {
           </div>
         </div>
 
-        <div className="px-3 py-1 rounded-full text-xs font-bold font-mono bg-[#EAF2FC] dark:bg-[#18181D] text-[#0066CC] dark:text-[#C9D0D6]">
+        <div className="px-3 py-1 rounded-full text-xs font-bold font-mono bg-[#EAF2FC] dark:bg-[#A9D8FF]/15 text-[#0066CC] dark:text-[#A9D8FF]">
           24/7 ACTIVE
         </div>
       </div>
@@ -59,10 +59,10 @@ export default function InteractiveCoachTeaser() {
             key={idx}
             type="button"
             onClick={() => setSelected(idx)}
-            className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 ${
+            className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
               selected === idx
-                ? 'bg-[#0066CC] text-white shadow-md shadow-[#0066CC]/25'
-                : 'bg-white dark:bg-[#18181D] border border-[#E0E0E0] dark:border-[#27272F] text-[#1D1D1F] dark:text-[#CBD5E1] hover:border-[#0066CC] dark:hover:border-[#C9D0D6]'
+                ? 'bg-[#0066CC] dark:bg-[#A9D8FF] text-white dark:text-black font-bold shadow-md shadow-[#0066CC]/25'
+                : 'bg-white dark:bg-[#18181D] border border-[#E0E0E0] dark:border-[#27272F] text-[#1D1D1F] dark:text-[#CBD5E1] hover:border-[#0066CC] dark:hover:border-[#A9D8FF]'
             }`}
           >
             <Sparkles className="w-3 h-3" />
@@ -85,12 +85,12 @@ export default function InteractiveCoachTeaser() {
 
         {/* AI Assistant Answer */}
         <div className="flex items-start gap-3">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#0066CC] to-[#004FA3] flex items-center justify-center text-white flex-none shadow-xs">
-            <Bot className="w-4 h-4" />
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#0066CC] to-[#004FA3] dark:from-[#A9D8FF] dark:to-[#A9D8FF] dark:bg-[#A9D8FF] flex items-center justify-center text-white dark:text-black flex-none shadow-xs">
+            <Bot className="w-4 h-4 text-white dark:text-black" />
           </div>
           <div className="bg-[#EAF2FC]/70 dark:bg-[#18181D] p-4 rounded-2xl rounded-tl-none border border-[#CFE4FA] dark:border-[#27272F] text-sm text-[#1D1D1F] dark:text-[#E2E8F0] leading-relaxed shadow-xs space-y-2">
             <div className="flex items-center justify-between border-b border-[#CFE4FA] dark:border-[#27272F] pb-1.5 mb-1.5">
-              <span className="text-[11px] font-extrabold text-[#0066CC] dark:text-[#C9D0D6] uppercase tracking-wider font-mono">
+              <span className="text-[11px] font-extrabold text-[#0066CC] dark:text-[#A9D8FF] uppercase tracking-wider font-mono">
                 {prompts[selected].tag}
               </span>
               <span className="text-[10px] text-[#7A7A7A] dark:text-[#64748B]">Context: Active Roadmap</span>

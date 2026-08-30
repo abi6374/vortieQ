@@ -137,9 +137,9 @@ html.dark .pfa {
   --input-bd: #27272F;
   --divider: #27272F;
   --app-bd: #27272F;
-  --lav-circle: rgba(201, 208, 214, 0.12);
+  --lav-circle: rgba(169, 216, 255, 0.12);
   background:
-    radial-gradient(1100px 680px at 8% -8%, rgba(201,208,214,0.06) 0%, transparent 55%),
+    radial-gradient(1100px 680px at 8% -8%, rgba(169,216,255,0.06) 0%, transparent 55%),
     radial-gradient(900px 560px at 112% 112%, rgba(24,24,29,0.5) 0%, transparent 52%),
     #09090B;
 }
@@ -162,6 +162,10 @@ html.dark .pfa .input {
 html.dark .pfa .input input {
   color: #F8FAFC;
 }
+html.dark .pfa .input:focus-within {
+  border-color: #A9D8FF !important;
+  box-shadow: 0 0 0 3px rgba(169, 216, 255, 0.2) !important;
+}
 html.dark .pfa .input input:-webkit-autofill,
 html.dark .pfa .input input:-webkit-autofill:hover, 
 html.dark .pfa .input input:-webkit-autofill:focus, 
@@ -177,7 +181,7 @@ html.dark .pfa .btn-google {
 }
 html.dark .pfa .btn-google:hover:not(:disabled) {
   background: #202026;
-  border-color: #C9D0D6;
+  border-color: #A9D8FF;
 }
 html.dark .pfa .btn-github {
   background: #18181D;
@@ -185,20 +189,61 @@ html.dark .pfa .btn-github {
 }
 html.dark .pfa .btn-github:hover:not(:disabled) {
   background: #202026;
-  border-color: #C9D0D6;
+  border-color: #A9D8FF;
 }
 html.dark .pfa .checkbox {
   background: #0E0E12;
   border-color: #27272F;
 }
+html.dark .pfa .remember input:checked + .checkbox {
+  background: #A9D8FF !important;
+  border-color: #A9D8FF !important;
+  color: #000000 !important;
+}
 html.dark .pfa .logo-name {
   color: #F8FAFC;
+}
+html.dark .pfa .logo-mark {
+  background: #A9D8FF !important;
+  box-shadow: 0 6px 18px rgba(169, 216, 255, 0.3) !important;
+}
+html.dark .pfa .logo-mark svg {
+  stroke: #000000 !important;
+}
+html.dark .pfa .logo-mark polygon {
+  fill: #000000 !important;
+}
+html.dark .pfa .btn-primary {
+  background: #A9D8FF !important;
+  color: #000000 !important;
+  font-weight: 700 !important;
+  box-shadow: 0 8px 18px rgba(169, 216, 255, 0.3) !important;
+}
+html.dark .pfa .btn-primary:hover:not(:disabled) {
+  background: #8ECAFF !important;
+  color: #000000 !important;
+}
+html.dark .pfa .btn-primary svg {
+  stroke: #000000 !important;
+  color: #000000 !important;
 }
 html.dark .pfa .tab {
   color: #A1A1AA;
 }
 html.dark .pfa .tab.active {
-  color: #C9D0D6;
+  color: #A9D8FF !important;
+}
+html.dark .pfa .tab.active::after {
+  background: #A9D8FF !important;
+}
+html.dark .pfa .forgot {
+  color: #A9D8FF !important;
+}
+html.dark .pfa .signup-foot button {
+  color: #A9D8FF !important;
+}
+html.dark .pfa .privacy svg {
+  color: #A9D8FF !important;
 }
 html.dark .pfa .hero h1 {
   color: #F8FAFC;
@@ -209,21 +254,21 @@ html.dark .pfa .hero p {
 
 /* Subtle dark mode roadmap styling */
 html.dark .pfa .path-deco .path-line {
-  stroke: rgba(201, 208, 214, 0.2);
+  stroke: rgba(169, 216, 255, 0.2);
   stroke-width: 2.5;
 }
 html.dark .pfa .path-deco .node-ring {
   fill: #18181D;
-  stroke: rgba(201, 208, 214, 0.35);
+  stroke: rgba(169, 216, 255, 0.35);
   stroke-width: 1.5;
 }
 html.dark .pfa .path-deco .node-dest {
-  fill: rgba(201, 208, 214, 0.15);
-  stroke: rgba(201, 208, 214, 0.5);
+  fill: rgba(169, 216, 255, 0.15);
+  stroke: rgba(169, 216, 255, 0.5);
   stroke-width: 2;
 }
 html.dark .pfa .path-deco .node-dest-inner {
-  fill: #C9D0D6;
+  fill: #A9D8FF;
 }
 
 @media (max-width:900px){ .pfa .app{ grid-template-columns:1fr; min-height:0; height:auto; max-height:none; } .pfa .brand-panel{ border-right:none; border-bottom:1px solid var(--divider); padding:28px 24px; min-height:220px; } .pfa .hero{ padding:16px 0; } .pfa .form-panel{ padding:28px 20px; height:auto; } }
@@ -488,9 +533,9 @@ export default function AuthScreen({ initialMode = 'signin' }) {
           <div className="brand-inner">
             <div className="logo-row">
               <span className="logo-mark" aria-hidden="true">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" className="dark:stroke-black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="9" />
-                  <polygon points="16 8 10.5 10.5 8 16 13.5 13.5" fill="#fff" stroke="none" />
+                  <polygon points="16 8 10.5 10.5 8 16 13.5 13.5" fill="#fff" className="dark:fill-black" stroke="none" />
                 </svg>
               </span>
               <span className="logo-name">PathFinder</span>
