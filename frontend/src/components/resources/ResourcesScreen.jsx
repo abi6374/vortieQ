@@ -6,6 +6,7 @@ import { useRoadmap } from '../../hooks/useRoadmap'
 import { supabase } from '../../lib/supabaseClient'
 import api from '../../lib/apiClient'
 import AppShell from '../layout/AppShell'
+import GoalSelectorDropdown from '../layout/GoalSelectorDropdown'
 
 /**
  * ResourcesScreen — the "Resources" page from the PathFinder reference.
@@ -585,12 +586,21 @@ export default function ResourcesScreen() {
   return (
     <AppShell
       topBar={
-        // display:contents so this element scopes the .rx CSS variables (via
-        // inheritance) to the goal chip / view-roadmap button without adding
-        // a box of its own to TopBar's flex layout.
-        <div className="rx" style={{ display: 'contents' }}>
-          <div className="rx-goal">{I.cal}<div><div className="g-title">{(path?.goal_text || 'Your learning goal').slice(0, 40)}</div><div className="g-sub">Target: February 2027</div></div>{I.chev}</div>
-          <button className="rx-view-road" onClick={() => path && navigate(`/roadmap/${path.id}`)}>{I.map}<span className="hidden sm:inline">View roadmap</span></button>
+        <div className="flex items-center gap-3">
+          <GoalSelectorDropdown
+            activePath={path || roadmap.path}
+            onSelectPath={(p) => {
+              if (p?.id) navigate(`/roadmap/${p.id}`)
+            }}
+          />
+          <button
+            type="button"
+            className="flex items-center gap-2 px-3.5 sm:px-4 py-2 border border-[#0066cc] dark:border-[#38BDF8] text-[#0066cc] dark:text-[#38BDF8] hover:bg-[#0066cc] dark:hover:bg-[#38BDF8] hover:text-white dark:hover:text-[#0E131E] rounded-xl text-xs font-bold transition-all shadow-2xs active:scale-[0.98] flex-none cursor-pointer"
+            onClick={() => (path || roadmap.path) && navigate(`/roadmap/${(path || roadmap.path).id}`)}
+          >
+            {I.map}
+            <span className="hidden sm:inline">View roadmap</span>
+          </button>
           <style>{STYLES}</style>
         </div>
       }

@@ -53,6 +53,7 @@ import {
 } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import AppShell from '../layout/AppShell'
+import GoalSelectorDropdown from '../layout/GoalSelectorDropdown'
 import { useRoadmap } from '../../hooks/useRoadmap'
 import { useStreak } from '../../hooks/useStreak'
 
@@ -91,9 +92,7 @@ export default function ProgressScreen() {
   const streak = useStreak()
   const hoursLoggedThisWeek = Math.round(((streak.minutes_this_week || 0) / 60) * 10) / 10
 
-  // Roadmap filter & dropdown state
-  const [isGoalDropdownOpen, setIsGoalDropdownOpen] = useState(false)
-  const [selectedGoal, setSelectedGoal] = useState('AIML Engineer Internship')
+  // Timeframe filter state
   const [progressTimeframe, setProgressTimeframe] = useState('8 weeks')
   const [isTimeframeOpen, setIsTimeframeOpen] = useState(false)
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
@@ -346,58 +345,24 @@ export default function ProgressScreen() {
   return (
     <AppShell
       topBar={
-        <>
-          {/* Roadmap Selector Pill */}
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => setIsGoalDropdownOpen((v) => !v)}
-              className="flex items-center gap-2.5 px-3.5 py-2 bg-white dark:bg-[#141A26] border border-[#e0e0e0] dark:border-[#242E40] hover:border-[#cfe4fb] dark:hover:border-[#38BDF8] rounded-xl text-xs font-medium text-[#1d1d1f] dark:text-white shadow-sm transition-all"
-            >
-              <CalendarDays className="w-4 h-4 text-[#0066cc] dark:text-[#38BDF8]" />
-              <div className="flex flex-col text-left">
-                <span className="font-bold text-[#1d1d1f] dark:text-white leading-tight">{selectedGoal}</span>
-                <span className="text-[10px] text-[#6e6e73] dark:text-[#94A3B8] font-medium leading-tight">Target: February 2027</span>
-              </div>
-              <ChevronDown className={`w-3.5 h-3.5 text-[#86868b] dark:text-[#94A3B8] ml-1 transition-transform ${isGoalDropdownOpen ? 'rotate-180' : ''}`} />
-            </button>
-
-            {isGoalDropdownOpen && (
-              <div className="absolute left-0 mt-1.5 w-60 bg-white dark:bg-[#141A26] rounded-xl border border-[#E6EAF2] dark:border-[#242E40] shadow-[0_22px_60px_rgba(14,27,56,0.22),0_4px_12px_rgba(14,27,56,0.06)] p-1.5 z-30">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedGoal('AIML Engineer Internship')
-                    setIsGoalDropdownOpen(false)
-                  }}
-                  className="w-full text-left p-2 rounded-lg bg-[#eaf2fc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] font-bold text-xs mb-1"
-                >
-                  AIML Engineer Internship (Target: Feb 2027)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedGoal('Data Scientist Track')
-                    setIsGoalDropdownOpen(false)
-                  }}
-                  className="w-full text-left p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-[#1E293B] text-[#1d1d1f] dark:text-white font-semibold text-xs"
-                >
-                  Data Scientist Track (Target: Summer 2027)
-                </button>
-              </div>
-            )}
-          </div>
+        <div className="flex items-center gap-3">
+          <GoalSelectorDropdown
+            activePath={roadmap.path}
+            onSelectPath={(p) => {
+              if (p?.id) navigate(`/roadmap/${p.id}`)
+            }}
+          />
 
           {/* Outlined Button: "View roadmap" */}
           <button
             type="button"
-            onClick={() => navigate('/dashboard')}
-            className="flex items-center gap-2 px-4 py-2.5 border border-[#0066cc] dark:border-[#38BDF8] text-[#0066cc] dark:text-[#38BDF8] hover:bg-[#0066cc] dark:hover:bg-[#38BDF8] hover:text-white dark:hover:text-[#0E131E] rounded-xl text-xs font-bold transition-all shadow-sm active:scale-[0.98] flex-none"
+            onClick={() => roadmap.path?.id ? navigate(`/roadmap/${roadmap.path.id}`) : navigate('/dashboard')}
+            className="flex items-center gap-2 px-3.5 sm:px-4 py-2 border border-[#0066cc] dark:border-[#38BDF8] text-[#0066cc] dark:text-[#38BDF8] hover:bg-[#0066cc] dark:hover:bg-[#38BDF8] hover:text-white dark:hover:text-[#0E131E] rounded-xl text-xs font-bold transition-all shadow-2xs active:scale-[0.98] flex-none cursor-pointer"
           >
             <MapPinned className="w-4 h-4" />
             <span className="hidden sm:inline">View roadmap</span>
           </button>
-        </>
+        </div>
       }
     >
         {/* -----------------------------------------------------------------------
