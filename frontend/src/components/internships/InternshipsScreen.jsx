@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import AppShell from '../layout/AppShell'
 import api from '../../lib/apiClient'
+import CustomSelect from '../ui/CustomSelect'
 
 const CATEGORY_CHIPS = ['All', 'AI/ML', 'Web Dev', 'Data Science', 'DevOps', 'Security', 'Mobile', 'Design', 'Product', 'Marketing']
 const STATUS_STAGES = [
@@ -500,16 +501,42 @@ export default function InternshipsScreen() {
                   <svg className="absolute left-3 top-2.5 text-[#888]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                 </div>
 
-                {/* Remote Toggle with Rounded Box */}
-                <label className="flex items-center gap-2.5 text-xs sm:text-sm font-semibold text-[#1d1d1f] dark:text-white cursor-pointer select-none px-3.5 py-2 rounded-xl border border-[#e0e0e0] dark:border-[#242E40] bg-white dark:bg-[#141A26] hover:border-[#0066cc] dark:hover:border-[#38BDF8] transition-colors shadow-xs">
-                  <input
-                    type="checkbox"
-                    checked={remoteOnly}
-                    onChange={e => setRemoteOnly(e.target.checked)}
-                    className="w-4 h-4 rounded-md text-[#0066cc] border-[#d1d5db] dark:border-[#4b5563] focus:ring-0 cursor-pointer accent-[#0066cc]"
-                  />
+                {/* Remote Toggle with Custom Interactive Checkbox */}
+                <button
+                  type="button"
+                  role="checkbox"
+                  aria-checked={remoteOnly}
+                  onClick={() => setRemoteOnly(!remoteOnly)}
+                  className={`flex items-center gap-2.5 text-xs sm:text-sm font-semibold cursor-pointer select-none px-3.5 py-2 rounded-xl border transition-all duration-200 shadow-2xs active:scale-[0.98] ${
+                    remoteOnly
+                      ? 'border-[#0066CC] dark:border-[#38BDF8] bg-[#EAF2FC]/80 dark:bg-[#132238] text-[#0066CC] dark:text-[#38BDF8] shadow-sm shadow-[#0066CC]/10'
+                      : 'border-[#E0E0E0] dark:border-[#242E40] bg-white dark:bg-[#141A26] text-[#1D1D1F] dark:text-[#E2E8F0] hover:border-[#0066CC]/60 dark:hover:border-[#38BDF8]/60'
+                  }`}
+                >
+                  <div
+                    className={`w-4 h-4 rounded-[5px] flex items-center justify-center border transition-all duration-200 ${
+                      remoteOnly
+                        ? 'bg-[#0066CC] dark:bg-[#38BDF8] border-[#0066CC] dark:border-[#38BDF8] text-white dark:text-[#0B0F17]'
+                        : 'bg-white dark:bg-[#1C2536] border-[#D0D5DD] dark:border-[#334155]'
+                    }`}
+                  >
+                    {remoteOnly && (
+                      <svg
+                        width="11"
+                        height="11"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="3.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    )}
+                  </div>
                   <span>Remote Only</span>
-                </label>
+                </button>
               </div>
 
               {/* Category Chips */}
@@ -616,22 +643,16 @@ export default function InternshipsScreen() {
                     </div>
 
                     {/* Status Pipeline Changer */}
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs text-[#7a7a7a] font-medium">Stage:</span>
-                      <div className="relative">
-                        <select
-                          value={currentStatus}
-                          onChange={e => handleStatusChange(item.id, e.target.value)}
-                          className="appearance-none pl-3 pr-7 py-1.5 rounded-xl border border-[#e0e0e0] dark:border-[#242E40] bg-[#fafafc] dark:bg-[#1a2032] text-xs font-bold text-[#1d1d1f] dark:text-white cursor-pointer focus:outline-none focus:border-[#0066cc]"
-                        >
-                          {STATUS_STAGES.map(s => (
-                            <option key={s.id} value={s.id}>{s.label}</option>
-                          ))}
-                        </select>
-                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-[#7a7a7a]">
-                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-                        </div>
-                      </div>
+                    <div className="flex items-center gap-2.5 flex-wrap">
+                      <span className="text-xs text-[#7a7a7a] dark:text-[#94A3B8] font-semibold">Stage:</span>
+                      <CustomSelect
+                        value={currentStatus}
+                        onChange={val => handleStatusChange(item.id, val)}
+                        options={STATUS_STAGES.map(s => ({ value: s.id, label: s.label }))}
+                        buttonClassName="!py-1.5 !px-3 !rounded-xl !text-xs !font-bold !bg-[#fafafc] dark:!bg-[#1a2032] border-[#e0e0e0] dark:border-[#242E40]"
+                        menuClassName="!rounded-xl border-[#e0e0e0] dark:border-[#242E40]"
+                        ariaLabel={`Change stage for ${item.title}`}
+                      />
                       <button
                         type="button"
                         onClick={() => handleToggleTrack(item.id, 'remove')}
