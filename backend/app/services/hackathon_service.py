@@ -279,36 +279,44 @@ def get_hackathon_by_id(hackathon_id: str) -> Optional[dict]:
 
 
 def register_for_hackathon(user_id: str, hackathon_id: str, status: str = "registered") -> dict:
-    """Register or track a hackathon for a user in Supabase."""
+    """Register or track a hackathon for a user in Supabase (persistent)."""
     hackathon = get_hackathon_by_id(hackathon_id)
     if not hackathon:
         raise ValueError("Hackathon not found")
-    if _HAS_SUPABASE:
-        try:
-            supabase_client.table("user_hackathons").upsert({
-                "user_id": user_id,
-                "hackathon_id": hackathon_id,
-                "registration_date": datetime.now(timezone.utc).isoformat(),
-                "status": status
-            }, on_conflict="user_id,hackathon_id").execute()
-        except Exception as e:
-            logger.warning(f"user_hackathons upsert note: {e}")
-    return {"success": True, "hackathon_id": hackathon_id, "status": status}
+    if not _HAS_SUPABASE:
+        logger.warning("Supabase not configured — hackathon registration will not persist.")
+        return {"success": True, "hackathon_id": hackathon_id, "status": status, "persisted": False}
+    try:
+        resp = supabase_client.table("user_hackathons").upsert({
+            "user_id": user_id,
+            "hackathon_id": hackathon_id,
+            "registration_date": datetime.now(timezone.utc).isoformat(),
+            "status": status
+        }, on_conflict="user_id,hackathon_id").execute()
+        logger.info(f"Hackathon {hackathon_id} tracked for user {user_id[:8]}... status={status}")
+    except Exception as e:
+        logger.error(f"user_hackathons upsert FAILED: {e}")
+        raise RuntimeError(f"Failed to persist hackathon registration: {e}") from e
+    return {"success": True, "hackathon_id": hackathon_id, "status": status, "persisted": True}
 
 
 def unregister_from_hackathon(user_id: str, hackathon_id: str) -> dict:
     """Remove a hackathon registration from user's tracking list."""
-    if _HAS_SUPABASE:
-        try:
-            supabase_client.table("user_hackathons").delete().eq("user_id", user_id).eq("hackathon_id", hackathon_id).execute()
-        except Exception as e:
-            logger.warning(f"user_hackathons delete note: {e}")
-    return {"success": True, "hackathon_id": hackathon_id, "status": "removed"}
+    if not _HAS_SUPABASE:
+        return {"success": True, "hackathon_id": hackathon_id, "status": "removed", "persisted": False}
+    try:
+        supabase_client.table("user_hackathons").delete().eq("user_id", user_id).eq("hackathon_id", hackathon_id).execute()
+        logger.info(f"Hackathon {hackathon_id} unregistered for user {user_id[:8]}...")
+    except Exception as e:
+        logger.error(f"user_hackathons delete FAILED: {e}")
+        raise RuntimeError(f"Failed to remove hackathon registration: {e}") from e
+    return {"success": True, "hackathon_id": hackathon_id, "status": "removed", "persisted": True}
 
 
 def get_user_hackathons(user_id: str) -> list:
-    """Get all hackathons a user has registered for."""
+    """Get all hackathons a user has registered for — loaded from Supabase on every call."""
     if not _HAS_SUPABASE:
+        logger.warning("Supabase not configured — returning empty user hackathons.")
         return []
     try:
         resp = supabase_client.table("user_hackathons").select("*").eq("user_id", user_id).execute()
@@ -322,7 +330,8 @@ def get_user_hackathons(user_id: str) -> list:
                 h_copy["user_status"] = row.get("status", "registered")
                 h_copy["registration_date"] = row.get("registration_date")
                 result.append(h_copy)
+        logger.info(f"Loaded {len(result)} hackathons for user {user_id[:8]}...")
         return result
     except Exception as e:
-        logger.warning(f"get_user_hackathons note: {e}")
+        logger.error(f"get_user_hackathons FAILED: {e}")
         return []

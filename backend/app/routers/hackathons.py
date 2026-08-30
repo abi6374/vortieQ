@@ -66,13 +66,15 @@ def register_for_hackathon(
 ):
     """
     Track user registration or interest for a hackathon.
-    Records the status in Supabase user_hackathons table.
+    Records the status in Supabase user_hackathons table (persistent).
     """
     try:
         result = hackathon_service.register_for_hackathon(user_id, hackathon_id, status=status)
         return result
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+    except RuntimeError as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.delete("/{hackathon_id}/register")
@@ -81,8 +83,11 @@ def unregister_from_hackathon(
     user_id: str = Depends(verify_jwt),
 ):
     """Remove a hackathon from the user's tracked registrations."""
-    result = hackathon_service.unregister_from_hackathon(user_id, hackathon_id)
-    return result
+    try:
+        result = hackathon_service.unregister_from_hackathon(user_id, hackathon_id)
+        return result
+    except RuntimeError as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/refresh")
