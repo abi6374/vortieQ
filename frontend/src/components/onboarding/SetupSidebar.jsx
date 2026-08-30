@@ -11,7 +11,7 @@ import React from 'react'
  * 5. Track progress
  */
 const STEPS = [
-  { n: 1, label: 'Upload resume' },
+  { n: 1, label: 'Learner Intake' },
   { n: 2, label: 'Assess skills' },
   { n: 3, label: 'Set your goal' },
   { n: 4, label: 'Create roadmap' },

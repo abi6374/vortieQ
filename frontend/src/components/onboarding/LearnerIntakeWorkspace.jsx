@@ -440,11 +440,11 @@ export default function LearnerIntakeWorkspace({
               </svg>
             </span>
           </h1>
-          <p className="text-[16px] text-[#333333] dark:text-[#94A3B8] mt-2 font-normal">
-            {githubData?.topics?.length > 0
-              ? 'Your GitHub repositories are linked. Uploading a resume or adding notes is completely optional.'
-              : 'Upload your resume or describe your background in your own words.'}
-          </p>
+          {githubData?.topics?.length > 0 && (
+            <p className="text-[16px] text-[#333333] dark:text-[#94A3B8] mt-2 font-normal">
+              Your GitHub repositories are linked. Uploading a resume or adding notes is completely optional.
+            </p>
+          )}
         </div>
 
         {/* GitHub Ingestion Banner if active */}
@@ -626,7 +626,7 @@ export default function LearnerIntakeWorkspace({
               Upload my resume <span className="text-xs font-semibold text-[#7a7a7a] dark:text-[#94A3B8]">(Optional)</span>
             </h2>
             <p className="text-[14.5px] text-[#333333] dark:text-[#94A3B8] leading-snug mb-4 text-balance">
-              Upload a PDF or DOCX to auto-extract your skills and past project keywords.
+              Extraction of your skills and past project 
             </p>
           </div>
 
@@ -766,10 +766,10 @@ export default function LearnerIntakeWorkspace({
             </div>
 
             <h2 className="text-[22px] font-bold text-[#1d1d1f] dark:text-[#F8FAFC] mb-1">
-              Describe in a single text <span className="text-xs font-bold text-[#0066cc] dark:text-[#38BDF8]">(Required)</span>
+              Describe your background <span className="text-xs font-bold text-[#0066cc] dark:text-[#38BDF8]">(Required)</span>
             </h2>
             <p className="text-[14.5px] text-[#333333] dark:text-[#94A3B8] leading-snug mb-4 text-balance">
-              Describe your background naturally. We’ll build your learner profile together.
+              We’ll build your learner profile 
             </p>
           </div>
 
