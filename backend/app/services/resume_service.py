@@ -94,13 +94,27 @@ def _call_groq(messages: list, max_tokens: int = 3000) -> str:
 VALID_LEVELS = {"basic", "intermediate", "advanced", "expert"}
 
 
-def _calculate_fallback_confidence(evidence: str, level: str, years: int) -> int:
-    level_weight = {"basic": 60, "intermediate": 76, "advanced": 88, "expert": 95}.get(level, 70)
-    words = len(evidence.split())
-    ev_bonus = min(words // 2, 8)
-    yr_bonus = min(max(years, 0) * 2, 6)
-    score = level_weight + ev_bonus + yr_bonus
-    return max(50, min(99, score))
+def _confidence_pct_or_none(raw) -> int | None:
+    """Only trust the LLM's OWN stated confidence when it's a real, in-range
+    number. Previously, a missing/invalid confidence_pct triggered
+    _calculate_fallback_confidence() - a formula that converted the
+    suggested_level, evidence-text word count, and years of experience into
+    a fabricated fine-grained percentage (e.g. "88%") that looked exactly
+    like a real LLM-stated confidence but wasn't one. That's precisely the
+    "confidence must represent uncertainty, not achievement" violation the
+    platform audit targets: it invented false precision for a value we
+    simply don't have. Returning None here is the honest alternative -
+    mastery_service._apply_topics() already has a documented, low, source-
+    specific default (_DEFAULT_CONFIDENCE_BY_SOURCE["resume"] = 0.6) for
+    exactly this "no real confidence available" case, and the frontend
+    (AssessSkills.jsx/LearnerIntakeWorkspace.jsx) already renders a topic
+    with no confidence_pct as "Self-reported"/unconfident rather than
+    crashing or fabricating a display value."""
+    try:
+        conf = int(raw)
+    except (TypeError, ValueError):
+        return None
+    return conf if 30 <= conf <= 100 else None
 
 
 MAX_TEXT_FIELD_CHARS = 500  # education/projects/suggested_goal - keep these short, real summaries
@@ -131,13 +145,7 @@ def _validate(payload: dict) -> dict:
         evidence = (t.get("evidence") or "").strip()
         if not name or level not in VALID_LEVELS:
             continue
-        conf = t.get("confidence_pct")
-        try:
-            conf = int(conf)
-            if conf < 30 or conf > 100:
-                conf = _calculate_fallback_confidence(evidence, level, years)
-        except (TypeError, ValueError):
-            conf = _calculate_fallback_confidence(evidence, level, years)
+        conf = _confidence_pct_or_none(t.get("confidence_pct"))
 
         clean.append({
             "name": name,

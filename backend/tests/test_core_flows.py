@@ -42,6 +42,33 @@ def test_resume_topic_validation():
     assert validated["topics"][0]["suggested_level"] == "advanced"
 
 
+def test_resume_topic_validation_never_fabricates_confidence_when_llm_omits_it():
+    """Platform-audit fix: a missing/invalid confidence_pct from the LLM
+    used to trigger _calculate_fallback_confidence() - a formula that
+    invented a fine-grained percentage (level + evidence word count + years)
+    that looked identical to a real LLM-stated confidence. That function no
+    longer exists; a missing/invalid confidence_pct must now surface as a
+    real None, letting mastery_service apply its own documented, honest,
+    low default confidence for the 'resume' source instead."""
+    raw_payload = {
+        "topics": [
+            {"name": "Python", "suggested_level": "advanced", "evidence": "5 years backend"},  # no confidence_pct at all
+            {"name": "SQL", "suggested_level": "intermediate", "evidence": "some", "confidence_pct": "not-a-number"},
+            {"name": "Docker", "suggested_level": "basic", "evidence": "", "confidence_pct": 250},  # out of range
+        ],
+    }
+    validated = _validate(raw_payload)
+    assert len(validated["topics"]) == 3
+    for topic in validated["topics"]:
+        assert topic["confidence_pct"] is None
+
+
+def test_resume_topic_validation_trusts_a_real_in_range_llm_confidence():
+    raw_payload = {"topics": [{"name": "Rust", "suggested_level": "basic", "evidence": "", "confidence_pct": 65}]}
+    validated = _validate(raw_payload)
+    assert validated["topics"][0]["confidence_pct"] == 65
+
+
 def test_profile_upsert_preserves_topic_ratings():
     """Verify profile_service.upsert_profile persists topic_ratings and detected_years."""
     mock_supabase = MagicMock()

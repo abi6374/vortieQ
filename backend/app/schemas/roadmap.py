@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import BaseModel, Field
 
 
@@ -20,7 +22,20 @@ class TaskCompletionSchema(BaseModel):
 
 
 class RerecommendSchema(BaseModel):
-    """Body for POST /api/roadmap/rerecommend."""
+    """Body for POST /api/roadmap/rerecommend.
+
+    preference is a real enum, not a bare string - matches the exact 5
+    option ids the live UI sends (PersonalizedRoadmap.jsx's
+    RERECOMMEND_OPTIONS). Previously any string was accepted; an
+    unrecognized value silently fell through path_service.
+    swap_step_with_preference's if/elif chain to the generic "custom-like"
+    branch rather than being rejected, and could still be persisted verbatim
+    into feedback_events.note. 'too_advanced'/'too_basic' are the only two
+    that move mastery evidence (see path_service.swap_step_with_preference) -
+    constraining the type here is what makes that mapping exhaustive and
+    typo-proof rather than a string comparison that silently does nothing
+    on a mismatch.
+    """
     step_id: str
-    preference: str = Field(default="custom", max_length=50)
+    preference: Literal["free_resource", "hands_on", "too_advanced", "too_basic", "custom"] = "custom"
     note: str = Field(default="", max_length=1000)

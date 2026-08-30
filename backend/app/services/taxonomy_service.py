@@ -60,9 +60,16 @@ def resolve_or_create_skill(text: str) -> str | None:
     ingestion paths that are ALREADY working with real, external evidence
     (a course's own skill_tags, a resume's extracted topics, a GitHub
     repo's detected languages) - this grows the taxonomy to cover real
-    skills it doesn't have yet, it does not fabricate mastery data."""
+    skills it doesn't have yet, it does not fabricate mastery data.
+
+    Defense in depth on length: the HTTP-facing schemas (TopicRating,
+    ResumeExtractedTopic) already cap name length, but this function is
+    also reachable from internal service-to-service calls that don't pass
+    through those schemas (e.g. course skill_tags at seed/ingestion time).
+    A new row here is a PERMANENT, SHARED taxonomy entry visible to every
+    learner - an oversized or empty string must never create one."""
     key = normalize(text)
-    if not key:
+    if not key or len(key) > 80:
         return None
     existing = resolve_skill(key)
     if existing:

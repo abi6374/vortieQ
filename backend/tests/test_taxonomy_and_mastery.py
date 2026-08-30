@@ -37,6 +37,21 @@ class TestTaxonomyResolution:
             assert taxonomy_service.resolve_skill(None) is None
         taxonomy_service.invalidate_cache()
 
+    def test_resolve_or_create_skill_refuses_an_oversized_name(self):
+        """A new row here is a PERMANENT, SHARED taxonomy entry visible to
+        every learner - an oversized "skill name" (e.g. garbage pasted into
+        a self-assessment's manual-add field, bypassing the HTTP schema's
+        own 80-char cap via some other internal call site) must never
+        create one."""
+        taxonomy_service.invalidate_cache()
+        mock_supabase = MagicMock()
+        mock_supabase.table.return_value.select.return_value.execute.return_value = MagicMock(data=[])
+        with patch("app.services.taxonomy_service.supabase_client", mock_supabase):
+            skill_id = taxonomy_service.resolve_or_create_skill("x" * 500)
+        assert skill_id is None
+        mock_supabase.table.return_value.insert.assert_not_called()
+        taxonomy_service.invalidate_cache()
+
     def test_resolve_or_create_skill_grows_taxonomy_for_a_real_new_skill(self):
         taxonomy_service.invalidate_cache()
         mock_supabase = MagicMock()
