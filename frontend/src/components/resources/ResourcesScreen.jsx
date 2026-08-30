@@ -685,7 +685,7 @@ export default function ResourcesScreen() {
         </header>
 
         <div className="rx-search">
-          <div className="s-in">{I.search}<input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search courses, videos, articles, documentation, practice..." /><span className="kbd">⌘ K</span></div>
+          <div className="s-in">{I.search}<input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search courses, videos, articles, documentation, practice..." /></div>
           <button className="rx-filter" onClick={() => setShowFilters((v) => !v)}>{I.slider}Filters{showFilters ? " ▾" : ""}</button>
         </div>
 
@@ -732,7 +732,6 @@ export default function ResourcesScreen() {
                 <h2>{chip === 'All' ? 'Recommended for you' : chip}</h2>
                 <div className="sub">Based on your current skill gaps and roadmap tasks.</div>
               </div>
-              <button className="rx-sort">Best match {I.chev}</button>
             </div>
 
             {loading ? (
