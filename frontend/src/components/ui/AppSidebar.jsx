@@ -334,12 +334,7 @@ export default function AppSidebar() {
       aria-label="Primary Navigation"
     >
       {/* ── Top Section: Symmetrical Expand/Collapse Button ── */}
-      <div className={`flex items-center flex-none w-full ${isExpanded ? 'justify-between px-1.5 pb-2' : 'justify-center pb-1'}`}>
-        {isExpanded && (
-          <span className="font-['Manrope'] font-bold text-xs uppercase tracking-wider text-[#7a7a7a] dark:text-[#94A3B8]">
-            Menu
-          </span>
-        )}
+      <div className={`flex items-center flex-none w-full ${isExpanded ? 'justify-end px-1.5 pb-2' : 'justify-center pb-1'}`}>
         <ToggleSidebarButton
           isExpanded={isExpanded}
           onClick={() => setCollapsed(isExpanded)}
@@ -371,27 +366,12 @@ export default function AppSidebar() {
         )}
       </nav>
 
-      {/* ── Bottom Section: Separator + Sign Out + System Pulse ── */}
+      {/* ── Bottom Section: Separator + Sign Out ── */}
       <div className="flex flex-col gap-2 pt-2 flex-none w-full">
         <div className="w-full h-px bg-black/[0.08] dark:bg-white/[0.1]" />
 
         {/* Sign Out */}
         <SignOutButton isExpanded={isExpanded} onClick={handleSignOut} />
-
-        {/* Live System Status Pulse */}
-        <div className={`flex items-center gap-2.5 py-1 ${isExpanded ? 'px-3' : 'justify-center'}`} title="System Operational">
-          <div className="relative w-4 h-4 flex items-center justify-center flex-none">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 block shadow-[0_0_8px_rgba(34,197,94,0.7)]" />
-            <span className="absolute inset-0 flex items-center justify-center">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping opacity-60" />
-            </span>
-          </div>
-          {isExpanded && (
-            <span className="text-[11px] font-semibold text-[#7a7a7a] dark:text-[#94A3B8]">
-              System Operational
-            </span>
-          )}
-        </div>
       </div>
     </aside>
   )

@@ -848,29 +848,40 @@ export default function PersonalizedRoadmap({
                             ? 'bg-[#0066cc] dark:bg-[#C9D0D6] text-white dark:text-[#09090B] shadow-xs'
                             : node.isComplete
                             ? 'bg-[#22A06B] text-white shadow-xs'
+                            : node.isLocked
+                            ? 'bg-[#f0f0f2] dark:bg-[#1E2738] text-[#86868b] dark:text-[#94A3B8] border border-[#e0e0e0] dark:border-[#2A374E]'
                             : 'bg-[#333333] dark:bg-[#27272F] text-white dark:text-[#C9D0D6]'
                         }`}
                       >
-                        {node.isComplete ? '✓' : node.id}
+                        {node.isComplete ? (
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                        ) : node.isLocked ? (
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="4" y="11" width="16" height="10" rx="2" />
+                            <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+                          </svg>
+                        ) : (
+                          node.id
+                        )}
                       </span>
 
                       <span className="text-[11px] sm:text-xs font-bold text-[#1d1d1f] dark:text-[#F9FAFB] leading-tight truncate max-w-[95px]">
                         {node.label}
                       </span>
 
-                      {node.isLocked ? (
-                        <span className="inline-flex items-center gap-0.5 text-[9.5px] font-bold text-[#86868b] dark:text-[#94A3B8] bg-[#f5f5f5] dark:bg-[#18181D] border border-[#e9e9e9] dark:border-[#27272F] px-1.5 py-0.5 rounded-full mt-1 shadow-2xs">
-                          🔒 Locked
-                        </span>
-                      ) : node.isComplete ? (
-                        <span className="inline-flex items-center gap-0.5 text-[9.5px] font-bold text-[#22A06B] dark:text-emerald-400 bg-[#ECFDF3] dark:bg-emerald-950/50 border border-[#D1FADF] dark:border-emerald-800/60 px-1.5 py-0.5 rounded-full mt-1 shadow-2xs">
-                          ✓ Complete
-                        </span>
-                      ) : (
-                        <span className="text-[10px] text-[#7a7a7a] dark:text-[#94A3B8] mt-1">
-                          Step {node.id}
-                        </span>
-                      )}
+                      <span className="text-[10px] text-[#7a7a7a] dark:text-[#94A3B8] mt-1 font-medium">
+                        {node.isComplete ? (
+                          <span className="text-[#22A06B] dark:text-emerald-400 font-bold">Done</span>
+                        ) : isSelected ? (
+                          <span className="text-[#0066cc] dark:text-[#38BDF8] font-bold">Active</span>
+                        ) : node.isLocked ? (
+                          `Week ${node.id}`
+                        ) : (
+                          `Step ${node.id}`
+                        )}
+                      </span>
                     </div>
                   </React.Fragment>
                 )
@@ -939,7 +950,7 @@ export default function PersonalizedRoadmap({
               type="button"
               onClick={handleStartWeek}
               disabled={currentWeekData.isLocked || (currentWeekData.tasks.length > 0 && weekCompletedCount === currentWeekData.tasks.length)}
-              className={`w-full py-3 font-bold text-sm rounded-xl transition-all flex items-center justify-center gap-2 ${
+              className={`w-full py-3 px-4 font-bold text-sm rounded-xl transition-all inline-flex items-center justify-center gap-2 select-none ${
                 currentWeekData.isLocked
                   ? 'bg-[#e5e5ea] dark:bg-[#18181D] text-[#86868b] dark:text-[#71717A] cursor-not-allowed border border-[#d2d2d7] dark:border-[#27272F] shadow-none'
                   : weekCompletedCount === currentWeekData.tasks.length && currentWeekData.tasks.length > 0
@@ -948,28 +959,28 @@ export default function PersonalizedRoadmap({
               }`}
             >
               {currentWeekData.isLocked ? (
-                <>
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                <span className="inline-flex items-center justify-center gap-2">
+                  <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
                     <rect x="4" y="11" width="16" height="10" rx="2" />
                     <path d="M8 11V7a4 4 0 0 1 8 0v4" />
                   </svg>
-                  <span>Locked — Complete previous week first</span>
-                </>
+                  <span className="leading-none text-center">Locked — Complete previous week first</span>
+                </span>
               ) : weekCompletedCount === currentWeekData.tasks.length && currentWeekData.tasks.length > 0 ? (
-                <>
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <span className="inline-flex items-center justify-center gap-2">
+                  <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                   <span>Completed {selectedWeek} 🎉</span>
-                </>
+                </span>
               ) : (
-                <>
+                <span className="inline-flex items-center justify-center gap-2">
                   <span>Start {selectedWeek}</span>
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="5" y1="12" x2="19" y2="12" />
                     <polyline points="12 5 19 12 12 19" />
                   </svg>
-                </>
+                </span>
               )}
             </button>
           </div>
