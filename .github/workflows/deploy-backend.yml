@@ -15,6 +15,13 @@ env:
   IMAGE_NAME: career-path-backend
   CONTAINER_NAME: career-path-backend
   REMOTE_DEPLOY_DIR: /home/ubuntu/deploy
+  # Sourced from a GitHub repo secret (Settings -> Secrets and variables ->
+  # Actions -> YOUTUBE_API_KEY), never committed and never visible in logs
+  # (GitHub automatically masks any value pulled from `secrets.*`). Empty
+  # string if the secret hasn't been added yet - the sync step below is a
+  # no-op in that case, so this workflow keeps working for anyone who
+  # hasn't set it up.
+  YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
 
 jobs:
   deploy:
@@ -48,6 +55,48 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "${{ env.IMAGE_NAME }}.tar.gz"
           target: "${{ env.REMOTE_DEPLOY_DIR }}"
+
+      # Runs BEFORE the container restart below, so the freshly-synced .env
+      # is already in place when `docker run --env-file` reads it. Neither
+      # the workflow log nor the remote script ever echoes the secret value
+      # itself - only whether an entry was added/updated, and GitHub masks
+      # `secrets.*` values in logs regardless (defense in depth, not relied
+      # on alone). No-op (via `if:`) until YOUTUBE_API_KEY is added as a
+      # repo secret, so this doesn't break deploys for anyone who hasn't
+      # set it up yet, and no-op safely if the remote .env doesn't exist
+      # yet either (never fabricates one from nothing - the existing three
+      # Supabase/Groq secrets still have to be set up manually the first
+      # time, same as before this change).
+      - name: Sync YOUTUBE_API_KEY into the remote .env (idempotent)
+        if: ${{ env.YOUTUBE_API_KEY != '' }}
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          YOUTUBE_API_KEY: ${{ env.YOUTUBE_API_KEY }}
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          envs: YOUTUBE_API_KEY
+          script: |
+            set -e
+            ENV_FILE=""
+            for f in "$HOME/app/.env" "/home/ubuntu/app/.env" "$HOME/.env"; do
+              if [ -f "$f" ]; then
+                ENV_FILE="$f"
+                break
+              fi
+            done
+            if [ -z "$ENV_FILE" ]; then
+              echo "No existing .env file found on host (checked ~/app/.env, /home/ubuntu/app/.env, ~/.env) - cannot sync YOUTUBE_API_KEY. Create the .env file with the existing required secrets first."
+              exit 1
+            fi
+            if grep -q '^YOUTUBE_API_KEY=' "$ENV_FILE"; then
+              sed -i "s|^YOUTUBE_API_KEY=.*|YOUTUBE_API_KEY=${YOUTUBE_API_KEY}|" "$ENV_FILE"
+              echo "Updated existing YOUTUBE_API_KEY entry in $ENV_FILE"
+            else
+              echo "YOUTUBE_API_KEY=${YOUTUBE_API_KEY}" >> "$ENV_FILE"
+              echo "Added YOUTUBE_API_KEY entry to $ENV_FILE"
+            fi
 
       - name: Load image and restart container on EC2
         uses: appleboy/ssh-action@v1.0.3
