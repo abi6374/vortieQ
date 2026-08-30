@@ -339,11 +339,12 @@ export default function PersonalizedRoadmap({
   const confirmCompleteTask = async () => {
     const task = pendingCompleteTask
     if (!task) return
+    const validRating = (typeof completeRating === 'number' && completeRating >= 1 && completeRating <= 5) ? completeRating : null
     const result = await roadmap.toggleTask(
       task.id,
       true,
       completeNote.trim() || completeTag,
-      completeRating,
+      validRating,
       completeTag
     )
     if (!result.ok) {
@@ -353,6 +354,8 @@ export default function PersonalizedRoadmap({
     }
     setPendingCompleteTask(null)
     setCompleteNote('')
+    setCompleteRating(0)
+    setCompleteTag('')
     showToast(`🎉 Completed "${task.title}"! Progress updated.`)
   }
 
@@ -1171,12 +1174,19 @@ export default function PersonalizedRoadmap({
               <button
                 type="button"
                 onClick={confirmCompleteTask}
-                className="px-5 py-2.5 bg-[#22A06B] hover:bg-[#1b8557] text-white text-sm font-bold rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
+                disabled={Boolean(roadmap.savingId)}
+                className={`px-5 py-2.5 bg-[#22A06B] hover:bg-[#1b8557] text-white text-sm font-bold rounded-xl shadow-sm transition-all flex items-center gap-1.5 ${
+                  roadmap.savingId ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'
+                }`}
               >
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-                <span>Complete & Update Path</span>
+                {roadmap.savingId ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                )}
+                <span>{roadmap.savingId ? 'Updating...' : 'Complete & Update Path'}</span>
               </button>
             </div>
           </div>

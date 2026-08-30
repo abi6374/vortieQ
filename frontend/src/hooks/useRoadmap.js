@@ -108,12 +108,13 @@ export function useRoadmap() {
   const toggleTask = useCallback(async (stepId, completed, note = '', rating = null, tag = '') => {
     setSavingId(stepId)
     setLockMessage(null)
+    const validRating = (typeof rating === 'number' && rating >= 1 && rating <= 5) ? Math.round(rating) : null
     try {
       const res = await api.patch(`/api/roadmap/tasks/${stepId}`, {
         completed,
-        note,
-        rating,
-        tag,
+        note: note || '',
+        rating: validRating,
+        tag: tag || '',
       }, { headers: { 'Idempotency-Key': genIdempotencyKey() } })
       setData(res.data) // full recomputed roadmap
       return { ok: true }
@@ -140,7 +141,7 @@ export function useRoadmap() {
         })
         return { ok: true }
       }
-      return { ok: false, reason: 'Unable to update. Try again.' }
+      return { ok: false, reason: err?.response?.data?.detail || 'Unable to update. Try again.' }
     } finally {
       setSavingId(null)
     }
