@@ -137,12 +137,26 @@ push architecture. Only the affected path is recomputed and returned
 | `apiClient.js` | An ungated bypass flag suppressing the real 401 sign-out/redirect | Gated behind `import.meta.env.DEV` |
 | `path_service.py` | `"https://google.com"` fallback `resource_url`, inserted directly into the shared `courses` table on LLM/search failure | `ResourceValidationError` — an honest failure, never a fabricated catalog row |
 | `profile_service.py` (earlier round, referenced here for completeness) | `FALLBACK_PROFILE` hardcoded "Software Developer / beginner / 10h" on repeated extraction failure | `ProfileExtractionError` — honest 422 |
+| `LearnerIntakeWorkspace.jsx` (onboarding Step 1) | `extractKeywordsFromText()`/`COMMON_TECH_SKILLS` — regex-scanned the learner's free-text GOAL description for any of 49 hardcoded tech words and fabricated `intermediate`/`82%` for each hit, with no distinction between "I know Python" and "I want to learn Python"; also `\|\| 80`, `\|\| 'modern stacks'`, `\|\| 1 yr` default fallbacks in the GitHub-sync summary text | Zero client-side skill guessing from text; a goal-only signup passes an empty topics array and lets the real backend LLM extractor (`profile_service.extract_profile`) interpret the goal honestly. Confidence/summary text now omits any clause it has no real number for, instead of substituting one |
+| `AssessSkills.jsx` (onboarding Step 2) | Hardcoded 3-skill fallback (Python/SQL/Data Analysis at 82/75/70%) shown to any learner with zero real detected topics; `confidenceFor()` — invented a new confidence percentage via arbitrary math whenever the learner picked a level other than the "suggested" one; `handleAddSkill()` defaulting every manually-typed skill to Intermediate/80% regardless of what the learner said; a "Matches your resume" label shown even for self-reported skills that never touched a resume | Honest "No skills confirmed yet" empty state; a "Self-reported" badge (no percentage) for any skill without real backing evidence, consistent with `mastery_service._apply_topics()`'s own documented `self_assessment` default-uncertainty behavior when no `confidence_pct` is sent |
+| `TopicRatingList.jsx` / `TopicRatingCard.jsx` | Dead code (confirmed zero importers via `grep -rln`) carrying the identical `confidence_pct: t.confidence_pct \|\| 80` fabrication pattern | Deleted outright rather than left as an unreachable copy of the same bug |
 
 **Verification**: the production Vercel bundle was fetched and grepped for
 every bypass-related string (`pf_dev_bypass`, `e2e_mock_auth`,
 `MOCK_DEV_ROADMAP`, the fabricated `hcltech@pathfinder` email) — zero
 matches, confirming Vite's dead-code elimination genuinely removes this
-code from what ships, not just gates it at runtime.
+code from what ships, not just gates it at runtime. The intake-workspace
+and skill-assessment fixes above were separately verified by reproducing
+the exact failure live in a local dev preview — typing "I want to learn
+Python and become a Machine Learning engineer" into the Step 1 intake box
+produced two fabricated "Intermediate, 82% confidence" entries under the
+old code; after the fix, the same input yields "Detected Skills & Stacks
+(0)" and the honest empty state, and a manually-added skill shows
+"Self-reported" with no invented percentage in both the Skills and
+per-topic Level views. `npm run build` passes and the shipped bundle was
+grepped to confirm `confidenceFor`, `COMMON_TECH_SKILLS`,
+`extractKeywordsFromText`, and the literal `82%`/`modern stacks` fallback
+strings are gone.
 
 ---
 
