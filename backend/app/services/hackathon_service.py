@@ -172,7 +172,7 @@ VERIFIED_REAL_HACKATHONS = [
         "team_min": 1,
         "team_max": 3,
         "registration_url": "https://huggingface.co",
-        "image_url": "https://images.unsplash.com/photo-1677442136019-21780efad99a?auto=format&fit=crop&w=800&q=80",
+        "image_url": "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=800&q=80",
         "themes": ["AI/ML", "Open Source", "Security"],
         "prizes": "$30,000 + GPU Compute Grants",
         "status": "upcoming",
