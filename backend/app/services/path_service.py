@@ -127,7 +127,11 @@ def generate_path(user_id: str, profile: dict) -> dict:
         raise ValueError("No courses returned from recommender")
 
     # If YouTube provider is configured, search verified top tutorial videos for learner's target role & skills
-    # and offer them as candidate resources for the LLM path planner
+    # and offer them as candidate resources for the LLM path planner.
+    # `promoted_youtube_courses` is tracked separately (not just merged into
+    # `courses`) so the guarantee pass below - after the LLM sequences
+    # milestones - can check whether any of them actually got picked.
+    promoted_youtube_courses: list[dict] = []
     try:
         from app.services import youtube_provider
         if youtube_provider.is_configured():
@@ -149,6 +153,7 @@ def generate_path(user_id: str, profile: dict) -> dict:
                         })
                         if promoted and not any(c.get("id") == promoted.get("id") for c in courses):
                             courses.append(promoted)
+                            promoted_youtube_courses.append(promoted)
                     except Exception as e:
                         print(f"[generate_path] YouTube video candidate add failed: {e}", flush=True)
     except Exception as e:
@@ -217,6 +222,37 @@ Generate the learning path JSON now."""
             print(f"[generate_path] prerequisite reorder: {note}", flush=True)
     except Exception as e:
         print(f"[generate_path] prerequisite validation skipped: {type(e).__name__}: {e}", flush=True)
+
+    # Guarantee at least one verified YouTube video actually surfaces in the
+    # generated path, rather than leaving it purely to LLM chance. Live
+    # testing showed the 3 YouTube candidates above are real, verified, and
+    # DO reach candidates_for_llm - but with ~20 already-strong real course
+    # candidates competing for the same 12-20 selection slots, the sequencer
+    # has no explicit incentive to ever pick them, so in practice they were
+    # silently never showing up in real generated paths. This never displaces
+    # anything the LLM chose - it only adds the single best-quality video,
+    # to whichever milestone shares the most real skill_tags with it (falls
+    # back to the first milestone if there's no overlap at all), if and only
+    # if none of the YouTube candidates were already selected.
+    if promoted_youtube_courses and milestones:
+        selected_ids = {cid for m in milestones for cid in m.get("course_ids", [])}
+        if not any(pc.get("id") in selected_ids for pc in promoted_youtube_courses):
+            best_video = max(promoted_youtube_courses, key=lambda c: c.get("quality_score") or 0)
+            video_tags = set((best_video.get("skill_tags") or []))
+
+            def _overlap(m):
+                m_tags = set()
+                for cid in m.get("course_ids", []):
+                    m_tags.update(course_lookup.get(cid, {}).get("skill_tags") or [])
+                return len(m_tags & video_tags)
+
+            best_milestone = max(milestones, key=_overlap) if video_tags else milestones[0]
+            best_milestone.setdefault("course_ids", []).append(best_video["id"])
+            print(
+                f"[generate_path] guaranteed inclusion: added YouTube video "
+                f"{best_video.get('title', '')!r} to milestone {best_milestone.get('label', '')!r}",
+                flush=True,
+            )
 
     # First pass: resolve every real (non-hallucinated) course id across all
     # milestones, in order, WITHOUT calling the LLM yet - collecting them all

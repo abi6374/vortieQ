@@ -188,13 +188,24 @@ export default function LearnerIntakeWorkspace({
     setProfileDraft((prev) => ({
       ...EMPTY_DRAFT,
       ...prev,
-      summary: `"${f.name}" is attached. It will be analyzed together with your single text description.`,
+      // Don't stomp a real "Identified N skills..." summary that live text
+      // extraction may have already produced before this file was picked -
+      // only show the generic "attached" placeholder if nothing real is
+      // there yet.
+      summary: (prev?.skills && prev.skills.trim() !== '')
+        ? prev.summary
+        : `"${f.name}" is attached. It will be analyzed together with your single text description.`,
     }))
   }
 
-  // Live extraction from natural language description
+  // Live extraction from natural language description. Previously also
+  // gated on `file` here (in addition to the two call-site gates already
+  // removed) - meaning a resume + typed description together STILL never
+  // extracted anything live, because this internal guard silently no-op'd
+  // regardless of what the callers did. This was the actual remaining root
+  // cause of the reported "AI Profile Draft empty/wrong" bug.
   const runTextExtraction = async (text) => {
-    if (!text || text.trim().length < 20 || file) return
+    if (!text || text.trim().length < 20) return
     setIsExtractingText(true)
     try {
       const { data } = await apiClient.post('/api/profile/extract-text', { text: text.trim() })
