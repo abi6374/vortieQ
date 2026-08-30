@@ -337,16 +337,18 @@ def handle_feedback(step_id: str, event_type: str, note: str, user_id: str) -> d
             }
         from app.services import path_service as _path_service
         swap_result = _path_service.swap_step(step_id, user_id, level_hint=0)
+        base_reason = (
+            "Confirmed this resource is no longer available and swapped in a verified alternative."
+            if swap_result.get("swapped")
+            else "Confirmed this resource is no longer available, but no verified alternative was found."
+        )
+        comparison_note = swap_result.get("comparison_note")
         return {
             "feedback_id": feedback_id,
             "path_updated": bool(swap_result.get("swapped")),
             "updated_steps": [swap_result["new_step"]] if swap_result.get("new_step") else [],
             "swap_result": swap_result,
-            "reason_for_change": (
-                "Confirmed this resource is no longer available and swapped in a verified alternative."
-                if swap_result.get("swapped")
-                else "Confirmed this resource is no longer available, but no verified alternative was found."
-            ),
+            "reason_for_change": f"{base_reason} {comparison_note}" if comparison_note else base_reason,
             "path_version": swap_result.get("path_version"),
             "last_recomputed_at": swap_result.get("last_recomputed_at"),
         }
@@ -399,6 +401,17 @@ def handle_feedback(step_id: str, event_type: str, note: str, user_id: str) -> d
         reason_for_change = "Swapped in a more advanced alternative and raised our confidence in your mastery of this skill."
     elif event_type == "not_interested" and swap_result.get("swapped"):
         reason_for_change = "Swapped in an alternative that better matches your stated interests."
+
+    # Two distinct, complementary explanations: reason_for_change covers the
+    # EVIDENCE impact (mastery/prerequisite), comparison_note covers WHY
+    # this specific course beat the real alternatives it was weighed
+    # against (see path_service.swap_step) - surface both rather than
+    # letting the response only carry one half of "what changed and why."
+    comparison_note = swap_result.get("comparison_note")
+    if reason_for_change and comparison_note:
+        reason_for_change = f"{reason_for_change} {comparison_note}"
+    elif comparison_note:
+        reason_for_change = comparison_note
 
     return {
         "feedback_id": feedback_id,

@@ -192,6 +192,129 @@ def test_detect_provider_and_type():
     assert type3 == "documentation"
 
 
+def test_swap_step_compares_alternatives_and_explains_the_winner():
+    """swap_step (the plain, non-preference version - used by too_easy/
+    too_hard/not_interested/resource_unavailable feedback) had zero direct
+    test coverage before this - every existing test mocked it out entirely.
+    Covers the platform-audit requirement to compare >=3 verified
+    alternatives and explain, deterministically, why the winner was chosen
+    over the runner-up - not just silently picking candidates[0]."""
+    from app.services.path_service import swap_step
+
+    mock_supabase = MagicMock()
+    step_resp = MagicMock(data=[{
+        "id": "step-1", "path_id": "path-1", "sequence_order": 3,
+        "milestone_label": "Core Skills", "status": "not_started",
+        "courses": {
+            "id": "old-course", "title": "Old Course", "description": "",
+            "provider": "X", "difficulty": "intermediate", "duration_hrs": 5,
+            "resource_url": "https://old.example/course", "skill_tags": ["python", "pandas"],
+            "prerequisites": [],
+        },
+        "learning_paths": {"id": "path-1", "user_id": "user-1", "goal_text": "Be a data analyst"},
+    }])
+    profile_resp = MagicMock(data=[{"id": "user-1", "current_level": "intermediate", "completed_courses": []}])
+
+    def table(name):
+        t = MagicMock()
+        if name == "path_steps":
+            t.select.return_value.eq.return_value.execute.return_value = step_resp
+            # _bump_later_sequences / in_path lookup - no later steps, no other steps in path.
+            t.select.return_value.eq.return_value.gt.return_value.execute.return_value = MagicMock(data=[])
+            t.insert.return_value.execute.return_value = MagicMock(data=[{"id": "new-step-id"}])
+            t.update.return_value.eq.return_value.execute.return_value = MagicMock(data=[{"id": "step-1"}])
+        elif name == "profiles":
+            t.select.return_value.eq.return_value.execute.return_value = profile_resp
+        elif name == "feedback_events":
+            t.insert.return_value.execute.return_value = MagicMock(data=[{"id": "fb-1"}])
+        elif name == "learning_paths":
+            t.select.return_value.eq.return_value.execute.return_value = MagicMock(data=[{"version": 1}])
+            t.update.return_value.eq.return_value.execute.return_value = MagicMock(data=[{"id": "path-1"}])
+        return t
+
+    mock_supabase.table.side_effect = table
+
+    # Three real candidates: the second-best overlaps on both tags (should
+    # win), the others overlap on only one or zero tags.
+    fake_recommender = MagicMock()
+    fake_recommender.recommend.return_value = [
+        {"id": "c-weak", "title": "Weak Match", "difficulty": "intermediate",
+         "skill_tags": ["excel"], "similarity": 0.1},
+        {"id": "c-best", "title": "Best Match", "difficulty": "intermediate",
+         "skill_tags": ["python", "pandas"], "similarity": 0.5},
+        {"id": "c-partial", "title": "Partial Match", "difficulty": "intermediate",
+         "skill_tags": ["python"], "similarity": 0.3},
+    ]
+
+    with patch("app.services.path_service.supabase_client", mock_supabase), \
+         patch("app.services.path_service.get_recommender", return_value=fake_recommender), \
+         patch("app.services.path_service.generate_explanation", return_value="A great fit."), \
+         patch("app.ml.ranking_engine.persist_recommendation_run") as mock_persist:
+        result = swap_step("step-1", "user-1", level_hint=0)
+
+    assert result["swapped"] is True
+    assert result["new_step"]["course_id"] == "c-best"
+    # Deterministic, non-LLM explanation - names the real winner and runner-up.
+    assert "Best Match" in result["comparison_note"]
+    assert "Partial Match" in result["comparison_note"]
+    assert "Compared 3 verified alternatives" in result["comparison_note"]
+
+    # Real audit trail persisted - trigger='swap' per migration 008's own
+    # documented allowed values, final_course_ids names the actual winner.
+    mock_persist.assert_called_once()
+    _, kwargs = mock_persist.call_args
+    assert kwargs["trigger"] == "swap"
+    assert kwargs["final_course_ids"] == ["c-best"]
+    assert len(kwargs["scored"]) == 3  # compared up to 3, never fabricated more
+
+
+def test_swap_step_with_only_one_alternative_says_so_honestly():
+    from app.services.path_service import swap_step
+
+    mock_supabase = MagicMock()
+    step_resp = MagicMock(data=[{
+        "id": "step-1", "path_id": "path-1", "sequence_order": 1,
+        "milestone_label": "Core Skills", "status": "not_started",
+        "courses": {"id": "old-course", "title": "Old Course", "description": "",
+                    "provider": "X", "difficulty": "beginner", "duration_hrs": 5,
+                    "resource_url": "https://old.example/course", "skill_tags": ["python"],
+                    "prerequisites": []},
+        "learning_paths": {"id": "path-1", "user_id": "user-1", "goal_text": "Learn Python"},
+    }])
+    profile_resp = MagicMock(data=[{"id": "user-1", "current_level": "beginner", "completed_courses": []}])
+
+    def table(name):
+        t = MagicMock()
+        if name == "path_steps":
+            t.select.return_value.eq.return_value.execute.return_value = step_resp
+            t.select.return_value.eq.return_value.gt.return_value.execute.return_value = MagicMock(data=[])
+            t.insert.return_value.execute.return_value = MagicMock(data=[{"id": "new-step-id"}])
+            t.update.return_value.eq.return_value.execute.return_value = MagicMock(data=[{"id": "step-1"}])
+        elif name == "profiles":
+            t.select.return_value.eq.return_value.execute.return_value = profile_resp
+        elif name == "feedback_events":
+            t.insert.return_value.execute.return_value = MagicMock(data=[{"id": "fb-1"}])
+        elif name == "learning_paths":
+            t.select.return_value.eq.return_value.execute.return_value = MagicMock(data=[{"version": 1}])
+            t.update.return_value.eq.return_value.execute.return_value = MagicMock(data=[{"id": "path-1"}])
+        return t
+
+    mock_supabase.table.side_effect = table
+    fake_recommender = MagicMock()
+    fake_recommender.recommend.return_value = [
+        {"id": "only-option", "title": "Only Option", "difficulty": "beginner", "skill_tags": ["python"], "similarity": 0.4},
+    ]
+
+    with patch("app.services.path_service.supabase_client", mock_supabase), \
+         patch("app.services.path_service.get_recommender", return_value=fake_recommender), \
+         patch("app.services.path_service.generate_explanation", return_value="Fits well."), \
+         patch("app.ml.ranking_engine.persist_recommendation_run"):
+        result = swap_step("step-1", "user-1", level_hint=0)
+
+    assert result["swapped"] is True
+    assert result["comparison_note"] == "Only one verified alternative was available for this swap."
+
+
 def test_swap_step_with_preference_realtime_flow():
     """Verify swap_step_with_preference searches live resources and updates step with LLM output."""
     from unittest.mock import patch, MagicMock

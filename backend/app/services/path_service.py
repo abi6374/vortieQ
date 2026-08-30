@@ -345,15 +345,30 @@ def _load_step_full(step_id: str, user_id: str) -> tuple[dict, dict]:
     return step, step["learning_paths"]
 
 
-def _score_alternative(candidate: dict, skipped_course: dict, target_diff: str) -> float:
-    """Higher is better. Overlap on skill_tags + difficulty match beats similarity."""
+def _score_alternative_breakdown(candidate: dict, skipped_course: dict, target_diff: str) -> tuple[float, dict]:
+    """Same scoring _score_alternative always did, but also returns the
+    named component breakdown - lets swap_step persist a real, inspectable
+    recommendation_explanations row (feature_scores) instead of only a bare
+    sort key, and build an honest, deterministic "why this one" sentence
+    without depending on an LLM having gotten the comparison right."""
     cand_tags = {t.lower() for t in (candidate.get("skill_tags") or [])}
     skipped_tags = {t.lower() for t in (skipped_course.get("skill_tags") or [])}
     overlap = len(cand_tags & skipped_tags) / max(len(cand_tags | skipped_tags), 1)  # Jaccard
     diff_match = 1.0 if (candidate.get("difficulty") == target_diff) else 0.0
     similarity = float(candidate.get("similarity") or 0.0)
     # Overlap dominates (weight 3), then diff match (2), then similarity (1).
-    return 3.0 * overlap + 2.0 * diff_match + similarity
+    total = 3.0 * overlap + 2.0 * diff_match + similarity
+    return total, {
+        "skill_overlap": round(overlap, 4),
+        "difficulty_match": diff_match,
+        "similarity": round(similarity, 4),
+    }
+
+
+def _score_alternative(candidate: dict, skipped_course: dict, target_diff: str) -> float:
+    """Higher is better. Overlap on skill_tags + difficulty match beats similarity."""
+    total, _ = _score_alternative_breakdown(candidate, skipped_course, target_diff)
+    return total
 
 
 def swap_step(step_id: str, user_id: str, level_hint: int = 0) -> dict:
@@ -410,12 +425,52 @@ def swap_step(step_id: str, user_id: str, level_hint: int = 0) -> dict:
         _log_swap_event(user_id, path["id"], step_id, note="no alternative available")
         return {"swapped": False, "reason": "No alternative course available in the library"}
 
-    # Rank
-    candidates.sort(
-        key=lambda c: _score_alternative(c, skipped_course, target_diff),
-        reverse=True,
-    )
-    replacement = candidates[0]
+    # Rank and score every real candidate (breakdown kept, not just the sort
+    # key) so the top few can be compared and audited, not just the winner.
+    scored = [
+        {"course": c, "total_score": (t_and_f := _score_alternative_breakdown(c, skipped_course, target_diff))[0],
+         "feature_scores": t_and_f[1]}
+        for c in candidates
+    ]
+    scored.sort(key=lambda s: s["total_score"], reverse=True)
+    replacement = scored[0]["course"]
+
+    # "Compare >=3 verified alternatives" from the audit - compares as many
+    # real candidates as exist, up to 3, never fabricates phantom ones when
+    # fewer are available (an honest "only 1 alternative existed" is
+    # correct behavior, not a bug to paper over).
+    compared = scored[: min(3, len(scored))]
+    comparison_note = None
+    if len(compared) > 1:
+        runner_up = compared[1]
+        winner_reasons = []
+        if compared[0]["feature_scores"]["skill_overlap"] > runner_up["feature_scores"]["skill_overlap"]:
+            winner_reasons.append("more skill overlap with the original course")
+        if compared[0]["feature_scores"]["difficulty_match"] > runner_up["feature_scores"]["difficulty_match"]:
+            winner_reasons.append("a better difficulty match")
+        if compared[0]["feature_scores"]["similarity"] > runner_up["feature_scores"]["similarity"]:
+            winner_reasons.append("higher topical similarity")
+        reason_text = " and ".join(winner_reasons) if winner_reasons else "an overall stronger match"
+        comparison_note = (
+            f"Compared {len(compared)} verified alternatives; chose "
+            f"\"{replacement.get('title')}\" over \"{runner_up['course'].get('title')}\" for {reason_text}."
+        )
+    else:
+        comparison_note = "Only one verified alternative was available for this swap."
+
+    # Real audit trail (recommendation_runs/recommendation_explanations,
+    # migration 008) - previously only path_service.generate_path() wrote
+    # to these tables; swap_step's own comparison was un-audited. Best-
+    # effort: never blocks the real swap on a logging failure.
+    try:
+        from app.ml.ranking_engine import persist_recommendation_run
+        persist_recommendation_run(
+            user_id=user_id, path_id=path["id"], trigger="swap", profile=profile,
+            candidates=[s["course"] for s in compared], hard_filter_reasons={},
+            scored=compared, final_course_ids=[replacement["id"]],
+        )
+    except Exception as e:
+        print(f"[path_service] failed to persist swap recommendation run: {type(e).__name__}: {e}", flush=True)
 
     # Bump sequence_orders of everything after the skipped step, then insert.
     old_seq = int(step.get("sequence_order") or 0)
@@ -444,6 +499,7 @@ def swap_step(step_id: str, user_id: str, level_hint: int = 0) -> dict:
         "old_step_id": step_id,
         "path_version": version_info.get("version") if version_info else None,
         "last_recomputed_at": version_info.get("last_recomputed_at") if version_info else None,
+        "comparison_note": comparison_note,
         "new_step": {
             "step_id": new_row["id"] if new_row else "",
             "course_id": replacement["id"],
