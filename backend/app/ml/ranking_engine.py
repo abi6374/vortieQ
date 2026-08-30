@@ -27,7 +27,7 @@ import json
 from app.config import supabase_client
 from app.services import taxonomy_service
 
-SCORING_VERSION = "v1.0-deterministic"
+SCORING_VERSION = "v1.1-deterministic"
 
 LEVEL_ORDER = {"beginner": 0, "intermediate": 1, "advanced": 2}
 _LEVEL_NAMES = ["beginner", "intermediate", "advanced"]
@@ -39,7 +39,15 @@ WEIGHTS = {
     "difficulty_fit": 1.5,       # course level vs. REAL per-skill mastery, not one global level
     "prerequisites_met": 2.0,    # real skill_prerequisites edges satisfied by real mastery
     "format_preference": 0.5,    # neutral (0.5) when format isn't tracked for this course - never guessed
-    "time_fit": 0.5,             # duration vs. remaining weekly-hour budget
+    # v1.1: 0.5 -> 1.5. A real learner with a very low weekly_hours budget
+    # (e.g. 2h/week) was still getting recommended the same long courses as
+    # everyone else, which the hour-based week-packer then had no choice but
+    # to split into dozens of tiny weekly slivers (a 22h course became 11
+    # separate weeks). At 0.5 with the old formula's narrow [0.2, 1.0]
+    # output range, time_fit could never meaningfully outweigh relevance/
+    # skill-gap/prerequisites even when it should - see the widened
+    # _time_fit_score below for the other half of this fix.
+    "time_fit": 1.5,             # duration vs. remaining weekly-hour budget
     "quality_freshness": 1.0,    # verified/available + real recency
     "diversity": 0.5,            # penalizes repeating an already-well-covered skill in THIS batch
 }
@@ -55,6 +63,34 @@ def _mastery_to_level(mastery_probability: float) -> str:
     if mastery_probability >= 0.4:
         return "intermediate"
     return "beginner"
+
+
+def _time_fit_score(duration_hrs: float, weekly_hours_remaining: float | None) -> float:
+    """How well a course's real duration fits a learner's real weekly-hour
+    budget. v1.1: widened from a narrow [0.2, 1.0] range to a real [0.0, 1.0]
+    spread - the old floor of 0.2 for even a wildly-mismatched course (e.g. a
+    22h course against a 2h/week budget) meant this feature could never
+    meaningfully outweigh relevance/skill-gap/prerequisites even at a higher
+    weight. Courses that fit within roughly half a week's budget are
+    rewarded as ideal; the hour-based week-packer (roadmap_service.
+    plan_weeks_with_splits) still correctly splits anything longer across
+    multiple weeks regardless of this score - this only shapes which
+    courses get SELECTED in the first place, so a learner with little
+    weekly time is steered toward shorter real content instead of the same
+    long courses everyone else gets, which used to turn into dozens of
+    tiny split parts."""
+    if not weekly_hours_remaining or weekly_hours_remaining <= 0:
+        return 0.5  # unknown budget - neutral, not fabricated
+    ratio = duration_hrs / weekly_hours_remaining
+    if ratio <= 0.5:
+        return 1.0
+    if ratio <= 1:
+        return 0.8
+    if ratio <= 2:
+        return 0.4
+    if ratio <= 4:
+        return 0.15
+    return 0.0
 
 
 def input_snapshot_hash(profile: dict, candidate_ids: list[str]) -> str:
@@ -182,11 +218,7 @@ def score_candidates(
         difficulty_fit = {0: 1.0, 1: 0.5}.get(level_gap, 0.0)
 
         duration = float(course.get("duration_hrs") or 0)
-        if weekly_hours_remaining and weekly_hours_remaining > 0:
-            ratio = duration / weekly_hours_remaining
-            time_fit = 1.0 if ratio <= 1 else (0.5 if ratio <= 2 else 0.2)
-        else:
-            time_fit = 0.5  # unknown budget - neutral, not fabricated
+        time_fit = _time_fit_score(duration, weekly_hours_remaining)
 
         availability = course.get("availability_status")
         if availability == "available":

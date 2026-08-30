@@ -32,6 +32,24 @@ MAX_RESULTS = 8
 CACHE_TTL_SECONDS = 1800  # 30 min - identical queries reuse results instead of re-searching
 _cache: dict[str, tuple[float, list]] = {}
 
+# Real bug this fixes: Wikipedia sits near the top of PREFERRED_DOMAINS
+# below, so for a broad/abstract skill tag (e.g. "product management") DDGS
+# would surface generic dictionary/definition pages ("Product (business) -
+# Wikipedia", Merriam-Webster, Cambridge Dictionary) ranked ABOVE genuinely
+# useful tutorial content - technically real results, correctly classified
+# as "article", but not the kind of learning resource anyone asked for.
+# Rejected outright here rather than just down-ranked, matching this
+# codebase's existing hard_filter design elsewhere (a wrong resource at
+# position 4 is still wrong).
+_DEFINITION_DOMAINS = (
+    "merriam-webster.com",
+    "dictionary.cambridge.org",
+    "dictionary.com",
+    "vocabulary.com",
+    "thefreedictionary.com",
+    "wiktionary.org",
+)
+
 # Domains that are reliably real, free, high-yield learning and documentation platforms.
 # Results are ranked so high-quality free sources appear first.
 PREFERRED_DOMAINS = (
@@ -116,6 +134,12 @@ def search_learning_resources(query: str, max_results: int = MAX_RESULTS, catego
         search_query = f"{q} official documentation tutorial guide"
     elif category == "video":
         search_query = f"{q} free youtube video course full tutorial"
+    elif category == "article":
+        # Explicitly "how to learn"-shaped, not just the topic name - a bare
+        # abstract skill tag like "product management" or "statistics" reads
+        # to a search engine as a request for its DEFINITION, surfacing
+        # Wikipedia/dictionary pages instead of a real learning article.
+        search_query = f"how to learn {q} guide for beginners tutorial article"
     else:
         search_query = f"{q} geeksforgeeks documentation free tutorial nptel"
 
@@ -123,14 +147,34 @@ def search_learning_resources(query: str, max_results: int = MAX_RESULTS, catego
     if cached and (time.time() - cached[0]) < CACHE_TTL_SECONDS:
         return cached[1][:max_results]
 
-    try:
-        with DDGS() as ddgs:
-            raw = list(ddgs.text(search_query, max_results=max_results * 2))
-    except DDGSException as exc:
-        print(f"[web_search_service] DuckDuckGo search failed: {exc}", flush=True)
-        return []
-    except Exception as exc:  # pragma: no cover
-        print(f"[web_search_service] unexpected search error: {exc}", flush=True)
+    # Real, confirmed behavior of this free/unofficial API (found live
+    # during testing, not assumed): under any recent load, DDGS returns 0
+    # results in a rate-limited pattern - roughly every other call fails
+    # regardless of query content (verified against several unrelated
+    # queries with delays between each). This isn't a malformed-query
+    # problem, it's the backend's own throttling. Retries with increasing
+    # backoff to recover the calls that "should" succeed instead of this
+    # whole feature silently going empty a large fraction of the time - an
+    # honest limitation of a free/unofficial API, not something a retry can
+    # fully guarantee away, but this meaningfully improves the odds.
+    raw = []
+    last_exc = None
+    backoffs = [1.5, 3.0]
+    for attempt in range(len(backoffs) + 1):
+        try:
+            with DDGS() as ddgs:
+                raw = list(ddgs.text(search_query, max_results=max_results * 2))
+            last_exc = None
+            if raw:
+                break
+        except DDGSException as exc:
+            last_exc = exc
+        except Exception as exc:  # pragma: no cover
+            last_exc = exc
+        if attempt < len(backoffs):
+            time.sleep(backoffs[attempt])
+    if last_exc is not None and not raw:
+        print(f"[web_search_service] DuckDuckGo search failed after retry: {last_exc}", flush=True)
         return []
 
     ranked = _rank(raw)
@@ -139,6 +183,8 @@ def search_learning_resources(query: str, max_results: int = MAX_RESULTS, catego
         url = r.get("href", "").strip()
         if not url:
             continue
+        if any(d in url.lower() for d in _DEFINITION_DOMAINS):
+            continue  # a dictionary definition is never a real learning resource
         title = r.get("title", "").strip()
         snippet = (r.get("body", "") or "").strip()[:240]
         provider, resource_type = _detect_provider_and_type(url, title)
@@ -166,7 +212,8 @@ def enrich_with_web_resources(groups: list, label_key: str = "label", steps_key:
     if not groups:
         return
 
-    def _one(group: dict) -> list:
+    def _one(args: tuple) -> list:
+        idx, group = args
         tags = set()
         for step in group.get(steps_key, []):
             tags.update(step.get("skill_tags") or [])
@@ -191,21 +238,29 @@ def enrich_with_web_resources(groups: list, label_key: str = "label", steps_key:
         except Exception as e:
             print(f"[web_search_service] YouTube video enrich note: {e}", flush=True)
 
-        # 2. Complement with live web resources
+        # 2. Complement with ONE real web search - still just 1 DDGS call per
+        # week (this is a free, unofficial, rate-limit-prone API; doubling
+        # the call count here to search "docs" and "article" separately was
+        # tried and reproduced real, repeated empty-result failures under
+        # back-to-back load during testing). Alternates category by week
+        # index instead: across the 3 weeks this function typically
+        # enriches, some weeks lean toward real official documentation and
+        # others toward real learning articles, giving genuine variety in
+        # the overall roadmap without tripling DDGS load on any single call.
+        category = "docs" if idx % 2 == 0 else "article"
+        seen_urls = {r["url"] for r in results}
         try:
-            web_res = search_learning_resources(query, max_results=4)
-            seen_urls = {r["url"] for r in results}
-            for wr in web_res:
+            for wr in search_learning_resources(query, max_results=4, category=category):
                 if wr.get("url") not in seen_urls:
                     seen_urls.add(wr.get("url"))
                     results.append(wr)
         except Exception as e:
-            print(f"[web_search_service] web search enrich failed for '{query}': {e}", flush=True)
+            print(f"[web_search_service] '{category}' enrich failed for '{query}': {e}", flush=True)
 
         return results[:4]
 
     with ThreadPoolExecutor(max_workers=min(len(groups), 10)) as ex:
-        results = list(ex.map(_one, groups))
+        results = list(ex.map(_one, enumerate(groups)))
 
     for group, web_resources in zip(groups, results):
         group["web_resources"] = web_resources

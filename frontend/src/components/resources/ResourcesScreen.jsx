@@ -29,9 +29,29 @@ const V_BORDER = '#cfe4fb'
 
 // ── Type mapping. We only actually have courses in the DB, so we synthesise
 // "type" from difficulty + duration to keep the reference screenshot's variety.
+// web_search_service._detect_provider_and_type's real, backend-determined
+// resource_type values, mapped to this page's display buckets. Trusting
+// this FIRST (instead of only ever re-guessing from title/duration/URL
+// keywords) means a real "GeeksforGeeks -> article" or "docs.python.org ->
+// documentation" classification the backend already made correctly isn't
+// silently discarded and re-guessed badly on the frontend.
+const RESOURCE_TYPE_TO_KIND = {
+  video: { kind: 'VIDEO', label: 'Watch video' },
+  documentation: { kind: 'DOC', label: 'Open docs' },
+  article: { kind: 'ARTICLE', label: 'Read article' },
+  free_guide: { kind: 'ARTICLE', label: 'Read article' },
+  practice_sheet: { kind: 'PRACTICE', label: 'Start practice' },
+  course: { kind: 'COURSE', label: 'Start learning' },
+}
+
 function typeOf(step) {
-  // Real filter buckets. Synthesise variety from real signals: URL host,
-  // provider, title keywords, milestone label, duration.
+  if (step.resource_type && RESOURCE_TYPE_TO_KIND[step.resource_type]) {
+    return RESOURCE_TYPE_TO_KIND[step.resource_type]
+  }
+
+  // Real filter buckets for seeded-course rows, which don't carry a
+  // resource_type - synthesise from real signals: URL host, provider,
+  // title keywords, milestone label, duration.
   const url = (step.resource_url || '').toLowerCase()
   const title = (step.title || '').toLowerCase()
   const provider = (step.provider || '').toLowerCase()
@@ -40,7 +60,7 @@ function typeOf(step) {
   const hasWord = (w) => title.includes(w) || ms.includes(w) || tags.includes(w) || provider.includes(w)
   const dur = step.duration_hrs || 0
 
-  if (url.includes('youtube.') || url.includes('youtu.be') || url.includes('vimeo.') || provider.includes('youtube') || step.resource_type === 'video' || hasWord('video') || hasWord('tutorial')) return { kind: 'VIDEO', label: 'Watch video' }
+  if (url.includes('youtube.') || url.includes('youtu.be') || url.includes('vimeo.') || provider.includes('youtube') || hasWord('video') || hasWord('tutorial')) return { kind: 'VIDEO', label: 'Watch video' }
   if (url.includes('docs.') || url.includes('/docs/') || url.includes('developer.mozilla') || hasWord('documentation')) return { kind: 'DOC', label: 'Open docs' }
   if (hasWord('project') || hasWord('portfolio') || hasWord('capstone') || dur >= 20) return { kind: 'PROJECT', label: 'View project' }
   if (hasWord('article') || hasWord('blog') || (dur > 0 && dur <= 2)) return { kind: 'ARTICLE', label: 'Read article' }
@@ -481,15 +501,30 @@ export default function ResourcesScreen() {
   // entirely plain "courses", so the Video/Article/Practice/Documentation
   // chips were structurally empty before this (typeOf() had nothing but
   // COURSE/PROJECT-shaped real data to classify). Fetched once automatically
-  // (cached 30min server-side, so repeat loads are cheap) using the path's
-  // real goal - not the learner's manual search box, which stays independent.
+  // (cached 30min server-side, so repeat loads are cheap).
+  //
+  // Query is built from the CURRENT WEEK's real skill_tags (same real
+  // roadmap.weeks data the dashboard uses), not the whole goal - a learner
+  // partway through a multi-month path shouldn't see generic goal-wide
+  // articles/docs unrelated to what they're actually working on this week.
+  // Falls back to the overall goal only if the current week has no real
+  // tags yet (e.g. roadmap still loading).
+  const currentWeekTags = useMemo(() => {
+    const wk = roadmap.weeks.find((w) => w.week_number === roadmap.currentWeek)
+    const tags = new Set()
+    for (const s of wk?.steps || []) {
+      for (const t of s.skill_tags || []) tags.add(t)
+    }
+    return [...tags].slice(0, 3).join(' ')
+  }, [roadmap.weeks, roadmap.currentWeek])
+
   const [webSteps, setWebSteps] = useState([])
   useEffect(() => {
     let cancelled = false
     async function loadWebSteps() {
-      if (!path?.goal_text) return
+      const q = currentWeekTags || (path?.goal_text ? path.goal_text.split('.')[0].slice(0, 100) : '')
+      if (!q) return
       try {
-        const q = path.goal_text.split('.')[0].slice(0, 100)
         const { data } = await api.get('/api/resources/search', { params: { query: q } })
         if (cancelled) return
         setWebSteps((data.results || []).map((r, i) => {
@@ -499,7 +534,15 @@ export default function ResourcesScreen() {
             id: `web-${i}`, status: 'not_started', milestone_label: '',
             explanation: r.snippet || '', weekNumber: 0,
             title: r.title || r.url, description: r.snippet || '',
-            provider: host, difficulty: 'beginner', duration_hrs: 1,
+            // Real provider name + resource_type the backend already
+            // determined (web_search_service._detect_provider_and_type) -
+            // was being thrown away here and re-guessed from scratch by
+            // typeOf()'s duration/keyword heuristics, which don't know
+            // "GeeksforGeeks -> article" or "docs.python.org ->
+            // documentation" the way the backend's real classification does.
+            provider: r.provider || host,
+            resource_type: r.resource_type || '',
+            difficulty: 'beginner', duration_hrs: 1,
             resource_url: r.url, skill_tags: [], isWebResult: true,
           }
         }))
@@ -507,7 +550,7 @@ export default function ResourcesScreen() {
     }
     loadWebSteps()
     return () => { cancelled = true }
-  }, [path?.goal_text])
+  }, [currentWeekTags, path?.goal_text])
 
   // Real course steps + real classified web resources, combined for the
   // browsable/filterable grid only - progress stats (completedCount,
