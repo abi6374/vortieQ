@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { motion, useReducedMotion } from 'framer-motion'
 import { useAuth } from '../../hooks/useAuth'
 import { supabase } from '../../lib/supabaseClient'
+import ThemeToggle from '../ui/ThemeToggle'
 
 /**
  * PathFinder sign-in / create-account screen. Split-panel violet design.
@@ -294,8 +295,14 @@ export default function AuthScreen({ initialMode = 'signin' }) {
   }
 
   return (
-    <div className="pfa">
+    <div className="pfa relative">
       <style>{STYLES}</style>
+
+      {/* Top-Right Theme Toggle */}
+      <div className="absolute top-5 right-5 sm:top-6 sm:right-6 z-20">
+        <ThemeToggle />
+      </div>
+
       <motion.div
         className="app"
         initial={reduce ? false : { opacity: 0, y: 18, scale: 0.985 }}
