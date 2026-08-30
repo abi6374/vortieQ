@@ -321,15 +321,6 @@ export default function ProgressScreen() {
           />
           <button
             type="button"
-            onClick={() => setShowPosterModal(true)}
-            className="flex items-center gap-1.5 px-3 sm:px-3.5 py-2 border border-[#cfe4fb] dark:border-[#1E3A5F] bg-[#eaf2fc] dark:bg-[#132338] text-[#0066cc] dark:text-[#38BDF8] hover:bg-[#dbeafc] dark:hover:bg-[#1A2E4B] rounded-xl text-xs font-bold transition-all shadow-2xs active:scale-[0.98] flex-none cursor-pointer"
-            title="Export flowchart poster & PDF"
-          >
-            <FileDown className="w-4 h-4" />
-            <span className="hidden sm:inline">Export PDF</span>
-          </button>
-          <button
-            type="button"
             onClick={() => roadmap.path?.id ? navigate(`/roadmap/${roadmap.path.id}`) : navigate('/dashboard')}
             className="flex items-center gap-2 px-3.5 sm:px-4 py-2 border border-[#0066cc] dark:border-[#27272F] text-[#0066cc] dark:text-[#38BDF8] hover:bg-[#0066cc] dark:hover:bg-[#18181D] hover:text-white dark:hover:text-white rounded-xl text-xs font-bold transition-all shadow-2xs active:scale-[0.98] flex-none cursor-pointer"
           >

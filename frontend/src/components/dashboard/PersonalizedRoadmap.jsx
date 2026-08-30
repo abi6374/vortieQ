@@ -491,21 +491,8 @@ export default function PersonalizedRoadmap({
           <div className="flex items-center gap-2 flex-none ml-auto">
             <button
               type="button"
-              onClick={() => setShowPosterModal(true)}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[#cfe4fb] dark:border-[#1E3A5F] hover:border-[#0066cc] bg-[#eaf2fc] dark:bg-[#132338] text-[#0066cc] dark:text-[#38BDF8] text-xs font-bold transition-all shadow-2xs cursor-pointer"
-              title="Export flowchart poster & PDF"
-            >
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                <polyline points="7 10 12 15 17 10" />
-                <line x1="12" y1="15" x2="12" y2="3" />
-              </svg>
-              <span>Export PDF</span>
-            </button>
-            <button
-              type="button"
               onClick={() => navigate('/onboarding')}
-              className="px-2.5 py-1 rounded-lg border border-[#e0e0e0] dark:border-[#27272F] hover:border-[#0066cc] dark:hover:border-[#0066cc] hover:bg-[#eaf2fc] dark:hover:bg-[#0066cc]/20 text-[#0066cc] dark:text-[#0066cc] text-xs font-bold transition-colors cursor-pointer"
+              className="px-2.5 py-1 rounded-lg border border-[#e0e0e0] dark:border-[#27272F] hover:border-[#0066cc] hover:bg-[#eaf2fc] dark:hover:bg-[#18181D] text-[#0066cc] dark:text-[#38BDF8] text-xs font-bold transition-colors cursor-pointer"
             >
               Replan
             </button>

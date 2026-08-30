@@ -641,18 +641,16 @@ export default function RoadmapInfographicModal({
       const originalScrollTop = container ? container.scrollTop : 0
       if (container) container.scrollTop = 0
 
-      // Capture the entire element at 2x resolution
+      // Capture the entire element at 2x resolution with exact element dimensions
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
-        backgroundColor: '#fafbfc',
+        backgroundColor: '#ffffff',
         logging: false,
         scrollX: 0,
         scrollY: 0,
-        width: element.offsetWidth,
+        width: element.clientWidth,
         height: element.scrollHeight,
-        windowWidth: element.offsetWidth,
-        windowHeight: element.scrollHeight,
       })
 
       // Restore scroll
@@ -684,8 +682,8 @@ export default function RoadmapInfographicModal({
           pageCanvas.height = pageCanvasHeightPx
           const ctx = pageCanvas.getContext('2d')
 
-          // Background fill
-          ctx.fillStyle = '#fafbfc'
+          // Clean white background
+          ctx.fillStyle = '#ffffff'
           ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height)
 
           // Slice source canvas
@@ -808,20 +806,18 @@ export default function RoadmapInfographicModal({
           {/* THE INFOGRAPHIC POSTER ELEMENT (Exported to PDF via html2canvas) */}
           <div
             ref={posterRef}
-            className="w-full max-w-[860px] bg-[#fafbfc] border border-[#e2e8f0] rounded-3xl p-6 sm:p-10 shadow-lg text-[#1d1d1f] flex flex-col items-center relative"
+            className="w-full max-w-[800px] mx-auto bg-white border border-[#e2e8f0] rounded-3xl p-6 sm:p-10 shadow-lg text-[#1d1d1f] flex flex-col items-center relative"
             style={{ fontFamily: "'Inter', sans-serif" }}
           >
-            {/* Top Title Banner Header */}
+            {/* Top Title Banner Header (Clean, professional, NO EMOJIS) */}
             <div className="w-full flex flex-col items-center mb-8 relative">
-              <div className="w-full max-w-lg bg-[#E2EBE5] border-2 border-[#CBD8CE] rounded-2xl py-3.5 px-6 text-center shadow-xs flex items-center justify-center gap-3">
-                <span className="text-2xl" role="img" aria-label="AI bot">🤖</span>
-                <h1 className="font-['Manrope'] font-extrabold text-xl sm:text-2xl text-[#1E293B] tracking-tight">
-                  {curriculum.roleTitle} Roadmap
+              <div className="w-full max-w-lg bg-[#E2EBE5] border-2 border-[#CBD8CE] rounded-2xl py-3.5 px-6 text-center shadow-xs">
+                <h1 className="font-['Manrope'] font-extrabold text-xl sm:text-2xl text-[#1E293B] tracking-tight uppercase">
+                  {curriculum.roleTitle}
                 </h1>
-                <span className="text-2xl" role="img" aria-label="AI bot">🤖</span>
               </div>
               <p className="text-xs text-[#64748B] font-semibold mt-2.5 text-center">
-                Personalized {totalWeeks}-Week Strategic Path · Calibrated by PathFinder AI
+                Structured {totalWeeks}-Week Curriculum & Learning Path · PathFinder AI
               </p>
             </div>
 
@@ -868,7 +864,7 @@ export default function RoadmapInfographicModal({
                               </span>
                               {week.isComplete && (
                                 <span className="text-[10px] font-bold text-[#059669] bg-[#D1FAE5] px-2 py-0.5 rounded-md border border-[#A7F3D0]">
-                                  ✓ Completed
+                                  COMPLETED
                                 </span>
                               )}
                             </div>
@@ -895,7 +891,7 @@ export default function RoadmapInfographicModal({
                               </span>
                               {week.isComplete && (
                                 <span className="text-[10px] font-bold text-[#059669] bg-[#D1FAE5] px-2 py-0.5 rounded-md border border-[#A7F3D0]">
-                                  ✓ Completed
+                                  COMPLETED
                                 </span>
                               )}
                             </div>
