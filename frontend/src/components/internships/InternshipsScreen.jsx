@@ -5,10 +5,11 @@ import CustomSelect from '../ui/CustomSelect'
 
 const CATEGORY_CHIPS = ['All', 'AI/ML', 'Web Dev', 'Data Science', 'DevOps', 'Security', 'Mobile', 'Design', 'Product', 'Marketing']
 const STATUS_STAGES = [
-  { id: 'applied', label: 'Applied', color: 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800' },
-  { id: 'saved', label: 'Saved / Reviewing', color: 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800' },
+  { id: 'tracked', label: 'Tracked', color: 'text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700' },
+  { id: 'applied', label: 'Applied', color: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800' },
+  { id: 'saved', label: 'Saved', color: 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800' },
   { id: 'interviewing', label: 'Interviewing', color: 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800' },
-  { id: 'offer', label: 'Offer Received', color: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800' },
+  { id: 'offer', label: 'Offer Received', color: 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800' },
   { id: 'rejected', label: 'Archived / Closed', color: 'text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700' },
 ]
 
@@ -60,7 +61,7 @@ function ApplyConfirmModal({ internship, onConfirm, onSaveForLater, onClose }) {
             onClick={() => onSaveForLater(internship.id, 'saved')}
             className="w-full py-2.5 px-4 rounded-xl border border-[#0066cc] dark:border-[#38BDF8] text-[#0066cc] dark:text-[#38BDF8] font-bold text-xs text-center hover:bg-[#eaf2fc] dark:hover:bg-white/5 transition-colors cursor-pointer"
           >
-            Save for Later (Not applied yet)
+            Save for Later
           </button>
           <button
             type="button"
@@ -283,16 +284,22 @@ function InternshipCard({ internship, applied, onVisitBoard, onToggleTrack, onVi
               type="button"
               title="Remove from My Applications"
               onClick={e => { e.stopPropagation(); onToggleTrack(internship.id, 'remove') }}
-              className="px-2.5 py-1.5 rounded-xl font-bold text-xs bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 hover:bg-red-50 hover:text-red-600 transition-colors cursor-pointer"
+              className={`px-2.5 py-1.5 rounded-xl font-bold text-xs border transition-colors cursor-pointer hover:bg-red-50 hover:text-red-600 hover:border-red-200 dark:hover:bg-red-950/20 ${
+                applied === 'applied'
+                  ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
+                  : applied === 'saved'
+                  ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800'
+                  : 'bg-slate-50 dark:bg-slate-800/40 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
+              }`}
             >
-              ✓ Applied
+              {applied === 'applied' ? '✓ Applied' : applied === 'saved' ? '✓ Saved' : '✓ Tracked'}
             </button>
           ) : (
             <button
               type="button"
               title="Track application status"
-              onClick={e => { e.stopPropagation(); onToggleTrack(internship.id, 'applied') }}
-              className="px-2.5 py-1.5 rounded-xl font-bold text-xs border border-[#e0e0e0] dark:border-[#242E40] text-[#7a7a7a] hover:text-[#0066cc] dark:hover:text-[#38BDF8] transition-colors cursor-pointer"
+              onClick={e => { e.stopPropagation(); onToggleTrack(internship.id, 'tracked') }}
+              className="px-2.5 py-1.5 rounded-xl font-bold text-xs border border-[#e0e0e0] dark:border-[#242E40] text-[#7a7a7a] hover:text-[#0066cc] dark:hover:text-[#38BDF8] hover:border-[#0066cc] dark:hover:border-[#38BDF8] transition-colors cursor-pointer"
             >
               Track
             </button>
@@ -312,7 +319,7 @@ export default function InternshipsScreen() {
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [remoteOnly, setRemoteOnly] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-  const [appliedIds, setAppliedIds] = useState(new Set())
+  const [appliedIds, setAppliedIds] = useState(new Map()) // id -> status
   const [activeDetail, setActiveDetail] = useState(null)
   const [confirmTarget, setConfirmTarget] = useState(null)
   const [toast, setToast] = useState(null)
@@ -333,7 +340,7 @@ export default function InternshipsScreen() {
       setInternships(discoverRes.data.internships || [])
       const mine = myRes.data.internships || []
       setMyInternships(mine)
-      setAppliedIds(new Set(mine.map(i => i.id)))
+      setAppliedIds(new Map(mine.map(i => [i.id, i.application_status || 'tracked'])))
     } catch (e) {
       setError('Unable to load internships. Please verify backend connection.')
     } finally {
@@ -347,18 +354,18 @@ export default function InternshipsScreen() {
     if (internship.apply_url) {
       window.open(internship.apply_url, '_blank', 'noopener')
     }
-    // If not already tracked as applied, open confirmation dialog
+    // If not already tracked, open confirmation dialog
     if (!appliedIds.has(internship.id)) {
       setConfirmTarget(internship)
     }
   }
 
-  const handleToggleTrack = async (internshipId, status = 'applied') => {
+  const handleToggleTrack = async (internshipId, status = 'tracked') => {
     if (status === 'remove') {
       try {
         await api.delete(`/api/internships/${internshipId}/apply`)
         setAppliedIds(prev => {
-          const next = new Set(prev)
+          const next = new Map(prev)
           next.delete(internshipId)
           return next
         })
@@ -371,11 +378,8 @@ export default function InternshipsScreen() {
     }
 
     try {
-      await api.post(`/api/internships/${internshipId}/apply`)
-      if (status !== 'applied') {
-        await api.patch(`/api/internships/${internshipId}/status?new_status=${status}`)
-      }
-      setAppliedIds(prev => new Set([...prev, internshipId]))
+      await api.post(`/api/internships/${internshipId}/apply?status=${status}`)
+      setAppliedIds(prev => new Map([...prev, [internshipId, status]]))
       const item = internships.find(x => x.id === internshipId)
       if (item) {
         setMyInternships(prev => {
@@ -383,10 +387,13 @@ export default function InternshipsScreen() {
           return [...filtered, { ...item, application_status: status, applied_on: new Date().toISOString() }]
         })
       }
-      showToast(status === 'saved' ? 'Saved to My Applications!' : 'Tracked as Applied! ✓')
+      const toastMsg = status === 'applied' ? 'Marked as Applied! ✓'
+        : status === 'saved' ? 'Saved to My Applications! ✓'
+        : 'Tracked! ✓'
+      showToast(toastMsg)
       setConfirmTarget(null)
     } catch {
-      showToast('Could not record application', 'error')
+      showToast('Could not record tracking', 'error')
     }
   }
 
@@ -600,7 +607,7 @@ export default function InternshipsScreen() {
                   <InternshipCard
                     key={i.id}
                     internship={i}
-                    applied={appliedIds.has(i.id)}
+                    applied={appliedIds.get(i.id) || null}
                     onVisitBoard={handleVisitBoard}
                     onToggleTrack={handleToggleTrack}
                     onView={setActiveDetail}
@@ -681,7 +688,7 @@ export default function InternshipsScreen() {
       {activeDetail && (
         <InternshipDetailModal
           internship={activeDetail}
-          applied={appliedIds.has(activeDetail.id)}
+          applied={appliedIds.get(activeDetail.id) || null}
           onVisitBoard={handleVisitBoard}
           onToggleTrack={handleToggleTrack}
           onClose={() => setActiveDetail(null)}

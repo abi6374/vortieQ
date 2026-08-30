@@ -191,7 +191,7 @@ textarea[class*="border-none"]:focus-visible {
   height: 100dvh;
   min-height: 680px;
   display: grid;
-  grid-template-columns: 240px minmax(0, 1fr);
+  grid-template-columns: 68px minmax(0, 1fr);
   overflow: hidden;
   background: var(--bg-main);
   transition: grid-template-columns 0.35s cubic-bezier(0.16, 1, 0.3, 1);
@@ -200,7 +200,7 @@ textarea[class*="border-none"]:focus-visible {
   grid-template-columns: minmax(0, 1fr) !important;
 }
 @media (max-width: 1279px) {
-  .pf-shell { grid-template-columns: 72px minmax(0, 1fr); }
+  .pf-shell { grid-template-columns: 68px minmax(0, 1fr); }
 }
 @media (max-width: 767px) {
   .pf-shell { grid-template-columns: minmax(0, 1fr); }
@@ -208,11 +208,21 @@ textarea[class*="border-none"]:focus-visible {
 
 .pf-sidebar {
   min-height: 0;
-  background: var(--canvas);
-  border-right: 1px solid var(--card-bd);
+  width: 68px;
+  background: rgba(255,255,255,0.82);
+  -webkit-backdrop-filter: blur(24px) saturate(200%);
+  backdrop-filter: blur(24px) saturate(200%);
+  border-right: 1px solid rgba(255,255,255,0.7);
+  box-shadow: 2px 0 24px -4px rgba(10,10,10,0.07), inset -1px 0 0 rgba(255,255,255,0.9);
   display: flex;
   flex-direction: column;
+  align-items: center;
   overflow: visible;
+}
+.dark .pf-sidebar {
+  background: rgba(13,15,20,0.88);
+  border-right-color: rgba(255,255,255,0.06);
+  box-shadow: 2px 0 24px -4px rgba(0,0,0,0.3), inset -1px 0 0 rgba(255,255,255,0.04);
 }
 @media (max-width: 767px) {
   .pf-sidebar { display: none; }
@@ -233,16 +243,25 @@ textarea[class*="border-none"]:focus-visible {
   min-width: 0;
   position: relative;
   z-index: 50;
-  background: var(--canvas);
-  border-bottom: 1px solid var(--card-bd);
+  background: rgba(255,255,255,0.88);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  border-radius: 0 0 16px 16px;
+  box-shadow: 0 2px 16px -4px rgba(10,10,10,0.06), 0 1px 0 rgba(255,255,255,0.9) inset;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   padding: 0 28px;
 }
+.dark .pf-topbar {
+  background: rgba(13,15,20,0.86);
+  border-bottom-color: rgba(255,255,255,0.06);
+  box-shadow: 0 2px 20px -4px rgba(0,0,0,0.4);
+}
 @media (max-width: 767px) {
-  .pf-topbar { padding: 0 16px; }
+  .pf-topbar { padding: 0 16px; border-radius: 0 0 12px 12px; }
 }
 
 .pf-content {

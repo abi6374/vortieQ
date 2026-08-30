@@ -323,8 +323,8 @@ def get_user_internships(user_id: str) -> list:
 
 
 def update_application_status(user_id: str, internship_id: str, new_status: str) -> dict:
-    """Update internship application status (applied → interviewing → offer/rejected)."""
-    valid = {"applied", "saved", "interviewing", "offer", "rejected"}
+    """Update internship application status (tracked → applied → saved → interviewing → offer/rejected)."""
+    valid = {"tracked", "applied", "saved", "interviewing", "offer", "rejected"}
     if new_status not in valid:
         raise ValueError(f"Invalid status. Must be one of: {valid}")
     if not _HAS_SUPABASE:

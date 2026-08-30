@@ -57,10 +57,10 @@ function RegisterConfirmModal({ hackathon, onConfirm, onSaveInterest, onClose })
           </button>
           <button
             type="button"
-            onClick={() => onSaveInterest(hackathon.id, 'interested')}
+            onClick={() => onSaveInterest(hackathon.id, 'saved')}
             className="w-full py-2.5 px-4 rounded-xl border border-[#0066cc] dark:border-[#38BDF8] text-[#0066cc] dark:text-[#38BDF8] font-bold text-xs text-center hover:bg-[#eaf2fc] dark:hover:bg-white/5 transition-colors cursor-pointer"
           >
-            Save for Later / Interested
+            Save for Later
           </button>
           <button
             type="button"
@@ -307,15 +307,19 @@ function HackathonCard({ hackathon, registered, onVisitSite, onToggleRegister, o
             type="button"
             title="Remove from My Hackathons"
             onClick={e => { e.stopPropagation(); onToggleRegister(hackathon.id, 'remove') }}
-            className="px-2.5 py-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-bold text-xs hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors cursor-pointer"
+            className={`px-2.5 py-2.5 rounded-xl border font-bold text-xs hover:bg-red-50 hover:text-red-600 hover:border-red-200 dark:hover:bg-red-950/20 transition-colors cursor-pointer ${
+              registered === 'registered' ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
+              : registered === 'saved' ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800'
+              : 'bg-slate-50 dark:bg-slate-800/40 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
+            }`}
           >
-            ✓ Registered
+            {registered === 'registered' ? '✓ Registered' : registered === 'saved' ? '✓ Saved' : '✓ Tracked'}
           </button>
         ) : (
           <button
             type="button"
-            title="Mark as registered without visiting"
-            onClick={e => { e.stopPropagation(); onToggleRegister(hackathon.id, 'registered') }}
+            title="Track this hackathon without visiting"
+            onClick={e => { e.stopPropagation(); onToggleRegister(hackathon.id, 'tracked') }}
             className="px-3 py-2.5 rounded-xl border border-[#e0e0e0] dark:border-[#242E40] text-[#7a7a7a] hover:text-[#0066cc] dark:hover:text-[#38BDF8] hover:border-[#0066cc] font-bold text-xs transition-colors cursor-pointer"
           >
             Track
@@ -490,7 +494,7 @@ export default function HackathonsScreen() {
   const [error, setError] = useState(null)
   const [selectedTheme, setSelectedTheme] = useState('All')
   const [selectedStatus, setSelectedStatus] = useState('All')
-  const [registeredIds, setRegisteredIds] = useState(new Set())
+  const [registeredIds, setRegisteredIds] = useState(new Map()) // id → status string
   const [activeDetail, setActiveDetail] = useState(null)
   const [confirmTarget, setConfirmTarget] = useState(null)
   const [toast, setToast] = useState(null)
@@ -514,7 +518,7 @@ export default function HackathonsScreen() {
       }
       const mine = myRes?.data?.hackathons || []
       setMyHackathons(mine)
-      setRegisteredIds(new Set(mine.map(h => h.id)))
+      setRegisteredIds(new Map(mine.map(h => [h.id, h.user_status || 'registered'])))
     } catch {
       setHackathons(FALLBACK_HACKATHONS)
     } finally {
@@ -528,7 +532,7 @@ export default function HackathonsScreen() {
     if (hackathon.registration_url) {
       window.open(hackathon.registration_url, '_blank', 'noopener')
     }
-    // If not already marked, show confirmation prompt so user can choose
+    // If not already tracked, show confirmation prompt
     if (!registeredIds.has(hackathon.id)) {
       setConfirmTarget(hackathon)
     }
@@ -539,21 +543,21 @@ export default function HackathonsScreen() {
       try {
         await api.delete(`/api/hackathons/${hackathonId}/register`)
         setRegisteredIds(prev => {
-          const next = new Set(prev)
+          const next = new Map(prev)
           next.delete(hackathonId)
           return next
         })
         setMyHackathons(prev => prev.filter(h => h.id !== hackathonId))
         showToast('Removed from My Hackathons')
       } catch {
-        showToast('Could not remove registration', 'error')
+        showToast('Could not remove', 'error')
       }
       return
     }
 
     try {
       await api.post(`/api/hackathons/${hackathonId}/register?status=${action}`)
-      setRegisteredIds(prev => new Set([...prev, hackathonId]))
+      setRegisteredIds(prev => new Map([...prev, [hackathonId, action]]))
       const h = hackathons.find(x => x.id === hackathonId)
       if (h) {
         setMyHackathons(prev => {
@@ -561,10 +565,13 @@ export default function HackathonsScreen() {
           return [...filtered, { ...h, user_status: action }]
         })
       }
-      showToast(action === 'interested' ? 'Saved to My Hackathons (Interested)' : 'Marked as Registered! ✓')
+      const toastMsg = action === 'registered' ? 'Marked as Registered! ✓'
+        : action === 'saved' ? 'Saved to My Hackathons! ✓'
+        : 'Tracked! ✓'
+      showToast(toastMsg)
       setConfirmTarget(null)
     } catch {
-      showToast('Could not update registration', 'error')
+      showToast('Could not update tracking', 'error')
     }
   }
 
@@ -723,7 +730,7 @@ export default function HackathonsScreen() {
                   <HackathonCard
                     key={h.id}
                     hackathon={h}
-                    registered={registeredIds.has(h.id)}
+                    registered={registeredIds.get(h.id) || null}
                     onVisitSite={handleVisitSite}
                     onToggleRegister={handleToggleRegister}
                     onView={setActiveDetail}
@@ -749,19 +756,23 @@ export default function HackathonsScreen() {
             ) : (
               myHackathons.map(h => {
                 const s = STATUS_META[h.status] || STATUS_META.upcoming
-                const isRegistered = h.user_status === 'registered'
+                const userStatus = h.user_status || 'tracked'
+                const statusLabel = userStatus === 'registered' ? '✓ Registered'
+                  : userStatus === 'saved' ? '✓ Saved'
+                  : '✓ Tracked'
+                const statusColor = userStatus === 'registered'
+                  ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
+                  : userStatus === 'saved'
+                  ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800'
+                  : 'bg-slate-50 dark:bg-slate-800/40 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700'
                 return (
                   <div key={h.id} className="bg-white dark:bg-[#141A26] rounded-2xl border border-[#e0e0e0] dark:border-[#242E40] p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
                     <div className="flex-1 flex flex-col gap-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         <h3 className="font-['Manrope'] font-extrabold text-base text-[#1d1d1f] dark:text-white">{h.name}</h3>
                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${s.bg} ${s.text}`}>{s.label}</span>
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-                          isRegistered
-                            ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
-                            : 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800'
-                        }`}>
-                          {isRegistered ? '✓ Registered' : '⭐ Interested'}
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${statusColor}`}>
+                          {statusLabel}
                         </span>
                       </div>
                       <p className="text-xs text-[#7a7a7a] dark:text-[#9CA3AF]">
@@ -771,10 +782,10 @@ export default function HackathonsScreen() {
                     <div className="flex items-center gap-2 flex-wrap">
                       <button
                         type="button"
-                        onClick={() => handleToggleRegister(h.id, isRegistered ? 'interested' : 'registered')}
+                        onClick={() => handleToggleRegister(h.id, userStatus === 'registered' ? 'saved' : 'registered')}
                         className="px-3 py-1.5 rounded-xl border border-[#e0e0e0] dark:border-[#242E40] text-xs font-semibold text-[#1d1d1f] dark:text-white hover:bg-[#f5f5f7] dark:hover:bg-white/5 transition-colors cursor-pointer"
                       >
-                        {isRegistered ? 'Mark as Interested' : 'Mark as Registered'}
+                        {userStatus === 'registered' ? 'Move to Saved' : 'Mark as Registered'}
                       </button>
                       <button
                         type="button"
@@ -804,7 +815,7 @@ export default function HackathonsScreen() {
       {activeDetail && (
         <HackathonDetailModal
           hackathon={activeDetail}
-          registered={registeredIds.has(activeDetail.id)}
+          registered={registeredIds.get(activeDetail.id) || null}
           onVisitSite={handleVisitSite}
           onToggleRegister={handleToggleRegister}
           onClose={() => setActiveDetail(null)}
