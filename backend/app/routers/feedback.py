@@ -20,7 +20,10 @@ def post_feedback(
     duplicate click/retry with the SAME key replays the first real result
     instead of double-applying the mastery update or risking a second
     distinct replacement course for one logical action."""
-    cached = idempotency_service.check_and_reserve(idempotency_key, user_id, "steps.feedback")
+    cached = idempotency_service.check_and_reserve(
+        idempotency_key, user_id, "steps.feedback",
+        request_payload={"step_id": step_id, "event_type": payload.event_type, "note": payload.note},
+    )
     if cached is not None:
         if cached["status"] >= 400:
             raise HTTPException(cached["status"], cached["body"])
@@ -58,7 +61,10 @@ def swap_step(
     """
     level_hint = int(payload.get("level_hint") or 0)
 
-    cached = idempotency_service.check_and_reserve(idempotency_key, user_id, "steps.swap")
+    cached = idempotency_service.check_and_reserve(
+        idempotency_key, user_id, "steps.swap",
+        request_payload={"step_id": step_id, "level_hint": level_hint},
+    )
     if cached is not None:
         if cached["status"] >= 400:
             raise HTTPException(cached["status"], cached["body"])

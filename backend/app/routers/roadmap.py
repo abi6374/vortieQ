@@ -41,7 +41,13 @@ def set_task(
     the path) - a duplicate click/retry with the SAME key replays the
     first real result instead of double-applying either.
     """
-    cached = idempotency_service.check_and_reserve(idempotency_key, user_id, "roadmap.set_task")
+    cached = idempotency_service.check_and_reserve(
+        idempotency_key, user_id, "roadmap.set_task",
+        request_payload={
+            "step_id": step_id, "completed": payload.completed,
+            "note": payload.note, "rating": payload.rating, "tag": payload.tag,
+        },
+    )
     if cached is not None:
         if cached["status"] >= 400:
             raise HTTPException(cached["status"], cached["body"])
@@ -83,7 +89,10 @@ def rerecommend_step(
     experienced as one click ("duplicate course insertion has race/
     duplicate risks" from the audit).
     """
-    cached = idempotency_service.check_and_reserve(idempotency_key, user_id, "roadmap.rerecommend")
+    cached = idempotency_service.check_and_reserve(
+        idempotency_key, user_id, "roadmap.rerecommend",
+        request_payload={"step_id": payload.step_id, "preference": payload.preference, "note": payload.note},
+    )
     if cached is not None:
         if cached["status"] >= 400:
             raise HTTPException(cached["status"], cached["body"])

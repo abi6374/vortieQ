@@ -121,25 +121,12 @@ def _set_step_status(step_id: str, status: str) -> None:
 
 
 # ---------------------------------------------------------------- Re-sequencing
-def _last_sequence_order(path_id: str) -> int:
-    """Highest sequence_order still present in the path (after deleting the tail)."""
-    r = (
-        supabase_client.table("path_steps")
-        .select("sequence_order")
-        .eq("path_id", path_id)
-        .order("sequence_order", desc=True)
-        .limit(1)
-        .execute()
-    )
-    return r.data[0]["sequence_order"] if r.data else 0
-
-
-def _delete_not_started(path_id: str) -> None:
-    supabase_client.table("path_steps").delete().eq(
-        "path_id", path_id
-    ).eq("status", "not_started").execute()
-
-
+# _last_sequence_order / _delete_not_started used to compute the insertion
+# point and clear the tail as two separate steps before _regenerate_tail's
+# insert loop. Both responsibilities now live inside the rebuild_path_tail
+# RPC (migration 017), which recomputes the next sequence_order itself
+# AFTER its own delete, in the same transaction - removed here rather than
+# left as dead, easy-to-accidentally-call-again code.
 def _existing_course_ids(path_id: str) -> set:
     r = supabase_client.table("path_steps").select("course_id").eq(
         "path_id", path_id
@@ -167,8 +154,18 @@ def _regenerate_tail(path_id: str, profile: dict) -> list:
     """Rebuild the not_started tail of the path based on the adjusted profile.
 
     Returns the freshly inserted step rows in the shape the frontend expects.
+
+    Database-reliability audit: this used to call _delete_not_started(path_id)
+    FIRST, then make LLM calls and insert replacements afterward - a failure
+    after the delete but before every replacement landed permanently lost
+    path steps (the function's own old comment even acknowledged this:
+    "tail already deleted, but the frontend will just render fewer steps").
+    Now every LLM/network call happens BEFORE any database write, and the
+    delete+insert happen together in one atomic RPC (rebuild_path_tail,
+    migration 017) at the very end - a failure anywhere before that point
+    (no candidates, bad LLM JSON) now leaves the existing tail completely
+    untouched instead of hollowed out.
     """
-    _delete_not_started(path_id)
     already_in_path = _existing_course_ids(path_id)
 
     candidates = [
@@ -215,15 +212,13 @@ Generate the learning path JSON now."""
         try:
             milestones = json.loads(_strip_fences(_call_groq(messages)))["milestones"]
         except Exception as e:
-            # LLM couldn't produce valid JSON on either attempt. Rather than
-            # 500 the user, leave the path as-is (tail already deleted, but
-            # the frontend will just render fewer steps).
+            # LLM couldn't produce valid JSON on either attempt. Nothing has
+            # been written to the DB yet at this point (see this function's
+            # docstring) - the existing tail is untouched, not hollowed out.
             print(f"[feedback regen] gave up after 2 bad JSON attempts: {e!r}", flush=True)
             return []
 
     course_lookup = {c["id"]: c for c in candidates}
-    seq = _last_sequence_order(path_id)
-    inserted = []
 
     # Batch every explanation into one call instead of one call per course -
     # same fix, same reason, as path_service.generate_path() (see
@@ -236,35 +231,47 @@ Generate the learning path JSON now."""
     ]
     explanations = generate_explanations_batch(profile, [course_lookup[cid] for cid in ordered_ids])
 
+    # Build the full replacement step list in memory - no DB write yet.
+    rpc_steps = []
+    course_by_position = []
     for milestone in milestones:
         for course_id in milestone.get("course_ids", []):
             course = course_lookup.get(course_id)
             if not course:  # LLM hallucinated an id - skip
                 continue
-            seq += 1
             explanation = explanations.get(course_id) or _generate_explanation(profile, course)
-            row = supabase_client.table("path_steps").insert({
-                "path_id": path_id,
+            rpc_steps.append({
                 "course_id": course_id,
-                "sequence_order": seq,
-                "milestone_label": milestone["label"],
-                "status": "not_started",
-                "explanation": explanation,
-            }).execute()
-            new_id = row.data[0]["id"] if row.data else ""
-            inserted.append({
-                "step_id": new_id,
-                "course_id": course_id,
-                "title": course.get("title", ""),
-                "provider": course.get("provider", ""),
-                "duration_hrs": course.get("duration_hrs", 0),
-                "difficulty": course.get("difficulty", ""),
-                "skill_tags": course.get("skill_tags", []),
-                "resource_url": course.get("resource_url", ""),
                 "milestone_label": milestone["label"],
                 "explanation": explanation,
-                "status": "not_started",
             })
+            course_by_position.append((course, milestone["label"], explanation))
+
+    if not rpc_steps:
+        return []
+
+    # Atomic delete-old-tail + insert-new-tail, together or not at all - see
+    # this function's docstring for the data-loss mode this replaces.
+    new_rows = supabase_client.rpc("rebuild_path_tail", {
+        "p_path_id": path_id,
+        "p_new_steps": rpc_steps,
+    }).execute().data or []
+
+    inserted = []
+    for row, (course, milestone_label, explanation) in zip(new_rows, course_by_position):
+        inserted.append({
+            "step_id": row.get("id", ""),
+            "course_id": course.get("id", ""),
+            "title": course.get("title", ""),
+            "provider": course.get("provider", ""),
+            "duration_hrs": course.get("duration_hrs", 0),
+            "difficulty": course.get("difficulty", ""),
+            "skill_tags": course.get("skill_tags", []),
+            "resource_url": course.get("resource_url", ""),
+            "milestone_label": milestone_label,
+            "explanation": explanation,
+            "status": "not_started",
+        })
 
     return inserted
 
@@ -435,11 +442,13 @@ def rebuild_tail_full(step_id_or_none: str | None, user_id: str, path_id: str) -
 
 
 def _append_completed_course(user_id: str, course_id: str) -> None:
-    existing = supabase_client.table("profiles").select("completed_courses").eq("id", user_id).execute()
-    ids = list((existing.data[0].get("completed_courses") if existing.data else None) or [])
-    if course_id not in ids:
-        ids.append(course_id)
-        supabase_client.table("profiles").update({"completed_courses": ids}).eq("id", user_id).execute()
+    # Database-reliability audit: was a SELECT-modify-UPDATE race on the
+    # whole array (see roadmap_service.set_task_completion for the same
+    # fix and full explanation) - set_course_completion_flag (migration
+    # 017) does this as one atomic array-expression UPDATE instead.
+    supabase_client.rpc("set_course_completion_flag", {
+        "p_user_id": user_id, "p_course_id": course_id, "p_done": True,
+    }).execute()
 
 
 def apply_recent_feedback(path_id: str, user_id: str, note: str) -> bool:

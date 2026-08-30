@@ -174,20 +174,6 @@ Generate the learning path JSON now."""
     # in the future) - archiving whatever was active before rather than
     # leaving two paths simultaneously active and ambiguous about which
     # one get_roadmap()/rerecommend/swap should even be operating on.
-    try:
-        supabase_client.table("learning_paths").update({"status": "archived"}).eq(
-            "user_id", user_id
-        ).eq("status", "active").execute()
-    except Exception as e:
-        print(f"[generate_path] failed to archive prior active path(s) for {user_id}: {type(e).__name__}: {e}", flush=True)
-
-    path_result = supabase_client.table("learning_paths").insert({
-        "user_id": user_id,
-        "goal_text": profile.get("goal_text", ""),
-        "status": "active",
-    }).execute()
-    path_id = path_result.data[0]["id"]
-
     course_lookup = {c["id"]: c for c in courses}
 
     # Deterministic prerequisite repair pass - "course sequencing is mostly
@@ -216,6 +202,15 @@ Generate the learning path JSON now."""
         profile, [course_lookup[cid] for cid in ordered_course_ids]
     )
 
+    # Database-reliability audit: every step used to be its own sequential
+    # INSERT after a separate archive-prior-path UPDATE and a separate
+    # learning_paths INSERT - a crash partway through the loop left an
+    # `active` path with only SOME of its steps, silently served to the
+    # learner as complete. Build the full ordered step list in memory
+    # first (no DB writes yet), then create the path AND every step in one
+    # atomic RPC call (create_learning_path_with_steps, migration 017) -
+    # either the whole path exists or none of it does.
+    rpc_steps = []
     response_milestones = []
     sequence_order = 0
 
@@ -229,18 +224,14 @@ Generate the learning path JSON now."""
             sequence_order += 1
             explanation = explanations.get(course_id) or generate_explanation(profile, course)
 
-            step_result = supabase_client.table("path_steps").insert({
-                "path_id": path_id,
+            rpc_steps.append({
                 "course_id": course_id,
-                "sequence_order": sequence_order,
                 "milestone_label": milestone["label"],
-                "status": "not_started",
                 "explanation": explanation,
-            }).execute()
-            step_id = step_result.data[0]["id"] if step_result.data else ""
+            })
 
             steps.append({
-                "step_id": step_id,
+                "step_id": "",  # filled in after the atomic insert, below
                 "course_id": course_id,
                 "title": course.get("title", ""),
                 "provider": course.get("provider", ""),
@@ -258,6 +249,29 @@ Generate the learning path JSON now."""
             "estimated_weeks": milestone.get("estimated_weeks", 2),
             "steps": steps,
         })
+
+    if not rpc_steps:
+        raise ValueError("No valid course steps could be sequenced from the recommender's output")
+
+    path_id = supabase_client.rpc("create_learning_path_with_steps", {
+        "p_user_id": user_id,
+        "p_goal_text": profile.get("goal_text", ""),
+        "p_steps": rpc_steps,
+    }).execute().data
+
+    # Backfill the real step_ids the RPC generated into the in-memory
+    # response (only used by the fallback return path below - the primary
+    # path re-fetches from the DB via get_path() instead).
+    inserted_steps = (
+        supabase_client.table("path_steps")
+        .select("id, sequence_order").eq("path_id", path_id).order("sequence_order").execute()
+    ).data or []
+    id_by_seq = {row["sequence_order"]: row["id"] for row in inserted_steps}
+    seq = 0
+    for milestone in response_milestones:
+        for step in milestone["steps"]:
+            seq += 1
+            step["step_id"] = id_by_seq.get(seq, "")
 
     # Assign contiguous week numbers so the roadmap week strip and prerequisite
     # locking work for freshly generated paths, not just backfilled ones. This
@@ -490,21 +504,24 @@ def swap_step(step_id: str, user_id: str, level_hint: int = 0) -> dict:
     except Exception as e:
         print(f"[path_service] failed to persist swap recommendation run: {type(e).__name__}: {e}", flush=True)
 
-    # Bump sequence_orders of everything after the skipped step, then insert.
+    # Database-reliability audit: this used to be N sequential single-row
+    # UPDATEs (bump every later sequence_order one at a time), then a
+    # separate UPDATE (mark skipped), then a separate INSERT - a crash
+    # partway through left duplicate or gapped sequence_order values with
+    # no step actually replaced. swap_path_step (migration 017) does the
+    # bump (one set-based UPDATE, safe because path_steps_path_seq_uniq is
+    # DEFERRABLE INITIALLY DEFERRED), the skip, and the insert together in
+    # one transaction.
     old_seq = int(step.get("sequence_order") or 0)
-    _bump_later_sequences(path["id"], after=old_seq)
-    _set_step_status_local(step_id, "skipped")
-
     explanation = generate_explanation(profile, replacement)
-    inserted = supabase_client.table("path_steps").insert({
-        "path_id": path["id"],
-        "course_id": replacement["id"],
-        "sequence_order": old_seq + 1,
-        "milestone_label": step.get("milestone_label"),
-        "status": "not_started",
-        "explanation": explanation,
-    }).execute()
-    new_row = inserted.data[0] if inserted.data else None
+    swap_row = supabase_client.rpc("swap_path_step", {
+        "p_step_id": step_id,
+        "p_user_id": user_id,
+        "p_new_course_id": replacement["id"],
+        "p_explanation": explanation,
+    }).execute().data
+    new_row = swap_row[0] if swap_row else None
+    new_step_id = new_row["new_step_id"] if new_row else ""
     _log_swap_event(
         user_id, path["id"], step_id,
         note=f"swapped for {replacement.get('title')} (level_hint={level_hint})",
@@ -519,7 +536,7 @@ def swap_step(step_id: str, user_id: str, level_hint: int = 0) -> dict:
         "last_recomputed_at": version_info.get("last_recomputed_at") if version_info else None,
         "comparison_note": comparison_note,
         "new_step": {
-            "step_id": new_row["id"] if new_row else "",
+            "step_id": new_step_id,
             "course_id": replacement["id"],
             "title": replacement.get("title", ""),
             "provider": replacement.get("provider", ""),
@@ -537,23 +554,6 @@ def swap_step(step_id: str, user_id: str, level_hint: int = 0) -> dict:
 
 def _set_step_status_local(step_id: str, status: str) -> None:
     supabase_client.table("path_steps").update({"status": status}).eq("id", step_id).execute()
-
-
-def _bump_later_sequences(path_id: str, after: int) -> None:
-    """Add +1 to sequence_order for every step in `path_id` with sequence_order > after."""
-    later = (
-        supabase_client.table("path_steps")
-        .select("id, sequence_order")
-        .eq("path_id", path_id)
-        .gt("sequence_order", after)
-        .execute()
-    )
-    # supabase-py has no bulk-update-with-expression; do individual updates in
-    # descending order to avoid transient unique conflicts if we ever add one.
-    for row in sorted(later.data or [], key=lambda r: r["sequence_order"], reverse=True):
-        supabase_client.table("path_steps").update(
-            {"sequence_order": row["sequence_order"] + 1}
-        ).eq("id", row["id"]).execute()
 
 
 def _log_swap_event(user_id: str, path_id: str, step_id: str, note: str) -> None:
@@ -657,8 +657,31 @@ def _ensure_course_in_catalog(course_data: dict) -> dict:
         "prerequisites": course_data.get("prerequisites") or [],
         "embedding": emb,
         "is_trusted_domain": is_trusted_provider_domain(url),
+        # Database-reliability audit: this insert previously omitted
+        # `source`, silently defaulting to the column's 'seed' default even
+        # though this row is a dynamically-ingested web resource, not part
+        # of the original CSV seed set. That mislabeling meant these rows
+        # were invisible to anything scoped to source='provider_resource'
+        # (including the new idx_courses_resource_url_provider_uniq unique
+        # index below) - real provenance now recorded accurately.
+        "source": "provider_resource",
     }
-    res = supabase_client.table("courses").insert(new_course).execute()
+    try:
+        res = supabase_client.table("courses").insert(new_course).execute()
+    except Exception:
+        # Database-reliability audit: SELECT-then-INSERT above has a real
+        # race - two concurrent swap/rerecommend requests (plausibly two
+        # different learners independently getting the same freshly-found
+        # web result recommended) can both see "not found" and both
+        # attempt this INSERT. idx_courses_resource_url_provider_uniq
+        # (migration 016) turns the second INSERT into a unique-violation
+        # instead of a silent duplicate row; re-select and use the winner
+        # rather than raising - the outcome for both callers is identical
+        # either way (a real, verified course row for this exact URL).
+        existing = supabase_client.table("courses").select("*").eq("resource_url", url).execute()
+        if existing.data:
+            return existing.data[0]
+        raise ResourceValidationError(f"Failed to persist verified course {title!r}")
     if res.data:
         return res.data[0]
     raise ResourceValidationError(f"Failed to persist verified course {title!r}")

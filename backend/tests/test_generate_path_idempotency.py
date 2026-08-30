@@ -19,31 +19,41 @@ def _base_mocks():
     mock_supabase = MagicMock()
     course = {"id": "c1", "title": "Intro", "description": "d", "difficulty": "beginner", "skill_tags": []}
 
-    # One real, persistent mock per table name (not a fresh MagicMock on
-    # every call) so repeated calls to the SAME table (learning_paths gets
-    # called twice: once to archive, once to insert) share one object -
-    # otherwise call_args inspection can't see both interactions together.
     tables: dict[str, MagicMock] = {}
 
     def table(name):
         if name not in tables:
             t = MagicMock()
-            if name == "learning_paths":
-                t.update.return_value.eq.return_value.eq.return_value.execute.return_value = MagicMock(data=[{"id": "old-path"}])
-                t.insert.return_value.execute.return_value = MagicMock(data=[{"id": "new-path-id"}])
-            elif name == "path_steps":
-                t.insert.return_value.execute.return_value = MagicMock(data=[{"id": "step-1"}])
+            if name == "path_steps":
+                t.select.return_value.eq.return_value.order.return_value.execute.return_value = MagicMock(
+                    data=[{"id": "step-1", "sequence_order": 1}]
+                )
             tables[name] = t
         return tables[name]
 
     mock_supabase.table.side_effect = table
+    # create_learning_path_with_steps RETURNS UUID - a scalar, so .data is
+    # the raw string itself (verified against the real deployed function,
+    # not assumed - see the database-reliability audit report).
+    mock_supabase.rpc.return_value.execute.return_value = MagicMock(data="new-path-id")
     fake_recommender = MagicMock()
     fake_recommender.recommend.return_value = [course]
     return mock_supabase, fake_recommender, course
 
 
 class TestAtMostOneActivePath:
-    def test_generate_path_archives_any_prior_active_path_first(self):
+    """Database-reliability audit: the archive-prior-active-path step and
+    the path+steps creation are no longer separate, sequential Python-
+    visible calls - they happen together inside the create_learning_path_
+    with_steps RPC (migration 017), so a crash between them (the original
+    confirmed bug: two real rows both status='active' for one user) is now
+    impossible - either the whole atomic operation commits or none of it
+    does. That invariant is verified directly against the real deployed
+    function in the database-reliability audit report; these unit tests
+    verify generate_path() calls the RPC with the right arguments and no
+    longer performs the old, separate, racy table calls."""
+
+    def test_generate_path_calls_the_atomic_rpc_with_every_step(self):
         mock_supabase, fake_recommender, _ = _base_mocks()
         with patch("app.services.path_service.supabase_client", mock_supabase), \
              patch("app.services.path_service.get_recommender", return_value=fake_recommender), \
@@ -53,32 +63,35 @@ class TestAtMostOneActivePath:
              patch("app.services.path_service.get_path", return_value={"path_id": "new-path-id", "milestones": []}):
             generate_path("user-1", {"goal_text": "Learn Python", "target_role": "Dev"})
 
-        # The archive-prior-active-paths update must have actually run,
-        # with the real {"status": "archived"} payload, before the new
-        # path's insert.
-        learning_paths_mock = mock_supabase.table("learning_paths")
-        learning_paths_mock.update.assert_called_once_with({"status": "archived"})
-        # Scoped to THIS user and to rows currently status='active' - never
-        # a blanket update touching other users' or other-status rows.
-        first_eq = learning_paths_mock.update.return_value.eq
-        second_eq = first_eq.return_value.eq
-        first_eq.assert_called_once_with("user_id", "user-1")
-        second_eq.assert_called_once_with("status", "active")
-        learning_paths_mock.insert.assert_called_once()
+        rpc_name, rpc_params = mock_supabase.rpc.call_args[0]
+        assert rpc_name == "create_learning_path_with_steps"
+        assert rpc_params["p_user_id"] == "user-1"
+        assert rpc_params["p_goal_text"] == "Learn Python"
+        assert rpc_params["p_steps"] == [{"course_id": "c1", "milestone_label": "M1", "explanation": "Fits well."}]
 
-    def test_archive_failure_does_not_block_creating_the_new_path(self):
-        """Best-effort: a failure archiving the OLD path must never
-        prevent the learner from getting their new one."""
+        # The old racy sequence (separate archive UPDATE + separate INSERT
+        # on learning_paths from Python) must be gone - both now happen
+        # inside the RPC, not as directly observable table calls.
+        assert "learning_paths" not in {c.args[0] for c in mock_supabase.table.call_args_list if c.args}
+
+    def test_atomic_rpc_failure_propagates_instead_of_silently_degrading(self):
+        """Deliberate behavior change from the old best-effort archive: since
+        archiving the prior path and creating the new one are now ONE
+        atomic transaction, a failure anywhere inside it must raise rather
+        than risk either violating the at-most-one-active-path invariant or
+        leaving inconsistent state - see the database-reliability audit
+        report for why silently swallowing this would be worse."""
         mock_supabase, fake_recommender, _ = _base_mocks()
-        mock_supabase.table("learning_paths").update.return_value.eq.return_value.eq.return_value.execute.side_effect = RuntimeError("db hiccup")
+        mock_supabase.rpc.return_value.execute.side_effect = RuntimeError("db hiccup")
         with patch("app.services.path_service.supabase_client", mock_supabase), \
              patch("app.services.path_service.get_recommender", return_value=fake_recommender), \
              patch("app.services.path_service._call_groq", return_value='{"milestones": [{"label": "M1", "course_ids": ["c1"]}]}'), \
-             patch("app.services.path_service.generate_explanations_batch", return_value={"c1": "Fits well."}), \
-             patch("app.services.roadmap_service.assign_week_numbers"), \
-             patch("app.services.path_service.get_path", return_value={"path_id": "new-path-id", "milestones": []}):
-            # Must not raise despite the archive step failing.
-            generate_path("user-1", {"goal_text": "Learn Python", "target_role": "Dev"})
+             patch("app.services.path_service.generate_explanations_batch", return_value={"c1": "Fits well."}):
+            try:
+                generate_path("user-1", {"goal_text": "Learn Python", "target_role": "Dev"})
+                assert False, "expected the RPC failure to propagate"
+            except RuntimeError:
+                pass
 
 
 class TestGeneratePathRouteIdempotency:

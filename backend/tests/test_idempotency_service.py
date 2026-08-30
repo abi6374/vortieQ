@@ -34,7 +34,7 @@ class TestCheckAndReserve:
         mock_table = MagicMock()
         mock_supabase.table.return_value = mock_table
         mock_table.select.return_value.eq.return_value.execute.return_value = MagicMock(
-            data=[{"response_status": 200, "response_body": {"swapped": True, "step_id": "s1"}}]
+            data=[{"user_id": "user-1", "response_status": 200, "response_body": {"swapped": True, "step_id": "s1"}}]
         )
         with patch("app.services.idempotency_service.supabase_client", mock_supabase):
             result = idempotency_service.check_and_reserve("key-123", "user-1", "steps.swap")
@@ -48,7 +48,7 @@ class TestCheckAndReserve:
         # Row exists but response_status is still NULL - another request with
         # this same key is mid-flight right now.
         mock_table.select.return_value.eq.return_value.execute.return_value = MagicMock(
-            data=[{"response_status": None, "response_body": None}]
+            data=[{"user_id": "user-1", "response_status": None, "response_body": None}]
         )
         with patch("app.services.idempotency_service.supabase_client", mock_supabase):
             result = idempotency_service.check_and_reserve("key-123", "user-1", "steps.swap")
@@ -65,12 +65,89 @@ class TestCheckAndReserve:
         # Second select (after failed insert): the winner's row, still in flight.
         mock_table.select.return_value.eq.return_value.execute.side_effect = [
             MagicMock(data=[]),
-            MagicMock(data=[{"response_status": None, "response_body": None}]),
+            MagicMock(data=[{"user_id": "user-1", "response_status": None, "response_body": None}]),
         ]
         mock_table.insert.return_value.execute.side_effect = RuntimeError("duplicate key value violates unique constraint")
         with patch("app.services.idempotency_service.supabase_client", mock_supabase):
             result = idempotency_service.check_and_reserve("key-123", "user-1", "steps.swap")
         assert result["status"] == 425  # told to wait, not allowed to double-execute
+
+
+class TestRequestHashAndOwnership:
+    """Database-reliability audit additions: a key reused for a DIFFERENT
+    request body must not silently replay the first response, and a key
+    somehow reused across users must not leak one user's cached response to
+    another."""
+
+    def test_same_key_different_payload_is_rejected_not_replayed(self):
+        mock_supabase = MagicMock()
+        mock_table = MagicMock()
+        mock_supabase.table.return_value = mock_table
+        first_hash = idempotency_service._hash_request({"step_id": "s1"})
+        mock_table.select.return_value.eq.return_value.execute.return_value = MagicMock(
+            data=[{"user_id": "user-1", "request_hash": first_hash,
+                    "response_status": 200, "response_body": {"swapped": True}}]
+        )
+        with patch("app.services.idempotency_service.supabase_client", mock_supabase):
+            result = idempotency_service.check_and_reserve(
+                "key-123", "user-1", "steps.swap", request_payload={"step_id": "DIFFERENT"},
+            )
+        assert result["status"] == 409
+        mock_table.insert.assert_not_called()
+
+    def test_same_key_same_payload_still_replays_normally(self):
+        mock_supabase = MagicMock()
+        mock_table = MagicMock()
+        mock_supabase.table.return_value = mock_table
+        payload = {"step_id": "s1"}
+        h = idempotency_service._hash_request(payload)
+        mock_table.select.return_value.eq.return_value.execute.return_value = MagicMock(
+            data=[{"user_id": "user-1", "request_hash": h,
+                    "response_status": 200, "response_body": {"swapped": True}}]
+        )
+        with patch("app.services.idempotency_service.supabase_client", mock_supabase):
+            result = idempotency_service.check_and_reserve(
+                "key-123", "user-1", "steps.swap", request_payload=payload,
+            )
+        assert result == {"status": 200, "body": {"swapped": True}}
+
+    def test_key_reserved_by_a_different_user_is_never_replayed(self):
+        mock_supabase = MagicMock()
+        mock_table = MagicMock()
+        mock_supabase.table.return_value = mock_table
+        mock_table.select.return_value.eq.return_value.execute.return_value = MagicMock(
+            data=[{"user_id": "someone-else", "response_status": 200, "response_body": {"secret": "data"}}]
+        )
+        with patch("app.services.idempotency_service.supabase_client", mock_supabase):
+            result = idempotency_service.check_and_reserve("key-123", "user-1", "steps.swap")
+        assert result["status"] == 404
+        assert result["body"] != {"secret": "data"}
+
+    def test_new_reservation_persists_the_request_hash(self):
+        mock_supabase = MagicMock()
+        mock_table = MagicMock()
+        mock_supabase.table.return_value = mock_table
+        mock_table.select.return_value.eq.return_value.execute.return_value = MagicMock(data=[])
+        with patch("app.services.idempotency_service.supabase_client", mock_supabase):
+            idempotency_service.check_and_reserve(
+                "key-123", "user-1", "steps.swap", request_payload={"step_id": "s1"},
+            )
+        insert_payload = mock_table.insert.call_args[0][0]
+        assert insert_payload["request_hash"] == idempotency_service._hash_request({"step_id": "s1"})
+
+    def test_no_payload_supplied_skips_the_mismatch_check(self):
+        """Backward compatibility: callers that don't pass request_payload
+        (not yet updated, or genuinely payload-less routes like
+        paths.generate) must behave exactly as before this audit."""
+        mock_supabase = MagicMock()
+        mock_table = MagicMock()
+        mock_supabase.table.return_value = mock_table
+        mock_table.select.return_value.eq.return_value.execute.return_value = MagicMock(
+            data=[{"user_id": "user-1", "request_hash": None, "response_status": 200, "response_body": {"ok": True}}]
+        )
+        with patch("app.services.idempotency_service.supabase_client", mock_supabase):
+            result = idempotency_service.check_and_reserve("key-123", "user-1", "paths.generate")
+        assert result == {"status": 200, "body": {"ok": True}}
 
 
 class TestStoreResult:

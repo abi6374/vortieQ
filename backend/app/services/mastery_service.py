@@ -49,7 +49,15 @@ _DEFAULT_CONFIDENCE_BY_SOURCE = {
 
 def _combine(existing: dict | None, new_mastery: float, new_confidence: float) -> tuple[float, float]:
     """Confidence-weighted combination of an existing mastery estimate with
-    one new observation. Returns (mastery_probability, confidence)."""
+    one new observation. Returns (mastery_probability, confidence).
+
+    No longer called from _upsert_mastery (see its docstring - the actual
+    combine+write now happens atomically inside the upsert_mastery_evidence
+    SQL function, migration 017, to close a lost-update race). Kept as the
+    readable Python reference implementation: the SQL function's formula is
+    a direct port of this one, and test_taxonomy_and_mastery.py's existing
+    unit tests on this function double as documentation that the two stay
+    in sync if either is ever changed."""
     new_mastery = max(0.0, min(1.0, new_mastery))
     new_confidence = max(0.0, min(1.0, new_confidence))
     if not existing:
@@ -68,27 +76,25 @@ def _combine(existing: dict | None, new_mastery: float, new_confidence: float) -
 
 def _upsert_mastery(user_id: str, skill_id: str, mastery: float, confidence: float,
                      source: str, note: str = "", target_level: float | None = None) -> None:
-    existing_r = (
-        supabase_client.table("learner_skill_mastery")
-        .select("mastery_probability, confidence, decay_version")
-        .eq("user_id", user_id).eq("skill_id", skill_id).execute()
-    )
-    existing = existing_r.data[0] if existing_r.data else None
-    combined_mastery, combined_confidence = _combine(existing, mastery, confidence)
-
-    payload = {
-        "user_id": user_id,
-        "skill_id": skill_id,
-        "mastery_probability": round(combined_mastery, 4),
-        "confidence": round(combined_confidence, 4),
-        "evidence_source": source,
-        "evidence_note": note[:500],
-        "observed_at": datetime.now(timezone.utc).isoformat(),
-        "decay_version": (existing.get("decay_version", 1) if existing else 1) + (1 if existing else 0),
-    }
-    if target_level is not None:
-        payload["target_level"] = max(0.0, min(1.0, target_level))
-    supabase_client.table("learner_skill_mastery").upsert(payload, on_conflict="user_id,skill_id").execute()
+    """Database-reliability audit: this used to be SELECT existing
+    mastery/confidence, combine in Python, then UPSERT - a lost-update race
+    under concurrent evidence writes for the SAME (user_id, skill_id) (e.g.
+    resume analysis and GitHub analysis both completing during onboarding
+    around the same time could each read the same starting point and one
+    combination would silently overwrite the other instead of both being
+    reflected). upsert_mastery_evidence (migration 017) does the read
+    (row-locked with FOR UPDATE), the SAME confidence-weighted-average
+    combine, and the upsert all inside one transaction, so two concurrent
+    calls serialize correctly instead of racing."""
+    supabase_client.rpc("upsert_mastery_evidence", {
+        "p_user_id": user_id,
+        "p_skill_id": skill_id,
+        "p_new_mastery": mastery,
+        "p_new_confidence": confidence,
+        "p_source": source,
+        "p_note": note[:500],
+        "p_target_level": max(0.0, min(1.0, target_level)) if target_level is not None else None,
+    }).execute()
 
 
 def _apply_topics(user_id: str, topics: list[dict], source: str) -> int:

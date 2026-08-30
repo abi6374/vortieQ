@@ -90,12 +90,20 @@ class TestMasteryCombination:
 
 
 class TestMasteryUpdates:
+    """Since the database-reliability audit, _upsert_mastery calls the
+    upsert_mastery_evidence RPC (migration 017) instead of a direct
+    .table().upsert() - the combine-and-write now happens atomically inside
+    the SQL function (see mastery_service._upsert_mastery's docstring for
+    why). These tests mock supabase_client.rpc(...) accordingly."""
+
     def _mock_supabase_for_upsert(self):
         mock_supabase = MagicMock()
         mock_table = MagicMock()
         mock_supabase.table.return_value = mock_table
         mock_table.select.return_value.eq.return_value.eq.return_value.execute.return_value = MagicMock(data=[])
-        mock_table.upsert.return_value.execute.return_value = MagicMock(data=[{"id": "row-1"}])
+        mock_supabase.rpc.return_value.execute.return_value = MagicMock(
+            data=[{"mastery_probability": 0, "confidence": 0, "decay_version": 1}]
+        )
         return mock_supabase, mock_table
 
     def test_update_mastery_from_resume_uses_real_evidence_only(self):
@@ -107,10 +115,11 @@ class TestMasteryUpdates:
                 [{"name": "Python", "suggested_level": "advanced", "confidence_pct": 90, "evidence": "3 real projects"}],
             )
         assert updated == 1
-        upsert_payload = mock_table.upsert.call_args[0][0]
-        assert upsert_payload["mastery_probability"] == 0.8  # advanced -> 0.8
-        assert upsert_payload["confidence"] == 0.9  # 90% confidence_pct -> 0.9
-        assert upsert_payload["evidence_source"] == "resume"
+        rpc_name, rpc_params = mock_supabase.rpc.call_args[0]
+        assert rpc_name == "upsert_mastery_evidence"
+        assert rpc_params["p_new_mastery"] == 0.8  # advanced -> 0.8
+        assert rpc_params["p_new_confidence"] == 0.9  # 90% confidence_pct -> 0.9
+        assert rpc_params["p_source"] == "resume"
 
     def test_update_mastery_skips_unrecognized_level_never_guesses(self):
         mock_supabase, mock_table = self._mock_supabase_for_upsert()
@@ -120,7 +129,7 @@ class TestMasteryUpdates:
                 "user-1", [{"name": "Something", "suggested_level": "super-duper-expert"}]
             )
         assert updated == 0
-        mock_table.upsert.assert_not_called()
+        mock_supabase.rpc.assert_not_called()
 
     def test_update_mastery_from_feedback_only_moves_on_too_easy_or_too_hard(self):
         mock_supabase, mock_table = self._mock_supabase_for_upsert()
@@ -146,17 +155,19 @@ class TestMasteryUpdates:
         mock_table.select.return_value.eq.return_value.eq.return_value.execute.return_value = MagicMock(
             data=[{"mastery_probability": 0.5, "confidence": 0.4}]
         )
-        mock_table.upsert.return_value.execute.return_value = MagicMock(data=[{"id": "row-1"}])
+        mock_supabase.rpc.return_value.execute.return_value = MagicMock(
+            data=[{"mastery_probability": 0, "confidence": 0, "decay_version": 1}]
+        )
         with patch("app.services.mastery_service.supabase_client", mock_supabase), \
              patch("app.services.taxonomy_service.resolve_or_create_skill", return_value="skill-x"):
             mastery_service.update_mastery_from_feedback("user-1", ["python"], "too_easy")
-            too_easy_payload = mock_table.upsert.call_args[0][0]
+            too_easy_params = mock_supabase.rpc.call_args[0][1]
 
             mastery_service.update_mastery_from_feedback("user-1", ["python"], "too_hard")
-            too_hard_payload = mock_table.upsert.call_args[0][0]
+            too_hard_params = mock_supabase.rpc.call_args[0][1]
 
-        assert too_easy_payload["mastery_probability"] > 0.5  # underestimated -> nudge up
-        assert too_hard_payload["mastery_probability"] < 0.5  # overestimated -> nudge down
+        assert too_easy_params["p_new_mastery"] > 0.5  # underestimated -> nudge up
+        assert too_hard_params["p_new_mastery"] < 0.5  # overestimated -> nudge down
 
     def test_too_hard_never_lowers_mastery_below_zero(self):
         mock_supabase, mock_table = self._mock_supabase_for_upsert()
@@ -164,8 +175,8 @@ class TestMasteryUpdates:
         with patch("app.services.mastery_service.supabase_client", mock_supabase), \
              patch("app.services.taxonomy_service.resolve_or_create_skill", return_value="skill-x"):
             mastery_service.update_mastery_from_feedback("user-1", ["python"], "too_hard")
-        payload = mock_table.upsert.call_args[0][0]
-        assert payload["mastery_probability"] >= 0.0
+        params = mock_supabase.rpc.call_args[0][1]
+        assert params["p_new_mastery"] >= 0.0
 
 
 class TestUnmetPrerequisites:

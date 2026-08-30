@@ -33,16 +33,22 @@ def bump_path_version(path_id: str) -> dict | None:
     feedback_service) can echo the real new version back in its own
     response instead of the client having to re-fetch the whole roadmap
     just to learn it changed. Returns None on failure - callers must not
-    treat that as "version 0"."""
+    treat that as "version 0".
+
+    Database-reliability audit: this used to be SELECT version, compute +1
+    in Python, then UPDATE - a classic lost-update race. Two concurrent
+    mutations on the same path (two tabs, a fast double-click hitting two
+    different action buttons) could both read the same version and both
+    write the same "+1", silently losing one increment. Now a single
+    UPDATE...RETURNING via the bump_path_version RPC (migration 017) -
+    Postgres's own row lock during the UPDATE serializes concurrent callers
+    correctly with no lost increments, because it's one atomic statement
+    instead of a read then a separate write."""
     try:
-        current = supabase_client.table("learning_paths").select("version").eq("id", path_id).execute()
-        next_version = (current.data[0].get("version") or 0) + 1 if current.data else 1
-        stamp = datetime.now(timezone.utc).isoformat()
-        supabase_client.table("learning_paths").update({
-            "version": next_version,
-            "last_recomputed_at": stamp,
-        }).eq("id", path_id).execute()
-        return {"version": next_version, "last_recomputed_at": stamp}
+        rows = supabase_client.rpc("bump_path_version", {"p_path_id": path_id}).execute().data
+        if not rows:
+            return None
+        return {"version": rows[0]["version"], "last_recomputed_at": rows[0]["last_recomputed_at"]}
     except Exception as e:
         print(f"[roadmap] path version bump failed for {path_id}: {type(e).__name__}: {e}", flush=True)
         return None
@@ -365,6 +371,15 @@ def set_task_completion(
 
     # Keep profiles.completed_courses in step with the toggle, both directions,
     # so the recommender never re-suggests something the learner just finished.
+    #
+    # Database-reliability audit: this used to be SELECT completed_courses,
+    # modify the array in Python, UPDATE the whole array - a lost-update
+    # race under concurrent completions (two tabs completing different
+    # steps of the same learner around the same time could each read a
+    # stale array and clobber the other's change). set_course_completion_
+    # flag (migration 017) does the add/remove as one array-expression
+    # UPDATE Postgres serializes on its own row lock - no read-then-write
+    # window for a concurrent call to land in.
     course_id = step.get("course_id")
     if course_id:
         current_statuses = (
@@ -372,16 +387,12 @@ def set_task_completion(
             .select("status").eq("path_id", path_id).eq("course_id", course_id).execute()
         ).data or []
         course_fully_done = bool(current_statuses) and all(s.get("status") in TERMINAL for s in current_statuses)
-
-        prof = supabase_client.table("profiles").select("completed_courses").eq("id", user_id).execute()
-        ids = list((prof.data[0].get("completed_courses") if prof.data else None) or [])
-        changed = False
-        if course_fully_done and course_id not in ids:
-            ids.append(course_id); changed = True
-        elif not course_fully_done and course_id in ids:
-            ids = [i for i in ids if i != course_id]; changed = True
-        if changed:
-            supabase_client.table("profiles").update({"completed_courses": ids}).eq("id", user_id).execute()
+        try:
+            supabase_client.rpc("set_course_completion_flag", {
+                "p_user_id": user_id, "p_course_id": course_id, "p_done": course_fully_done,
+            }).execute()
+        except Exception as e:
+            print(f"[roadmap] completed_courses flag update failed: {type(e).__name__}: {e}", flush=True)
 
     if completed:
         try:

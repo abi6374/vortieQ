@@ -504,29 +504,38 @@ def test_swap_step_with_preference_skips_youtube_when_learner_excludes_video():
 def test_bump_path_version_increments_and_stamps_freshness():
     """Real-time-behavior fix: learning_paths.version/last_recomputed_at
     (migration 008) let a client detect a stale roadmap without a blind
-    refresh timer. Called from every real path mutation."""
+    refresh timer. Called from every real path mutation.
+
+    Database-reliability audit: bump_path_version now calls the
+    bump_path_version RPC (migration 017) - a single UPDATE...RETURNING
+    instead of SELECT-then-compute-then-UPDATE, closing a lost-update race
+    under concurrent callers (see test_concurrent_mutations.py for the
+    race itself)."""
     from app.services.roadmap_service import bump_path_version
 
     mock_supabase = MagicMock()
-    mock_table = MagicMock()
-    mock_supabase.table.return_value = mock_table
-    mock_table.select.return_value.eq.return_value.execute.return_value = MagicMock(data=[{"version": 3}])
+    mock_supabase.rpc.return_value.execute.return_value = MagicMock(
+        data=[{"version": 4, "last_recomputed_at": "2026-01-01T00:00:00+00:00"}]
+    )
 
     with patch("app.services.roadmap_service.supabase_client", mock_supabase):
-        bump_path_version("path-1")
+        result = bump_path_version("path-1")
 
-    update_payload = mock_table.update.call_args[0][0]
-    assert update_payload["version"] == 4
-    assert "last_recomputed_at" in update_payload
+    rpc_name, rpc_params = mock_supabase.rpc.call_args[0]
+    assert rpc_name == "bump_path_version"
+    assert rpc_params == {"p_path_id": "path-1"}
+    assert result["version"] == 4
+    assert "last_recomputed_at" in result
 
 
 def test_bump_path_version_never_raises_on_failure():
     from app.services.roadmap_service import bump_path_version
 
     mock_supabase = MagicMock()
-    mock_supabase.table.side_effect = RuntimeError("db down")
+    mock_supabase.rpc.side_effect = RuntimeError("db down")
     with patch("app.services.roadmap_service.supabase_client", mock_supabase):
-        bump_path_version("path-1")  # must not raise - this is a best-effort signal
+        result = bump_path_version("path-1")  # must not raise - this is a best-effort signal
+    assert result is None
 
 
 def test_extract_from_text_endpoint():
