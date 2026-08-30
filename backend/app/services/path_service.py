@@ -163,6 +163,24 @@ Generate the learning path JSON now."""
         })
         milestones = json.loads(_strip_fences(_call_groq(messages)))["milestones"]
 
+    # Real invariant this enforces: "at most one active path per user."
+    # Confirmed live during this session's own verification testing that
+    # this could actually break - a real test account had TWO rows both
+    # status='active' in learning_paths, with no schema constraint or
+    # application logic preventing it. Idempotency-Key protection on the
+    # router (POST /api/paths/generate) guards the "same request retried"
+    # case; this guards the distinct case of a genuinely SECOND call
+    # (e.g. two browser tabs, or a legitimate "regenerate my path" action
+    # in the future) - archiving whatever was active before rather than
+    # leaving two paths simultaneously active and ambiguous about which
+    # one get_roadmap()/rerecommend/swap should even be operating on.
+    try:
+        supabase_client.table("learning_paths").update({"status": "archived"}).eq(
+            "user_id", user_id
+        ).eq("status", "active").execute()
+    except Exception as e:
+        print(f"[generate_path] failed to archive prior active path(s) for {user_id}: {type(e).__name__}: {e}", flush=True)
+
     path_result = supabase_client.table("learning_paths").insert({
         "user_id": user_id,
         "goal_text": profile.get("goal_text", ""),
