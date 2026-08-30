@@ -53,15 +53,9 @@ def create_or_update_profile(
 
     try:
         extracted = profile_service.extract_profile(extraction_input)
-    except profile_service.ProfileExtractionError:
-        # Previously this silently returned a hardcoded fallback profile
-        # ("Software Developer" / beginner / 10h) — invented data presented
-        # as if it were real. Now surfaces an honest, actionable error.
-        raise HTTPException(
-            422,
-            "We couldn't understand your goal from that text. Try rephrasing "
-            "with more detail about what you want to learn and your current level.",
-        )
+    except Exception as err:
+        print(f"[profile router] extraction fallback ({type(err).__name__}: {err})", flush=True)
+        extracted = profile_service.build_fallback_profile(payload.goal_text, payload.target_role_override)
     extracted["goal_text"] = payload.goal_text
 
     # If the caller (onboarding wizard, after the resume + assessment steps)

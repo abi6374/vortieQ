@@ -197,35 +197,42 @@ export default function OnboardingPage() {
 
     try {
       const ratingsPayload = (topicRatings.length > 0 ? topicRatings : resumeTopics).map((t) => ({
-        topic_name: t.name,
-        skill_name: t.name,
-        level: t.suggested_level || t.level || 'basic',
-        self_rating: t.suggested_level || t.level || 'basic',
-        confidence: typeof t.confidence_pct === 'number' ? t.confidence_pct / 100 : (t.confidence ?? 0.8),
-        confidence_pct: t.confidence_pct ?? 80,
-      }))
+        name: String(t.name || t.topic_name || t.skill_name || '').trim().slice(0, 100),
+        level: String(t.suggested_level || t.level || t.self_rating || 'basic').toLowerCase().trim(),
+        evidence: String(t.evidence || '').slice(0, 500),
+        confidence_pct: typeof t.confidence_pct === 'number' ? Math.round(t.confidence_pct) : 80,
+      })).filter((t) => t.name.length > 0)
 
       let effectiveTargetRole = targetRoleOverrideInput || targetRoleOverride
       if (!effectiveTargetRole && goalTextInput) {
         effectiveTargetRole = goalTextInput.trim().slice(0, 80)
       }
 
+      const composed = weeklyHours
+        ? `${goalTextInput || 'My Career Learning Goal'} I can study ${weeklyHours} hours per week.`
+        : (goalTextInput || 'My Career Learning Goal')
+
       const profilePayload = {
         goal: goalTextInput,
+        goal_text: composed,
         target_role: effectiveTargetRole || 'Software Engineer',
-        weekly_hours: weeklyHours,
-        years_experience: detectedYears,
+        target_role_override: effectiveTargetRole || 'Software Engineer',
+        weekly_hours: weeklyHours || 10,
+        detected_years_experience: detectedYears || 0,
+        years_experience: detectedYears || 0,
         topic_ratings: ratingsPayload,
-        education: resumeEducation,
-        projects: resumeProjects,
+        resume_education: resumeEducation || '',
+        education: resumeEducation || '',
+        resume_projects: resumeProjects || '',
+        projects: resumeProjects || '',
       }
 
       await api.post('/api/profile/', profilePayload)
 
       const generatePayload = {
-        goal_text: goalTextInput,
+        goal_text: composed,
         target_role: effectiveTargetRole || 'Software Engineer',
-        weekly_hours: weeklyHours,
+        weekly_hours: weeklyHours || 10,
         resume_topics: ratingsPayload,
       }
 
@@ -241,7 +248,7 @@ export default function OnboardingPage() {
         throw new Error('No path_id returned from generation')
       }
     } catch (err) {
-      console.error('Plan generation failed:', err)
+      console.error('Plan generation failed:', err?.response?.data || err?.message || err)
       const detail = err?.response?.data?.detail
       const msg = typeof detail === 'string' ? detail : 'Failed to generate learning plan. Please try again.'
       setError(msg)

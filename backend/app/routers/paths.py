@@ -1,3 +1,4 @@
+from pydantic import BaseModel
 from fastapi import APIRouter, Depends, Header, HTTPException
 
 from app.config import supabase_client
@@ -8,8 +9,20 @@ from app.services import feedback_service, idempotency_service, path_service
 router = APIRouter()
 
 
+class GeneratePathPayload(BaseModel):
+    goal_text: str | None = None
+    goal: str | None = None
+    target_role: str | None = None
+    weekly_hours: int | None = None
+    resume_topics: list[dict] | None = None
+
+    class Config:
+        extra = "ignore"
+
+
 @router.post("/generate")
 def generate_path(
+    payload: GeneratePathPayload | None = None,
     user_id: str = Depends(rate_limit("paths.generate", max_calls=5)),
     idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
 ):
