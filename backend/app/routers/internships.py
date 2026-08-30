@@ -60,8 +60,11 @@ def get_internship_detail(
 @router.post("/{internship_id}/apply")
 def apply_to_internship(
     internship_id: str,
-    # Matches user_internships.application_status's real DB CHECK
-    # constraint (migration 015) exactly.
+    # Subset of user_internships.application_status's real DB CHECK
+    # constraint (migration 015 - widened in place to add 'tracked')
+    # relevant to this apply/save/bookmark action -
+    # "interviewing"/"offer"/"rejected" are set via the separate PATCH
+    # /status route below, not here.
     status: Literal["tracked", "applied", "saved"] = Query("tracked"),
     user_id: str = Depends(verify_jwt),
 ):
@@ -97,7 +100,8 @@ def unapply_from_internship(
 def update_internship_status(
     internship_id: str,
     # Matches user_internships.application_status's full real DB CHECK
-    # constraint (migration 015) exactly.
+    # constraint (migration 015 - widened in place to add 'tracked')
+    # exactly.
     new_status: Literal["tracked", "applied", "saved", "interviewing", "offer", "rejected"] = Query(...),
     user_id: str = Depends(verify_jwt),
 ):

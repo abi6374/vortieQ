@@ -265,7 +265,7 @@ def get_internship_by_id(internship_id: str) -> Optional[dict]:
     return None
 
 
-def apply_to_internship(user_id: str, internship_id: str, status: str = "applied") -> dict:
+def apply_to_internship(user_id: str, internship_id: str, status: str = "tracked") -> dict:
     """Record that a user applied to an internship (persistent via Supabase)."""
     internship = get_internship_by_id(internship_id)
     if not internship:
@@ -323,7 +323,9 @@ def get_user_internships(user_id: str) -> list:
 
 
 def update_application_status(user_id: str, internship_id: str, new_status: str) -> dict:
-    """Update internship application status (tracked → applied → saved → interviewing → offer/rejected)."""
+    """Update internship application status (tracked/saved → applied → interviewing → offer/rejected)."""
+    # Matches user_internships.application_status's real DB CHECK
+    # constraint (migration 015, widened in place) exactly.
     valid = {"tracked", "applied", "saved", "interviewing", "offer", "rejected"}
     if new_status not in valid:
         raise ValueError(f"Invalid status. Must be one of: {valid}")

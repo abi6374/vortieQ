@@ -67,7 +67,8 @@ def get_hackathon_detail(
 def register_for_hackathon(
     hackathon_id: str,
     # Matches user_hackathons.status's real DB CHECK constraint
-    # (migration 015) exactly - previously a bare string, so any other
+    # (migration 015 - widened in place to add 'tracked'/'saved' to the
+    # original 3 values) exactly - previously a bare string, so any other
     # value would only ever be caught by the DB itself, surfacing as the
     # RuntimeError/500 branch below (and, before this fix, leaking the
     # raw Postgres error string to the client).

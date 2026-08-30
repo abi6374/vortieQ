@@ -278,7 +278,7 @@ def get_hackathon_by_id(hackathon_id: str) -> Optional[dict]:
     return None
 
 
-def register_for_hackathon(user_id: str, hackathon_id: str, status: str = "registered") -> dict:
+def register_for_hackathon(user_id: str, hackathon_id: str, status: str = "tracked") -> dict:
     """Register or track a hackathon for a user in Supabase (persistent)."""
     hackathon = get_hackathon_by_id(hackathon_id)
     if not hackathon:

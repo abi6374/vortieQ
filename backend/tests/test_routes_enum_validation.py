@@ -46,7 +46,7 @@ class TestHackathonStatusEnum:
 
     def test_real_status_values_accepted(self):
         with patch("app.services.hackathon_service.register_for_hackathon", return_value={"ok": True}):
-            for status in ("registered", "interested", "submitted"):
+            for status in ("tracked", "saved", "registered", "interested", "submitted"):
                 r = client.post("/api/hackathons/h1/register", params={"status": status})
                 assert r.status_code == 200
 
@@ -66,8 +66,14 @@ class TestInternshipStatusEnums:
 
     def test_update_status_accepts_every_real_check_constraint_value(self):
         with patch("app.services.internship_service.update_application_status", return_value={"ok": True}):
-            for status in ("applied", "saved", "interviewing", "offer", "rejected"):
+            for status in ("tracked", "applied", "saved", "interviewing", "offer", "rejected"):
                 r = client.patch("/api/internships/i1/status", params={"new_status": status})
+                assert r.status_code == 200
+
+    def test_apply_accepts_every_relevant_status_value(self):
+        with patch("app.services.internship_service.apply_to_internship", return_value={"ok": True}):
+            for status in ("tracked", "applied", "saved"):
+                r = client.post("/api/internships/i1/apply", params={"status": status})
                 assert r.status_code == 200
 
 
