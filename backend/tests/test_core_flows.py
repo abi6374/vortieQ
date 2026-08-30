@@ -529,5 +529,43 @@ def test_bump_path_version_never_raises_on_failure():
         bump_path_version("path-1")  # must not raise - this is a best-effort signal
 
 
+def test_extract_from_text_endpoint():
+    """Verify POST /api/profile/extract-text extracts skills and metadata from natural language description."""
+    from fastapi.testclient import TestClient
+    from app.main import app
+    from app.middleware.auth import verify_jwt
+
+    fake_result = {
+        "topics": [
+            {"name": "Python", "evidence": "2 years experience", "suggested_level": "intermediate", "confidence_pct": 80},
+            {"name": "SQL", "evidence": "Built queries", "suggested_level": "intermediate", "confidence_pct": 75}
+        ],
+        "detected_years_experience": 2,
+        "education": "BS in CS",
+        "projects": "Built ETL pipelines",
+        "suggested_goal": "Data Scientist",
+    }
+
+    app.dependency_overrides[verify_jwt] = lambda: "test-user-1"
+    try:
+        client = TestClient(app)
+        with patch("app.services.resume_service.extract_topics", return_value=fake_result):
+            resp = client.post(
+                "/api/profile/extract-text",
+                json={"text": "I have 2 years of Python and SQL experience building ETL pipelines."},
+                headers={"Authorization": "Bearer fake-token"}
+            )
+            assert resp.status_code == 200
+            data = resp.json()
+            assert len(data["topics"]) == 2
+            assert data["topics"][0]["name"] == "Python"
+            assert data["detected_years_experience"] == 2
+            assert data["suggested_goal"] == "Data Scientist"
+    finally:
+        app.dependency_overrides.clear()
+
+
+
+
 
 

@@ -76,3 +76,8 @@ class ResumeExtractResponse(BaseModel):
     education: str = ""
     projects: str = ""
     suggested_goal: str = ""
+
+
+class TextExtractRequest(BaseModel):
+    text: str = Field(..., min_length=1, max_length=4000)
+

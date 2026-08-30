@@ -5,10 +5,32 @@ from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
 from app.config import supabase_client
 from app.middleware.auth import verify_jwt
 from app.middleware.rate_limit import rate_limit
-from app.schemas.profile import ProfileCreateSchema, ResumeExtractResponse
+from app.schemas.profile import ProfileCreateSchema, ResumeExtractResponse, TextExtractRequest
 from app.services import mastery_service, profile_service, resume_service
 
 router = APIRouter()
+
+
+@router.post("/extract-text", response_model=ResumeExtractResponse)
+def extract_from_text(
+    payload: TextExtractRequest,
+    user_id: str = Depends(rate_limit("profile.extract_text", max_calls=30)),
+):
+    """Extract skills, years of experience, projects, education, and target goal
+    directly from natural language background description without requiring a resume file.
+    """
+    text = payload.text.strip()
+    if not text:
+        return ResumeExtractResponse(
+            topics=[],
+            detected_years_experience=0,
+            education="",
+            projects="",
+            suggested_goal="",
+        )
+    result = resume_service.extract_topics(text)
+    return result
+
 
 
 @router.post("/")

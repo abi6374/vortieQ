@@ -163,6 +163,11 @@ export default function LearnerIntakeWorkspace({
   const [isEditingDraft, setIsEditingDraft] = useState(false)
   const [editFormData, setEditFormData] = useState({ ...EMPTY_DRAFT })
 
+  // Cached topics extracted from natural language text
+  const parsedTopicsRef = useRef([])
+  const [isExtractingText, setIsExtractingText] = useState(false)
+  const extractTimerRef = useRef(null)
+
   const acceptTypes =
     '.pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document'
 
@@ -187,25 +192,75 @@ export default function LearnerIntakeWorkspace({
     }))
   }
 
+  // Live extraction from natural language description
+  const runTextExtraction = async (text) => {
+    if (!text || text.trim().length < 20 || file) return
+    setIsExtractingText(true)
+    try {
+      const { data } = await apiClient.post('/api/profile/extract-text', { text: text.trim() })
+      if (data?.topics) {
+        parsedTopicsRef.current = data.topics
+        setProfileDraft((prev) => {
+          const skillsStr = data.topics.map((t) => t.name).join(', ')
+          return {
+            ...EMPTY_DRAFT,
+            ...prev,
+            skills: prev?.skills && prev.skills !== '' ? prev.skills : skillsStr,
+            education: prev?.education || data.education || '',
+            projects: prev?.projects || data.projects || '',
+            goal: prev?.goal && prev.goal !== text.trim() ? prev.goal : (data.suggested_goal || text.trim()),
+            confidence: confidenceDisplay(data.topics),
+            summary: data.topics.length > 0
+              ? `Identified ${data.topics.length} skill${data.topics.length === 1 ? '' : 's'} (${data.topics.slice(0, 4).map((t) => t.name).join(', ')}${data.topics.length > 4 ? '…' : ''})${data.detected_years_experience ? ` with ~${data.detected_years_experience} years experience` : ''}. Target: ${data.suggested_goal || 'Custom goal'}.`
+              : (text.trim().length > 15
+                ? `Draft from your description: "${text.slice(0, 140)}${text.length > 140 ? '…' : ''}"`
+                : 'Describe your background to build your AI Profile Draft.'),
+          }
+        })
+      }
+    } catch (err) {
+      console.warn('Natural language extraction note:', err)
+    } finally {
+      setIsExtractingText(false)
+    }
+  }
+
   // Handle single description typing
   const handleDescriptionChange = (e) => {
     const val = e.target.value
     setSingleDescription(val)
     setContinueError('')
 
-    // Only reflect the raw text back as a preview here - no client-side
-    // skill guessing. Real skills come from an uploaded resume, a synced
-    // GitHub account, or the learner's own explicit self-assessment later
-    // in onboarding (see AssessSkills.jsx). `skills` is intentionally left
-    // untouched (real evidence only, never inferred from goal text).
     setProfileDraft((prev) => ({
       ...EMPTY_DRAFT,
       ...prev,
-      goal: val,
+      goal: prev?.goal && prev.goal !== prev.summary ? prev.goal : val,
       summary: val.trim().length > 15
         ? `Draft from your description: "${val.slice(0, 140)}${val.length > 140 ? '…' : ''}"`
         : (prev?.summary || 'Describe your background to build your AI Profile Draft.'),
     }))
+
+    // Debounce natural language extraction
+    if (extractTimerRef.current) clearTimeout(extractTimerRef.current)
+    if (val.trim().length >= 25 && !file) {
+      extractTimerRef.current = setTimeout(() => {
+        runTextExtraction(val)
+      }, 700)
+    }
+  }
+
+  const handleOpenEditDraft = async () => {
+    if (!profileDraft?.skills && singleDescription.trim().length >= 20 && !file) {
+      await runTextExtraction(singleDescription)
+    }
+    setEditFormData({
+      skills: profileDraft?.skills || parsedTopicsRef.current.map((t) => t.name).join(', ') || '',
+      education: profileDraft?.education || '',
+      projects: profileDraft?.projects || '',
+      goal: profileDraft?.goal || singleDescription.trim(),
+      summary: profileDraft?.summary || '',
+    })
+    setIsEditingDraft(true)
   }
 
   // Handle Continue button action
@@ -220,15 +275,6 @@ export default function LearnerIntakeWorkspace({
       descInputRef.current?.focus()
       return
     }
-
-    // NOTE: topics here come ONLY from real evidence sources - an uploaded
-    // resume parsed server-side, or a synced GitHub account's actual repo
-    // languages. The free-text description is never scanned for keyword
-    // matches; it is passed through as `goal` for the backend's real LLM
-    // extraction (profile_service.extract_profile) to interpret honestly,
-    // and as a fallback nothing is invented - an empty topics array means
-    // "no skills detected yet," matching AssessSkills.jsx's honest empty
-    // state rather than a fabricated default.
 
     if (file) {
       setUploading(true)
@@ -287,28 +333,87 @@ export default function LearnerIntakeWorkspace({
         trimmedDesc || profileDraft?.goal || ''
       )
     } else {
-      // Goal-only signup: no resume, no GitHub - honestly report zero
-      // detected topics rather than fabricating skills from goal text.
-      onExtracted(
-        [],
-        0,
-        profileDraft?.education || '',
-        profileDraft?.projects || '',
-        trimmedDesc
-      )
+      // Natural Language background description flow
+      setUploading(true)
+      try {
+        let topicsToPass = parsedTopicsRef.current || []
+        let detectedYears = 0
+        let educationStr = profileDraft?.education || ''
+        let projectsStr = profileDraft?.projects || ''
+        let goalStr = profileDraft?.goal || trimmedDesc
+
+        // If manual skills were typed in profileDraft
+        if (profileDraft?.skills) {
+          const rawSkills = profileDraft.skills.split(',').map((s) => s.trim()).filter(Boolean)
+          topicsToPass = rawSkills.map((name) => {
+            const existing = (parsedTopicsRef.current || []).find(
+              (t) => t.name.toLowerCase() === name.toLowerCase()
+            )
+            return (
+              existing || {
+                name,
+                suggested_level: 'intermediate',
+                evidence: 'Extracted from background',
+                confidence_pct: 70,
+              }
+            )
+          })
+        } else if (topicsToPass.length === 0 && trimmedDesc.length >= 20) {
+          try {
+            const { data } = await apiClient.post('/api/profile/extract-text', { text: trimmedDesc })
+            if (data?.topics && data.topics.length > 0) {
+              topicsToPass = data.topics
+              detectedYears = data.detected_years_experience || 0
+              if (data.education && !educationStr) educationStr = data.education
+              if (data.projects && !projectsStr) projectsStr = data.projects
+              if (data.suggested_goal && !goalStr) goalStr = data.suggested_goal
+            }
+          } catch (e) {
+            console.warn('Inline text extraction fallback:', e)
+          }
+        }
+
+        onExtracted(
+          topicsToPass,
+          detectedYears,
+          educationStr,
+          projectsStr,
+          goalStr
+        )
+      } finally {
+        setUploading(false)
+      }
     }
   }
 
   const handleSaveDraft = () => {
-    setProfileDraft((prev) => ({
+    const rawSkills = (editFormData.skills || '').split(',').map((s) => s.trim()).filter(Boolean)
+    const customTopics = rawSkills.map((name) => {
+      const existing = (parsedTopicsRef.current || []).find(
+        (t) => t.name.toLowerCase() === name.toLowerCase()
+      )
+      return (
+        existing || {
+          name,
+          suggested_level: 'intermediate',
+          evidence: 'Specified in profile draft',
+          confidence_pct: 70,
+        }
+      )
+    })
+    parsedTopicsRef.current = customTopics
+
+    setProfileDraft({
       ...EMPTY_DRAFT,
       ...editFormData,
-      summary: `We understood that you know ${editFormData.skills || '—'}, studied ${
-        editFormData.education || '—'
-      }, and aim for ${editFormData.goal || '—'}.`,
-    }))
+      confidence: confidenceDisplay(customTopics),
+      summary: rawSkills.length > 0
+        ? `Custom profile: ${rawSkills.length} skill${rawSkills.length === 1 ? '' : 's'} (${rawSkills.slice(0, 4).join(', ')}${rawSkills.length > 4 ? '…' : ''}), target ${editFormData.goal || 'your goal'}.`
+        : `Custom profile: target ${editFormData.goal || 'your goal'}.`,
+    })
     setIsEditingDraft(false)
   }
+
 
   return (
     <div className="w-full max-w-[1140px] bg-white dark:bg-[#0E1522] rounded-2xl border border-[#f0f0f0] dark:border-[#202B3C] shadow-[0_14px_38px_rgba(25,49,75,0.08)] dark:shadow-[0_14px_38px_rgba(0,0,0,0.5)] flex flex-col justify-between overflow-hidden transition-colors">
@@ -768,13 +873,24 @@ export default function LearnerIntakeWorkspace({
 
           {/* Right Column: AI Profile Draft */}
           <div className="lg:col-span-5 xl:col-span-4 lg:border-l lg:border-[#f0f0f0] dark:lg:border-[#242E40] lg:pl-5">
-            <div className="flex items-center gap-1.5 text-[#1d1d1f] dark:text-white font-bold text-[14.5px]">
-              <span className="text-[#0066cc] dark:text-[#38BDF8]">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2L14.4 7.6L20 10L14.4 12.4L12 18L9.6 12.4L4 10L9.6 7.6L12 2Z" />
-                </svg>
-              </span>
-              <span>AI Profile Draft</span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 text-[#1d1d1f] dark:text-white font-bold text-[14.5px]">
+                <span className="text-[#0066cc] dark:text-[#38BDF8]">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2L14.4 7.6L20 10L14.4 12.4L12 18L9.6 12.4L4 10L9.6 7.6L12 2Z" />
+                  </svg>
+                </span>
+                <span>AI Profile Draft</span>
+              </div>
+              {isExtractingText && (
+                <span className="text-[11px] text-[#0066cc] dark:text-[#38BDF8] font-semibold flex items-center gap-1 animate-pulse">
+                  <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                  </svg>
+                  <span>Analyzing...</span>
+                </span>
+              )}
             </div>
 
             <p className="text-[13px] text-[#333333] dark:text-[#94A3B8] leading-relaxed mt-1">
@@ -783,13 +899,17 @@ export default function LearnerIntakeWorkspace({
                 : 'Describe your background in the text box above to generate your AI Profile Draft.'}
             </p>
 
+            {/* If skills are not yet extracted or empty, show helpful review notice */}
+            {(!profileDraft?.skills || profileDraft.skills.trim() === '') && singleDescription.trim().length > 10 && (
+              <div className="mt-2 flex items-center gap-1.5 text-[11px] font-semibold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 px-2.5 py-1 rounded-lg">
+                <span>⚠️ Skills & tools not verified yet. Review & edit to confirm.</span>
+              </div>
+            )}
+
             <button
               type="button"
-              disabled={!profileDraft}
-              onClick={() => {
-                setEditFormData({ ...EMPTY_DRAFT, ...profileDraft })
-                setIsEditingDraft(true)
-              }}
+              disabled={!profileDraft && !singleDescription.trim()}
+              onClick={handleOpenEditDraft}
               className="mt-2 text-[#0066cc] dark:text-[#38BDF8] text-[12.5px] font-bold inline-flex items-center gap-1.5 hover:underline cursor-pointer focus:outline-none disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:no-underline"
             >
               <svg
@@ -807,6 +927,7 @@ export default function LearnerIntakeWorkspace({
               <span>Review and edit</span>
             </button>
           </div>
+
 
         </div>
       </div>
@@ -881,11 +1002,12 @@ export default function LearnerIntakeWorkspace({
             <div className="space-y-4 py-4 text-left">
               <div>
                 <label className="block text-xs font-bold text-[#1d1d1f] dark:text-[#CBD5E1] uppercase tracking-wider mb-1">
-                  Skills & Tools
+                  Skills & Tools <span className="text-[#7a7a7a] font-normal normal-case">(comma separated)</span>
                 </label>
                 <input
                   type="text"
                   value={editFormData.skills}
+                  placeholder="e.g. Python, SQL, Excel, PowerBI, Tableau, Pandas, NumPy, Scikit-Learn"
                   onChange={(e) => setEditFormData({ ...editFormData, skills: e.target.value })}
                   className="w-full bg-[#fbfbfb] dark:bg-[#0E131E] border border-[#e0e0e0] dark:border-[#242E40] rounded-xl px-3.5 py-2.5 text-sm text-[#1d1d1f] dark:text-white focus:border-[#0066cc] dark:focus:border-[#38BDF8] outline-none"
                 />
@@ -898,6 +1020,7 @@ export default function LearnerIntakeWorkspace({
                 <input
                   type="text"
                   value={editFormData.education}
+                  placeholder="e.g. B.Tech in Computer Science / 2 years working experience"
                   onChange={(e) => setEditFormData({ ...editFormData, education: e.target.value })}
                   className="w-full bg-[#fbfbfb] dark:bg-[#0E131E] border border-[#e0e0e0] dark:border-[#242E40] rounded-xl px-3.5 py-2.5 text-sm text-[#1d1d1f] dark:text-white focus:border-[#0066cc] dark:focus:border-[#38BDF8] outline-none"
                 />
@@ -910,6 +1033,7 @@ export default function LearnerIntakeWorkspace({
                 <input
                   type="text"
                   value={editFormData.projects}
+                  placeholder="e.g. Built automated ETL pipelines and interactive dashboards in PowerBI"
                   onChange={(e) => setEditFormData({ ...editFormData, projects: e.target.value })}
                   className="w-full bg-[#fbfbfb] dark:bg-[#0E131E] border border-[#e0e0e0] dark:border-[#242E40] rounded-xl px-3.5 py-2.5 text-sm text-[#1d1d1f] dark:text-white focus:border-[#0066cc] dark:focus:border-[#38BDF8] outline-none"
                 />
@@ -922,10 +1046,12 @@ export default function LearnerIntakeWorkspace({
                 <input
                   type="text"
                   value={editFormData.goal}
+                  placeholder="e.g. Data Scientist / Machine Learning Engineer"
                   onChange={(e) => setEditFormData({ ...editFormData, goal: e.target.value })}
                   className="w-full bg-[#fbfbfb] dark:bg-[#0E131E] border border-[#e0e0e0] dark:border-[#242E40] rounded-xl px-3.5 py-2.5 text-sm text-[#1d1d1f] dark:text-white focus:border-[#0066cc] dark:focus:border-[#38BDF8] outline-none"
                 />
               </div>
+
             </div>
 
             <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#f0f0f0] dark:border-[#242E40]">
