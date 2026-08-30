@@ -38,6 +38,14 @@ class Settings(BaseSettings):
     # (~0.6-1.3s vs ~2.2s), and returns clean JSON with no markdown fences.
     BEDROCK_MODEL_ID: str = "amazon.nova-pro-v1:0"
 
+    # Free, quota-based (not a paid course-provider integration) - see
+    # app/services/youtube_provider.py. Optional and defaults to None
+    # rather than being required: the adapter must fail safely and
+    # honestly (return no results, never fabricate a resource) when this
+    # is unset, not crash the whole app at startup. Never logged, never
+    # sent to the frontend, never included in any LLM prompt.
+    YOUTUBE_API_KEY: str | None = None
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 
