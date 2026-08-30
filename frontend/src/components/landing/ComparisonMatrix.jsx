@@ -10,7 +10,7 @@ export default function ComparisonMatrix() {
     {
       feature: 'Curriculum Model',
       traditional: 'Static, one-size-fits-all 40hr video playlist',
-      pathfinder: 'Dynamic 12-week graph calibrated to your exact skill gaps',
+      pathfinder: 'Dynamic custom-week graph calibrated to your exact skill gaps',
     },
     {
       feature: 'Prior Experience Recognition',

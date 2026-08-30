@@ -127,7 +127,7 @@ export default function LandingPage() {
 
         {/* Subheading & Decrypted Role Scrambler */}
         <p className="mt-6 text-lg sm:text-xl md:text-2xl text-[#4A4A4A] dark:text-[#CBD5E1] max-w-3xl font-medium leading-relaxed">
-          Architect your custom 12-week roadmap to become an{' '}
+          Architect your custom week roadmap to become an{' '}
           <DecryptedText
             words={['AI / LLM Engineer', 'Full-Stack Architect', 'MLOps Lead', 'Cloud Specialist']}
             className="text-[#0066CC] dark:text-[#38BDF8] underline decoration-[#0066CC]/40"
@@ -234,10 +234,10 @@ export default function LandingPage() {
                 PILLAR 02
               </div>
               <h3 className="font-sans text-2xl font-bold text-[#1D1D1F] dark:text-[#F8FAFC] mb-3">
-                12-Week Adaptive Graph Engine
+                Custom-Week Adaptive Graph Engine
               </h3>
               <p className="text-sm sm:text-base text-[#666666] dark:text-[#94A3B8] leading-relaxed">
-                Every milestone has deterministic prerequisite dependencies. If you breeze through Week 2 or hit a blocker in Week 4, the learning graph recalibrates subsequent tasks automatically.
+                Every milestone has deterministic prerequisite dependencies. If you breeze through a week or hit a blocker, the learning graph recalibrates subsequent tasks automatically.
               </p>
             </div>
             <div className="mt-8 pt-6 border-t border-[#F0F0F0] dark:border-[#1E293B] flex items-center gap-2 text-xs font-bold text-[#0066CC] dark:text-[#38BDF8]">

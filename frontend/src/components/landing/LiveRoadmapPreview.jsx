@@ -79,7 +79,7 @@ export default function LiveRoadmapPreview() {
               </span>
             </div>
             <p className="text-xs text-[#7A7A7A] dark:text-[#94A3B8]">
-              Target Role: Senior ML / LLM Systems Engineer • 12 Weeks
+              Target Role: Senior ML / LLM Systems Engineer • Custom Weeks
             </p>
           </div>
         </div>

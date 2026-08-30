@@ -22,7 +22,7 @@ export default function LandingFooter() {
               </span>
             </Link>
             <p className="text-sm text-[#7A7A7A] dark:text-[#94A3B8] leading-relaxed max-w-sm">
-              The intelligent, adaptive career acceleration engine. We transform your existing resume & GitHub code into a custom 12-week mastery roadmap with real-time AI guidance.
+              The intelligent, adaptive career acceleration engine. We transform your existing resume & GitHub code into a custom-week mastery roadmap with real-time AI guidance.
             </p>
             <div className="flex items-center gap-3 pt-2">
               <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-[#ECFDF3] dark:bg-[#064E3B]/30 border border-[#22A06B]/30 text-xs font-semibold text-[#22A06B] dark:text-[#34D399]">
