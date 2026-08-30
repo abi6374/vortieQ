@@ -30,6 +30,7 @@ import SpotlightCard from '../components/landing/SpotlightCard'
 import TiltedCard from '../components/landing/TiltedCard'
 import InfiniteMarquee from '../components/landing/InfiniteMarquee'
 import MagneticButton from '../components/landing/MagneticButton'
+import SpecularButton from '../components/landing/SpecularButton'
 import LiveRoadmapPreview from '../components/landing/LiveRoadmapPreview'
 import StatsCounter from '../components/landing/StatsCounter'
 import InteractiveCoachTeaser from '../components/landing/InteractiveCoachTeaser'
@@ -140,26 +141,46 @@ export default function LandingPage() {
 
         {/* Action Button Suite */}
         <div className="mt-10 flex flex-col sm:flex-row items-center gap-4 sm:gap-5 w-full justify-center">
-          <MagneticButton
-            strength={25}
+          <SpecularButton
+            size="lg"
+            radius={16}
+            lineColor="#000000"
+            baseColor="#000000"
+            intensity={1.25}
+            thickness={1.5}
+            shineSize={12}
+            shineFade={45}
+            speed={0.35}
+            followMouse
+            proximity={250}
             onClick={handleStartRoadmap}
-            className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-[#0066CC] to-[#004FA3] hover:from-[#0052A3] hover:to-[#003D80] text-white font-bold text-base sm:text-lg shadow-xl shadow-[#0066CC]/30 hover:shadow-2xl hover:shadow-[#0066CC]/40 transition-all flex items-center justify-center gap-3 group"
+            className="w-full sm:w-auto px-8 py-4 !bg-gradient-to-r !from-[#0066CC] !to-[#004FA3] hover:!from-[#0052A3] hover:!to-[#003D80] !text-white font-bold text-base sm:text-lg shadow-xl shadow-[#0066CC]/30 hover:shadow-2xl hover:shadow-[#0066CC]/40 transition-all flex items-center justify-center gap-3 group"
           >
             <Sparkles className="w-5 h-5 group-hover:rotate-12 transition-transform" />
             <span>Generate Your Learning Path</span>
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-          </MagneticButton>
+          </SpecularButton>
 
-          <button
-            type="button"
+          <SpecularButton
+            size="lg"
+            radius={16}
+            lineColor="#000000"
+            baseColor="#000000"
+            intensity={1.25}
+            thickness={1.5}
+            shineSize={12}
+            shineFade={45}
+            speed={0.35}
+            followMouse
+            proximity={250}
             onClick={scrollToDemo}
-            className="w-full sm:w-auto px-7 py-4 rounded-2xl border border-[#D0D0D0] dark:border-[#2A374A] bg-white/70 dark:bg-[#141C2B]/75 hover:bg-white dark:hover:bg-[#1A2538] text-[#1D1D1F] dark:text-[#F1F5F9] font-bold text-base backdrop-blur-md shadow-xs hover:border-[#0066CC] transition-all flex items-center justify-center gap-2"
+            className="w-full sm:w-auto px-7 py-4 border border-[#D0D0D0] dark:border-[#2A374A] !bg-white/70 dark:!bg-[#141C2B]/75 hover:!bg-white dark:hover:!bg-[#1A2538] !text-[#1D1D1F] dark:!text-[#F1F5F9] font-bold text-base backdrop-blur-md shadow-xs hover:border-[#0066CC] transition-all flex items-center justify-center gap-2"
           >
             <span>Explore Interactive Demo</span>
             <span className="text-xs px-2 py-0.5 rounded-full bg-[#EAF2FC] dark:bg-[#1E293B] text-[#0066CC] dark:text-[#38BDF8] font-mono">
               60s
             </span>
-          </button>
+          </SpecularButton>
         </div>
 
         {/* Feature Checkpoints */}
@@ -365,15 +386,25 @@ export default function LandingPage() {
           </p>
 
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <MagneticButton
-              strength={30}
+            <SpecularButton
+              size="lg"
+              radius={16}
+              lineColor="#000000"
+              baseColor="#000000"
+              intensity={1.25}
+              thickness={1.5}
+              shineSize={12}
+              shineFade={45}
+              speed={0.35}
+              followMouse
+              proximity={250}
               onClick={handleStartRoadmap}
-              className="w-full sm:w-auto px-9 py-4 rounded-2xl bg-gradient-to-r from-[#0066CC] to-[#004FA3] hover:from-[#0052A3] hover:to-[#003D80] text-white font-bold text-lg shadow-xl shadow-[#0066CC]/35 hover:shadow-2xl hover:shadow-[#0066CC]/50 transition-all flex items-center justify-center gap-3 group"
+              className="w-full sm:w-auto px-9 py-4 !bg-gradient-to-r !from-[#0066CC] !to-[#004FA3] hover:!from-[#0052A3] hover:!to-[#003D80] !text-white font-bold text-lg shadow-xl shadow-[#0066CC]/35 hover:shadow-2xl hover:shadow-[#0066CC]/50 transition-all flex items-center justify-center gap-3 group"
             >
               <Sparkles className="w-5 h-5 group-hover:rotate-12 transition-transform" />
               <span>Generate My Free Roadmap</span>
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </MagneticButton>
+            </SpecularButton>
           </div>
         </div>
       </section>

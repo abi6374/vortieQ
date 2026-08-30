@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Compass, Moon, Sun, ArrowRight, User, Sparkles } from 'lucide-react'
 import { useTheme } from '../../contexts/ThemeContext'
 import { useAuth } from '../../hooks/useAuth'
+import SpecularButton from './SpecularButton'
 
 /**
  * LandingNavbar
@@ -110,13 +111,22 @@ export default function LandingNavbar() {
           </button>
 
           {isAuthed ? (
-            <Link
-              to="/dashboard"
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0066CC] hover:bg-[#0052A3] text-white font-semibold text-sm shadow-md shadow-[#0066CC]/25 hover:shadow-lg transition-all active:scale-95"
+            <SpecularButton
+              size="sm"
+              radius={12}
+              lineColor="#000000"
+              baseColor="#000000"
+              intensity={1.25}
+              thickness={1.5}
+              speed={0.35}
+              followMouse
+              proximity={200}
+              onClick={() => navigate('/dashboard')}
+              className="!py-2 !px-4 !rounded-xl !bg-[#0066CC] hover:!bg-[#0052A3] !text-white font-semibold text-sm shadow-md shadow-[#0066CC]/25 hover:shadow-lg transition-all group inline-flex items-center gap-2"
             >
               <span>Dashboard</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+            </SpecularButton>
           ) : (
             <>
               <Link
@@ -125,13 +135,22 @@ export default function LandingNavbar() {
               >
                 Sign In
               </Link>
-              <Link
-                to="/auth"
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0066CC] hover:bg-[#0052A3] text-white font-semibold text-sm shadow-md shadow-[#0066CC]/25 hover:shadow-lg transition-all active:scale-95 group"
+              <SpecularButton
+                size="sm"
+                radius={12}
+                lineColor="#000000"
+                baseColor="#000000"
+                intensity={1.25}
+                thickness={1.5}
+                speed={0.35}
+                followMouse
+                proximity={200}
+                onClick={() => navigate('/auth')}
+                className="!py-2 !px-4 !rounded-xl !bg-[#0066CC] hover:!bg-[#0052A3] !text-white font-semibold text-sm shadow-md shadow-[#0066CC]/25 hover:shadow-lg transition-all group inline-flex items-center gap-2"
               >
                 <span>Get Started</span>
                 <Sparkles className="w-4 h-4 group-hover:rotate-12 transition-transform" />
-              </Link>
+              </SpecularButton>
             </>
           )}
         </div>

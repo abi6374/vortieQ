@@ -92,22 +92,30 @@ export default function LiveRoadmapPreview() {
               {progressPercent}% Complete
             </div>
           </div>
-          <div className="w-12 h-12 rounded-full border-4 border-[#E0E0E0] dark:border-[#20293A] relative flex items-center justify-center">
-            <svg className="absolute inset-0 w-full h-full -rotate-90">
+          <div className="w-12 h-12 relative flex items-center justify-center">
+            <svg viewBox="0 0 48 48" className="absolute inset-0 w-full h-full -rotate-90">
               <circle
-                cx="20"
-                cy="20"
-                r="18"
+                cx="24"
+                cy="24"
+                r="19"
+                fill="none"
+                strokeWidth="3.5"
+                className="stroke-[#E0E0E0] dark:stroke-[#1E293B]"
+              />
+              <circle
+                cx="24"
+                cy="24"
+                r="19"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="4"
+                strokeWidth="3.5"
+                strokeLinecap="round"
                 className="text-[#0066CC] dark:text-[#38BDF8] transition-all duration-700"
-                strokeDasharray="113"
-                strokeDashoffset={113 - (113 * progressPercent) / 100}
-                style={{ transform: 'scale(1.15)', transformOrigin: 'center' }}
+                strokeDasharray="119.38"
+                strokeDashoffset={119.38 - (119.38 * progressPercent) / 100}
               />
             </svg>
-            <Trophy className="w-5 h-5 text-[#0066CC] dark:text-[#38BDF8]" />
+            <Trophy className="w-5 h-5 text-[#0066CC] dark:text-[#38BDF8] relative z-10" />
           </div>
         </div>
       </div>
