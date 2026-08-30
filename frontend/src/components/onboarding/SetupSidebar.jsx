@@ -2,7 +2,7 @@ import React from 'react'
 
 /**
  * SetupSidebar
- * Seven-step learning-setup progress sidebar matching the unified PathFinder onboarding flow.
+ * Six-step learning-setup progress sidebar matching the unified PathFinder onboarding flow.
  * Steps:
  * 1. Learner Intake
  * 2. GitHub Integration
@@ -10,7 +10,6 @@ import React from 'react'
  * 4. Your Confidence Level
  * 5. Set your goal
  * 6. Create roadmap
- * 7. Track progress
  */
 const STEPS = [
   { n: 1, label: 'Learner Intake' },
@@ -19,7 +18,6 @@ const STEPS = [
   { n: 4, label: 'Your Confidence Level' },
   { n: 5, label: 'Set your goal' },
   { n: 6, label: 'Create roadmap' },
-  { n: 7, label: 'Track progress' },
 ]
 
 export default function SetupSidebar({ current = 1 }) {

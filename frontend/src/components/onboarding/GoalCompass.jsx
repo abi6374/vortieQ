@@ -632,10 +632,6 @@ export default function GoalCompass({ topicRatings = [], detectedYears = 0, init
                 Suggested based on {topicRatings.length > 0 ? 'your background skills' : 'your goal'}
               </p>
             )}
-
-            {topicRatings.length > 0 && !isCustomRole && (
-              <p className="insight"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M6 6l2 2M16 16l2 2M18 6l-2 2M8 16l-2 2" /></svg> Readiness is calculated from the {topicRatings.length} skill{topicRatings.length === 1 ? '' : 's'} in your profile.</p>
-            )}
           </div>
 
           <div className="sec constraints">
@@ -713,8 +709,6 @@ export default function GoalCompass({ topicRatings = [], detectedYears = 0, init
               </div>
             </>
           )}
-
-          <div className="callout"><span className="ci" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.1h6c0-.8.4-1.6 1-2.1A7 7 0 0 0 12 2z" /></svg></span><p>{calc.insight}</p></div>
         </div>
       </div>
 
@@ -756,7 +750,7 @@ export default function GoalCompass({ topicRatings = [], detectedYears = 0, init
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
           </button>
         </div>
-        <button type="button" className="back" onClick={onBack}>← Back to skills</button>
+        <button type="button" className="back" onClick={onBack}>← Back</button>
       </div>
     </div>
   )

@@ -375,7 +375,7 @@ export default function OnboardingPage() {
     return (
       <div className="min-h-screen flex bg-[#f5f5f7] dark:bg-[#0B0E14]">
         <SetupSidebar current={3} />
-        <div className="flex-1 flex flex-col items-center justify-start px-4 py-8 lg:py-10 overflow-y-auto">
+        <div className="flex-1 flex flex-col items-center justify-center px-4 py-8 lg:py-10 overflow-y-auto">
           <YourSkillsStep
             topics={resumeTopics}
             detectedYears={detectedYears}
