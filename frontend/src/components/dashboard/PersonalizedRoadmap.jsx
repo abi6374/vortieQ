@@ -7,6 +7,7 @@ import { useAuth } from '../../hooks/useAuth'
 import { supabase } from '../../lib/supabaseClient'
 import AppShell from '../layout/AppShell'
 import ConnectGitHubModal from '../ui/ConnectGitHubModal'
+import RoadmapInfographicModal from './RoadmapInfographicModal'
 
 /**
  * PersonalizedRoadmap
@@ -43,9 +44,10 @@ export default function PersonalizedRoadmap({
   // Notification toast for user actions
   const [toastMessage, setToastMessage] = useState(null)
 
-  // Modals for other views (Resources, etc.)
+  // Modals for other views (Resources, Infographic Poster, etc.)
   const [activeModal, setActiveModal] = useState(null)
   const [showGitHubModal, setShowGitHubModal] = useState(false)
+  const [showPosterModal, setShowPosterModal] = useState(false)
 
   // Scoped ref for "Remind me later" within this page mount
   const remindLaterDismissedRef = useRef(false)
@@ -470,8 +472,8 @@ export default function PersonalizedRoadmap({
   return (
     <AppShell
       topBar={
-        <div className="bg-white border border-[#e0e0e0] hover:border-[#d2d2d7] rounded-2xl px-3.5 py-2 flex items-center gap-3 shadow-2xs min-w-0">
-          <span className="w-8 h-8 rounded-xl bg-[#eaf2fc] text-[#0066cc] flex items-center justify-center flex-none">
+        <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] hover:border-[#d2d2d7] rounded-2xl px-3.5 py-2 flex items-center gap-3 shadow-2xs min-w-0">
+          <span className="w-8 h-8 rounded-xl bg-[#eaf2fc] dark:bg-[#18181D] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center flex-none">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10" />
               <circle cx="12" cy="12" r="6" />
@@ -479,31 +481,61 @@ export default function PersonalizedRoadmap({
             </svg>
           </span>
           <div className="text-left min-w-0">
-            <h2 className="font-['Manrope'] font-bold text-xs sm:text-[13px] text-[#1d1d1f] leading-tight max-w-[220px] truncate">
+            <h2 className="font-['Manrope'] font-bold text-xs sm:text-[13px] text-[#1d1d1f] dark:text-white leading-tight max-w-[220px] truncate">
               {cleanGoalTitle}
             </h2>
-            <p className="text-[10px] text-[#7a7a7a] font-medium leading-tight mt-0.5">
+            <p className="text-[10px] text-[#7a7a7a] dark:text-[#94A3B8] font-medium leading-tight mt-0.5">
               Target: Ongoing Pace
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => navigate('/onboarding')}
-            className="px-2.5 py-1 rounded-lg border border-[#e0e0e0] dark:border-[#27272F] hover:border-[#0066cc] dark:hover:border-[#A9D8FF] hover:bg-[#eaf2fc] dark:hover:bg-[#A9D8FF]/20 text-[#0066cc] dark:text-[#A9D8FF] text-xs font-bold transition-colors cursor-pointer flex-none"
-          >
-            Replan
-          </button>
+          <div className="flex items-center gap-2 flex-none ml-auto">
+            <button
+              type="button"
+              onClick={() => setShowPosterModal(true)}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[#cfe4fb] dark:border-[#1E3A5F] hover:border-[#0066cc] bg-[#eaf2fc] dark:bg-[#132338] text-[#0066cc] dark:text-[#38BDF8] text-xs font-bold transition-all shadow-2xs cursor-pointer"
+              title="Export flowchart poster & PDF"
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              <span>Export PDF</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/onboarding')}
+              className="px-2.5 py-1 rounded-lg border border-[#e0e0e0] dark:border-[#27272F] hover:border-[#0066cc] hover:bg-[#eaf2fc] dark:hover:bg-[#18181D] text-[#0066cc] dark:text-[#38BDF8] text-xs font-bold transition-colors cursor-pointer"
+            >
+              Replan
+            </button>
+          </div>
         </div>
       }
     >
       {/* Page header */}
-      <div className="mb-6 relative z-10">
-        <h1 className="font-['Manrope'] font-extrabold text-2xl sm:text-3xl text-[#1d1d1f] dark:text-white tracking-tight">
-          Your path to: {cleanGoalTitle}
-        </h1>
-        <p className="text-sm sm:text-base text-[#333333] dark:text-[#94A3B8] mt-1 font-normal">
-          Personalized roadmap calibrated from your skills and weekly availability.
-        </p>
+      <div className="mb-6 relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="font-['Manrope'] font-extrabold text-2xl sm:text-3xl text-[#1d1d1f] dark:text-white tracking-tight">
+            Your path to: {cleanGoalTitle}
+          </h1>
+          <p className="text-sm sm:text-base text-[#333333] dark:text-[#94A3B8] mt-1 font-normal">
+            Personalized roadmap calibrated from your skills and weekly availability.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setShowPosterModal(true)}
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#0066cc] hover:bg-[#004fa3] text-white text-xs font-bold rounded-xl transition-all shadow-md active:scale-[0.98] cursor-pointer flex-none self-start sm:self-auto"
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+            <line x1="16" y1="13" x2="8" y2="13" />
+            <line x1="16" y1="17" x2="8" y2="17" />
+          </svg>
+          <span>Download Flowchart PDF</span>
+        </button>
       </div>
 
       {/* GitHub Recommendation Booster Top Banner (Non-blocking, zero screen blackout) */}
@@ -578,10 +610,23 @@ export default function PersonalizedRoadmap({
         {/* LEFT COLUMN: Your learning roadmap */}
         <div className="pf-glass-card p-6 sm:p-7 flex flex-col justify-between min-w-0">
           <div>
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
               <h2 className="font-['Manrope'] font-bold text-lg text-[#1d1d1f] dark:text-white">
                 Your learning roadmap
               </h2>
+              <button
+                type="button"
+                onClick={() => setShowPosterModal(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#cfe4fb] dark:border-[#1E3A5F] bg-[#eaf2fc] dark:bg-[#142339] text-[#0066cc] dark:text-[#38BDF8] text-xs font-bold hover:bg-[#dbeafc] dark:hover:bg-[#1A2E4B] transition-all cursor-pointer shadow-2xs"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                  <line x1="16" y1="13" x2="8" y2="13" />
+                  <line x1="16" y1="17" x2="8" y2="17" />
+                </svg>
+                <span>Flowchart Poster & PDF</span>
+              </button>
             </div>
 
             {/* Week Selector Chips */}
@@ -1344,6 +1389,16 @@ export default function PersonalizedRoadmap({
         </div>,
         document.body
       )}
+
+      {/* Flowchart Poster & 1-Click PDF Export Modal */}
+      <RoadmapInfographicModal
+        isOpen={showPosterModal}
+        onClose={() => setShowPosterModal(false)}
+        roadmap={roadmap}
+        cleanGoalTitle={cleanGoalTitle}
+        targetRole={cleanGoalTitle}
+        totalWeeks={weekTabs.length}
+      />
     </AppShell>
   )
 }

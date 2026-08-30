@@ -31,12 +31,14 @@ import {
   Layers,
   FileText,
   Activity,
+  FileDown,
 } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import AppShell from '../layout/AppShell'
 import GoalSelectorDropdown from '../layout/GoalSelectorDropdown'
 import { useRoadmap } from '../../hooks/useRoadmap'
 import { useStreak } from '../../hooks/useStreak'
+import RoadmapInfographicModal from '../dashboard/RoadmapInfographicModal'
 
 /**
  * PathFinder High-Fidelity Progress Page
@@ -52,10 +54,11 @@ export default function ProgressScreen() {
   const streak = useStreak()
   const weeklyHoursTotal = Math.round(((streak.minutes_this_week || 0) / 60) * 10) / 10
 
-  // Timeframe filter & view logs state
+  // Timeframe filter, view logs, and export PDF modal state
   const [progressTimeframe, setProgressTimeframe] = useState('8 weeks')
   const [isTimeframeOpen, setIsTimeframeOpen] = useState(false)
   const [showAllLogs, setShowAllLogs] = useState(false)
+  const [showPosterModal, setShowPosterModal] = useState(false)
 
   // ---------------------------------------------------------------------------
   // 1. Roadmap Progress Over Time (Area Chart Data) - Dynamic with exact weeks
@@ -316,6 +319,15 @@ export default function ProgressScreen() {
               if (p?.id) navigate(`/roadmap/${p.id}`)
             }}
           />
+          <button
+            type="button"
+            onClick={() => setShowPosterModal(true)}
+            className="flex items-center gap-1.5 px-3 sm:px-3.5 py-2 border border-[#cfe4fb] dark:border-[#1E3A5F] bg-[#eaf2fc] dark:bg-[#132338] text-[#0066cc] dark:text-[#38BDF8] hover:bg-[#dbeafc] dark:hover:bg-[#1A2E4B] rounded-xl text-xs font-bold transition-all shadow-2xs active:scale-[0.98] flex-none cursor-pointer"
+            title="Export flowchart poster & PDF"
+          >
+            <FileDown className="w-4 h-4" />
+            <span className="hidden sm:inline">Export PDF</span>
+          </button>
           <button
             type="button"
             onClick={() => roadmap.path?.id ? navigate(`/roadmap/${roadmap.path.id}`) : navigate('/dashboard')}
@@ -994,6 +1006,16 @@ export default function ProgressScreen() {
         </div>
 
       </div>
+
+      {/* Flowchart Poster & 1-Click PDF Export Modal */}
+      <RoadmapInfographicModal
+        isOpen={showPosterModal}
+        onClose={() => setShowPosterModal(false)}
+        roadmap={roadmap}
+        cleanGoalTitle={roadmap.path?.goal_text?.split('.')[0] || 'Career'}
+        targetRole={roadmap.path?.goal_text?.split('.')[0] || 'Career Path'}
+        totalWeeks={roadmap.weeks?.length || 24}
+      />
     </AppShell>
   )
 }
