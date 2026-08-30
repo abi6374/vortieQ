@@ -546,6 +546,96 @@ class TestResourceURLValidation:
         # fails validation - no fabricated row reaches the shared catalog.
         mock_table.insert.assert_not_called()
 
+    def test_youtube_url_is_reverified_never_trusted_from_llm_claims(self):
+        """"No LLM may invent video IDs, URLs, durations, channels, or
+        availability state" - even if the LLM's synthesized course_data
+        claims a duration/title for a youtube.com URL, this path must
+        re-fetch and independently re-verify the REAL metadata rather than
+        persisting the LLM's claim."""
+        from app.services.path_service import _ensure_course_in_catalog
+
+        mock_supabase = MagicMock()
+        mock_table = MagicMock()
+        mock_supabase.table.return_value = mock_table
+        mock_table.select.return_value.eq.return_value.execute.return_value = MagicMock(data=[])
+        mock_table.select.return_value.ilike.return_value.execute.return_value = MagicMock(data=[])
+
+        real_video_item = {
+            "id": "dQw4w9WgXcQ",
+            "snippet": {
+                "title": "The REAL Title From The API", "description": "Real description." + " x" * 60,
+                "channelId": "UC_real", "channelTitle": "Real Channel", "publishedAt": "2024-01-01T00:00:00Z",
+                "defaultAudioLanguage": "en",
+            },
+            "contentDetails": {"duration": "PT12M"},
+            "status": {"privacyStatus": "public", "embeddable": True, "uploadStatus": "processed"},
+        }
+        promoted_course = {"id": "promoted-course-id", "title": "The REAL Title From The API"}
+
+        with patch("app.services.path_service.supabase_client", mock_supabase), \
+             patch("app.services.youtube_provider.is_configured", return_value=True), \
+             patch("app.services.youtube_provider.YouTubeProviderAdapter._fetch_video_details",
+                   return_value=[real_video_item]), \
+             patch("app.services.catalog_service.ingest_youtube_result", return_value={"id": "provider-resource-id"}) as mock_ingest, \
+             patch("app.services.catalog_service.promote_to_course", return_value=promoted_course) as mock_promote:
+            result = _ensure_course_in_catalog({
+                "title": "A Completely Made Up Title The LLM Invented",
+                "resource_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ&utm_source=llm",
+                "description": "fabricated", "duration_hrs": 99, "skill_tags": ["Python"],
+            })
+
+        assert result == promoted_course
+        # The REAL title from the API was used for scoring/ingestion - the
+        # LLM's fabricated title/duration never reached ingest_youtube_result.
+        ingested_video = mock_ingest.call_args[0][0]
+        assert ingested_video["title"] == "The REAL Title From The API"
+        assert ingested_video["duration_hrs"] != 99
+        mock_promote.assert_called_once_with("provider-resource-id")
+        # Never fell through to the generic courses.insert path.
+        mock_table.insert.assert_not_called()
+
+    def test_youtube_url_fails_honestly_when_video_cannot_be_reverified(self):
+        """A private/deleted video (or an API failure) must raise, never
+        silently fall through to trusting the LLM's original claim about
+        it via the generic insert path."""
+        from app.services.path_service import _ensure_course_in_catalog, ResourceValidationError
+
+        mock_supabase = MagicMock()
+        mock_table = MagicMock()
+        mock_supabase.table.return_value = mock_table
+        mock_table.select.return_value.eq.return_value.execute.return_value = MagicMock(data=[])
+        mock_table.select.return_value.ilike.return_value.execute.return_value = MagicMock(data=[])
+
+        with patch("app.services.path_service.supabase_client", mock_supabase), \
+             patch("app.services.youtube_provider.is_configured", return_value=True), \
+             patch("app.services.youtube_provider.YouTubeProviderAdapter._fetch_video_details", return_value=[]):
+            with pytest.raises(ResourceValidationError):
+                _ensure_course_in_catalog({
+                    "title": "Claims To Be Real",
+                    "resource_url": "https://www.youtube.com/watch?v=deadvideo01",
+                    "description": "x", "skill_tags": [],
+                })
+        mock_table.insert.assert_not_called()
+
+    def test_youtube_url_fails_honestly_when_provider_not_configured(self):
+        from app.services.path_service import _ensure_course_in_catalog, ResourceValidationError
+
+        mock_supabase = MagicMock()
+        mock_table = MagicMock()
+        mock_supabase.table.return_value = mock_table
+        mock_table.select.return_value.eq.return_value.execute.return_value = MagicMock(data=[])
+        mock_table.select.return_value.ilike.return_value.execute.return_value = MagicMock(data=[])
+
+        with patch("app.services.path_service.supabase_client", mock_supabase), \
+             patch("app.services.youtube_provider.is_configured", return_value=False):
+            with pytest.raises(ResourceValidationError):
+                _ensure_course_in_catalog({
+                    "title": "A Video",
+                    "resource_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                    "description": "x", "skill_tags": [],
+                })
+        mock_table.insert.assert_not_called()
+
     def test_task_completion_schema_string_false_is_really_false(self):
         # Real production bug: roadmap.py used to do
         # completed=bool(payload["completed"]) - Python's bool("false") is

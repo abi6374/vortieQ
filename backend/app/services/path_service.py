@@ -555,12 +555,19 @@ def _ensure_course_in_catalog(course_data: dict) -> dict:
     rather than persisting a placeholder/guessed URL; this table is shared
     across every user, so a fabricated row here doesn't just affect the one
     swap that created it."""
+    from app.services.catalog_service import canonicalize_url, is_trusted_provider_domain
+
     url = (course_data.get("resource_url") or "").strip()
+    if url:
+        url = canonicalize_url(url)
     title = (course_data.get("title") or "").strip()
 
     # Check if this course or URL already exists — an already-catalogued
     # course was validated when IT was first inserted, so re-checking here
     # would just be redundant network calls on every repeat recommendation.
+    # Canonicalized first, so a tracking-param-decorated duplicate of an
+    # already-catalogued URL dedupes correctly instead of creating a
+    # second row for the same real resource.
     if url:
         existing = supabase_client.table("courses").select("*").eq("resource_url", url).execute()
         if existing.data:
@@ -569,6 +576,43 @@ def _ensure_course_in_catalog(course_data: dict) -> dict:
         existing = supabase_client.table("courses").select("*").ilike("title", title).execute()
         if existing.data:
             return existing.data[0]
+
+    # A YouTube URL never gets trusted on the LLM's own say-so for title/
+    # duration/channel/availability - "No LLM may invent video IDs, URLs,
+    # durations, channels, or availability state." Re-fetches REAL
+    # metadata from the API itself and routes through the full
+    # provenance-preserving catalog_service pipeline instead of this
+    # function's generic insert below. An honest ResourceValidationError
+    # (never a silent fall-through to trusting the LLM's claims) if the
+    # video can't be independently re-verified this way.
+    from app.services import youtube_provider
+    video_id = youtube_provider.extract_video_id(url) if url else None
+    if video_id:
+        if not youtube_provider.is_configured():
+            raise ResourceValidationError(
+                f"Cannot verify YouTube video {video_id!r}: YouTube provider is not configured"
+            )
+        adapter = youtube_provider.get_default_adapter()
+        raw_items = adapter._fetch_video_details([video_id])
+        tags = course_data.get("skill_tags") or []
+        if isinstance(tags, str):
+            tags = [t.strip() for t in tags.split(",") if t.strip()]
+        validated = adapter._validate_and_score(raw_items[0], tags) if raw_items else None
+        if not validated or validated["quality_score"] < youtube_provider.MIN_QUALITY_SCORE:
+            raise ResourceValidationError(
+                f"YouTube video {video_id!r} could not be independently re-verified "
+                "(private, deleted, non-embeddable, or below the quality bar)"
+            )
+        from app.services import catalog_service
+        resource = catalog_service.ingest_youtube_result(
+            validated, skill_tags=tags, difficulty=course_data.get("difficulty")
+        )
+        if not resource:
+            raise ResourceValidationError(f"Failed to persist verified YouTube video {video_id!r}")
+        promoted = catalog_service.promote_to_course(resource["id"])
+        if not promoted:
+            raise ResourceValidationError(f"Failed to promote verified YouTube video {video_id!r}")
+        return promoted
 
     if not _validate_resource_url(url):
         raise ResourceValidationError(
@@ -594,6 +638,7 @@ def _ensure_course_in_catalog(course_data: dict) -> dict:
         "skill_tags": tags,
         "prerequisites": course_data.get("prerequisites") or [],
         "embedding": emb,
+        "is_trusted_domain": is_trusted_provider_domain(url),
     }
     res = supabase_client.table("courses").insert(new_course).execute()
     if res.data:
@@ -653,6 +698,32 @@ def swap_step_with_preference(
                     web_results.append(r)
         except Exception as e:
             print(f"[path_service] search query '{q}' failed: {e}", flush=True)
+
+    # 1b. YouTube - a second, official, free-quota provider (see
+    # youtube_provider.py). "Video recommendations should not dominate
+    # learners who prefer practice/docs/courses": profiles.
+    # preferred_formats already existed in the schema (default includes
+    # 'video') but was never actually consulted anywhere in the app before
+    # this - real learner intent, not fabricated, now genuinely gates
+    # whether video candidates are even offered to the LLM at all.
+    preferred_formats = profile.get("preferred_formats") or ["course", "video", "article"]
+    if "video" in preferred_formats:
+        try:
+            from app.services import youtube_provider
+            adapter = youtube_provider.get_default_adapter()
+            youtube_videos = adapter.search_videos(topic_keywords, max_results=5, skill_tags=old_skills)
+            for v in youtube_videos:
+                u = v.get("canonical_url")
+                if u and u not in seen_urls:
+                    seen_urls.add(u)
+                    web_results.append({
+                        "title": v["title"],
+                        "url": u,
+                        "snippet": v.get("description", ""),
+                        "provider": "YouTube",
+                    })
+        except Exception as e:
+            print(f"[path_service] YouTube search failed: {type(e).__name__}: {e}", flush=True)
 
     # 2. Vector search candidate fallback in DB specifically on topic
     from app.ml.embedder import embed_text

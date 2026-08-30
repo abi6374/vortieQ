@@ -392,7 +392,8 @@ def test_swap_step_with_preference_realtime_flow():
          patch("app.services.path_service._validate_resource_url", return_value=True), \
          patch("app.ml.embedder.embed_text", return_value=[0.1] * 384), \
          patch("app.services.mastery_service.update_mastery_from_feedback") as mock_mastery, \
-         patch("app.services.mastery_service.find_unmet_prerequisites", return_value=[]) as mock_gaps:
+         patch("app.services.mastery_service.find_unmet_prerequisites", return_value=[]) as mock_gaps, \
+         patch("app.services.youtube_provider.YouTubeProviderAdapter.search_videos", return_value=[]):
         # 'too_advanced' now updates real mastery evidence (see path_service.
         # swap_step_with_preference) - without these patches this call would
         # otherwise reach the REAL app.services.mastery_service.supabase_client
@@ -403,6 +404,12 @@ def test_swap_step_with_preference_realtime_flow():
         # "u-1" user id isn't valid UUID syntax, so the write failed closed) -
         # but that was luck, not test isolation, so it's fixed here rather
         # than left relying on it again.
+        #
+        # Same reasoning for YouTube: swap_step_with_preference now also
+        # searches YouTube (see path_service's YouTube-integration block) -
+        # this dev machine has a REAL YOUTUBE_API_KEY configured in .env for
+        # production use, so this call would otherwise burn real quota on
+        # every test run instead of exercising a mock.
         res = swap_step_with_preference("step-1", "u-1", preference="too_advanced", note="Need a gentler intro")
 
         assert res["swapped"] is True
@@ -413,6 +420,85 @@ def test_swap_step_with_preference_realtime_flow():
         mock_mastery.assert_called_once_with("u-1", ["Kubernetes", "DevOps"], "too_hard")
         mock_gaps.assert_called_once_with("u-1", ["Kubernetes", "DevOps"])
         assert res["reason_for_change"]
+
+
+def _swap_with_preference_base_mocks(preferred_formats):
+    """Shared fixture builder for the two format-preference tests below -
+    same shape as test_swap_step_with_preference_realtime_flow, just with
+    a configurable profile.preferred_formats and no dependency on the
+    exact LLM/course output (those tests only assert whether the YouTube
+    search was invoked, not what the swap ultimately picked)."""
+    import json as _json
+
+    mock_supabase = MagicMock()
+    mock_step_resp = MagicMock(data=[{
+        "id": "step-1", "path_id": "path-1", "milestone_label": "Core Skills",
+        "courses": {"id": "c-old", "title": "Old Course", "description": "",
+                    "difficulty": "beginner", "skill_tags": ["Python"]},
+        "learning_paths": {"id": "path-1", "user_id": "u-1"},
+    }])
+    mock_prof_resp = MagicMock(data=[{
+        "id": "u-1", "target_role": "Analyst", "current_level": "beginner",
+        "goal_text": "Learn Python", "preferred_formats": preferred_formats,
+    }])
+
+    def mock_table(name):
+        t = MagicMock()
+        if name == "path_steps":
+            t.select.return_value.eq.return_value.execute.return_value = mock_step_resp
+            t.update.return_value.eq.return_value.execute.return_value = MagicMock(data=[{"id": "step-1"}])
+        elif name == "profiles":
+            t.select.return_value.eq.return_value.execute.return_value = mock_prof_resp
+        elif name == "courses":
+            t.select.return_value.eq.return_value.execute.return_value = MagicMock(data=[])
+            t.select.return_value.ilike.return_value.execute.return_value = MagicMock(data=[])
+            t.insert.return_value.execute.return_value = MagicMock(data=[{
+                "id": "new-course", "title": "New Course", "provider": "Docs",
+                "resource_url": "https://docs.python.org/3/tutorial/", "difficulty": "beginner", "duration_hrs": 3,
+            }])
+        return t
+
+    mock_supabase.table.side_effect = mock_table
+    mock_llm_json = _json.dumps({
+        "title": "New Course", "provider": "Docs", "description": "A real course.",
+        "resource_url": "https://docs.python.org/3/tutorial/", "difficulty": "beginner",
+        "duration_hrs": 3, "skill_tags": ["Python"], "explanation": "Fits the request.",
+    })
+    return mock_supabase, mock_llm_json
+
+
+def test_swap_step_with_preference_searches_youtube_when_video_is_preferred():
+    from app.services.path_service import swap_step_with_preference
+
+    mock_supabase, mock_llm_json = _swap_with_preference_base_mocks(["course", "video", "article"])
+    with patch("app.services.path_service.supabase_client", mock_supabase), \
+         patch("app.services.web_search_service.search_learning_resources", return_value=[]), \
+         patch("app.services.path_service._call_groq", return_value=mock_llm_json), \
+         patch("app.services.path_service._validate_resource_url", return_value=True), \
+         patch("app.ml.embedder.embed_text", return_value=[0.1] * 384), \
+         patch("app.services.youtube_provider.YouTubeProviderAdapter.search_videos", return_value=[]) as mock_yt:
+        swap_step_with_preference("step-1", "u-1", preference="custom", note="")
+
+    mock_yt.assert_called_once()
+
+
+def test_swap_step_with_preference_skips_youtube_when_learner_excludes_video():
+    """Real learner preference (profiles.preferred_formats, previously
+    stored but never consulted anywhere) now genuinely gates whether video
+    candidates are even offered to the LLM - "video recommendations
+    should not dominate learners who prefer practice/docs/courses.\""""
+    from app.services.path_service import swap_step_with_preference
+
+    mock_supabase, mock_llm_json = _swap_with_preference_base_mocks(["course", "article"])  # no 'video'
+    with patch("app.services.path_service.supabase_client", mock_supabase), \
+         patch("app.services.web_search_service.search_learning_resources", return_value=[]), \
+         patch("app.services.path_service._call_groq", return_value=mock_llm_json), \
+         patch("app.services.path_service._validate_resource_url", return_value=True), \
+         patch("app.ml.embedder.embed_text", return_value=[0.1] * 384), \
+         patch("app.services.youtube_provider.YouTubeProviderAdapter.search_videos", return_value=[]) as mock_yt:
+        swap_step_with_preference("step-1", "u-1", preference="custom", note="")
+
+    mock_yt.assert_not_called()
 
 
 def test_bump_path_version_increments_and_stamps_freshness():
