@@ -84,4 +84,18 @@ test.describe('production bundle contains no mock/dev/fabricated learner data', 
     // 82 appearing anywhere else (e.g. a CSS value or an unrelated id).
     expect(/confidence_pct["']?\s*:\s*82\b/.test(bundle)).toBe(false)
   })
+
+  // YouTube Data API v3 adapter (backend-only by design - see
+  // app/services/youtube_provider.py and app/config.py's YOUTUBE_API_KEY).
+  // The frontend never imports or references it at all, so this is a
+  // structural guarantee, not a runtime gate that could be bypassed - but
+  // the same "verify, don't just assume" standard applies to a secret as
+  // to any other claim in this codebase. A real Google API key has a
+  // recognizable literal prefix ("AIza") that a bundle containing one
+  // would trivially match; a bare env var NAME appearing at all would
+  // also indicate someone wired it into client code by mistake.
+  test('bundle contains no YouTube API key literal or reference', () => {
+    expect(/\bAIza[0-9A-Za-z_-]{30,}\b/.test(bundle)).toBe(false)
+    expect(bundle.includes('YOUTUBE_API_KEY')).toBe(false)
+  })
 })
