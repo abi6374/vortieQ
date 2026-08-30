@@ -12,10 +12,40 @@ Prerequisite locking is enforced HERE, server-side — the UI lock is only a
 mirror of this, so a crafted request can't complete week 5 first.
 """
 
+from datetime import datetime, timezone
+
 from app.config import supabase_client
 from app.services import web_search_service
 
 TERMINAL = ("completed", "skipped")
+
+
+def bump_path_version(path_id: str) -> dict | None:
+    """Real-time-ish freshness signal (learning_paths.version/
+    last_recomputed_at, migration 008): a client can cheaply detect a stale
+    cached roadmap by comparing `version` instead of a blind refresh timer,
+    and every response carries a real timestamp of when the path was
+    actually last recomputed. Called from every real path mutation (task
+    completion, swap, rerecommend). Best-effort - never blocks the real
+    mutation that triggered it.
+
+    Returns {"version", "last_recomputed_at"} on success so a caller (e.g.
+    feedback_service) can echo the real new version back in its own
+    response instead of the client having to re-fetch the whole roadmap
+    just to learn it changed. Returns None on failure - callers must not
+    treat that as "version 0"."""
+    try:
+        current = supabase_client.table("learning_paths").select("version").eq("id", path_id).execute()
+        next_version = (current.data[0].get("version") or 0) + 1 if current.data else 1
+        stamp = datetime.now(timezone.utc).isoformat()
+        supabase_client.table("learning_paths").update({
+            "version": next_version,
+            "last_recomputed_at": stamp,
+        }).eq("id", path_id).execute()
+        return {"version": next_version, "last_recomputed_at": stamp}
+    except Exception as e:
+        print(f"[roadmap] path version bump failed for {path_id}: {type(e).__name__}: {e}", flush=True)
+        return None
 
 # ── part-splitting schema support ───────────────────────────────────────────
 # migration 002_course_parts.sql adds part_number/part_total/part_hours to
@@ -90,7 +120,7 @@ def plan_weeks_with_splits(course_specs: list[dict], weekly_hours: float = 10) -
 def _active_path(user_id: str) -> dict | None:
     r = (
         supabase_client.table("learning_paths")
-        .select("id, goal_text, status, generated_at")
+        .select("id, goal_text, status, generated_at, version, last_recomputed_at")
         .eq("user_id", user_id).eq("status", "active")
         .order("generated_at", desc=True).limit(1).execute()
     )
@@ -206,7 +236,15 @@ def get_roadmap(user_id: str) -> dict:
     target_role = (prof.data[0].get("target_role") if prof.data else "") or ""
 
     return {
-        "path": {"id": path["id"], "goal_text": path.get("goal_text"), "status": path.get("status"), "target_role": target_role},
+        "path": {
+            "id": path["id"], "goal_text": path.get("goal_text"), "status": path.get("status"),
+            "target_role": target_role,
+            # Real freshness signal (migration 008) - a client can compare
+            # `version` to detect a stale cached roadmap instead of a blind
+            # refresh timer, per the audit's real-time-behavior requirement.
+            "version": path.get("version") or 1,
+            "last_recomputed_at": path.get("last_recomputed_at"),
+        },
         "weeks": weeks,
         "current_week": current,
         "total_steps": len(steps),
@@ -227,7 +265,7 @@ def get_week(user_id: str, week_number: int) -> dict:
 def _owned_step(step_id: str, user_id: str) -> dict:
     fields = (
         "id, path_id, week_number, status, course_id, "
-        "learning_paths!inner(id, user_id), courses(duration_hrs)"
+        "learning_paths!inner(id, user_id), courses(duration_hrs, skill_tags)"
     )
     if _has_parts_schema():
         fields = fields.replace("course_id,", "course_id, part_hours,")
@@ -244,18 +282,20 @@ def _owned_step(step_id: str, user_id: str) -> dict:
     return step
 
 
-def set_task_completion(step_id: str, user_id: str, completed: bool, note: str = "") -> dict:
+def set_task_completion(
+    step_id: str, user_id: str, completed: bool, note: str = "",
+    rating: int = None, tag: str = ""
+) -> dict:
     """Mark a task complete or INCOMPLETE. Both directions persist.
 
     Completing is blocked unless every earlier week is finished — enforced here,
     not just in the UI.
 
-    `note`: the learner's real natural-language feedback on this task (the
-    frontend makes this mandatory on every completion). Stored as a real
-    feedback_events row - not just logged for its own sake: once the note's
-    WEEK becomes fully complete, it's used to reconsider the next
-    not-started week's course selection (see feedback_service.
-    apply_week_feedback). Ignored on un-complete (nothing to act on there).
+    `note`, `rating` (1-5 stars), `tag`: learner's real feedback on this task.
+    Stored as a real feedback_events row and applied IMMEDIATELY (not gated
+    on finishing the task's whole week) to reconsider the not-started tail
+    of the path's course selection (see feedback_service.
+    apply_recent_feedback). Ignored on un-complete (nothing to act on there).
     """
     step = _owned_step(step_id, user_id)
     path_id = step["path_id"]
@@ -278,43 +318,55 @@ def set_task_completion(step_id: str, user_id: str, completed: bool, note: str =
     new_status = "completed" if completed else "not_started"
     supabase_client.table("path_steps").update({"status": new_status}).eq("id", step_id).execute()
 
-    if completed and note and note.strip():
+    if completed:
+        # Real (weak) positive mastery evidence - this is the actual
+        # frontend completion path (PersonalizedRoadmap's checkbox ->
+        # useRoadmap.toggleTask -> here), so this is where real completion
+        # evidence needs to land, not just in the separate
+        # feedback_service.handle_feedback route. See mastery_service for
+        # why this only ever raises a floor, never claims expert mastery
+        # from one completion.
+        try:
+            from app.services import mastery_service
+            skill_tags = (step.get("courses") or {}).get("skill_tags") or []
+            mastery_service.update_mastery_from_completion(user_id, skill_tags)
+        except Exception as e:
+            print(f"[roadmap] mastery update from completion failed: {type(e).__name__}: {e}", flush=True)
+
+    if completed and (note or rating or tag):
+        feedback_content = []
+        if rating:
+            feedback_content.append(f"Rating: {rating}/5 stars")
+        if tag:
+            feedback_content.append(f"Tag: {tag}")
+        if note and note.strip():
+            feedback_content.append(note.strip())
+        combined_note = " | ".join(feedback_content)[:1000]
+
         try:
             supabase_client.table("feedback_events").insert({
                 "user_id": user_id, "path_id": path_id, "step_id": step_id,
-                "event_type": "completed", "note": note.strip()[:1000],
+                "event_type": "completed", "note": combined_note,
             }).execute()
         except Exception as e:
             print(f"[roadmap] feedback note write failed: {type(e).__name__}: {e}", flush=True)
 
-        # If this was the last not-yet-terminal step in its week, the week is
-        # now fully done - a good moment to fold this week's feedback into
-        # the upcoming week's course selection.
+        # Real-time, not week-gated: this feedback is applied to the
+        # not-started tail of the path immediately, the moment it's left -
+        # it used to wait until every remaining step in the CURRENT week
+        # was also terminal, which meant feedback on the first task of a
+        # 5-task week sat unused until the other four were done too. See
+        # feedback_service.apply_recent_feedback.
         try:
-            remaining = (
-                supabase_client.table("path_steps")
-                .select("status").eq("path_id", path_id).eq("week_number", week).execute()
-            ).data or []
-            if remaining and all(s.get("status") in TERMINAL for s in remaining):
-                from app.services import feedback_service
-                feedback_service.apply_week_feedback(path_id, user_id, week)
+            from app.services import feedback_service
+            feedback_service.apply_recent_feedback(path_id, user_id, combined_note)
         except Exception as e:
-            print(f"[roadmap] week-feedback application failed: {type(e).__name__}: {e}", flush=True)
+            print(f"[roadmap] recent-feedback application failed: {type(e).__name__}: {e}", flush=True)
 
     # Keep profiles.completed_courses in step with the toggle, both directions,
-    # so the recommender never re-suggests something the learner just finished
-    # (and does re-suggest it if they un-complete it).
-    #
-    # A split course has multiple path_steps rows sharing one course_id (Part
-    # 1, Part 2, ...) - it only counts as done once EVERY part is terminal, so
-    # this checks the other rows for the same course_id before touching
-    # completed_courses. Un-completing always removes it (the course is no
-    # longer 100% done as soon as any one part isn't), which is correct
-    # whether or not it was ever split.
+    # so the recommender never re-suggests something the learner just finished.
     course_id = step.get("course_id")
     if course_id:
-        # Re-fetch after the update above: every row's *current* status for
-        # this course_id tells us directly whether the whole course is done.
         current_statuses = (
             supabase_client.table("path_steps")
             .select("status").eq("path_id", path_id).eq("course_id", course_id).execute()
@@ -331,13 +383,6 @@ def set_task_completion(step_id: str, user_id: str, completed: bool, note: str =
         if changed:
             supabase_client.table("profiles").update({"completed_courses": ids}).eq("id", user_id).execute()
 
-    # Completing a task is qualifying learning activity — log it so the streak
-    # AND the weekly-activity hours on Progress are derived from what the
-    # learner actually did. We don't track live session duration (no timer),
-    # so the REAL hours for what was just completed is used as the
-    # time-investment estimate — this part's own hours if the course was
-    # split (so completing "Part 1 of 2" doesn't log the whole course's
-    # duration twice), else the whole course's real duration_hrs.
     if completed:
         try:
             from app.services import account_service
@@ -351,9 +396,34 @@ def set_task_completion(step_id: str, user_id: str, completed: bool, note: str =
         except Exception as e:
             print(f"[roadmap] study session log failed: {type(e).__name__}: {e}", flush=True)
 
+    bump_path_version(path_id)
+
     # Return the whole recomputed roadmap so every dependent view can refresh
     # from one response instead of firing extra requests.
     return get_roadmap(user_id)
+
+
+def rerecommend_task(
+    step_id: str, user_id: str, preference: str = "custom", note: str = ""
+) -> dict:
+    """Re-recommends a single week course based on learner preferences and
+    returns the recomputed roadmap, enriched with the real reason for the
+    change and any unmet prerequisite this swap surfaced (see
+    path_service.swap_step_with_preference - this is the actual reachable
+    "too hard"/"too easy" signal in the live app, via the 'too_advanced'/
+    'too_basic' preference options, and it updates real mastery evidence
+    before this function ever runs). Previously this data was computed and
+    then silently discarded here in favor of the plain roadmap object."""
+    from app.services import path_service
+    res = path_service.swap_step_with_preference(
+        step_id=step_id, user_id=user_id, preference=preference, note=note
+    )
+    if not res.get("swapped"):
+        raise ValueError(res.get("reason", "Could not re-recommend course for this week"))
+    roadmap = get_roadmap(user_id)
+    roadmap["reason_for_change"] = res.get("reason_for_change")
+    roadmap["unmet_prerequisites"] = res.get("unmet_prerequisites") or []
+    return roadmap
 
 
 def assign_week_numbers(path_id: str, weekly_hours: int = 10) -> None:

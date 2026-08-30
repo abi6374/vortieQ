@@ -12,6 +12,23 @@ import api from '../lib/apiClient'
  * response returns, so Progress / Skill insights / the week strip all reflect
  * the change without extra requests.
  */
+// Same dev/e2e-only bypass pattern as AuthContext.getDevBypassUser() -
+// import.meta.env.DEV is a Vite build-time constant (false in a real `vite
+// build`), so this check and MOCK_DEV_ROADMAP below are dead code the
+// bundler strips from what actually ships to Vercel. Previously these two
+// localStorage checks (in `load` below) had NO such gate - a production
+// user who happened to have either flag set (or hit by a stale test
+// artifact) and a slow/failing /api/roadmap call would see a fully
+// fabricated roadmap (fake completed steps, fake percent, fake course
+// titles) presented as their real progress.
+function isDevBypassActive() {
+  return (
+    import.meta.env.DEV &&
+    typeof window !== 'undefined' &&
+    (window.localStorage.getItem('pf_dev_bypass') === 'true' || window.localStorage.getItem('e2e_mock_auth') === 'true')
+  )
+}
+
 const MOCK_DEV_ROADMAP = {
   path: { id: 'dev-path', goal_text: 'AIML Engineer & Data Analytics' },
   percent: 35,
@@ -70,13 +87,13 @@ export function useRoadmap() {
       const res = await api.get('/api/roadmap')
       if (res.data && res.data.weeks && res.data.weeks.length > 0) {
         setData(res.data)
-      } else if (typeof window !== 'undefined' && (window.localStorage.getItem('pf_dev_bypass') === 'true' || window.localStorage.getItem('e2e_mock_auth') === 'true')) {
+      } else if (isDevBypassActive()) {
         setData(MOCK_DEV_ROADMAP)
       } else {
         setData(res.data)
       }
     } catch (err) {
-      if (typeof window !== 'undefined' && (window.localStorage.getItem('pf_dev_bypass') === 'true' || window.localStorage.getItem('e2e_mock_auth') === 'true')) {
+      if (isDevBypassActive()) {
         setData(MOCK_DEV_ROADMAP)
       } else {
         setError('We could not load your roadmap. Please try again.')
@@ -88,11 +105,16 @@ export function useRoadmap() {
 
   useEffect(() => { load() }, [load])
 
-  const toggleTask = useCallback(async (stepId, completed, note = '') => {
+  const toggleTask = useCallback(async (stepId, completed, note = '', rating = null, tag = '') => {
     setSavingId(stepId)
     setLockMessage(null)
     try {
-      const res = await api.patch(`/api/roadmap/tasks/${stepId}`, { completed, note })
+      const res = await api.patch(`/api/roadmap/tasks/${stepId}`, {
+        completed,
+        note,
+        rating,
+        tag,
+      })
       setData(res.data) // full recomputed roadmap
       return { ok: true }
     } catch (err) {
@@ -124,6 +146,28 @@ export function useRoadmap() {
     }
   }, [])
 
+  const rerecommendTask = useCallback(async (stepId, preference = 'custom', note = '') => {
+    setSavingId(stepId)
+    try {
+      const res = await api.post('/api/roadmap/rerecommend', {
+        step_id: stepId,
+        preference,
+        note,
+      })
+      setData(res.data) // full recomputed roadmap
+      // Real reason for the change (mastery-adjusted, prerequisite gap,
+      // etc.) when the preference was too_advanced/too_basic - see
+      // roadmap_service.rerecommend_task. Absent for format/style
+      // preferences (free_resource/hands_on/custom) that don't touch mastery.
+      return { ok: true, reasonForChange: res.data?.reason_for_change || null }
+    } catch (err) {
+      const msg = err?.response?.data?.detail || 'Unable to re-recommend course for this week.'
+      return { ok: false, reason: msg }
+    } finally {
+      setSavingId(null)
+    }
+  }, [])
+
   // Convenience derivations so components don't re-implement them.
   const weeks = data?.weeks || []
   const currentWeek = data?.current_week ?? 1
@@ -137,7 +181,7 @@ export function useRoadmap() {
     completedSteps: data?.completed_steps ?? 0,
     path: data?.path || null,
     loading, error, lockMessage, setLockMessage, savingId,
-    reload: load, toggleTask,
+    reload: load, toggleTask, rerecommendTask,
   }
 }
 

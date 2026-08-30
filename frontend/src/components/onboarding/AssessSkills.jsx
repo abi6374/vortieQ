@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import { subtopicsFor, LEVEL_KEYS } from './skillTaxonomy'
 import UserProfileDropdown from '../ui/UserProfileDropdown'
+import ThemeToggle from '../ui/ThemeToggle'
 
 /**
  * Skill Confidence Assessment — Step 2 of onboarding.
@@ -25,16 +26,22 @@ function normalizeLevel(l) {
   return LEVEL_KEYS.includes(k) ? k : 'basic'
 }
 
-function confidenceFor(chosen, suggested, baseConfidence) {
-  const base = typeof baseConfidence === 'number' && baseConfidence >= 30 && baseConfidence <= 100
-    ? baseConfidence
-    : 82
-  const dist = LEVEL_KEYS.indexOf(chosen) - LEVEL_KEYS.indexOf(suggested)
-  if (dist === 0) return base
-  if (dist < 0) {
-    return Math.min(99, base + Math.abs(dist) * 4)
-  }
-  return Math.max(35, base - dist * 14)
+// A skill's confidence_pct is REAL evidence (from a resume/GitHub extraction
+// that already ran), never invented client-side. It only stays attached to
+// the currently-chosen level while that level matches what was actually
+// detected — the moment the learner picks a different level than the one
+// the evidence supported, that's a self-correction, and we stop claiming a
+// percentage we no longer have evidence for. The backend
+// (mastery_service._apply_topics) already applies its own documented
+// per-source default uncertainty (0.5 for self_assessment) whenever no real
+// confidence_pct is sent, so omitting it here is the correct contract, not
+// a gap to paper over.
+function isInferredAtLevel(topic, chosenLevel) {
+  return typeof topic.confidence_pct === 'number' && normalizeLevel(topic.suggested_level) === chosenLevel
+}
+
+function confidencePctFor(topic, chosenLevel) {
+  return isInferredAtLevel(topic, chosenLevel) ? topic.confidence_pct : null
 }
 
 function Radio({ on, small }) {
@@ -42,13 +49,19 @@ function Radio({ on, small }) {
   const dot = small ? 9 : 11
   return (
     <span
-      style={{
-        width: size, height: size, borderRadius: '50%',
-        border: `2px solid ${on ? V : '#e6e6e6'}`,
-        background: '#fff', display: 'grid', placeItems: 'center', flex: 'none',
-      }}
+      className={`rounded-full grid place-items-center flex-none border-2 transition-all ${
+        on
+          ? 'border-[#0066cc] dark:border-[#38BDF8] bg-white dark:bg-[#131D2E]'
+          : 'border-[#e6e6e6] dark:border-[#2D3A4F] bg-white dark:bg-[#0B0F17]'
+      }`}
+      style={{ width: size, height: size }}
     >
-      {on && <span style={{ width: dot, height: dot, borderRadius: '50%', background: V }} />}
+      {on && (
+        <span
+          className="rounded-full bg-[#0066cc] dark:bg-[#38BDF8]"
+          style={{ width: dot, height: dot }}
+        />
+      )}
     </span>
   )
 }
@@ -56,31 +69,37 @@ function Radio({ on, small }) {
 function SkillLevelPanel({ topic, level, onLevel }) {
   const [open, setOpen] = useState(true)
   const suggested = normalizeLevel(topic.suggested_level)
-  const pct = confidenceFor(level, suggested, topic.confidence_pct)
+  const pct = confidencePctFor(topic, level)
 
   return (
-    <section className="rounded-2xl border border-[#e6e6e6] bg-white shadow-sm overflow-hidden">
+    <section className="rounded-2xl border border-[#e6e6e6] dark:border-[#202B3C] bg-white dark:bg-[#101726] shadow-sm overflow-hidden transition-colors">
       {/* header */}
       <div className="flex items-center gap-4 px-5 py-4">
         <div
-          className="grid place-items-center rounded-xl text-white font-bold flex-none"
-          style={{ width: 44, height: 44, background: V, boxShadow: '0 4px 12px rgba(0,102,204,.25)' }}
+          className="grid place-items-center rounded-xl text-white dark:text-[#0B0F17] font-bold flex-none bg-[#0066cc] dark:bg-[#38BDF8] shadow-[0_4px_12px_rgba(0,102,204,.25)] dark:shadow-[0_4px_12px_rgba(56,189,248,.25)]"
+          style={{ width: 44, height: 44 }}
         >
           {topic.name.slice(0, 2).toUpperCase()}
         </div>
-        <span className="font-bold text-[#1d1d1f]" style={{ fontSize: 20, letterSpacing: '-.02em' }}>
+        <span className="font-bold text-[#1d1d1f] dark:text-[#F8FAFC]" style={{ fontSize: 20, letterSpacing: '-.02em' }}>
           {topic.name}
         </span>
         <span className="flex-1" />
-        <span className="flex items-baseline gap-1.5">
-          <span className="font-extrabold tabular-nums" style={{ fontSize: 20, color: V }}>{pct}%</span>
-          <span className="text-xs sm:text-sm text-[#494949]">confidence</span>
-        </span>
+        {pct !== null ? (
+          <span className="flex items-baseline gap-1.5">
+            <span className="font-extrabold tabular-nums text-[#0066cc] dark:text-[#38BDF8]" style={{ fontSize: 20 }}>{pct}%</span>
+            <span className="text-xs sm:text-sm text-[#494949] dark:text-[#94A3B8]">inferred</span>
+          </span>
+        ) : (
+          <span className="text-[11px] font-bold uppercase tracking-wide text-[#7a7a7a] dark:text-[#94A3B8] bg-[#f2f2f2] dark:bg-[#1A2536] px-2.5 py-1 rounded-full">
+            Self-reported
+          </span>
+        )}
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
           aria-label={open ? 'Collapse' : 'Expand'}
-          className="grid place-items-center rounded-full border border-[#e6e6e6] bg-[#f7f9fc] text-[#494949] hover:bg-[#eef3f8] flex-none cursor-pointer"
+          className="grid place-items-center rounded-full border border-[#e6e6e6] dark:border-[#263750] bg-[#f7f9fc] dark:bg-[#1A2536] text-[#494949] dark:text-[#CBD5E1] hover:bg-[#eef3f8] dark:hover:bg-[#25354D] flex-none cursor-pointer transition-colors"
           style={{ width: 36, height: 36 }}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"
@@ -94,7 +113,7 @@ function SkillLevelPanel({ topic, level, onLevel }) {
       {open && (
         <div className="px-5 pb-5">
           {topic.evidence && (
-            <p className="text-[13px] text-[#86868b] italic mb-3.5 -mt-1">"{topic.evidence}"</p>
+            <p className="text-[13px] text-[#86868b] dark:text-[#94A3B8] italic mb-3.5 -mt-1">"{topic.evidence}"</p>
           )}
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -107,42 +126,42 @@ function SkillLevelPanel({ topic, level, onLevel }) {
                   role="radio"
                   aria-checked={active}
                   onClick={() => onLevel(key)}
-                  className="text-left rounded-xl bg-white transition cursor-pointer"
-                  style={{
-                    border: active ? `2px solid ${V}` : '1px solid #e6e6e6',
-                    padding: active ? 13 : 14,
-                    background: active ? 'linear-gradient(160deg,#fff,#eaf2fc 120%)' : '#fff',
-                    boxShadow: active ? '0 0 0 3px rgba(0,102,204,.07)' : 'none',
-                  }}
+                  className={`text-left rounded-xl transition-all cursor-pointer p-3 sm:p-3.5 border-2 ${
+                    active
+                      ? 'border-[#0066cc] dark:border-[#38BDF8] bg-gradient-to-br from-white to-[#eaf2fc] dark:from-[#131D2E] dark:to-[#18263D] shadow-[0_0_0_3px_rgba(0,102,204,.07)] dark:shadow-[0_0_0_3px_rgba(56,189,248,.15)]'
+                      : 'border-[#e6e6e6] dark:border-[#202C3E] bg-white dark:bg-[#0B0F17] hover:border-[#abd2fb] dark:hover:border-[#38BDF8]'
+                  }`}
                 >
                   <span className="flex items-center justify-between gap-1.5">
-                    <span className="font-bold" style={{ fontSize: 14, color: active ? V_DARK : '#1d1d1f' }}>
+                    <span className={`font-bold text-sm ${active ? 'text-[#004fa3] dark:text-[#38BDF8]' : 'text-[#1d1d1f] dark:text-[#F8FAFC]'}`}>
                       {LEVEL_META[key].label}
                     </span>
                     <Radio on={active} small />
                   </span>
-                  <span className="block text-[11.5px] text-[#86868b] mt-1 leading-snug">
-                    {suggested === key ? 'Matches your resume' : LEVEL_META[key].blurb}
+                  <span className={`block text-[11.5px] mt-1 leading-snug ${active ? 'text-[#494949] dark:text-[#94A3B8]' : 'text-[#86868b] dark:text-[#64748B]'}`}>
+                    {/* Only claim a match to real evidence when there actually is
+                        a confidence_pct backing it (resume/GitHub extraction) -
+                        a manually self-reported skill's default "basic" level
+                        must never be mislabeled as something we detected. */}
+                    {suggested === key && typeof topic.confidence_pct === 'number' ? 'Matches what we detected' : LEVEL_META[key].blurb}
                   </span>
                 </button>
               )
             })}
           </div>
 
-          <div className="mt-3.5 flex items-center gap-3.5 rounded-xl border px-4 py-3"
-               style={{ background: '#eaf2fc', borderColor: '#eaf2fc' }}>
-            <span className="grid place-items-center rounded-full flex-none"
-                  style={{ width: 36, height: 36, background: '#eaf2fc', color: V }}>
+          <div className="mt-3.5 flex items-center gap-3.5 rounded-xl border px-4 py-3 bg-[#eaf2fc] dark:bg-[#131E30] border-[#d8e9fb] dark:border-[#22354E] transition-colors">
+            <span className="grid place-items-center rounded-full flex-none w-9 h-9 bg-[#dbeafc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8]">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
                    strokeLinecap="round" strokeLinejoin="round">
                 <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
               </svg>
             </span>
             <div>
-              <div className="text-[11px] font-bold tracking-wide uppercase" style={{ color: V }}>
+              <div className="text-[11px] font-bold tracking-wide uppercase text-[#0066cc] dark:text-[#38BDF8]">
                 Key concepts · {LEVEL_META[level].label}
               </div>
-              <div className="font-semibold text-[#1d1d1f] leading-snug text-[14.5px]">
+              <div className="font-semibold text-[#1d1d1f] dark:text-[#F8FAFC] leading-snug text-[14px]">
                 {subtopicsFor(topic.name, level)}
               </div>
             </div>
@@ -154,32 +173,81 @@ function SkillLevelPanel({ topic, level, onLevel }) {
 }
 
 export default function AssessSkills({ topics = [], detectedYears = 0, onContinue, onBack, onSkip }) {
-  const [method, setMethod] = useState('level') // 'level' | 'describe'
-  const [levels, setLevels] = useState(
-    () => Object.fromEntries(topics.map((t) => [t.name, normalizeLevel(t.suggested_level)]))
+  const [method, setMethod] = useState('skills') // 'skills' | 'level'
+  // No fabricated defaults: a learner with zero detected skills (no resume,
+  // no GitHub, goal-text-only intake) sees an honest empty state below,
+  // never a fake "Python / SQL / Data Analysis" starter set.
+  const [currentTopics, setCurrentTopics] = useState(() => topics || [])
+
+  const [levels, setLevels] = useState(() =>
+    Object.fromEntries((topics || []).map((t) => [t.name, normalizeLevel(t.suggested_level)]))
   )
-  
-  // Single unified description for all skills
-  const [unifiedDescription, setUnifiedDescription] = useState('')
+
+  const [newSkillInput, setNewSkillInput] = useState('')
 
   const setLevel = (name, lvl) => setLevels((p) => ({ ...p, [name]: lvl }))
 
+  const handleAddSkill = (skillName) => {
+    const trimmed = (skillName || newSkillInput).trim()
+    if (!trimmed) return
+    const exists = currentTopics.some((t) => t.name.toLowerCase() === trimmed.toLowerCase())
+    if (exists) {
+      setNewSkillInput('')
+      return
+    }
+    // Manually added skills carry no suggested_level or confidence_pct -
+    // there is no evidence behind them yet beyond the learner's own word.
+    // They default to "Basic" (a neutral, non-presumptuous starting point,
+    // never "Intermediate" as if something had been detected) and the
+    // learner is expected to adjust the level themselves; the UI marks
+    // these "Self-reported" rather than attaching an invented percentage.
+    const newTopic = {
+      name: trimmed,
+      evidence: 'Self-reported by you',
+    }
+    setCurrentTopics((prev) => [...prev, newTopic])
+    setLevels((prev) => ({ ...prev, [trimmed]: 'basic' }))
+    setNewSkillInput('')
+  }
+
+  const handleRemoveSkill = (name) => {
+    setCurrentTopics((prev) => prev.filter((t) => t.name !== name))
+    setLevels((prev) => {
+      const copy = { ...prev }
+      delete copy[name]
+      return copy
+    })
+  }
+
   const submit = () => {
-    const ratings = topics.map((t) => {
+    const ratings = currentTopics.map((t) => {
       const chosenLevel = levels[t.name] || normalizeLevel(t.suggested_level)
-      const suggested = normalizeLevel(t.suggested_level)
-      const dynamicPct = confidenceFor(chosenLevel, suggested, t.confidence_pct)
-      return {
+      const pct = confidencePctFor(t, chosenLevel)
+      const rating = {
         name: t.name,
         level: chosenLevel,
-        confidence_pct: dynamicPct,
-        evidence: method === 'describe' && unifiedDescription.trim()
-          ? unifiedDescription.trim()
-          : (t.evidence || ''),
+        evidence: pct !== null
+          ? (t.evidence || 'Detected from your profile')
+          : (t.evidence || 'Self-reported during skill calibration'),
       }
+      // Only send a confidence_pct when it is REAL evidence still backing
+      // the currently-chosen level. Omitting it for self-reported/adjusted
+      // skills is intentional: the backend
+      // (mastery_service._apply_topics) applies its own documented
+      // self_assessment default uncertainty rather than us inventing one.
+      if (pct !== null) rating.confidence_pct = pct
+      return rating
     })
     onContinue(ratings)
   }
+
+  const SUGGESTED_QUICK_SKILLS = [
+    'Python', 'SQL', 'React', 'JavaScript', 'Docker', 'Git', 'FastAPI', 'Machine Learning', 'AWS', 'TypeScript', 'Pandas'
+  ]
+
+  const unaddedSuggestions = SUGGESTED_QUICK_SKILLS.filter(
+    (s) => !currentTopics.some((t) => t.name.toLowerCase() === s.toLowerCase())
+  ).slice(0, 6)
 
   const MethodCard = ({ id, icon, title, desc, children }) => {
     const active = method === id
@@ -188,26 +256,22 @@ export default function AssessSkills({ topics = [], detectedYears = 0, onContinu
         type="button"
         onClick={() => setMethod(id)}
         aria-pressed={active}
-        className="relative text-left rounded-2xl bg-white transition flex flex-col cursor-pointer"
-        style={{
-          border: active ? `2px solid ${V}` : '1px solid #e6e6e6',
-          padding: active ? 22 : 24,
-          minHeight: 180,
-          background: active ? 'linear-gradient(160deg,#fff,#eaf2fc)' : '#fff',
-          boxShadow: active ? '0 0 0 4px rgba(0,102,204,.08)' : 'none',
-        }}
+        className={`relative text-left rounded-2xl transition flex flex-col cursor-pointer p-5 sm:p-6 min-h-[170px] ${
+          active
+            ? 'border-2 border-[#0066cc] dark:border-[#38BDF8] bg-gradient-to-br from-white to-[#eaf2fc] dark:from-[#131D2E] dark:to-[#18263D] shadow-[0_0_0_4px_rgba(0,102,204,.08)]'
+            : 'border border-[#e6e6e6] dark:border-[#202C3E] bg-white dark:bg-[#101726] hover:border-[#abd2fb] dark:hover:border-[#38BDF8]'
+        }`}
       >
-        <span className="absolute" style={{ top: 20, right: 20 }}><Radio on={active} /></span>
+        <span className="absolute top-5 right-5"><Radio on={active} /></span>
         <div className="flex items-start gap-3.5 mb-3">
-          <span className="grid place-items-center rounded-xl flex-none" style={{
-            width: 44, height: 44,
-            background: active ? V : '#eef3f8',
-            color: active ? '#fff' : '#494949',
-            boxShadow: active ? '0 4px 12px rgba(0,102,204,.28)' : 'none',
-          }}>{icon}</span>
+          <span className={`grid place-items-center rounded-xl flex-none w-11 h-11 ${
+            active
+              ? 'bg-[#0066cc] dark:bg-[#38BDF8] text-white dark:text-[#0B0F17] shadow-[0_4px_12px_rgba(0,102,204,.28)]'
+              : 'bg-[#eef3f8] dark:bg-[#1E293B] text-[#494949] dark:text-[#CBD5E1]'
+          }`}>{icon}</span>
           <div>
-            <h3 className="font-bold text-[#1d1d1f]" style={{ fontSize: 18, letterSpacing: '-.01em' }}>{title}</h3>
-            <p className="text-[13.5px] text-[#494949] mt-0.5 leading-snug">{desc}</p>
+            <h3 className="font-bold text-[#1d1d1f] dark:text-[#F8FAFC] text-lg tracking-tight">{title}</h3>
+            <p className="text-[13.5px] text-[#494949] dark:text-[#94A3B8] mt-0.5 leading-snug">{desc}</p>
           </div>
         </div>
         {children}
@@ -216,35 +280,39 @@ export default function AssessSkills({ topics = [], detectedYears = 0, onContinu
   }
 
   return (
-    <div className="w-full max-w-[1140px] bg-white rounded-2xl border border-[#f0f0f0] shadow-[0_14px_38px_rgba(25,49,75,0.08)] p-6 sm:p-10 flex flex-col justify-between overflow-hidden">
+    <div className="w-full max-w-[1140px] bg-white dark:bg-[#0E1522] rounded-2xl border border-[#f0f0f0] dark:border-[#202B3C] shadow-[0_14px_38px_rgba(25,49,75,0.08)] dark:shadow-[0_14px_38px_rgba(0,0,0,0.5)] p-6 sm:p-10 flex flex-col justify-between overflow-hidden transition-colors">
       
-      {/* Top Header Row with Step Badge and User Profile */}
+      {/* Top Header Row with Step Badge, ThemeToggle, and User Profile */}
       <div className="flex items-center justify-between mb-4">
-        <span className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[12px] font-bold uppercase tracking-wider"
-              style={{ color: V, background: '#eaf2fc', border: '1px solid #eaf2fc' }}>
+        <span className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[12px] font-bold uppercase tracking-wider text-[#0066cc] dark:text-[#38BDF8] bg-[#eaf2fc] dark:bg-[#1E293B] border border-[#eaf2fc] dark:border-[#2D3A4F]">
           Step 2 · Skill Confidence
         </span>
-        <UserProfileDropdown />
+        <div className="flex items-center gap-2 sm:gap-2.5">
+          <ThemeToggle />
+          <UserProfileDropdown />
+        </div>
       </div>
 
-      <h1 className="font-extrabold text-[#1d1d1f]" style={{ fontSize: 'clamp(26px,3.4vw,38px)', letterSpacing: '-.025em', lineHeight: 1.1 }}>
+      <h1 className="font-extrabold text-[#1d1d1f] dark:text-[#F8FAFC]" style={{ fontSize: 'clamp(26px,3.4vw,38px)', letterSpacing: '-.025em', lineHeight: 1.1 }}>
         Your skills, your confidence
       </h1>
-      <p className="text-[#494949] mt-2.5 mb-6" style={{ fontSize: 'clamp(15px,1.4vw,17px)' }}>
-        We found {topics.length} topic{topics.length === 1 ? '' : 's'} in your background
-        {detectedYears ? ` (≈${detectedYears} years experience)` : ''}. Choose how you'd like to calibrate your skills.
+      <p className="text-[#494949] dark:text-[#94A3B8] mt-2.5 mb-6" style={{ fontSize: 'clamp(15px,1.4vw,17px)' }}>
+        {currentTopics.length > 0
+          ? <>We identified {currentTopics.length} skill{currentTopics.length === 1 ? '' : 's'} in your profile
+              {detectedYears ? ` (≈${detectedYears} years experience)` : ''}. Review your detected skills or fine-tune your level per skill.</>
+          : <>We didn't detect any skills from a resume or GitHub sync. Add the skills you actually have below and tell us your real level for each.</>}
       </p>
 
-      {/* Method Toggle: Single Description vs Choose Level */}
+      {/* Method Toggle: Skills vs Choose Level */}
       <div className="grid sm:grid-cols-2 gap-4 mb-6">
         <MethodCard
-          id="describe"
-          title="Describe in a single text"
-          desc="Tell us all your skills, projects, and strengths together."
-          icon={<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.7A8.38 8.38 0 0 1 4 11.5 8.5 8.5 0 0 1 12.5 3 8.38 8.38 0 0 1 21 11.5z"/></svg>}
+          id="skills"
+          title="Skills"
+          desc="Extracted skills from your background & resume."
+          icon={<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L14.4 7.6L20 10L14.4 12.4L12 18L9.6 12.4L4 10L9.6 7.6L12 2Z"/></svg>}
         >
-          <p className="text-[12.5px] text-[#494949] mt-auto leading-relaxed">
-            Fastest text flow — describe all your skills at once and our AI will infer your tiers.
+          <p className="text-[12.5px] text-[#494949] dark:text-[#94A3B8] mt-auto leading-relaxed">
+            Skills overview — all detected competencies ready to shape your learning roadmap.
           </p>
         </MethodCard>
 
@@ -254,66 +322,137 @@ export default function AssessSkills({ topics = [], detectedYears = 0, onContinu
           desc="Pick Basic, Intermediate, Advanced, or Expert per topic."
           icon={<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18"/><path d="M7 16v-5"/><path d="M12 16V8"/><path d="M17 16v-9"/></svg>}
         >
-          <p className="text-[12.5px] text-[#494949] mt-auto leading-relaxed">
+          <p className="text-[12.5px] text-[#494949] dark:text-[#94A3B8] mt-auto leading-relaxed">
             Precise calibration — fine-tune your tier per skill to set your exact starting point.
           </p>
         </MethodCard>
       </div>
 
       {/* Content Area Based on Method */}
-      {method === 'describe' ? (
-        /* SINGLE UNIFIED TEXT BOX FOR ALL SKILLS */
-        <div className="rounded-2xl border-2 border-[#0066cc]/40 bg-[#f9fcff] p-6 shadow-sm">
-          <div className="flex items-center gap-2.5 mb-2">
-            <span className="w-8 h-8 rounded-lg bg-[#dbeafc] text-[#0066cc] flex items-center justify-center font-bold">
-              ✍️
-            </span>
-            <h3 className="font-bold text-[#1d1d1f] text-[17px]">
-              Describe all your skills, tools & experience
-            </h3>
-          </div>
-          <p className="text-xs sm:text-sm text-[#333333] mb-4">
-            Mention your programming languages, frameworks, past projects, coursework, and concepts you feel confident with.
-          </p>
-          
-          <div className="relative">
-            <textarea
-              value={unifiedDescription}
-              onChange={(e) => setUnifiedDescription(e.target.value.slice(0, 1500))}
-              maxLength={1500}
-              placeholder="e.g. I have 2 years of Python experience building APIs with FastAPI and Flask. I understand descriptive statistics and basic Pandas for data analysis. I have built 1 data visualization project with Matplotlib. I want to learn Machine Learning from scratch..."
-              className="w-full resize-none rounded-xl border border-[#e0e0e0] bg-white p-4 text-[15px] text-[#1d1d1f] leading-relaxed focus:outline-none focus:border-[#0066cc] focus:ring-2 focus:ring-[#0066cc]/10 transition-all shadow-inner"
-              style={{ minHeight: 160 }}
-            />
-            <span className="absolute right-3.5 bottom-3 text-[12px] font-semibold text-[#7a7a7a] tabular-nums">
-              {unifiedDescription.length}/1500
-            </span>
+      {method === 'skills' ? (
+        /* SKILLS CATALOG DASHBOARD */
+        <div className="rounded-2xl border border-[#D8DFEB] dark:border-[#24334A] bg-[#f9fcff] dark:bg-[#131D2E] p-6 shadow-sm">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-[#E1E6F0] dark:border-[#202C3E]">
+            <div className="flex items-center gap-2.5">
+              <span className="w-8 h-8 rounded-lg bg-[#dbeafc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center font-bold">
+                ⚡
+              </span>
+              <div>
+                <h3 className="font-bold text-[#1d1d1f] dark:text-[#F8FAFC] text-[17px]">
+                  Detected Skills & Stacks ({currentTopics.length})
+                </h3>
+                <p className="text-xs text-[#52617D] dark:text-[#94A3B8]">
+                  These competencies will be used to benchmark your starting point on your roadmap.
+                </p>
+              </div>
+            </div>
+
+            {/* Quick Add Custom Skill Form */}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault()
+                handleAddSkill()
+              }}
+              className="flex items-center bg-white dark:bg-[#0B0F17] border border-[#D8DFEB] dark:border-[#2D3F59] rounded-full p-1 pl-3 shadow-2xs focus-within:border-[#0066cc] dark:focus-within:border-[#38BDF8] transition-all w-full sm:w-auto"
+            >
+              <input
+                type="text"
+                value={newSkillInput}
+                onChange={(e) => setNewSkillInput(e.target.value)}
+                placeholder="+ Add another skill..."
+                className="bg-transparent border-0 border-none outline-none focus:outline-none focus:ring-0 text-xs text-[#0E1B38] dark:text-[#F8FAFC] placeholder-[#888888] dark:placeholder-[#64748B] w-full sm:w-40"
+              />
+              <button
+                type="submit"
+                disabled={!newSkillInput.trim()}
+                className="px-3 py-1 bg-[#0066CC] hover:bg-[#0052A3] text-white text-xs font-bold rounded-full transition-all cursor-pointer disabled:opacity-40 flex-none"
+              >
+                Add
+              </button>
+            </form>
           </div>
 
-          {/* Chips of detected skills from resume/intake */}
-          {topics.length > 0 && (
-            <div className="mt-4 pt-3 border-t border-[#f0f0f0]">
-              <span className="text-xs font-bold text-[#7a7a7a] uppercase tracking-wider block mb-2">
-                Detected topics in your background:
-              </span>
-              <div className="flex flex-wrap gap-2">
-                {topics.map((t) => (
-                  <span
-                    key={t.name}
-                    className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-[#e0e0e0] rounded-lg text-xs font-bold text-[#1d1d1f] shadow-2xs"
+          {/* Skill Badges Catalog, or an honest empty state when nothing has been detected/added yet */}
+          {currentTopics.length === 0 ? (
+            <div className="mb-5 rounded-xl border border-dashed border-[#D8DFEB] dark:border-[#2D3F59] bg-white dark:bg-[#0B0F17] px-5 py-8 text-center">
+              <p className="font-bold text-[#1d1d1f] dark:text-[#F8FAFC] text-[15px]">No skills confirmed yet</p>
+              <p className="text-[13px] text-[#7a7a7a] dark:text-[#94A3B8] mt-1.5 max-w-md mx-auto leading-relaxed">
+                We didn't detect any skills from a resume or GitHub sync. Add skills yourself using the field above or the suggestions below — your self-reported level is what we'll use to build your roadmap.
+              </p>
+            </div>
+          ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-5">
+            {currentTopics.map((t) => {
+              const currentLvl = levels[t.name] || normalizeLevel(t.suggested_level)
+              const pct = confidencePctFor(t, currentLvl)
+              return (
+                <div
+                  key={t.name}
+                  className="bg-white dark:bg-[#101726] border border-[#e0e0e0] dark:border-[#24334A] rounded-xl p-3.5 flex items-center justify-between gap-2 shadow-xs hover:border-[#0066cc] dark:hover:border-[#38BDF8] transition-all group"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <span className="w-8 h-8 rounded-lg bg-[#eaf2fc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] font-bold text-xs flex items-center justify-center flex-none">
+                      {t.name.slice(0, 2).toUpperCase()}
+                    </span>
+                    <div className="min-w-0">
+                      <div className="font-bold text-[#1d1d1f] dark:text-[#F8FAFC] text-sm truncate">
+                        {t.name}
+                      </div>
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <span className="text-[11px] font-semibold text-[#0066cc] dark:text-[#38BDF8] bg-[#eaf2fc] dark:bg-[#182438] px-1.5 py-0.5 rounded capitalize">
+                          {LEVEL_META[currentLvl]?.label || 'Basic'}
+                        </span>
+                        <span className="text-[11px] text-[#7a7a7a] dark:text-[#94A3B8] font-mono">
+                          {pct !== null ? `${pct}% inferred` : 'Self-reported'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveSkill(t.name)}
+                    className="w-6 h-6 rounded-full text-[#888888] hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 flex items-center justify-center text-xs transition-colors cursor-pointer opacity-60 group-hover:opacity-100"
+                    title={`Remove ${t.name}`}
                   >
-                    <span className="w-2 h-2 rounded-full bg-[#0066cc]" />
-                    {t.name}
-                  </span>
-                ))}
-              </div>
+                    ✕
+                  </button>
+                </div>
+              )
+            })}
+          </div>
+          )}
+
+          {/* Quick Suggestions Chips */}
+          {unaddedSuggestions.length > 0 && (
+            <div className="pt-3 border-t border-[#E1E6F0] dark:border-[#202C3E] flex items-center gap-2 flex-wrap">
+              <span className="text-xs font-bold text-[#7a7a7a] dark:text-[#94A3B8] uppercase tracking-wider">
+                Quick Add:
+              </span>
+              {unaddedSuggestions.map((skill) => (
+                <button
+                  key={skill}
+                  type="button"
+                  onClick={() => handleAddSkill(skill)}
+                  className="px-2.5 py-1 rounded-lg bg-white dark:bg-[#182438] border border-[#D8DFEB] dark:border-[#2D3F59] hover:border-[#0066cc] dark:hover:border-[#38BDF8] text-xs font-semibold text-[#1d1d1f] dark:text-[#F8FAFC] cursor-pointer transition-all shadow-2xs"
+                >
+                  + {skill}
+                </button>
+              ))}
             </div>
           )}
         </div>
       ) : (
         /* PER-TOPIC LEVEL PANELS */
         <div className="space-y-4">
-          {topics.map((t) => (
+          {currentTopics.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-[#e6e6e6] dark:border-[#2D3A4F] bg-white dark:bg-[#101726] px-5 py-8 text-center">
+              <p className="font-bold text-[#1d1d1f] dark:text-[#F8FAFC] text-[15px]">No skills confirmed yet</p>
+              <p className="text-[13px] text-[#7a7a7a] dark:text-[#94A3B8] mt-1.5">
+                Switch to the "Skills" tab to add the skills you actually have.
+              </p>
+            </div>
+          ) : currentTopics.map((t) => (
             <SkillLevelPanel
               key={t.name}
               topic={t}
@@ -335,8 +474,8 @@ export default function AssessSkills({ topics = [], detectedYears = 0, onContinu
           Continue
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
         </button>
-        <button type="button" onClick={onSkip} className="px-6 py-3 rounded-xl border border-[#e6e6e6] text-[#494949] hover:bg-gray-50 cursor-pointer text-sm font-semibold">Skip</button>
-        <button type="button" onClick={onBack} className="px-6 py-3 rounded-xl text-[#86868b] hover:text-[#494949] cursor-pointer text-sm font-semibold">← Back</button>
+        <button type="button" onClick={onSkip} className="px-6 py-3 rounded-xl border border-[#e6e6e6] dark:border-[#263750] text-[#494949] dark:text-[#CBD5E1] hover:bg-gray-50 dark:hover:bg-[#1E293B] cursor-pointer text-sm font-semibold">Skip</button>
+        <button type="button" onClick={onBack} className="px-6 py-3 rounded-xl text-[#86868b] dark:text-[#94A3B8] hover:text-[#494949] dark:hover:text-[#F8FAFC] cursor-pointer text-sm font-semibold">← Back</button>
       </div>
     </div>
   )

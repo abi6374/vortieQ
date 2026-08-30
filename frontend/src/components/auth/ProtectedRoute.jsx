@@ -4,8 +4,16 @@ import { useAuth } from '../../hooks/useAuth'
 
 export default function ProtectedRoute({ children }) {
   const { session, user, loading } = useAuth()
-  const isBypass = typeof window !== 'undefined' && (window.localStorage.getItem('e2e_mock_auth') === 'true' || window.localStorage.getItem('pf_dev_bypass') === 'true')
-  const isAuth = session?.user || user || isBypass
+  // No separate bypass check here: AuthContext.getDevBypassUser() already
+  // produces a real (DEV-build-only) session.user for the dev/e2e flags, so
+  // session?.user / user already cover it. This route guard previously had
+  // its OWN parallel `isBypass` OR-clause with zero import.meta.env.DEV
+  // gate - the single most security-critical place to have had an
+  // ungated bypass, since it's literally the check deciding whether to let
+  // a request past the auth wall in production.
+  const isAuth = session?.user || user
+  const isBypass = import.meta.env.DEV && typeof window !== 'undefined' &&
+    (window.localStorage.getItem('e2e_mock_auth') === 'true' || window.localStorage.getItem('pf_dev_bypass') === 'true')
 
   const isOAuthCallback =
     typeof window !== 'undefined' &&

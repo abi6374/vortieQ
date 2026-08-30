@@ -152,6 +152,66 @@ const GENERIC = (name) => ({
   expert: `Architecture, scaling, and mentoring others in ${name}`,
 })
 
+export function extractSkillsFromText(text) {
+  if (!text || typeof text !== 'string') return []
+  const lower = text.toLowerCase()
+  const detected = []
+
+  const ALL_TOPICS = [
+    { key: 'python', name: 'Python', aliases: ['python', 'py'] },
+    { key: 'sql', name: 'SQL', aliases: ['sql', 'postgres', 'mysql', 'sqlite'] },
+    { key: 'javascript', name: 'JavaScript', aliases: ['javascript', 'js', 'es6'] },
+    { key: 'typescript', name: 'TypeScript', aliases: ['typescript', 'ts'] },
+    { key: 'react', name: 'React', aliases: ['react', 'reactjs', 'nextjs', 'next.js'] },
+    { key: 'fastapi', name: 'FastAPI', aliases: ['fastapi'] },
+    { key: 'node.js', name: 'Node.js', aliases: ['node', 'nodejs', 'node.js', 'express'] },
+    { key: 'pandas', name: 'Pandas', aliases: ['pandas'] },
+    { key: 'machine learning', name: 'Machine Learning', aliases: ['machine learning', 'ml', 'scikit-learn', 'sklearn'] },
+    { key: 'deep learning', name: 'Deep Learning', aliases: ['deep learning', 'pytorch', 'tensorflow', 'keras', 'neural'] },
+    { key: 'data analysis', name: 'Data Analysis', aliases: ['data analysis', 'analytics', 'bi', 'tableau', 'power bi'] },
+    { key: 'statistics', name: 'Statistics', aliases: ['statistics', 'statistical', 'probability'] },
+    { key: 'docker', name: 'Docker', aliases: ['docker', 'containers', 'containerization'] },
+    { key: 'kubernetes', name: 'Kubernetes', aliases: ['kubernetes', 'k8s'] },
+    { key: 'aws', name: 'AWS', aliases: ['aws', 'cloud', 's3', 'ec2', 'lambda'] },
+    { key: 'git', name: 'Git', aliases: ['git', 'github', 'version control'] },
+    { key: 'html', name: 'HTML', aliases: ['html', 'html5'] },
+    { key: 'css', name: 'CSS', aliases: ['css', 'css3', 'tailwind', 'sass'] },
+    { key: 'linux', name: 'Linux', aliases: ['linux', 'bash', 'shell'] },
+    { key: 'postgresql', name: 'PostgreSQL', aliases: ['postgresql', 'postgres'] },
+    { key: 'mongodb', name: 'MongoDB', aliases: ['mongodb', 'nosql'] },
+    { key: 'system design', name: 'System Design', aliases: ['system design', 'architecture', 'microservices'] },
+    { key: 'product management', name: 'Product Management', aliases: ['product management', 'agile', 'scrum', 'prd'] },
+  ]
+
+  for (const item of ALL_TOPICS) {
+    const matched = item.aliases.some((alias) => {
+      const regex = new RegExp(`\\b${alias.replace('.', '\\.')}\\b`, 'i')
+      return regex.test(lower)
+    })
+
+    if (matched) {
+      let level = 'intermediate'
+      let conf = 82
+      if (/\b(beginner|learning|started|scratch|basic|intro)\b/i.test(lower)) {
+        level = 'basic'
+        conf = 72
+      } else if (/\b(senior|expert|lead|architect|advanced|proficient|5\+? years)\b/i.test(lower)) {
+        level = 'advanced'
+        conf = 90
+      }
+
+      detected.push({
+        name: item.name,
+        suggested_level: level,
+        confidence_pct: conf,
+        evidence: `Mentioned in your background description`,
+      })
+    }
+  }
+
+  return detected
+}
+
 export function subtopicsFor(topicName, level) {
   const key = (topicName || '').trim().toLowerCase()
   const entry = TAXONOMY[key] || GENERIC(topicName)

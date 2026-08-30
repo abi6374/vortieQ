@@ -18,14 +18,15 @@ MAX_TEXT_CHARS = 60_000       # trim very long resumes before sending to the LLM
 def _load_prompt(name: str) -> str:
     return (_Path(__file__).parent.parent / "prompts" / name).read_text(encoding="utf-8")
 try:
-    from pypdf import PdfReader
-except ImportError:
+    from pypdf import PdfReader  # type: ignore
+except (ImportError, Exception):
     PdfReader = None
 
 try:
-    from docx import Document
-except ImportError:
+    from docx import Document  # type: ignore
+except (ImportError, Exception):
     Document = None
+
 
 
 # ---------------------------------------------------------------- text extraction

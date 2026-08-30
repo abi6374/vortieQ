@@ -5,6 +5,12 @@ from app.config import supabase_client
 from app.llm_client import chat_completion
 from app.ml.registry import get_recommender
 from app.services import web_search_service
+# Real resource-URL validation and the ResourceValidationError it raises now
+# live in catalog_service.py, shared by both this swap/rerecommend flow and
+# the dynamic-catalog ingestion pipeline (provider_resources) - imported and
+# rebound under the old names here so this module's own call sites (and the
+# existing test suite's patch targets) don't need to change.
+from app.services.catalog_service import ResourceValidationError, validate_resource_url as _validate_resource_url
 
 
 def _load_prompt(name: str) -> str:
@@ -165,6 +171,19 @@ Generate the learning path JSON now."""
     path_id = path_result.data[0]["id"]
 
     course_lookup = {c["id"]: c for c in courses}
+
+    # Deterministic prerequisite repair pass - "course sequencing is mostly
+    # delegated to an LLM after retrieval, without deterministic
+    # prerequisite graph validation" from the audit. Reorders (never drops
+    # or invents) courses so a real skill_prerequisites edge is never
+    # violated by two courses the LLM itself already chose for this path.
+    try:
+        from app.services import path_planner
+        milestones, _prereq_violations = path_planner.validate_and_reorder(milestones, course_lookup)
+        for note in _prereq_violations:
+            print(f"[generate_path] prerequisite reorder: {note}", flush=True)
+    except Exception as e:
+        print(f"[generate_path] prerequisite validation skipped: {type(e).__name__}: {e}", flush=True)
 
     # First pass: resolve every real (non-hallucinated) course id across all
     # milestones, in order, WITHOUT calling the LLM yet - collecting them all
@@ -343,7 +362,9 @@ def swap_step(step_id: str, user_id: str, level_hint: int = 0) -> dict:
     Args:
       step_id:    the step being swapped out.
       user_id:    caller (ownership-checked).
-      level_hint: +1 = "too easy" (find a harder replacement), 0 = plain swap.
+      level_hint: +1 = "too easy" (find a harder replacement), -1 = "too
+                  hard" (find an easier one), 0 = plain swap (e.g.
+                  "not interested" - no difficulty change implied).
 
     Behavior:
       1. Marks the skipped step as `skipped` in place (kept for history).
@@ -415,10 +436,14 @@ def swap_step(step_id: str, user_id: str, level_hint: int = 0) -> dict:
         user_id, path["id"], step_id,
         note=f"swapped for {replacement.get('title')} (level_hint={level_hint})",
     )
+    from app.services.roadmap_service import bump_path_version
+    version_info = bump_path_version(path["id"])
 
     return {
         "swapped": True,
         "old_step_id": step_id,
+        "path_version": version_info.get("version") if version_info else None,
+        "last_recomputed_at": version_info.get("last_recomputed_at") if version_info else None,
         "new_step": {
             "step_id": new_row["id"] if new_row else "",
             "course_id": replacement["id"],
@@ -465,3 +490,294 @@ def _log_swap_event(user_id: str, path_id: str, step_id: str, note: str) -> None
         "event_type": "not_interested",  # reuse existing enum; note carries the semantic
         "note": note,
     }).execute()
+
+
+def _ensure_course_in_catalog(course_data: dict) -> dict:
+    """Ensures a dynamically found or synthesized course exists in the
+    database courses table - only ever a REAL, independently-verified
+    resource (see _validate_resource_url). Raises ResourceValidationError
+    rather than persisting a placeholder/guessed URL; this table is shared
+    across every user, so a fabricated row here doesn't just affect the one
+    swap that created it."""
+    url = (course_data.get("resource_url") or "").strip()
+    title = (course_data.get("title") or "").strip()
+
+    # Check if this course or URL already exists — an already-catalogued
+    # course was validated when IT was first inserted, so re-checking here
+    # would just be redundant network calls on every repeat recommendation.
+    if url:
+        existing = supabase_client.table("courses").select("*").eq("resource_url", url).execute()
+        if existing.data:
+            return existing.data[0]
+    if title:
+        existing = supabase_client.table("courses").select("*").ilike("title", title).execute()
+        if existing.data:
+            return existing.data[0]
+
+    if not _validate_resource_url(url):
+        raise ResourceValidationError(
+            f"No independently-verifiable resource URL for {title!r} ({url!r})"
+        )
+
+    # Create embedding for pgvector
+    from app.ml.embedder import embed_text
+    desc = course_data.get("description", "") or title
+    tags = course_data.get("skill_tags") or []
+    if isinstance(tags, str):
+        tags = [t.strip() for t in tags.split(",") if t.strip()]
+
+    emb = embed_text(f"{title} {desc} {' '.join(tags)}")
+
+    new_course = {
+        "title": title,
+        "description": desc,
+        "provider": course_data.get("provider", "Web Learning Resource"),
+        "difficulty": course_data.get("difficulty", "beginner"),
+        "duration_hrs": int(course_data.get("duration_hrs") or 6),
+        "resource_url": url,
+        "skill_tags": tags,
+        "prerequisites": course_data.get("prerequisites") or [],
+        "embedding": emb,
+    }
+    res = supabase_client.table("courses").insert(new_course).execute()
+    if res.data:
+        return res.data[0]
+    raise ResourceValidationError(f"Failed to persist verified course {title!r}")
+
+
+def swap_step_with_preference(
+    step_id: str, user_id: str, preference: str = "custom", note: str = ""
+) -> dict:
+    """Realtime in-depth AI & Web Search re-recommendation for a single step according to learner's preference."""
+    step, path = _load_step_full(step_id, user_id)
+    old_course = step.get("courses") or {}
+    old_title = old_course.get("title") or "Current Module"
+    old_skills = old_course.get("skill_tags") or []
+    old_diff = old_course.get("difficulty") or "beginner"
+    milestone = step.get("milestone_label") or "Core Skills"
+
+    # Fetch profile (skills, resume context, topic ratings, years, goals)
+    prof_r = supabase_client.table("profiles").select("*").eq("id", user_id).execute()
+    if not prof_r.data:
+        raise ValueError("Profile not found")
+    profile = prof_r.data[0]
+
+    # Target specific topic/technology of this step to prevent unrelated topic jumps
+    topic_keywords = f"{old_title} {' '.join(old_skills[:2])}".strip()
+
+    # 1. Multi-query targeted live web search
+    search_queries = []
+    if preference == "too_advanced":
+        search_queries.append(f"{topic_keywords} beginner step by step tutorial crash course guide")
+        search_queries.append(f"{topic_keywords} fundamentals for beginners documentation")
+    elif preference == "too_basic":
+        search_queries.append(f"{topic_keywords} advanced production deep dive masterclass architecture")
+        search_queries.append(f"{topic_keywords} best practices scaling guide")
+    elif preference == "free_resource":
+        search_queries.append(f"{topic_keywords} official documentation free course youtube freecodecamp")
+        search_queries.append(f"{topic_keywords} free guide geeksforgeeks documentation")
+    elif preference in ("hands_on", "practice_sheet"):
+        search_queries.append(f"{topic_keywords} interactive hands-on coding tutorial lab exercises")
+        search_queries.append(f"{topic_keywords} practical exercises implementation guide")
+    else:
+        search_queries.append(f"{topic_keywords} best online tutorial guide documentation")
+
+    if note and note.strip():
+        search_queries.append(f"{topic_keywords} {note.strip()}")
+
+    web_results = []
+    seen_urls = set()
+    for q in search_queries[:3]:
+        try:
+            results = web_search_service.search_learning_resources(q, max_results=5)
+            for r in results:
+                u = r.get("url")
+                if u and u not in seen_urls:
+                    seen_urls.add(u)
+                    web_results.append(r)
+        except Exception as e:
+            print(f"[path_service] search query '{q}' failed: {e}", flush=True)
+
+    # 2. Vector search candidate fallback in DB specifically on topic
+    from app.ml.embedder import embed_text
+    from app.ml.retriever import retrieve_candidates
+    try:
+        topic_emb = embed_text(f"{topic_keywords} {preference} {note}")
+        catalog_matches = retrieve_candidates(topic_emb, n=6)
+    except Exception:
+        catalog_matches = []
+
+    in_path_ids = {
+        row["course_id"]
+        for row in (
+            supabase_client.table("path_steps")
+            .select("course_id")
+            .eq("path_id", path["id"])
+            .execute()
+            .data or []
+        )
+        if row.get("course_id")
+    }
+
+    # 3. AI synthesis and selection
+    system_prompt = """You are an expert AI Curriculum Designer and Technical Recommender.
+A learner wants to re-recommend / swap a specific learning module in their active learning path.
+
+CRITICAL INSTRUCTIONS:
+1. STRICT SUBJECT DOMAIN COHERENCE: The new course MUST be on the exact same subject / technology as the current module (e.g. if the current course is Kubernetes / Containers, the replacement MUST be Kubernetes / Containers — NEVER switch to an unrelated subject like AWS Solutions Architect, React, or Python unless explicitly asked in the user's note).
+2. SATISFY LEARNER INTENT:
+   - 'too_advanced' / gentler: A clear, step-by-step beginner-friendly introduction with zero unnecessary jargon, focusing on foundational mechanics.
+   - 'too_basic': An advanced, production-grade deep dive focusing on real-world architecture, scaling, and best practices.
+   - 'free_resource': A verified free / open-source resource (Official Docs, YouTube crash course, freeCodeCamp, GeeksforGeeks, NPTEL).
+   - 'hands_on': Practical hands-on exercises, labs, and interactive code implementations.
+   - 'custom' / user note: Directly satisfy the learner's exact written request.
+3. GROUNDING: Use the provided live web search results whenever possible to pick a REAL course / tutorial with an authentic title, provider, and valid resource URL.
+4. EXPLANATION: Write a 2-sentence explanation of why this replacement is better suited for the learner based on their feedback, experience, and target goal.
+
+Return ONLY a JSON object with this exact schema (no markdown fences, no extra keys):
+{
+  "title": "String",
+  "provider": "String",
+  "description": "String",
+  "resource_url": "String",
+  "difficulty": "beginner" | "intermediate" | "advanced",
+  "duration_hrs": 6,
+  "skill_tags": ["String", "String"],
+  "explanation": "String"
+}"""
+
+    user_payload = {
+        "learner_profile": {
+            "target_role": profile.get("target_role"),
+            "current_level": profile.get("current_level"),
+            "detected_years_experience": profile.get("detected_years_experience"),
+            "goal_text": profile.get("goal_text"),
+        },
+        "current_module": {
+            "milestone": milestone,
+            "title": old_title,
+            "description": old_course.get("description"),
+            "difficulty": old_diff,
+            "skill_tags": old_skills,
+        },
+        "swap_request": {
+            "preference": preference,
+            "user_note": note,
+        },
+        "live_web_search_results": web_results[:6],
+        "catalog_candidates": [
+            {
+                "id": c.get("id"),
+                "title": c.get("title"),
+                "provider": c.get("provider"),
+                "difficulty": c.get("difficulty"),
+                "resource_url": c.get("resource_url"),
+            }
+            for c in catalog_matches if c.get("id") not in in_path_ids and c.get("id") != old_course.get("id")
+        ][:3],
+    }
+
+    user_msg = f"<<<SWAP_REQUEST>>>\n{json.dumps(user_payload, indent=2)}\n<<<END_SWAP_REQUEST>>>"
+
+    try:
+        raw = _call_groq([
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_msg},
+        ], max_tokens=2500)
+        parsed = json.loads(_strip_fences(raw))
+    except Exception as e:
+        print(f"[path_service] LLM swap call failed: {e}, falling back to top web result", flush=True)
+        top_w = web_results[0] if web_results else {}
+        # No more "https://google.com" placeholder here - if neither the top
+        # web result nor the old course has a real URL, resource_url stays
+        # empty and _ensure_course_in_catalog below rejects it honestly
+        # (ResourceValidationError) rather than persisting a fabricated
+        # "Tailored Alternative" course pointing at a search engine homepage.
+        top_url = top_w.get("url") or old_course.get("resource_url") or ""
+        parsed = {
+            "title": top_w.get("title") or f"{old_title} (Tailored Alternative)",
+            "provider": top_w.get("provider") or "Web Learning Resource",
+            "description": top_w.get("snippet") or old_course.get("description") or "Alternative learning module",
+            "resource_url": top_url,
+            "difficulty": "beginner" if preference == "too_advanced" else "advanced" if preference == "too_basic" else old_diff,
+            "duration_hrs": old_course.get("duration_hrs") or 6,
+            "skill_tags": old_skills or [old_title],
+            "explanation": f"Calibrated alternative module matching your request for {preference.replace('_', ' ')}."
+        }
+
+    # Ensure this course is in Supabase catalog - only ever a real,
+    # independently-verified resource. A ResourceValidationError here means
+    # neither the LLM nor the web search produced anything real enough to
+    # verify; the honest outcome is a failed swap the learner can retry or
+    # rephrase, never a fabricated catalog entry (see ResourceValidationError
+    # docstring for the production incident this replaces).
+    try:
+        replacement = _ensure_course_in_catalog(parsed)
+    except ResourceValidationError as e:
+        raise ValueError(
+            "Could not find a verified alternative resource for this request. "
+            "Please try again or rephrase your preference."
+        ) from e
+    explanation = parsed.get("explanation") or generate_explanation(profile, replacement)
+
+    # In-place update of the step
+    supabase_client.table("path_steps").update({
+        "course_id": replacement["id"],
+        "explanation": explanation,
+        "status": "not_started",
+    }).eq("id", step_id).execute()
+
+    # Real mastery evidence from the learner's own stated preference - this
+    # is the ACTUAL reachable "too easy"/"too hard" signal in the live app
+    # (the modal's "Too Advanced"/"Too Basic" options on the Roadmap page;
+    # FeedbackButtons.jsx/handle_feedback's too_easy/too_hard branches exist
+    # but are currently unreachable dead code - see PROGRESS_TRACKER / audit
+    # notes). 'too_advanced' means the recommender OVERESTIMATED this
+    # skill (too hard); 'too_basic' means it UNDERESTIMATED it (too easy).
+    # Every other preference (free_resource/hands_on/custom) is a format/
+    # style choice, not a competency signal, so it must not move mastery.
+    unmet_prerequisites: list = []
+    reason_for_change = None
+    if preference in ("too_advanced", "too_basic"):
+        from app.services import mastery_service
+        event_type = "too_hard" if preference == "too_advanced" else "too_easy"
+        try:
+            mastery_service.update_mastery_from_feedback(user_id, old_skills, event_type)
+        except Exception as e:
+            print(f"[path_service] mastery update from swap preference failed: {type(e).__name__}: {e}", flush=True)
+        if preference == "too_advanced":
+            try:
+                unmet_prerequisites = mastery_service.find_unmet_prerequisites(user_id, old_skills)
+            except Exception as e:
+                print(f"[path_service] prerequisite-gap check failed: {type(e).__name__}: {e}", flush=True)
+            if unmet_prerequisites:
+                names = ", ".join(g["name"] for g in unmet_prerequisites)
+                reason_for_change = (
+                    f"This looked too hard, likely because of a gap in {names} - "
+                    "swapped in an easier alternative and lowered our confidence "
+                    "in your mastery of this skill."
+                )
+            else:
+                reason_for_change = "Swapped in an easier alternative and lowered our confidence in your mastery of this skill."
+        else:
+            reason_for_change = "Swapped in a more advanced alternative and raised our confidence in your mastery of this skill."
+
+    _log_swap_event(
+        user_id, path["id"], step_id,
+        note=f"rerecommended for {replacement.get('title')} (preference={preference}, note={note[:200]})"
+    )
+    from app.services.roadmap_service import bump_path_version
+    version_info = bump_path_version(path["id"])
+
+    return {
+        "swapped": True,
+        "step_id": step_id,
+        "replacement": replacement,
+        "explanation": explanation,
+        "path_version": version_info.get("version") if version_info else None,
+        "last_recomputed_at": version_info.get("last_recomputed_at") if version_info else None,
+        "reason_for_change": reason_for_change,
+        "unmet_prerequisites": unmet_prerequisites,
+    }
+
+

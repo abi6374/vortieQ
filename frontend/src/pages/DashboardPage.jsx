@@ -46,7 +46,13 @@ export default function DashboardPage() {
     fetchDashboardData()
   }, [session, user])
 
-  if (loading) {
+  useEffect(() => {
+    if (!loading && !path) {
+      navigate('/onboarding', { replace: true })
+    }
+  }, [loading, path, navigate])
+
+  if (loading || !path) {
     return (
       <div className="min-h-screen bg-[#f5f5f7] flex items-center justify-center">
         <div className="w-10 h-10 border-3 border-[#0066cc] border-t-transparent rounded-full animate-spin" />

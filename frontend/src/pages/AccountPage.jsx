@@ -87,7 +87,8 @@ export default function AccountPage() {
     ''
 
   const handleSyncGithubAccount = async (overrideUsername) => {
-    const target = (overrideUsername || ghInput || githubHandle).trim()
+    const custom = typeof overrideUsername === 'string' ? overrideUsername : ''
+    const target = (custom || ghInput || githubHandle || '').trim()
     if (!target) return
     setGhSyncing(true)
     setGhFeedback(null)
@@ -145,7 +146,7 @@ export default function AccountPage() {
     } catch (err) {
       setGhFeedback({
         type: 'error',
-        message: err?.message || 'Could not start GitHub authorization.',
+        message: err?.message || 'Could not start GitHub authorization. Please use the username sync option above instead.',
       })
       setGhLinking(false)
     }
@@ -444,7 +445,7 @@ export default function AccountPage() {
                     </div>
                     <button
                       type="button"
-                      onClick={handleSyncGithubAccount}
+                      onClick={() => handleSyncGithubAccount()}
                       disabled={ghSyncing || (!ghInput.trim() && !githubHandle)}
                       className="px-4 py-2 bg-[#181717] dark:bg-[#242E40] hover:bg-black dark:hover:bg-[#1E293B] text-white text-xs sm:text-sm font-bold rounded-xl transition-colors cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 flex-none"
                     >

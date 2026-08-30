@@ -27,7 +27,7 @@ export default function InteractiveCoachTeaser() {
   const [selected, setSelected] = useState(0)
 
   return (
-    <div className="w-full max-w-4xl mx-auto rounded-3xl border border-[#E0E0E0] dark:border-[#263348] bg-white/90 dark:bg-[#111726]/90 backdrop-blur-2xl shadow-2xl p-6 sm:p-8 relative overflow-hidden">
+    <div className="w-full max-w-4xl mx-auto rounded-3xl border border-[#E0E0E0] dark:border-[#263348] bg-white/95 dark:bg-[#111726]/95 backdrop-blur-md shadow-2xl p-6 sm:p-8 relative overflow-hidden will-change-transform">
       <div className="flex items-center justify-between pb-6 border-b border-[#F0F0F0] dark:border-[#1E293B]">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0066CC] to-[#004FA3] flex items-center justify-center text-white shadow-md shadow-[#0066CC]/20">

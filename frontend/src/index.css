@@ -84,30 +84,40 @@ body {
 }
 
 /* ----------------------------------------------------------------------
-   Smooth, tactile interaction — every interactive element gets a quiet
-   colour/shadow/transform transition, plus the system-wide "press"
-   micro-interaction (scale down slightly on click). Keeps motion cheap:
-   only transform/opacity/color/shadow are ever animated.
+   Smooth, lightweight interaction — Focused CSS transitions without
+   global wildcard overhead to ensure 60-120fps scrolling on all devices.
    ---------------------------------------------------------------------- */
 a,
 button,
 input,
 select,
 textarea,
-label,
 [role="button"],
-[role="switch"],
-[role="tab"],
+[role="tab"] {
+  transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.2s ease;
+}
+
 .pf-transition {
   transition: background-color 0.2s ease, border-color 0.2s ease,
-    color 0.2s ease, box-shadow 0.25s ease,
+    color 0.2s ease, box-shadow 0.2s ease,
     transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
 }
 
 button:active:not(:disabled),
 [role="button"]:active:not([aria-disabled="true"]),
 [role="switch"]:active {
-  transform: scale(0.97);
+  transform: scale(0.98);
+}
+
+/* GPU hardware acceleration helper */
+.will-change-transform {
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
 }
 
 a {
@@ -465,7 +475,7 @@ html.dark [class*="text-gray-900"] {
 }
 
 html.dark p,
-html.dark span:not([class*="text-[#0066cc]"]):not([class*="text-[#22A06B]"]):not([class*="text-red-"]):not([class*="text-emerald-"]):not([class*="text-amber-"]):not([class*="text-blue-"]):not([class*="text-white"]):not([class*="text-[#FBBF24]"]),
+html.dark span:not([class*="text-[#0066cc]"]):not([class*="text-[#22A06B]"]):not([class*="text-red-"]):not([class*="text-emerald-"]):not([class*="text-amber-"]):not([class*="text-blue-"]):not([class*="text-white"]):not([class*="text-[#FBBF24]"]):not([class*="text-transparent"]):not([class*="bg-clip-text"]),
 html.dark label,
 html.dark [class*="text-[#333333]"],
 html.dark [class*="text-[#444444]"],

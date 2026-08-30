@@ -220,23 +220,56 @@ export default function LiquidMetalBackground({ className = '', isDark = false }
     const timeUniform = gl.getUniformLocation(program, 'u_time')
     const isDarkUniform = gl.getUniformLocation(program, 'u_isDark')
 
-    let mouseX = window.innerWidth * 0.5
-    let mouseY = window.innerHeight * 0.5
+    let isVisible = true
+    let isTabActive = true
+    let observer = null
+
+    const handleVisibilityChange = () => {
+      isTabActive = !document.hidden
+      if (isTabActive && isVisible && !animFrame) {
+        animFrame = requestAnimationFrame(render)
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    if (window.IntersectionObserver) {
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            isVisible = entry.isIntersecting
+            if (isVisible && isTabActive && !animFrame) {
+              animFrame = requestAnimationFrame(render)
+            }
+          })
+        },
+        { threshold: 0.02 }
+      )
+      observer.observe(canvas)
+    }
+
+    const isTouch = typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0)
+    let mouseX = (canvas.clientWidth || window.innerWidth) * 0.5
+    let mouseY = (canvas.clientHeight || window.innerHeight) * 0.5
     let targetMouseX = mouseX
     let targetMouseY = mouseY
 
     const handleMouseMove = (e) => {
       const rect = canvas.getBoundingClientRect()
       targetMouseX = e.clientX - rect.left
-      targetMouseY = canvas.height - (e.clientY - rect.top)
+      targetMouseY = canvas.clientHeight - (e.clientY - rect.top)
     }
 
-    window.addEventListener('mousemove', handleMouseMove, { passive: true })
+    if (!isTouch) {
+      window.addEventListener('mousemove', handleMouseMove, { passive: true })
+    }
 
     const handleResize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 1.5)
-      canvas.width = canvas.clientWidth * dpr
-      canvas.height = canvas.clientHeight * dpr
+      // Smart resolution scaler: Render at 0.5x on mobile / 0.6x on desktop
+      // Drastically lowers GPU fragment shader math while maintaining smooth fluid look
+      const isMobile = window.innerWidth < 768
+      const dpr = isMobile ? 0.45 : 0.6
+      canvas.width = Math.max(120, Math.round((canvas.clientWidth || window.innerWidth) * dpr))
+      canvas.height = Math.max(120, Math.round((canvas.clientHeight || window.innerHeight) * dpr))
       gl.viewport(0, 0, canvas.width, canvas.height)
     }
 
@@ -244,14 +277,30 @@ export default function LiquidMetalBackground({ className = '', isDark = false }
     window.addEventListener('resize', handleResize, { passive: true })
 
     let startTime = performance.now()
-    let animFrame
+    let lastRenderTime = 0
+    let animFrame = null
+    const targetFps = isTouch ? 30 : 60
+    const frameInterval = 1000 / targetFps
 
     const render = (time) => {
+      if (!isVisible || !isTabActive) {
+        animFrame = null
+        return
+      }
+
+      // Throttle frames on low power/mobile to prevent battery drain & jank
+      const delta = time - lastRenderTime
+      if (delta < frameInterval - 1) {
+        animFrame = requestAnimationFrame(render)
+        return
+      }
+      lastRenderTime = time
+
       // Damping mouse physics
       mouseX += (targetMouseX - mouseX) * 0.08
       mouseY += (targetMouseY - mouseY) * 0.08
 
-      const elapsed = (time - startTime) * 0.001
+      const elapsed = (time - startTime) * 0.0008
 
       gl.useProgram(program)
       gl.enableVertexAttribArray(posAttr)
@@ -259,7 +308,7 @@ export default function LiquidMetalBackground({ className = '', isDark = false }
       gl.vertexAttribPointer(posAttr, 2, gl.FLOAT, false, 0, 0)
 
       gl.uniform2f(resUniform, canvas.width, canvas.height)
-      gl.uniform2f(mouseUniform, mouseX, mouseY)
+      gl.uniform2f(mouseUniform, (mouseX / (canvas.clientWidth || 1)) * canvas.width, (mouseY / (canvas.clientHeight || 1)) * canvas.height)
       gl.uniform1f(timeUniform, elapsed)
       gl.uniform1f(isDarkUniform, isDark ? 1.0 : 0.0)
 
@@ -271,8 +320,12 @@ export default function LiquidMetalBackground({ className = '', isDark = false }
     animFrame = requestAnimationFrame(render)
 
     return () => {
-      cancelAnimationFrame(animFrame)
-      window.removeEventListener('mousemove', handleMouseMove)
+      if (animFrame) cancelAnimationFrame(animFrame)
+      if (observer) observer.disconnect()
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      if (!isTouch) {
+        window.removeEventListener('mousemove', handleMouseMove)
+      }
       window.removeEventListener('resize', handleResize)
       if (gl) {
         gl.deleteProgram(program)
@@ -287,7 +340,11 @@ export default function LiquidMetalBackground({ className = '', isDark = false }
     <canvas
       ref={canvasRef}
       className={`absolute inset-0 w-full h-full pointer-events-none ${className}`}
-      style={{ opacity: isDark ? 0.85 : 0.7 }}
+      style={{
+        opacity: isDark ? 0.85 : 0.7,
+        transform: 'translate3d(0, 0, 0)',
+        willChange: 'transform',
+      }}
     />
   )
 }

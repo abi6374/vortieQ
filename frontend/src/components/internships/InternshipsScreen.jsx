@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import AppShell from '../layout/AppShell'
 import api from '../../lib/apiClient'
+import CustomSelect from '../ui/CustomSelect'
 
 const CATEGORY_CHIPS = ['All', 'AI/ML', 'Web Dev', 'Data Science', 'DevOps', 'Security', 'Mobile', 'Design', 'Product', 'Marketing']
 const STATUS_STAGES = [
@@ -202,16 +203,22 @@ function InternshipCard({ internship, applied, onApply, onView }) {
         <span className="text-xs font-semibold text-[#1d1d1f] dark:text-white">
           {internship.stipend || 'Competitive'}
         </span>
-        <button
-          onClick={e => { e.stopPropagation(); onApply(internship.id, internship.apply_url) }}
+        <a
+          href={internship.apply_url || '#'}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={e => {
+            e.stopPropagation()
+            onApply(internship.id, internship.apply_url)
+          }}
           className={`px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all flex items-center gap-1 cursor-pointer ${
             applied
               ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
               : 'bg-[#0066cc] hover:bg-[#004fa3] dark:bg-[#38BDF8] dark:hover:bg-[#0ea5e9] text-white dark:text-[#0B0E14] shadow-sm'
           }`}
         >
-          {applied ? '✓ Applied' : 'Apply Now ↗'}
-        </button>
+          <span>{applied ? '✓ Applied — View Job ↗' : 'Apply on Website ↗'}</span>
+        </a>
       </div>
     </div>
   )
@@ -256,17 +263,15 @@ export default function InternshipsScreen() {
 
   useEffect(() => { loadInternships() }, [loadInternships])
 
-  const handleApply = async (internshipId, applyUrl) => {
-    try {
-      await api.post(`/api/internships/${internshipId}/apply`)
-      setAppliedIds(prev => new Set([...prev, internshipId]))
-      const item = internships.find(x => x.id === internshipId)
-      if (item) setMyInternships(prev => [...prev, { ...item, application_status: 'applied', applied_on: new Date().toISOString() }])
-      showToast('Tracked in My Applications!')
-      if (applyUrl) window.open(applyUrl, '_blank', 'noopener')
-    } catch {
-      if (applyUrl) window.open(applyUrl, '_blank', 'noopener')
+  const handleApply = (internshipId, applyUrl) => {
+    setAppliedIds(prev => new Set([...prev, internshipId]))
+    const item = internships.find(x => x.id === internshipId)
+    if (item && !myInternships.some(m => m.id === internshipId)) {
+      setMyInternships(prev => [...prev, { ...item, application_status: 'applied', applied_on: new Date().toISOString() }])
     }
+    showToast('Redirecting to official job posting...')
+    // Track in background
+    api.post(`/api/internships/${internshipId}/apply`).catch(() => {})
   }
 
   const handleStatusChange = async (internshipId, newStatus) => {
@@ -497,20 +502,14 @@ export default function InternshipsScreen() {
                       {/* Status Pipeline Changer */}
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-xs text-[#7a7a7a] font-medium">Stage:</span>
-                        <div className="relative">
-                          <select
-                            value={currentStatus}
-                            onChange={e => handleStatusChange(item.id, e.target.value)}
-                            className="appearance-none pl-3 pr-7 py-1.5 rounded-xl border border-[#e0e0e0] dark:border-[#242E40] bg-[#fafafc] dark:bg-[#1a2032] text-xs font-bold text-[#1d1d1f] dark:text-white cursor-pointer focus:outline-none focus:border-[#0066cc]"
-                          >
-                            {STATUS_STAGES.map(s => (
-                              <option key={s.id} value={s.id}>{s.label}</option>
-                            ))}
-                          </select>
-                          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-[#7a7a7a]">
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-                          </div>
-                        </div>
+                        <CustomSelect
+                          value={currentStatus}
+                          onChange={newStatus => handleStatusChange(item.id, newStatus)}
+                          options={STATUS_STAGES.map(s => ({ value: s.id, label: s.label }))}
+                          className="flex-none"
+                          buttonClassName="!py-1.5 !px-3 !text-xs !rounded-xl !border-[#e0e0e0] dark:!border-[#242E40] !bg-[#fafafc] dark:!bg-[#1a2032] font-bold"
+                          menuClassName="right-0 left-auto !rounded-xl"
+                        />
                         <a
                           href={item.apply_url}
                           target="_blank"

@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import UserProfileDropdown from '../ui/UserProfileDropdown'
+import ThemeToggle from '../ui/ThemeToggle'
 
 /**
  * Goal Compass — the "Set your goal" onboarding step. Computes an
@@ -199,16 +200,17 @@ const STYLES = `
 .gc .insight svg{ color:var(--violet); flex:none; margin-top:2px; }
 .gc .constraints{ display:grid; grid-template-columns:1fr 1fr; gap:15px; }
 .gc .cfield label{ display:block; font-size:14.5px; font-weight:600; margin-bottom:7px; }
-.gc .cinput{ display:flex; align-items:center; gap:9px; border:1px solid var(--input-bd); border-radius:11px; padding:0 12px; height:50px; background:#fff; }
+.gc .cinput{ display:flex; align-items:center; gap:9px; border:1.5px solid var(--input-bd); border-radius:12px; padding:0 12px; height:48px; background:#fff; transition:border-color .15s,box-shadow .15s; }
 .gc .cinput:focus-within{ border-color:var(--violet); box-shadow:0 0 0 3px rgba(0,102,204,.22); }
 .gc .cinput svg{ color:var(--muted); flex:none; }
-.gc .cinput input[type=month]{ border:none; outline:none; background:none; font:600 15.5px/1 "Inter",sans-serif; color:var(--navy); width:100%; }
+.gc .cinput input[type=month]{ border:none; outline:none; background:transparent; font:600 15px/1 "Inter",sans-serif; color:var(--navy); width:100%; padding:0; margin:0; cursor:pointer; }
 .gc .time-val{ display:flex; align-items:baseline; gap:6px; margin-bottom:6px; }
 .gc .time-val b{ font-size:19px; font-weight:700; color:var(--violet); font-variant-numeric:tabular-nums; }
 .gc .time-val span{ font-size:13.5px; color:var(--slate); }
-.gc input[type=range]{ -webkit-appearance:none; appearance:none; width:100%; height:6px; border-radius:999px; background:var(--track); outline:none; margin:12px 0 3px; }
-.gc input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; appearance:none; width:21px; height:21px; border-radius:50%; background:var(--violet); border:3px solid #fff; box-shadow:0 2px 6px rgba(0,102,204,.4); cursor:pointer; }
-.gc input[type=range]::-moz-range-thumb{ width:21px; height:21px; border-radius:50%; background:var(--violet); border:3px solid #fff; box-shadow:0 2px 6px rgba(0,102,204,.4); cursor:pointer; }
+.gc input[type=range]{ -webkit-appearance:none; appearance:none; width:100%; height:8px; border-radius:999px; background:var(--track); outline:none; margin:12px 0 6px; cursor:pointer; border:1px solid rgba(0,102,204,0.12); }
+.gc input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; appearance:none; width:22px; height:22px; border-radius:50%; background:var(--violet); border:3.5px solid #fff; box-shadow:0 2px 8px rgba(0,102,204,.45); cursor:pointer; transition:transform .15s ease,box-shadow .15s ease; }
+.gc input[type=range]::-webkit-slider-thumb:hover{ transform:scale(1.15); box-shadow:0 0 12px rgba(0,102,204,.7); }
+.gc input[type=range]::-moz-range-thumb{ width:22px; height:22px; border-radius:50%; background:var(--violet); border:3.5px solid #fff; box-shadow:0 2px 8px rgba(0,102,204,.45); cursor:pointer; }
 .gc .range-ends{ display:flex; justify-content:space-between; font-size:12px; color:var(--muted); }
 .gc .meter{ border:1px solid #d5e8fd; background:linear-gradient(165deg,#fff,#fafcff 60%,#f3f9ff); }
 .gc .meter-h{ display:flex; align-items:center; gap:8px; margin:0 0 16px; }
@@ -253,6 +255,106 @@ const STYLES = `
 .gc .btn-plan:disabled{ opacity:.5; cursor:not-allowed; box-shadow:none; }
 .gc .back{ background:none; border:none; color:var(--muted); font:inherit; font-size:14.5px; cursor:pointer; margin-top:14px; }
 .gc .back:hover{ color:var(--slate); }
+
+html.dark .gc {
+  --navy: #F8FAFC;
+  --slate: #CBD5E1;
+  --muted: #94A3B8;
+  --lavender: #182438;
+  --lav-icon: #1E293B;
+  --card-bd: #202B3C;
+  --input-bd: #2D3F59;
+  --divider: #202B3C;
+  --track: #263852;
+  --range-fill: #38BDF8;
+  --green-surface: rgba(6, 78, 59, 0.3);
+  --green-bd: rgba(52, 211, 153, 0.3);
+  --green-text: #34D399;
+  --amber-surface: rgba(120, 53, 15, 0.3);
+  --amber-bd: rgba(251, 191, 36, 0.3);
+  --amber-text: #FBBF24;
+  --red-surface: rgba(127, 29, 29, 0.3);
+  --red-bd: rgba(248, 113, 113, 0.3);
+  --red-text: #F87171;
+}
+html.dark .gc .card {
+  background: #0E1522;
+  box-shadow: 0 14px 38px rgba(0, 0, 0, 0.5);
+}
+html.dark .gc textarea {
+  background: #0B0F17;
+  color: #F8FAFC;
+}
+html.dark .gc .role,
+html.dark .gc .role-custom,
+html.dark .gc .pstep {
+  background: #141C2B;
+}
+html.dark .gc .cinput {
+  background: #0B0F17;
+  border-color: #2D3F59;
+}
+html.dark .gc .cinput:focus-within {
+  border-color: #38BDF8;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.22);
+}
+html.dark .gc .cinput svg {
+  color: #94A3B8;
+}
+html.dark .gc .cinput input[type=month] {
+  color-scheme: dark;
+  background: transparent;
+  color: #F8FAFC;
+}
+html.dark .gc .cinput input[type=month]::-webkit-datetime-edit {
+  background: transparent;
+  color: #F8FAFC;
+}
+html.dark .gc .cinput input[type=month]::-webkit-datetime-edit-fields-wrapper {
+  background: transparent;
+}
+html.dark .gc .cinput input[type=month]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  filter: invert(0.8) brightness(1.2);
+}
+html.dark .gc .role.sel,
+html.dark .gc .role-custom.sel {
+  background: #18263D;
+}
+html.dark .gc .role.sel .role-ic {
+  background: #1E293B;
+  color: #38BDF8;
+}
+html.dark .gc .time-val b {
+  color: #38BDF8;
+}
+html.dark .gc input[type=range] {
+  background: var(--track);
+  border: 1px solid #334A6E;
+}
+html.dark .gc input[type=range]::-webkit-slider-thumb {
+  background: #38BDF8;
+  border: 3.5px solid #0E1522;
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.7);
+}
+html.dark .gc input[type=range]::-moz-range-thumb {
+  background: #38BDF8;
+  border: 3.5px solid #0E1522;
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.7);
+}
+html.dark .gc .meter {
+  background: linear-gradient(165deg, #0E1522, #121B2C 60%, #0F1726);
+  border-color: #24334A;
+}
+html.dark .gc .callout {
+  background: #131E30;
+  border-color: #22344E;
+}
+html.dark .gc .pstep .pic {
+  background: #1E293B;
+  color: #CBD5E1;
+}
+
 @media (max-width:1000px){ .gc .cols{ grid-template-columns:1fr; } .gc .preview-top{ flex-direction:column; align-items:stretch; } .gc .btn-plan{ width:100%; } }
 @media (prefers-reduced-motion:reduce){ .gc *{ transition:none !important; } }
 `
@@ -273,16 +375,19 @@ export default function GoalCompass({ topicRatings = [], detectedYears = 0, init
   // Auto-suggested from the learner's real resume skills (or goal-text
   // keywords when there's no resume yet) instead of always defaulting to
   // the same role regardless of who they actually are.
-  const [role, setRole] = useState(() => suggestRole(topicRatings, initialGoal))
+  const defaultSuggestedRole = suggestRole(topicRatings, initialGoal)
+  const [role, setRole] = useState(() => defaultSuggestedRole)
   const [customRoleName, setCustomRoleName] = useState('')
-  const suggestedRoleName = ROLES[suggestRole(topicRatings, initialGoal)].name
-  const [goal, setGoal] = useState(initialGoal || `I want to become a ${suggestedRoleName} within 6 months.`)
+  const suggestedRoleName = ROLES[defaultSuggestedRole].name
+  const [goal, setGoal] = useState(
+    initialGoal || `I want to become a ${suggestedRoleName} within 6 months.`
+  )
   const [weekly, setWeekly] = useState(8)
   const [target, setTarget] = useState(defaultTargetMonth())
   const [priority, setPriority] = useState('intern')
 
   const isCustomRole = role === 'custom'
-  const effectiveRoleName = isCustomRole ? (customRoleName.trim() || 'your custom role') : ROLES[role].name
+  const effectiveRoleName = isCustomRole ? ((customRoleName || '').trim() || 'your custom role') : ROLES[role].name
 
   // current skills from the resume/assess step
   const current = useMemo(() => {
@@ -365,15 +470,31 @@ export default function GoalCompass({ topicRatings = [], detectedYears = 0, init
             </div>
           </div>
         </div>
-        <UserProfileDropdown />
+        <div className="flex items-center gap-2 sm:gap-2.5">
+          <ThemeToggle />
+          <UserProfileDropdown />
+        </div>
       </div>
 
       <div className="cols">
         {/* LEFT */}
         <div className="card">
           <div className="sec">
-            <h3 className="sec-h">Describe your goal</h3>
-            <textarea value={goal} onChange={(e) => setGoal(e.target.value)} spellCheck="false" />
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="sec-h" style={{ margin: 0 }}>Describe your goal <span className="text-xs font-bold text-[#0066cc] dark:text-[#38BDF8]">(Required)</span></h3>
+              <span className="text-xs text-[#7a7a7a] dark:text-[#94A3B8]">Extend or refine for richer recommendations</span>
+            </div>
+            <textarea
+              value={goal}
+              onChange={(e) => setGoal(e.target.value)}
+              placeholder={`e.g. I want to become a ${effectiveRoleName} in 6 months with hands-on projects...`}
+              spellCheck="false"
+            />
+            {!(goal || '').trim() && (
+              <p className="mt-1.5 text-xs text-red-600 dark:text-red-400 font-semibold">
+                Please describe your learning goal before creating your plan.
+              </p>
+            )}
           </div>
 
           <div className="sec">
@@ -406,15 +527,15 @@ export default function GoalCompass({ topicRatings = [], detectedYears = 0, init
               />
             )}
 
-            {!isCustomRole && role === suggestRole(topicRatings, initialGoal) && (
+            {!isCustomRole && role === defaultSuggestedRole && (
               <p className="role-suggested">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
-                Suggested based on {topicRatings.length > 0 ? 'your resume' : 'your goal'}
+                Suggested based on {topicRatings.length > 0 ? 'your background skills' : 'your goal'}
               </p>
             )}
 
             {topicRatings.length > 0 && !isCustomRole && (
-              <p className="insight"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M6 6l2 2M16 16l2 2M18 6l-2 2M8 16l-2 2" /></svg> Readiness is calculated from the {topicRatings.length} skill{topicRatings.length === 1 ? '' : 's'} in your resume.</p>
+              <p className="insight"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M6 6l2 2M16 16l2 2M18 6l-2 2M8 16l-2 2" /></svg> Readiness is calculated from the {topicRatings.length} skill{topicRatings.length === 1 ? '' : 's'} in your profile.</p>
             )}
           </div>
 
@@ -424,9 +545,22 @@ export default function GoalCompass({ topicRatings = [], detectedYears = 0, init
               <div className="cinput"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></svg><input type="month" id="gc-target" value={target} onChange={(e) => setTarget(e.target.value)} /></div>
             </div>
             <div className="cfield">
-              <label htmlFor="gc-weekly">Weekly learning time</label>
+              <label htmlFor="gc-weekly">
+                Weekly learning time <span className="text-xs font-bold text-[#0066cc] dark:text-[#38BDF8]">(Required)</span>
+              </label>
               <div className="time-val"><b>{weekly}</b><span>hours per week</span></div>
-              <input type="range" id="gc-weekly" min="2" max="30" step="1" value={weekly} onChange={(e) => setWeekly(Number(e.target.value))} />
+              <input
+                type="range"
+                id="gc-weekly"
+                min="2"
+                max="30"
+                step="1"
+                value={weekly}
+                onChange={(e) => setWeekly(Number(e.target.value))}
+                style={{
+                  background: `linear-gradient(to right, var(--range-fill, #0066cc) 0%, var(--range-fill, #0066cc) ${((weekly - 2) / (30 - 2)) * 100}%, var(--track) ${((weekly - 2) / (30 - 2)) * 100}%, var(--track) 100%)`,
+                }}
+              />
               <div className="range-ends"><span>2h</span><span>30h</span></div>
             </div>
           </div>
@@ -500,18 +634,21 @@ export default function GoalCompass({ topicRatings = [], detectedYears = 0, init
           <button
             type="button"
             className="btn-plan"
-            disabled={isCustomRole && !customRoleName.trim() && !goal.trim()}
+            disabled={!(goal || '').trim() || !weekly || weekly < 1 || (isCustomRole && !(customRoleName || '').trim())}
+            title={
+              !(goal || '').trim()
+                ? 'Please describe your learning goal before creating your plan'
+                : !weekly || weekly < 1
+                ? 'Weekly learning time is required before creating your plan'
+                : isCustomRole && !(customRoleName || '').trim()
+                ? 'Please enter your custom target role'
+                : undefined
+            }
             onClick={() => {
-              // Real bug this fixes: previously, typing ANYTHING in the goal
-              // box silently dropped whatever role (custom or preset) the
-              // learner explicitly selected - only used as a fallback when
-              // the goal box was empty. The selected role is now always
-              // folded in, and also sent as an explicit target_role_override
-              // so the backend uses it directly instead of re-guessing it
-              // from text.
-              const hasRealRole = isCustomRole ? !!customRoleName.trim() : true
-              const composedGoal = goal.trim()
-                ? `${goal.trim()} (Target role: ${effectiveRoleName}.)`
+              const hasRealRole = isCustomRole ? !!(customRoleName || '').trim() : true
+              const trimmedGoal = (goal || '').trim()
+              const composedGoal = trimmedGoal
+                ? `${trimmedGoal} (Target role: ${effectiveRoleName}.)`
                 : `I want to become a ${effectiveRoleName}.`
               onCreate(composedGoal, weekly, hasRealRole ? effectiveRoleName : '')
             }}

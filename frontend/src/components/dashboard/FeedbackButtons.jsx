@@ -11,8 +11,15 @@ import apiClient from '../../lib/apiClient'
  *   stepId          - string, the path_step id to attach feedback to
  *   onFeedbackGiven - function(responseData), called after a successful post
  */
-// The two right-hand buttons now hit /api/steps/{id}/swap on the backend
-// instead of triggering a full-tail regen. Only THIS one step is replaced.
+// All four non-"Mark Done" buttons post to /api/steps/{id}/feedback
+// (feedback_service.handle_feedback), which records the real evidence
+// (mastery update for too_easy/too_hard, a real skill_prerequisites gap
+// check for too_hard) BEFORE delegating to path_service.swap_step for the
+// single-step in-place replacement. Previously too_easy/not_interested
+// bypassed handle_feedback entirely and hit /swap directly - meaning the
+// mastery-update-from-feedback logic, despite being fully implemented and
+// tested, was unreachable from any real button click. Fixed as part of the
+// platform-audit's real-time-feedback phase.
 const ACTIONS = [
   {
     type: 'completed',
@@ -27,6 +34,13 @@ const ACTIONS = [
     icon: '⚡',
     idle: 'bg-amber-100 text-amber-700 hover:bg-amber-200 focus-visible:ring-amber-400',
     spinner: 'text-amber-700',
+  },
+  {
+    type: 'too_hard',
+    label: 'Too Hard',
+    icon: '🧗',
+    idle: 'bg-rose-100 text-rose-700 hover:bg-rose-200 focus-visible:ring-rose-400',
+    spinner: 'text-rose-700',
   },
   {
     type: 'not_interested',
@@ -98,26 +112,25 @@ export default function FeedbackButtons({ stepId, stepStatus, onFeedbackGiven })
     setInfo(null)
     setLoadingType(buttonType)
     try {
-      let response
-      if (buttonType === 'completed') {
-        response = await apiClient.post(`/api/steps/${stepId}/feedback`, {
-          event_type: 'completed', note: '',
-        })
-      } else {
-        // too_easy => level_hint=1 (harder replacement); Swap => level_hint=0.
-        const level_hint = buttonType === 'too_easy' ? 1 : 0
-        response = await apiClient.post(`/api/steps/${stepId}/swap`, { level_hint })
-        // Surface "no alternative available" as an info line.
-        if (response.data && response.data.swapped === false && response.data.reason) {
-          if (mounted.current) setInfo(response.data.reason)
-        }
-      }
-      // Idempotency guard on /feedback also returns a note.
-      if (response.data && response.data.note && response.data.path_updated === false) {
-        if (mounted.current) setInfo(response.data.note)
+      const response = await apiClient.post(`/api/steps/${stepId}/feedback`, {
+        event_type: buttonType, note: '',
+      })
+      const data = response.data || {}
+
+      // Idempotency guard (step already terminal) returns a plain note.
+      if (data.note && data.path_updated === false) {
+        if (mounted.current) setInfo(data.note)
+      } else if (data.swap_result && data.swap_result.swapped === false && data.swap_result.reason) {
+        // No alternative course was available to swap in.
+        if (mounted.current) setInfo(data.swap_result.reason)
+      } else if (data.reason_for_change) {
+        // A real, specific explanation of what changed and why
+        // (mastery-adjusted, prerequisite gap, etc.) - see
+        // feedback_service.handle_feedback.
+        if (mounted.current) setInfo(data.reason_for_change)
       }
       if (typeof onFeedbackGiven === 'function') {
-        onFeedbackGiven(response.data)
+        onFeedbackGiven(data)
       }
     } catch (err) {
       if (mounted.current) setError('Failed to update. Try again.')

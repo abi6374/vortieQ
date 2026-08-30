@@ -124,21 +124,21 @@ export default function CustomSelect({
                     )}
                   </div>
 
-                  {isSelected && (
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="#0066cc"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="flex-shrink-0"
-                    >
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                  )}
+                    {isSelected && (
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="flex-shrink-0 text-[#0066cc] dark:text-[#38BDF8]"
+                      >
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    )}
                 </button>
               )
             })}

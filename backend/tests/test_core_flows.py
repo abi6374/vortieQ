@@ -141,8 +141,157 @@ def test_web_search_ranking_and_graceful_fallback():
         {"href": "https://randomblog.com/post", "title": "Random Blog"},
         {"href": "https://coursera.org/learn/ml", "title": "Coursera ML"},
         {"href": "https://nptel.ac.in/courses/106", "title": "NPTEL AI"},
+        {"href": "https://takeuforward.org/strivers-a2z-dsa-course-sheet", "title": "Striver A2Z Sheet"},
+        {"href": "https://www.geeksforgeeks.org/python-programming-language", "title": "GFG Python"},
     ]
     ranked = _rank(sample_results)
-    assert "nptel.ac.in" in ranked[0]["href"]
-    assert "coursera.org" in ranked[1]["href"]
-    assert "randomblog.com" in ranked[2]["href"]
+    assert any("nptel.ac.in" in r["href"] for r in ranked[:3])
+    assert any("takeuforward.org" in r["href"] for r in ranked[:3])
+    assert any("geeksforgeeks.org" in r["href"] for r in ranked[:3])
+
+
+def test_detect_provider_and_type():
+    from app.services.web_search_service import _detect_provider_and_type
+    prov1, type1 = _detect_provider_and_type("https://takeuforward.org/dsa-sheet", "Striver A2Z DSA")
+    assert prov1 == "Striver Sheet"
+    assert type1 == "practice_sheet"
+
+    prov2, type2 = _detect_provider_and_type("https://www.geeksforgeeks.org/tree-data-structure", "Tree in GFG")
+    assert prov2 == "GeeksforGeeks"
+    assert type2 == "article"
+
+    prov3, type3 = _detect_provider_and_type("https://docs.python.org/3/tutorial", "Python Docs")
+    assert prov3 == "Official Documentation"
+    assert type3 == "documentation"
+
+
+def test_swap_step_with_preference_realtime_flow():
+    """Verify swap_step_with_preference searches live resources and updates step with LLM output."""
+    from unittest.mock import patch, MagicMock
+    from app.services.path_service import swap_step_with_preference
+    import json
+
+    mock_supabase = MagicMock()
+    # Step query
+    mock_step_resp = MagicMock(data=[{
+        "id": "step-1",
+        "path_id": "path-1",
+        "milestone_label": "Container Orchestration",
+        "courses": {
+            "id": "c-k8s-old",
+            "title": "Kubernetes for Beginners",
+            "description": "Deep cluster setup",
+            "difficulty": "intermediate",
+            "skill_tags": ["Kubernetes", "DevOps"],
+        },
+        "learning_paths": {"id": "path-1", "user_id": "u-1"}
+    }])
+    # Profile query
+    mock_prof_resp = MagicMock(data=[{
+        "id": "u-1",
+        "target_role": "DevOps Engineer",
+        "current_level": "beginner",
+        "goal_text": "Learn Kubernetes and cloud",
+    }])
+
+    def mock_table(name):
+        t = MagicMock()
+        if name == "path_steps":
+            t.select.return_value.eq.return_value.execute.return_value = mock_step_resp
+            t.update.return_value.eq.return_value.execute.return_value = MagicMock(data=[{"id": "step-1"}])
+        elif name == "profiles":
+            t.select.return_value.eq.return_value.execute.return_value = mock_prof_resp
+        elif name == "courses":
+            t.select.return_value.eq.return_value.execute.return_value = MagicMock(data=[])
+            t.select.return_value.ilike.return_value.execute.return_value = MagicMock(data=[])
+            t.insert.return_value.execute.return_value = MagicMock(data=[{
+                "id": "c-k8s-new",
+                "title": "Kubernetes Basics & Interactive Labs",
+                "provider": "Kubernetes Official Docs",
+                "resource_url": "https://kubernetes.io/docs/tutorials/kubernetes-basics/",
+                "difficulty": "beginner",
+                "duration_hrs": 5,
+            }])
+        return t
+
+    mock_supabase.table.side_effect = mock_table
+
+    mock_search = [
+        {
+            "title": "Kubernetes Basics Interactive Labs",
+            "url": "https://kubernetes.io/docs/tutorials/kubernetes-basics/",
+            "provider": "Kubernetes Official Docs",
+            "snippet": "Learn Kubernetes fundamentals with interactive hands-on browser labs",
+        }
+    ]
+
+    mock_llm_json = json.dumps({
+        "title": "Kubernetes Basics & Interactive Labs",
+        "provider": "Kubernetes Official Docs",
+        "description": "Interactive step-by-step walkthrough of pods and services.",
+        "resource_url": "https://kubernetes.io/docs/tutorials/kubernetes-basics/",
+        "difficulty": "beginner",
+        "duration_hrs": 5,
+        "skill_tags": ["Kubernetes", "DevOps"],
+        "explanation": "Gentle foundation for Kubernetes requested by the learner.",
+    })
+
+    with patch("app.services.path_service.supabase_client", mock_supabase), \
+         patch("app.services.web_search_service.search_learning_resources", return_value=mock_search), \
+         patch("app.services.path_service._call_groq", return_value=mock_llm_json), \
+         patch("app.services.path_service._validate_resource_url", return_value=True), \
+         patch("app.ml.embedder.embed_text", return_value=[0.1] * 384), \
+         patch("app.services.mastery_service.update_mastery_from_feedback") as mock_mastery, \
+         patch("app.services.mastery_service.find_unmet_prerequisites", return_value=[]) as mock_gaps:
+        # 'too_advanced' now updates real mastery evidence (see path_service.
+        # swap_step_with_preference) - without these patches this call would
+        # otherwise reach the REAL app.services.mastery_service.supabase_client
+        # (a module-level import, unaffected by patching path_service's
+        # reference), i.e. a live network call against whatever
+        # SUPABASE_URL .env points at. Confirmed via the live DB that an
+        # earlier unpatched run of this exact test wrote nothing (the fake
+        # "u-1" user id isn't valid UUID syntax, so the write failed closed) -
+        # but that was luck, not test isolation, so it's fixed here rather
+        # than left relying on it again.
+        res = swap_step_with_preference("step-1", "u-1", preference="too_advanced", note="Need a gentler intro")
+
+        assert res["swapped"] is True
+        assert res["replacement"]["title"] == "Kubernetes Basics & Interactive Labs"
+        assert res["replacement"]["id"] == "c-k8s-new"
+        # Real mastery evidence recorded for the OLD course's skills, as
+        # too_hard (too_advanced = the recommender overestimated this skill).
+        mock_mastery.assert_called_once_with("u-1", ["Kubernetes", "DevOps"], "too_hard")
+        mock_gaps.assert_called_once_with("u-1", ["Kubernetes", "DevOps"])
+        assert res["reason_for_change"]
+
+
+def test_bump_path_version_increments_and_stamps_freshness():
+    """Real-time-behavior fix: learning_paths.version/last_recomputed_at
+    (migration 008) let a client detect a stale roadmap without a blind
+    refresh timer. Called from every real path mutation."""
+    from app.services.roadmap_service import bump_path_version
+
+    mock_supabase = MagicMock()
+    mock_table = MagicMock()
+    mock_supabase.table.return_value = mock_table
+    mock_table.select.return_value.eq.return_value.execute.return_value = MagicMock(data=[{"version": 3}])
+
+    with patch("app.services.roadmap_service.supabase_client", mock_supabase):
+        bump_path_version("path-1")
+
+    update_payload = mock_table.update.call_args[0][0]
+    assert update_payload["version"] == 4
+    assert "last_recomputed_at" in update_payload
+
+
+def test_bump_path_version_never_raises_on_failure():
+    from app.services.roadmap_service import bump_path_version
+
+    mock_supabase = MagicMock()
+    mock_supabase.table.side_effect = RuntimeError("db down")
+    with patch("app.services.roadmap_service.supabase_client", mock_supabase):
+        bump_path_version("path-1")  # must not raise - this is a best-effort signal
+
+
+
+

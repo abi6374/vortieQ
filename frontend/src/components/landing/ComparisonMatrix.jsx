@@ -9,8 +9,8 @@ export default function ComparisonMatrix() {
   const rows = [
     {
       feature: 'Curriculum Model',
-      traditional: 'Static, one-size-fits-all 40hr video playlist',
-      pathfinder: 'Dynamic 12-week graph calibrated to your exact skill gaps',
+      traditional: 'Static, one-size-fits-all video playlists',
+      pathfinder: 'Dynamic custom-week graph calibrated to your exact skill gaps',
     },
     {
       feature: 'Prior Experience Recognition',
@@ -40,7 +40,7 @@ export default function ComparisonMatrix() {
   ]
 
   return (
-    <div className="w-full max-w-5xl mx-auto overflow-x-auto rounded-3xl border border-[#E0E0E0] dark:border-[#263348] bg-white/90 dark:bg-[#111726]/90 backdrop-blur-2xl shadow-2xl p-6 sm:p-8">
+    <div className="w-full max-w-5xl mx-auto overflow-x-auto rounded-3xl border border-[#E0E0E0] dark:border-[#263348] bg-white/95 dark:bg-[#111726]/95 backdrop-blur-md shadow-2xl p-6 sm:p-8 will-change-transform">
       <table className="w-full text-left border-collapse">
         <thead>
           <tr className="border-b border-[#E0E0E0] dark:border-[#1E293B]">

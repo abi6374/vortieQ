@@ -24,6 +24,7 @@ import { useTheme } from '../contexts/ThemeContext'
 import { useAuth } from '../hooks/useAuth'
 
 import LiquidMetalBackground from '../components/landing/LiquidMetalBackground'
+import WebThreads from '../components/landing/WebThreads'
 import DecryptedText from '../components/landing/DecryptedText'
 import SpotlightCard from '../components/landing/SpotlightCard'
 import TiltedCard from '../components/landing/TiltedCard'
@@ -76,8 +77,35 @@ export default function LandingPage() {
 
   return (
     <div className="relative min-h-screen bg-[#F5F5F7] dark:bg-[#0B0F17] text-[#1D1D1F] dark:text-[#F8FAFC] overflow-x-hidden selection:bg-[#0066CC] selection:text-white transition-colors duration-300">
-      {/* 1. Interactive Molten Metal Fluid WebGL Shader Canvas */}
-      <LiquidMetalBackground isDark={isDark} />
+      {/* 1. Dynamic Interactive Background: WebThreads (Unified Dual-Theme Optical Physics) */}
+      <div className="fixed inset-0 w-full h-full pointer-events-none z-0 overflow-hidden">
+        <WebThreads
+          key={isDark ? 'threads-dark' : 'threads-light'}
+          color1="#0066CC"
+          color2="#38BDF8"
+          color3={isDark ? '#E0F2FE' : '#6366F1'}
+          speed={0.2}
+          threadCount={4}
+          frequency={4.5}
+          spread={0.22}
+          taper={1.0}
+          position={0.48}
+          fanMode="center"
+          glow={0.015}
+          falloff={0.62}
+          thickness={1.05}
+          brightness={0.78}
+          opacity={0.95}
+          mirror={true}
+          shimmer={false}
+          grain={true}
+          grainIntensity={0.015}
+          mouseInteraction={true}
+          mouseStrength={0.28}
+          lightMode={!isDark}
+          backgroundColor={isDark ? '#0B0F17' : '#F5F5F7'}
+        />
+      </div>
 
       {/* 2. Floating Glass Navbar */}
       <LandingNavbar />
@@ -93,13 +121,16 @@ export default function LandingPage() {
         </div>
 
         {/* BALBOA Loud Monumental Display Headline */}
-        <h1 className="font-balboa text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight text-[#1D1D1F] dark:text-white leading-[0.9] text-balance max-w-5xl">
-          CRUSH THE <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#0066CC] via-[#0080FF] to-[#38BDF8]">SKILL GAP</span>
+        <h1 className="font-balboa text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight leading-[0.9] text-balance max-w-5xl">
+          <span className="text-[#1D1D1F] dark:text-white">CRUSH THE </span>
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#0066CC] via-[#0080FF] to-[#38BDF8] dark:from-[#2997FF] dark:via-[#38BDF8] dark:to-[#67E8F9]">
+            SKILL GAP
+          </span>
         </h1>
 
         {/* Subheading & Decrypted Role Scrambler */}
         <p className="mt-6 text-lg sm:text-xl md:text-2xl text-[#4A4A4A] dark:text-[#CBD5E1] max-w-3xl font-medium leading-relaxed">
-          Architect your custom 12-week roadmap to become an{' '}
+          Architect your custom week roadmap to become an{' '}
           <DecryptedText
             words={['AI / LLM Engineer', 'Full-Stack Architect', 'MLOps Lead', 'Cloud Specialist']}
             className="text-[#0066CC] dark:text-[#38BDF8] underline decoration-[#0066CC]/40"
@@ -169,7 +200,7 @@ export default function LandingPage() {
             FOUR PILLARS OF ADAPTIVE INTELLIGENCE
           </h2>
           <p className="mt-4 text-base sm:text-lg text-[#666666] dark:text-[#94A3B8]">
-            Traditional courses give everyone the same 40 hours of static video. PathFinder builds a live learning graph that reacts to every concept you master or struggle with.
+            Traditional courses give everyone the same rigid, static video curriculum. PathFinder builds a live learning graph that reacts to every concept you master or struggle with.
           </p>
         </div>
 
@@ -206,10 +237,10 @@ export default function LandingPage() {
                 PILLAR 02
               </div>
               <h3 className="font-sans text-2xl font-bold text-[#1D1D1F] dark:text-[#F8FAFC] mb-3">
-                12-Week Adaptive Graph Engine
+                Custom-Week Adaptive Graph Engine
               </h3>
               <p className="text-sm sm:text-base text-[#666666] dark:text-[#94A3B8] leading-relaxed">
-                Every milestone has deterministic prerequisite dependencies. If you breeze through Week 2 or hit a blocker in Week 4, the learning graph recalibrates subsequent tasks automatically.
+                Every milestone has deterministic prerequisite dependencies. If you breeze through a week or hit a blocker, the learning graph recalibrates subsequent tasks automatically.
               </p>
             </div>
             <div className="mt-8 pt-6 border-t border-[#F0F0F0] dark:border-[#1E293B] flex items-center gap-2 text-xs font-bold text-[#0066CC] dark:text-[#38BDF8]">
@@ -322,7 +353,7 @@ export default function LandingPage() {
 
       {/* 10. FINAL LAUNCH CTA BANNER */}
       <section className="relative py-24 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto z-10">
-        <div className="relative rounded-3xl p-10 sm:p-14 border border-[#0066CC]/30 dark:border-[#38BDF8]/30 bg-gradient-to-br from-[#EAF2FC]/90 via-white/80 to-[#DBEAFC]/90 dark:from-[#0E1726]/90 dark:via-[#111A2E]/80 dark:to-[#0A1220]/90 backdrop-blur-2xl shadow-2xl overflow-hidden text-center">
+        <div className="relative rounded-3xl p-10 sm:p-14 border border-[#0066CC]/30 dark:border-[#38BDF8]/30 bg-gradient-to-br from-[#EAF2FC]/90 via-white/85 to-[#DBEAFC]/90 dark:from-[#0E1726]/90 dark:via-[#111A2E]/85 dark:to-[#0A1220]/90 backdrop-blur-lg shadow-2xl overflow-hidden text-center will-change-transform">
           <div className="font-shadow text-2xl sm:text-3xl text-[#0066CC] dark:text-[#38BDF8] font-bold mb-3">
             Start Your Transformation Today
           </div>
