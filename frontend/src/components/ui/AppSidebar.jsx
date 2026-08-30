@@ -1,17 +1,14 @@
 import React, { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useSidebar } from '../../contexts/SidebarContext'
 
 /**
- * PathFinder Premium Glassmorphic Sidebar
- * - Floating pill design with glass blur
- * - Icon-only with animated flyout tooltips
- * - Spring-animated active indicator
- * - System health pulse indicator at bottom
+ * PathFinder Floating Glassmorphic Sidebar
+ * - Detached floating pill design (not attached to any screen edge)
+ * - Navigation icons with spring-animated active pill
+ * - Smooth right-side flyout tooltip on hover showing feature text & badges
+ * - Bottom Sign Out and live system status pulse
  */
-
-// ─── Icons ───────────────────────────────────────────────────────────────────
 
 export const SidebarIcon = ({ className = 'w-4 h-4' }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -95,7 +92,7 @@ export function activeKeyFor(pathname) {
   return ''
 }
 
-// ─── Tooltip ─────────────────────────────────────────────────────────────────
+// ─── Tooltip Flyout ──────────────────────────────────────────────────────────
 
 function Tooltip({ label, badge, visible }) {
   return (
@@ -103,20 +100,20 @@ function Tooltip({ label, badge, visible }) {
       {visible && (
         <motion.div
           className="absolute left-[calc(100%+14px)] top-1/2 -translate-y-1/2 z-[300] pointer-events-none"
-          initial={{ opacity: 0, x: -8, scale: 0.93 }}
+          initial={{ opacity: 0, x: -8, scale: 0.94 }}
           animate={{ opacity: 1, x: 0, scale: 1 }}
-          exit={{ opacity: 0, x: -6, scale: 0.95 }}
-          transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
+          exit={{ opacity: 0, x: -6, scale: 0.94 }}
+          transition={{ duration: 0.14, ease: [0.16, 1, 0.3, 1] }}
         >
-          <div className="relative flex items-center gap-2 bg-[#0d0f14]/95 text-white text-[12px] font-semibold px-3 py-2 rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.32)] border border-white/10 backdrop-blur-md whitespace-nowrap">
-            {/* Arrow */}
+          <div className="relative flex items-center gap-2 bg-[#0c0d12]/95 dark:bg-[#182030]/95 text-white text-[12px] font-semibold px-3 py-2 rounded-xl shadow-[0_12px_28px_rgba(0,0,0,0.36)] border border-white/10 dark:border-white/15 backdrop-blur-md whitespace-nowrap">
+            {/* Arrow point */}
             <span
               className="absolute right-full top-1/2 -translate-y-1/2 border-[5px] border-transparent"
-              style={{ borderRightColor: 'rgba(13,15,20,0.95)' }}
+              style={{ borderRightColor: 'rgba(12,13,18,0.95)' }}
             />
             <span>{label}</span>
             {badge && (
-              <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-[#0066cc]/80 text-white">
+              <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-[#0066cc] dark:bg-[#38BDF8] text-white dark:text-[#0B0E14]">
                 {badge}
               </span>
             )}
@@ -127,7 +124,7 @@ function Tooltip({ label, badge, visible }) {
   )
 }
 
-// ─── Nav Item ─────────────────────────────────────────────────────────────────
+// ─── Nav Item Component ───────────────────────────────────────────────────────
 
 function NavItem({ item, isActive, onClick }) {
   const [hovered, setHovered] = useState(false)
@@ -141,40 +138,29 @@ function NavItem({ item, isActive, onClick }) {
         onMouseLeave={() => setHovered(false)}
         aria-label={item.label}
         aria-current={isActive ? 'page' : undefined}
-        className="relative w-11 h-11 flex items-center justify-center rounded-2xl transition-all duration-150 cursor-pointer border-none outline-none"
-        style={{ background: 'transparent' }}
+        className="relative w-11 h-11 flex items-center justify-center rounded-2xl transition-all duration-150 cursor-pointer border-none outline-none bg-transparent"
       >
-        {/* Spring-animated active pill */}
-        {isActive && (
+        {/* Spring-animated active capsule pill */}
+        {isActive ? (
           <motion.span
             layoutId="sidebar-active-pill"
             className="absolute inset-0 rounded-2xl"
             style={{
-              background: 'linear-gradient(135deg, #0066cc, #0052a3)',
-              boxShadow: '0 4px 16px rgba(0,102,204,0.40), 0 1px 3px rgba(0,102,204,0.25)',
+              background: 'linear-gradient(135deg, #0066cc, #004fa3)',
+              boxShadow: '0 4px 16px rgba(0,102,204,0.42), 0 1px 3px rgba(0,102,204,0.25)',
             }}
-            transition={{ type: 'spring', stiffness: 400, damping: 32 }}
+            transition={{ type: 'spring', stiffness: 420, damping: 32 }}
           />
-        )}
-
-        {/* Hover glow when not active */}
-        {!isActive && hovered && (
-          <motion.span
-            className="absolute inset-0 rounded-2xl"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            style={{ background: 'rgba(0,102,204,0.08)' }}
-          />
+        ) : (
+          <div className="absolute inset-0 rounded-2xl transition-colors duration-150 hover:bg-black/[0.04] dark:hover:bg-white/[0.06]" />
         )}
 
         {/* Icon */}
         <span
-          className="relative z-10 transition-all duration-150"
+          className="relative z-10 transition-all duration-150 flex items-center justify-center"
           style={{
-            color: isActive ? '#fff' : hovered ? '#0066cc' : '#6e6e73',
-            strokeWidth: isActive ? 2.2 : 1.8,
-            transform: isActive ? 'scale(1.08)' : 'scale(1)',
+            color: isActive ? '#ffffff' : hovered ? 'var(--violet, #0066cc)' : 'var(--muted, #7a7a7a)',
+            transform: isActive ? 'scale(1.06)' : 'scale(1)',
           }}
         >
           {React.cloneElement(ICONS[item.key], {
@@ -182,13 +168,13 @@ function NavItem({ item, isActive, onClick }) {
           })}
         </span>
 
-        {/* Badge dot for Beta items */}
+        {/* Micro badge dot for Beta */}
         {item.badge && !isActive && (
-          <span className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-[#0066cc]" />
+          <span className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-[#0066cc] dark:bg-[#38BDF8]" />
         )}
       </button>
 
-      {/* Flyout tooltip */}
+      {/* Flyout tooltip on hover */}
       <Tooltip label={item.label} badge={item.badge} visible={hovered} />
     </div>
   )
@@ -206,10 +192,10 @@ function SignOutButton({ onClick }) {
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         aria-label="Sign Out"
-        className="w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-150 cursor-pointer border-none"
+        className="w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-150 cursor-pointer border-none outline-none"
         style={{
-          color: hovered ? '#ef4444' : '#9ca3af',
-          background: hovered ? 'rgba(239,68,68,0.08)' : 'transparent',
+          color: hovered ? '#ef4444' : 'var(--muted, #7a7a7a)',
+          background: hovered ? 'rgba(239,68,68,0.1)' : 'transparent',
         }}
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -218,80 +204,30 @@ function SignOutButton({ onClick }) {
           <line x1="21" y1="12" x2="9" y2="12" />
         </svg>
       </button>
-      <AnimatePresence>
-        {hovered && (
-          <motion.div
-            className="absolute left-[calc(100%+14px)] top-1/2 -translate-y-1/2 z-[300] pointer-events-none"
-            initial={{ opacity: 0, x: -8 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -6 }}
-            transition={{ duration: 0.15 }}
-          >
-            <div className="relative flex items-center bg-[#0d0f14]/95 text-white text-[12px] font-semibold px-3 py-2 rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.32)] border border-white/10 whitespace-nowrap">
-              <span className="absolute right-full top-1/2 -translate-y-1/2 border-[5px] border-transparent" style={{ borderRightColor: 'rgba(13,15,20,0.95)' }} />
-              Sign Out
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <Tooltip label="Sign Out" visible={hovered} />
     </div>
   )
 }
 
-// ─── Main Sidebar ─────────────────────────────────────────────────────────────
+// ─── Main Floating Sidebar ────────────────────────────────────────────────────
 
 export default function AppSidebar() {
-  const navigate  = useNavigate()
-  const location  = useLocation()
-  const active    = activeKeyFor(location.pathname)
-  const { setCollapsed } = useSidebar()
+  const navigate = useNavigate()
+  const location = useLocation()
+  const active = activeKeyFor(location.pathname)
 
   const handleSignOut = () => {
-    // Clear any client-side session state if needed
     navigate('/login')
   }
 
   return (
     <aside
-      className="pf-sidebar relative z-30 flex flex-col items-center h-full py-4 px-2 select-none"
-      style={{
-        width: 68,
-        background: 'rgba(255,255,255,0.82)',
-        backdropFilter: 'blur(24px) saturate(200%)',
-        WebkitBackdropFilter: 'blur(24px) saturate(200%)',
-        borderRight: '1px solid rgba(255,255,255,0.7)',
-        boxShadow: '2px 0 24px -4px rgba(10,10,10,0.07), inset -1px 0 0 rgba(255,255,255,0.9)',
-      }}
+      className="pf-sidebar-floating hidden md:flex flex-col items-center justify-between py-4 px-2 select-none"
+      aria-label="Primary Navigation"
     >
-      {/* ── Top: Logo + collapse toggle ── */}
-      <div className="flex flex-col items-center gap-3 flex-none">
-        {/* Brand Logo */}
-        <button
-          type="button"
-          onClick={() => navigate('/dashboard')}
-          className="w-11 h-11 rounded-2xl flex items-center justify-center cursor-pointer border-none outline-none transition-transform duration-200 hover:scale-105"
-          style={{
-            background: 'linear-gradient(135deg, #0071e3, #0066cc)',
-            boxShadow: '0 4px 14px rgba(0,102,204,0.38), 0 1px 3px rgba(0,102,204,0.25)',
-          }}
-          aria-label="PathFinder Home"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="9" />
-            <polygon points="16 8 10.5 10.5 8 16 13.5 13.5" fill="#fff" stroke="none" />
-          </svg>
-        </button>
-
-        {/* Separator */}
-        <div className="w-6 h-px bg-black/[0.07]" />
-
-        {/* Collapse toggle */}
-        <SidebarCollapseButton onClick={() => setCollapsed(true)} />
-      </div>
-
-      {/* ── Center: Navigation ── */}
-      <nav className="flex flex-col items-center gap-1.5 flex-1 my-4 overflow-y-auto overflow-x-visible scrollbar-none">
-        {NAV.map(item => (
+      {/* Navigation Icons Group */}
+      <nav className="flex flex-col items-center gap-2 w-full">
+        {NAV.map((item) => (
           <NavItem
             key={item.key}
             item={item}
@@ -301,60 +237,21 @@ export default function AppSidebar() {
         ))}
       </nav>
 
-      {/* ── Bottom: Sign out + system pulse ── */}
-      <div className="flex flex-col items-center gap-2 flex-none">
-        <div className="w-6 h-px bg-black/[0.07]" />
+      {/* Bottom Section: Separator + Sign Out + System Pulse */}
+      <div className="flex flex-col items-center gap-2.5 pt-2 w-full">
+        <div className="w-6 h-px bg-black/[0.08] dark:bg-white/[0.1]" />
+
+        {/* Sign Out Button */}
         <SignOutButton onClick={handleSignOut} />
 
-        {/* Live health indicator */}
-        <div className="relative w-6 h-6 flex items-center justify-center" title="System Active">
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 block shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
+        {/* System active health indicator */}
+        <div className="relative w-7 h-7 rounded-full flex items-center justify-center" title="System Operational">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 block shadow-[0_0_8px_rgba(34,197,94,0.7)]" />
           <span className="absolute inset-0 flex items-center justify-center">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping opacity-50" />
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping opacity-60" />
           </span>
         </div>
       </div>
     </aside>
-  )
-}
-
-// ─── Collapse Button (shared) ─────────────────────────────────────────────────
-
-function SidebarCollapseButton({ onClick }) {
-  const [hovered, setHovered] = useState(false)
-  return (
-    <div className="relative flex items-center justify-center">
-      <button
-        type="button"
-        onClick={onClick}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        aria-label="Hide sidebar"
-        className="w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-150 cursor-pointer border border-black/[0.07] outline-none"
-        style={{
-          color: hovered ? '#0066cc' : '#9ca3af',
-          background: hovered ? 'rgba(0,102,204,0.07)' : 'rgba(255,255,255,0.6)',
-          borderColor: hovered ? 'rgba(0,102,204,0.3)' : 'rgba(0,0,0,0.07)',
-        }}
-      >
-        <SidebarIcon className="w-4 h-4" />
-      </button>
-      <AnimatePresence>
-        {hovered && (
-          <motion.div
-            className="absolute left-[calc(100%+14px)] top-1/2 -translate-y-1/2 z-[300] pointer-events-none"
-            initial={{ opacity: 0, x: -8 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -6 }}
-            transition={{ duration: 0.14 }}
-          >
-            <div className="relative flex items-center bg-[#0d0f14]/95 text-white text-[12px] font-semibold px-3 py-2 rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.32)] border border-white/10 whitespace-nowrap">
-              <span className="absolute right-full top-1/2 -translate-y-1/2 border-[5px] border-transparent" style={{ borderRightColor: 'rgba(13,15,20,0.95)' }} />
-              Collapse sidebar
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
   )
 }

@@ -1,157 +1,57 @@
-import React, { useRef } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
+import React from 'react'
+import { useNavigate } from 'react-router-dom'
 import UserProfileDropdown from '../ui/UserProfileDropdown'
 import ThemeToggle from '../ui/ThemeToggle'
-import { useSidebar } from '../../contexts/SidebarContext'
-import { SidebarIcon, NAV, ICONS, activeKeyFor } from '../ui/AppSidebar'
 
 /**
- * TopBar: Premium 72px shared top application bar.
+ * TopBar: Full-width Edge-to-Edge Top Application Header (72px)
  * Features:
- * - Permanent PathFinder Logo & Name on the left side.
- * - Rounded/curved bottom corners with ultra-fine glassmorphic backdrop.
- * - Framer-motion animated flyout navigation menu on hover/toggle when collapsed.
- * - Permanent z-50 stacking context.
+ * - Extends full width from left to right with slight rounded bottom edges.
+ * - PathFinder Brand (Logo + Text) cleanly positioned on the left.
+ * - Dynamic center controls (e.g., Goal Selector, Roadmap shortcuts, search).
+ * - Theme Switcher & User Profile on the right.
  */
 export default function TopBar({ children }) {
   const navigate = useNavigate()
-  const location = useLocation()
-  const active = activeKeyFor(location.pathname)
-  const { isCollapsed, setCollapsed, isHoverOpen, setIsHoverOpen } = useSidebar()
-  const hoverTimeoutRef = useRef(null)
-
-  const handleMouseEnter = () => {
-    if (!isCollapsed) return
-    if (hoverTimeoutRef.current) {
-      clearTimeout(hoverTimeoutRef.current)
-      hoverTimeoutRef.current = null
-    }
-    setIsHoverOpen(true)
-  }
-
-  const handleMouseLeave = () => {
-    if (hoverTimeoutRef.current) {
-      clearTimeout(hoverTimeoutRef.current)
-    }
-    hoverTimeoutRef.current = setTimeout(() => {
-      setIsHoverOpen(false)
-    }, 300)
-  }
 
   return (
-    <header className="pf-topbar relative z-50">
-      <div className="flex items-center gap-3 min-w-0 flex-1 h-full overflow-visible">
-        {/* Left Side: PathFinder Brand + Sidebar Toggle */}
-        <div
-          className="flex items-center gap-2 flex-none h-full relative"
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
+    <header className="pf-topbar w-full relative z-50 flex items-center justify-between">
+      {/* Left: Brand Identity + Children Controls */}
+      <div className="flex items-center gap-3.5 min-w-0 flex-1 h-full overflow-visible">
+        {/* Brand Logo & Name */}
+        <button
+          type="button"
+          onClick={() => navigate('/dashboard')}
+          className="flex items-center gap-2.5 bg-transparent border-none cursor-pointer text-left pr-2 group transition-transform active:scale-95 flex-none"
+          aria-label="PathFinder Home"
         >
-          {/* Logo & Name */}
-          <button
-            type="button"
-            onClick={() => {
-              navigate('/dashboard')
-              setIsHoverOpen(false)
-            }}
-            className="flex items-center gap-2.5 bg-transparent border-none cursor-pointer text-left pr-1 group transition-transform active:scale-95"
-            aria-label="PathFinder Home"
+          <span
+            className="grid place-items-center rounded-xl flex-none bg-gradient-to-br from-[#0071e3] to-[#0066cc] shadow-[0_4px_12px_rgba(0,102,204,0.35)] group-hover:scale-105 transition-transform"
+            style={{ width: 34, height: 34 }}
           >
-            <span
-              className="grid place-items-center rounded-xl flex-none bg-gradient-to-br from-[#0071e3] to-[#0066cc] shadow-[0_4px_12px_rgba(0,102,204,0.35)] group-hover:scale-105 transition-transform"
-              style={{ width: 34, height: 34 }}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="9" />
-                <polygon points="16 8 10.5 10.5 8 16 13.5 13.5" fill="#fff" stroke="none" />
-              </svg>
-            </span>
-            <span className="font-['Manrope'] font-extrabold text-[#1d1d1f] dark:text-white text-[17px] tracking-tight">
-              PathFinder
-            </span>
-          </button>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="9" />
+              <polygon points="16 8 10.5 10.5 8 16 13.5 13.5" fill="#fff" stroke="none" />
+            </svg>
+          </span>
+          <span className="font-['Manrope'] font-extrabold text-[#1d1d1f] dark:text-white text-[17px] tracking-tight">
+            PathFinder
+          </span>
+        </button>
 
-          {/* Toggle Button */}
-          <button
-            type="button"
-            onClick={() => {
-              setCollapsed(!isCollapsed)
-              setIsHoverOpen(false)
-            }}
-            aria-label={isCollapsed ? 'Show sidebar' : 'Hide sidebar'}
-            className="relative group flex items-center justify-center w-8 h-8 rounded-lg text-[#7a7a7a] hover:text-[#0066cc] hover:bg-[#eaf2fc] dark:hover:bg-white/10 border border-[#f0f0f0] dark:border-[#242E40] hover:border-[#0066cc] dark:hover:border-[#38BDF8] transition-all cursor-pointer shadow-2xs"
-          >
-            <SidebarIcon className="w-4 h-4" />
-            <span className="pointer-events-none absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2.5 py-1 bg-slate-900 dark:bg-slate-800 text-white text-[11px] font-semibold rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-xl z-50 border border-slate-700">
-              {isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            </span>
-          </button>
+        <span className="h-6 w-px bg-black/[0.08] dark:bg-white/[0.1] mx-0.5 flex-none" />
 
-          {/* Hover Floating Navigation Dropdown with Framer Motion (when sidebar is collapsed) */}
-          <AnimatePresence>
-            {isCollapsed && isHoverOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: -6, scale: 0.96 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -4, scale: 0.96 }}
-                transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-                style={{ transformOrigin: 'top left' }}
-                className="absolute top-[64px] left-0 z-50 w-[230px] pt-2"
-                onMouseEnter={handleMouseEnter}
-                onMouseLeave={handleMouseLeave}
-              >
-                <div className="bg-white dark:bg-[#141A26] rounded-2xl border border-[#E6EAF2] dark:border-[#242E40] shadow-[0_20px_50px_rgba(14,27,56,0.18),0_4px_12px_rgba(14,27,56,0.06)] p-2">
-                  <nav className="flex flex-col gap-0.5">
-                    {NAV.map((item) => {
-                      const on = active === item.key
-                      return (
-                        <button
-                          key={item.key}
-                          type="button"
-                          onClick={() => {
-                            navigate(item.path)
-                            setIsHoverOpen(false)
-                          }}
-                          className={`flex items-center gap-3 rounded-[10px] border-none cursor-pointer text-left transition-colors w-full px-3 py-2.5 text-sm ${
-                            on
-                              ? 'bg-[#eaf2fc] dark:bg-[rgba(41,151,255,0.22)] text-[#0066cc] dark:text-[#38BDF8] font-semibold'
-                              : 'bg-transparent text-[#333333] dark:text-[#D1D5DB] hover:bg-[#fafbfc] dark:hover:bg-white/5 font-medium'
-                          }`}
-                        >
-                          <span className={`flex ${on ? 'text-[#0066cc] dark:text-[#38BDF8]' : 'text-[#6e6e73] dark:text-[#94A3B8]'}`}>
-                            {ICONS[item.key]}
-                          </span>
-                          <span className="flex-1">{item.label}</span>
-                          {item.badge && (
-                            <span className="px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md bg-[#0066cc]/10 text-[#0066cc] dark:bg-[#38BDF8]/20 dark:text-[#38BDF8]">
-                              {item.badge}
-                            </span>
-                          )}
-                        </button>
-                      )
-                    })}
-                  </nav>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        <span className="h-6 w-px bg-[#f0f0f0] dark:bg-[#242E40] mx-1 flex-none" />
-
-        {/* Center / Custom Page Topbar Controls */}
+        {/* Dynamic Center Page Header / Goal Selector */}
         <div className="flex-1 flex items-center min-w-0">
           {children}
         </div>
       </div>
 
-      {/* Right Side: Theme + Profile */}
-      <div className="flex items-center gap-2.5 sm:gap-3 flex-none">
+      {/* Right: Theme Toggle + User Profile */}
+      <div className="flex items-center gap-2.5 sm:gap-3 flex-none pl-3">
         <ThemeToggle />
         <UserProfileDropdown />
       </div>
     </header>
   )
 }
-
