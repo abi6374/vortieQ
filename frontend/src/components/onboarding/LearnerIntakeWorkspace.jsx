@@ -418,12 +418,9 @@ export default function LearnerIntakeWorkspace({
   return (
     <div className="w-full max-w-[1140px] bg-white dark:bg-[#0E1522] rounded-2xl border border-[#f0f0f0] dark:border-[#202B3C] shadow-[0_14px_38px_rgba(25,49,75,0.08)] dark:shadow-[0_14px_38px_rgba(0,0,0,0.5)] flex flex-col justify-between overflow-hidden transition-colors">
       
-      {/* Top Header Row with Badge, Title, ThemeToggle, and Profile Dropdown */}
+      {/* Top Header Row with ThemeToggle and Profile Dropdown */}
       <div className="pt-6 sm:pt-8 pb-3 px-6 sm:px-10 relative">
-        <div className="flex items-center justify-between mb-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1 text-[12px] font-bold uppercase tracking-wider text-[#0066cc] dark:text-[#38BDF8] bg-[#eaf2fc] dark:bg-[#1E293B] border border-[#eaf2fc] dark:border-[#2D3A4F]">
-            Step 1 · Learner Intake
-          </span>
+        <div className="flex items-center justify-end mb-2">
           <div className="flex items-center gap-2 sm:gap-2.5">
             <ThemeToggle />
             <UserProfileDropdown />
@@ -793,20 +790,7 @@ export default function LearnerIntakeWorkspace({
         </div>
       </div>
 
-      {/* Reassurance text */}
-      <div className="text-center py-1">
-        <p className="text-[14.5px] text-[#333333] dark:text-[#94A3B8]">
-          You can{' '}
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="text-[#0066cc] dark:text-[#38BDF8] font-semibold hover:underline cursor-pointer focus:outline-none"
-          >
-            upload a resume
-          </button>{' '}
-          to enhance and auto-extract additional project skills.
-        </p>
-      </div>
+
 
       {/* Bottom Profile-Understanding Panel */}
       <div className="mx-6 sm:mx-10 bg-[#f9fcff]/90 dark:bg-[#101622] border border-[#ddedfe] dark:border-[#242E40] rounded-2xl p-4 sm:p-5 my-3 shadow-xs">
