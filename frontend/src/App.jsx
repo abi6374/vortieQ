@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { Suspense, lazy } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import { ThemeProvider } from './contexts/ThemeContext'
@@ -6,22 +6,34 @@ import { AIChatProvider } from './contexts/AIChatContext'
 import { SidebarProvider } from './contexts/SidebarContext'
 import AIChat from './components/ui/AIChat'
 import ProtectedRoute from './components/auth/ProtectedRoute'
-import AuthScreen from './components/auth/AuthScreen'
-import LandingPage from './pages/LandingPage'
-import OnboardingPage from './pages/OnboardingPage'
-import RoadmapPage from './pages/RoadmapPage'
-import DashboardPage from './pages/DashboardPage'
-import ProgressPage from './pages/ProgressPage'
-import SkillInsightsPage from './pages/SkillInsightsPage'
-import ResourcesPage from './pages/ResourcesPage'
-import AccountPage from './pages/AccountPage'
-import SettingsPage from './pages/SettingsPage'
-import CoachPage from './pages/CoachPage'
-import InterviewPage from './pages/InterviewPage'
-import HackathonsPage from './pages/HackathonsPage'
-import InternshipsPage from './pages/InternshipsPage'
-
 import BackToTop from './components/ui/BackToTop'
+
+// Route-level code splitting for lightning-fast initial page loads
+const LandingPage = lazy(() => import('./pages/LandingPage'))
+const AuthScreen = lazy(() => import('./components/auth/AuthScreen'))
+const OnboardingPage = lazy(() => import('./pages/OnboardingPage'))
+const RoadmapPage = lazy(() => import('./pages/RoadmapPage'))
+const DashboardPage = lazy(() => import('./pages/DashboardPage'))
+const ProgressPage = lazy(() => import('./pages/ProgressPage'))
+const SkillInsightsPage = lazy(() => import('./pages/SkillInsightsPage'))
+const ResourcesPage = lazy(() => import('./pages/ResourcesPage'))
+const AccountPage = lazy(() => import('./pages/AccountPage'))
+const SettingsPage = lazy(() => import('./pages/SettingsPage'))
+const CoachPage = lazy(() => import('./pages/CoachPage'))
+const InterviewPage = lazy(() => import('./pages/InterviewPage'))
+const HackathonsPage = lazy(() => import('./pages/HackathonsPage'))
+const InternshipsPage = lazy(() => import('./pages/InternshipsPage'))
+
+function PageFallback() {
+  return (
+    <div className="w-full h-screen flex items-center justify-center bg-[var(--bg-main)]">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-9 h-9 border-3 border-[#0066cc]/20 border-t-[#0066cc] dark:border-[#C9D0D6]/20 dark:border-t-[#C9D0D6] rounded-full animate-spin" />
+        <span className="text-xs font-bold text-[#7a7a7a] dark:text-[#94A3B8] tracking-wide animate-pulse">Loading PathFinder…</span>
+      </div>
+    </div>
+  )
+}
 
 export default function App() {
   return (
@@ -30,7 +42,8 @@ export default function App() {
         <BrowserRouter>
           <SidebarProvider>
             <AIChatProvider>
-            <Routes>
+              <Suspense fallback={<PageFallback />}>
+                <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/auth" element={<AuthScreen />} />
               <Route path="/login" element={<AuthScreen />} />
@@ -157,7 +170,8 @@ export default function App() {
               />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
-            {/* The single shared "Ask PathFinder" assistant, mounted once for the
+          </Suspense>
+          {/* The single shared "Ask PathFinder" assistant, mounted once for the
                 whole app so the conversation persists across every route. */}
             <AIChat />
             {/* Universal Back-To-Top button */}
