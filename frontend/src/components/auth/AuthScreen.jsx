@@ -35,10 +35,10 @@ const STYLES = `
   border-radius:22px;
   box-shadow:0 28px 70px -24px rgba(20,40,80,.30), 0 2px 6px rgba(20,40,80,.04), inset 0 1px 0 rgba(255,255,255,.7);
   -webkit-backdrop-filter:blur(30px) saturate(1.5); backdrop-filter:blur(30px) saturate(1.5);
-  display:grid; grid-template-columns:44% 56%; overflow:hidden; height:700px; min-height:700px; max-height:700px; }
+  display:grid; grid-template-columns:44% 56%; grid-template-rows:740px; overflow:hidden; height:740px; min-height:740px; max-height:740px; }
 .pfa .brand-panel{ position:relative; overflow:hidden; padding:40px 44px;
   background:linear-gradient(160deg,rgba(255,255,255,0.6) 0%,rgba(234,242,252,0.5) 100%);
-  border-right:1px solid rgba(255,255,255,0.55); display:flex; flex-direction:column; height:100%; }
+  border-right:1px solid rgba(255,255,255,0.55); display:flex; flex-direction:column; height:740px; min-height:740px; max-height:740px; box-sizing:border-box; }
 
 /* Subtle roadmap background styling */
 .pfa .path-deco{ position:absolute; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; }
@@ -62,7 +62,7 @@ const STYLES = `
 
 .pfa .form-panel{ background:rgba(255,255,255,0.55); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
   padding:36px 48px;
-  display:flex; flex-direction:column; align-items:center; justify-content:flex-start; height:100%; }
+  display:flex; flex-direction:column; align-items:center; justify-content:flex-start; height:740px; min-height:740px; max-height:740px; box-sizing:border-box; overflow:hidden; }
 .pfa .form{ width:100%; max-width:400px; height:100%; display:flex; flex-direction:column; }
 .pfa .form-tabs-header{ flex:none; width:100%; }
 .pfa .form-body{ flex:1; display:flex; flex-direction:column; justify-content:center; width:100%; }
