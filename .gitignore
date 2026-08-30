@@ -8,3 +8,5 @@ dist/
 *.egg-info/
 .pytest_cache/
 playwright_screenshots/
+frontend/test-results/
+frontend/playwright-report/

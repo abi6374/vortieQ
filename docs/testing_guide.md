@@ -10,10 +10,16 @@ pip install -r requirements.txt
 pytest -q
 ```
 
-Expected: **126 passed** (as of this round). No live network calls, no live
+Expected: **144 passed** (as of this round). No live network calls, no live
 Supabase writes — every external dependency (Supabase client, GitHub API,
 LLM calls, web search, resource-URL reachability checks) is mocked, so this
 runs in CI without secrets or network access.
+
+(One pre-existing exception, tracked separately, not this suite's general
+behavior: `test_swap_step_with_preference_realtime_flow` reaches the real
+`app.ml.retriever.retrieve_candidates` → `match_courses` RPC against
+whatever `SUPABASE_URL` is configured - read-only, no writes, but a real
+~10s network round-trip. See the spawned follow-up task for the fix.)
 
 Run one file / one class / one test:
 
@@ -34,7 +40,8 @@ pytest tests/test_ranking_engine.py::TestMasteryChangesRanking::test_high_master
 | `test_rate_limit_durable.py` | Postgres-backed rate limiter: allow/reject/fail-open/no-double-count |
 | `test_idempotency_service.py` | Duplicate-click/retry replay, in-flight `425`, concurrent-reservation race |
 | `test_security_and_integrity.py` | All security-audit rounds (see `docs/security_audit.md`) |
-| `test_core_flows.py` | Resume extraction, profile upsert (including the partial-update fix), path-version bumping, the full `swap_step_with_preference` realtime flow |
+| `test_core_flows.py` | Resume extraction (incl. confidence never fabricated when the LLM omits it), profile upsert (including the partial-update fix), path-version bumping, the full `swap_step_with_preference` realtime flow (incl. real mastery-evidence updates for too_advanced/too_basic) |
+| `test_feedback_realtime.py` | too_hard mastery/prerequisite-gap handling, resource_unavailable's live re-check-before-swap safety property, apply_recent_feedback firing immediately with no week gate |
 
 ## Live/production verification (cannot run in CI — needs real Supabase credentials)
 
@@ -73,11 +80,14 @@ npm run test:e2e   # Playwright - health/landing checks always run; authed
                     # checks skip cleanly without PLAYWRIGHT_EMAIL/PASSWORD
 ```
 
-To verify the mock-auth removal specifically: build for production and grep
-the output bundle for any bypass-related string - it must return nothing.
+To verify the mock-auth/fabricated-data removal specifically: build for
+production, then run the automated bundle-purity check (this used to be a
+manual `grep` a person had to remember to re-run before every release -
+it's now a real Playwright test, `tests/e2e/bundle-purity.spec.js`, that
+fails loudly in CI if any of these strings reappear).
 
 ```bash
 npm run build
-grep -c "pf_dev_bypass\|e2e_mock_auth\|MOCK_DEV_ROADMAP" dist/assets/*.js
-# expected: 0
+npx playwright test tests/e2e/bundle-purity.spec.js
+# expected: 12 passed
 ```
