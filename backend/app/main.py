@@ -5,9 +5,18 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from app.middleware.security_headers import SecurityHeadersMiddleware
 from app.routers import profile, paths, feedback, assistant, roadmap, account, resources, coach, github, interview, hackathons, internships
 
 app = FastAPI(title="AI Learning Path Recommender", version="1.0.0")
+
+# Applied to every response - CSP, X-Content-Type-Options, clickjacking
+# protection, Permissions-Policy, and conditional HSTS. See the module
+# docstring for why each is scoped the way it is. Added as middleware
+# (not per-route) so a new route can never accidentally ship without
+# these - the same reasoning as CORS being configured once here rather
+# than per-router.
+app.add_middleware(SecurityHeadersMiddleware)
 
 # SECURITY: allow_origins=["*"] + allow_credentials=True used to be set here.
 # Starlette cannot literally send "Access-Control-Allow-Origin: *" alongside

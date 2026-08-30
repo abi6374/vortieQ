@@ -1,37 +1,76 @@
-from typing import Any, List, Optional
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Response
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.middleware.rate_limit import rate_limit
 from app.services import interview_service
 
 router = APIRouter()
 
+# Bounds both the LLM prompt-injection surface and per-request token/TTS
+# cost - previously every one of these fields (topic, transcript, tts
+# text, questions/answers lists, the free-form current_question dict) had
+# no length or size limit at all, despite each one feeding either a real
+# Bedrock call or a real Polly (per-character-billed) call.
+_MAX_TOPIC_LEN = 200
+_MAX_TRANSCRIPT_LEN = 8000  # a spoken answer, generously bounded
+_MAX_TTS_TEXT_LEN = 3000    # Polly is billed per character
+_MAX_QUESTIONS_PER_SESSION = 20
+
 
 class StartSessionRequest(BaseModel):
-    topic: Optional[str] = ""
-    question_count: Optional[int] = 5
+    topic: Optional[str] = Field(default="", max_length=_MAX_TOPIC_LEN)
+    question_count: Optional[int] = Field(default=5, ge=1, le=_MAX_QUESTIONS_PER_SESSION)
+
+
+class InterviewQuestion(BaseModel):
+    """Real shape produced by interview_service - was a bare `dict`."""
+    id: str
+    question: str = Field(..., max_length=2000)
+    category: str = Field(default="", max_length=200)
+    difficulty: str = Field(default="medium", max_length=50)
+    skill_focus: str = Field(default="", max_length=200)
+    key_criteria: list[str] = Field(default_factory=list, max_length=20)
+    model_answer_summary: str = Field(default="", max_length=2000)
+
+
+class AnswerEvaluation(BaseModel):
+    """Real shape produced by interview_service - was implicitly folded
+    into a bare `dict` on the FinalizeSessionRequest.answers list."""
+    question_id: str = ""
+    score: int = Field(default=0, ge=0, le=100)
+    verdict: str = Field(default="", max_length=50)
+    strengths: list[str] = Field(default_factory=list, max_length=20)
+    missing_concepts: list[str] = Field(default_factory=list, max_length=20)
+    feedback: str = Field(default="", max_length=2000)
+
+
+class SubmittedAnswer(BaseModel):
+    question_id: Optional[str] = None
+    question_number: Optional[int] = Field(default=None, ge=1, le=_MAX_QUESTIONS_PER_SESSION)
+    transcript: str = Field(default="", max_length=_MAX_TRANSCRIPT_LEN)
+    answer_evaluation: Optional[AnswerEvaluation] = None
 
 
 class SubmitAnswerRequest(BaseModel):
-    session_id: str
-    question_number: int
-    total_questions: int
-    current_question: dict
-    transcript: str
-    duration_sec: Optional[int] = 0
+    session_id: str = Field(..., max_length=200)
+    question_number: int = Field(..., ge=1, le=_MAX_QUESTIONS_PER_SESSION)
+    total_questions: int = Field(..., ge=1, le=_MAX_QUESTIONS_PER_SESSION)
+    current_question: InterviewQuestion
+    transcript: str = Field(default="", max_length=_MAX_TRANSCRIPT_LEN)
+    duration_sec: Optional[int] = Field(default=0, ge=0, le=24 * 3600)
 
 
 class FinalizeSessionRequest(BaseModel):
-    session_id: str
-    questions: List[dict]
-    answers: List[dict]
-    total_duration_sec: Optional[int] = 0
+    session_id: str = Field(..., max_length=200)
+    questions: list[InterviewQuestion] = Field(..., max_length=_MAX_QUESTIONS_PER_SESSION)
+    answers: list[SubmittedAnswer] = Field(..., max_length=_MAX_QUESTIONS_PER_SESSION)
+    total_duration_sec: Optional[int] = Field(default=0, ge=0, le=24 * 3600)
 
 
 class TTSRequest(BaseModel):
-    text: str
-    voice_id: Optional[str] = "Joanna"
+    text: str = Field(..., min_length=1, max_length=_MAX_TTS_TEXT_LEN)
+    voice_id: Optional[str] = Field(default="Joanna", max_length=50)
 
 
 @router.post("/start")
@@ -48,7 +87,15 @@ def start_interview(
         )
         return res
     except Exception as e:
-        raise HTTPException(500, f"Failed to start interview session: {str(e)}")
+        # Real exception details (which could include internal error text,
+        # a stack-adjacent message, etc.) go to server logs only - the
+        # client gets a generic, safe message. Previously str(e) was
+        # interpolated directly into the HTTPException detail, which is
+        # exactly the raw-internals leak app.main's global handler already
+        # prevents for UNHANDLED exceptions - this explicit re-raise
+        # bypassed that protection.
+        print(f"[interview router] start_interview_session failed: {type(e).__name__}: {e}", flush=True)
+        raise HTTPException(500, "Failed to start interview session. Please try again.")
 
 
 @router.post("/answer")
@@ -65,13 +112,14 @@ def submit_answer(
             session_id=payload.session_id,
             question_number=payload.question_number,
             total_questions=payload.total_questions,
-            current_question=payload.current_question,
+            current_question=payload.current_question.model_dump(),
             transcript=payload.transcript,
             duration_sec=payload.duration_sec or 0
         )
         return res
     except Exception as e:
-        raise HTTPException(500, f"Failed to process answer: {str(e)}")
+        print(f"[interview router] process_interview_answer failed: {type(e).__name__}: {e}", flush=True)
+        raise HTTPException(500, "Failed to process answer. Please try again.")
 
 
 @router.post("/finalize")
@@ -84,13 +132,14 @@ def finalize_interview(
         res = interview_service.finalize_interview_session(
             user_id=user_id,
             session_id=payload.session_id,
-            questions=payload.questions,
-            answers=payload.answers,
+            questions=[q.model_dump() for q in payload.questions],
+            answers=[a.model_dump() for a in payload.answers],
             total_duration_sec=payload.total_duration_sec or 0
         )
         return res
     except Exception as e:
-        raise HTTPException(500, f"Failed to finalize interview: {str(e)}")
+        print(f"[interview router] finalize_interview_session failed: {type(e).__name__}: {e}", flush=True)
+        raise HTTPException(500, "Failed to finalize interview. Please try again.")
 
 
 @router.post("/tts")
