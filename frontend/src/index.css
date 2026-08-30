@@ -668,41 +668,119 @@ html.dark .rx-insight {
 }
 
 /* 8. AIChat Floating Assistant (.pfchat) Comprehensive Theming */
-html.dark .pfchat-fab {
+html.dark .pfchat-fab,
+[data-theme="dark"] .pfchat-fab {
   background-color: #141A26 !important;
   border-color: #242E40 !important;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
 }
-html.dark .pfchat-fab span {
+html.dark .pfchat-fab span,
+[data-theme="dark"] .pfchat-fab span {
   color: #F9FAFB !important;
 }
-html.dark .pfchat-panel {
+html.dark .pfchat-panel,
+[data-theme="dark"] .pfchat-panel {
   background-color: #141A26 !important;
   border-color: #242E40 !important;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7) !important;
 }
-html.dark .pfchat-head {
-  border-bottom-color: #242E40 !important;
+html.dark .pfchat-head,
+[data-theme="dark"] .pfchat-head {
+  border-bottom-color: #1E2638 !important;
+  background-color: #141A26 !important;
 }
-html.dark .pfchat-head .n {
+html.dark .pfchat-head .n,
+[data-theme="dark"] .pfchat-head .n {
   color: #F9FAFB !important;
 }
-html.dark .pfchat-body {
+html.dark .pfchat-head button,
+[data-theme="dark"] .pfchat-head button {
+  color: #94A3B8 !important;
+}
+html.dark .pfchat-head button:hover,
+[data-theme="dark"] .pfchat-head button:hover {
+  background-color: #1E2638 !important;
+  color: #F9FAFB !important;
+}
+html.dark .pfchat-body,
+[data-theme="dark"] .pfchat-body {
   background-color: #0E131E !important;
 }
-html.dark .pfchat-msg.assistant {
+html.dark .pfchat-empty,
+[data-theme="dark"] .pfchat-empty {
+  color: #94A3B8 !important;
+}
+html.dark .pfchat-empty b,
+[data-theme="dark"] .pfchat-empty b {
+  color: #F9FAFB !important;
+}
+html.dark .pfchat-msg.assistant,
+[data-theme="dark"] .pfchat-msg.assistant {
   background-color: #141A26 !important;
   border-color: #242E40 !important;
   color: #F9FAFB !important;
 }
-html.dark .pfchat-sugg button {
+html.dark .pfchat-msg.user,
+[data-theme="dark"] .pfchat-msg.user {
+  background-color: #0066cc !important;
+  color: #FFFFFF !important;
+}
+html.dark .pfchat-sugg button,
+[data-theme="dark"] .pfchat-sugg button {
   background-color: #141A26 !important;
   border-color: #242E40 !important;
   color: #F9FAFB !important;
 }
-html.dark .pfchat-typing {
+html.dark .pfchat-sugg button:hover,
+[data-theme="dark"] .pfchat-sugg button:hover {
+  border-color: #38BDF8 !important;
+  background-color: #1E293B !important;
+}
+html.dark .pfchat-typing,
+[data-theme="dark"] .pfchat-typing {
   background-color: #141A26 !important;
   border-color: #242E40 !important;
+}
+html.dark .pfchat-typing i,
+[data-theme="dark"] .pfchat-typing i {
+  background-color: #64748B !important;
+}
+html.dark .pfchat-foot,
+[data-theme="dark"] .pfchat-foot {
+  border-top-color: #1E2638 !important;
+  background-color: #141A26 !important;
+}
+html.dark .pfchat-in,
+[data-theme="dark"] .pfchat-in {
+  border-color: #242E40 !important;
+  background-color: #0E131E !important;
+}
+html.dark .pfchat-in:focus-within,
+[data-theme="dark"] .pfchat-in:focus-within {
+  border-color: #38BDF8 !important;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18) !important;
+}
+html.dark .pfchat-in textarea,
+[data-theme="dark"] .pfchat-in textarea {
+  color: #F9FAFB !important;
+  background-color: transparent !important;
+}
+html.dark .pfchat-in textarea::placeholder,
+[data-theme="dark"] .pfchat-in textarea::placeholder {
+  color: #64748B !important;
+}
+html.dark .pfchat-send,
+[data-theme="dark"] .pfchat-send {
+  background-color: #0066cc !important;
+  color: #FFFFFF !important;
+}
+html.dark .pfchat-send:hover:not(:disabled),
+[data-theme="dark"] .pfchat-send:hover:not(:disabled) {
+  background-color: #0052a3 !important;
+}
+html.dark .pfchat-ctx,
+[data-theme="dark"] .pfchat-ctx {
+  color: #64748B !important;
 }
 
 /* 9. Recharts SVG Charts & Data Visuals in Dark Mode */

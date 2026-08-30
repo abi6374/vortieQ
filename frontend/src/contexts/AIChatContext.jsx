@@ -41,19 +41,19 @@ export function AIChatProvider({ children }) {
   useEffect(() => {
     if (!session?.user || loadedRef.current) return
     loadedRef.current = true
-    let cancelled = false
+    let isCurrent = true
     ;(async () => {
       setHydrating(true)
       try {
-        const { data } = await api.get('/api/assistant/conversation')
-        if (!cancelled) setMessages(data.messages || [])
+        const { data } = await api.get('/api/assistant/conversation', { timeout: 3500 })
+        if (isCurrent && data?.messages) setMessages(data.messages)
       } catch {
         // Non-fatal: the user can still start a fresh conversation.
       } finally {
-        if (!cancelled) setHydrating(false)
+        setHydrating(false)
       }
     })()
-    return () => { cancelled = true }
+    return () => { isCurrent = false }
   }, [session])
 
   const send = useCallback(async (text) => {

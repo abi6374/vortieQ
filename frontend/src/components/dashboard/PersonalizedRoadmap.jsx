@@ -460,7 +460,7 @@ export default function PersonalizedRoadmap({
       }
     >
       {/* Page header */}
-      <div className="mb-6">
+      <div className="mb-6 relative z-10">
         <h1 className="font-['Manrope'] font-extrabold text-2xl sm:text-3xl text-[#1d1d1f] tracking-tight">
           Your path to: {cleanGoalTitle}
         </h1>

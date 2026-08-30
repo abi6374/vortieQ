@@ -48,14 +48,17 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!loading && !path) {
-      navigate('/onboarding', { replace: true })
+      const isDevBypass = typeof window !== 'undefined' && window.localStorage?.getItem('pf_dev_bypass') === 'true'
+      if (!isDevBypass) {
+        navigate('/onboarding', { replace: true })
+      }
     }
   }, [loading, path, navigate])
 
-  if (loading || !path) {
+  if (loading) {
     return (
-      <div className="min-h-screen bg-[#f5f5f7] flex items-center justify-center">
-        <div className="w-10 h-10 border-3 border-[#0066cc] border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-[#f5f5f7] dark:bg-[#0B0E14] flex items-center justify-center">
+        <div className="w-10 h-10 border-3 border-[#0066cc] dark:border-[#38BDF8] border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }

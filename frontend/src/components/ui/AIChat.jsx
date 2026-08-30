@@ -14,7 +14,7 @@ const V = '#0066cc'
 const STYLES = `
 .pfchat-fab{ position:fixed; bottom:24px; right:28px; z-index:30; display:flex; align-items:center; gap:9px;
   background:#fff; border:1px solid #e0e0e0; border-radius:999px; padding:8px 16px 8px 8px;
-  box-shadow:0 8px 22px rgba(0,102,204,.18); cursor:pointer; transition:box-shadow .15s, transform .12s;
+  box-shadow:0 8px 22px rgba(0,102,204,.18); cursor:pointer; transition:box-shadow .15s, transform .12s, background-color .2s, border-color .2s;
   font-family:"Inter",system-ui,sans-serif; }
 .pfchat-fab:hover{ box-shadow:0 12px 28px rgba(0,102,204,.26); transform:translateY(-1px); }
 .pfchat-fab .b{ width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg,#0071e3,${V});
@@ -65,13 +65,106 @@ const STYLES = `
 .pfchat-in{ display:flex; align-items:flex-end; gap:8px; border:1.5px solid #e0e0e0; border-radius:12px; padding:8px 10px; background:#fff; }
 .pfchat-in:focus-within{ border-color:${V}; box-shadow:0 0 0 3px rgba(0,102,204,.15); }
 .pfchat-in textarea{ flex:1; border:none; outline:none; resize:none; font-family:inherit; font-size:13.5px;
-  line-height:1.45; color:#1d1d1f; max-height:96px; background:none; }
+  line-height:1.45; color:#1d1d1f; max-height:96px; background:transparent; }
 .pfchat-in textarea::placeholder{ color:#86868b; }
 .pfchat-send{ width:34px; height:34px; border-radius:9px; border:none; background:${V}; color:#fff; cursor:pointer;
-  display:grid; place-items:center; flex:none; }
+  display:grid; place-items:center; flex:none; transition:background-color .15s, opacity .15s; }
 .pfchat-send:disabled{ opacity:.4; cursor:not-allowed; }
 .pfchat-send:hover:not(:disabled){ background:#004fa3; }
 .pfchat-ctx{ font-size:11px; color:#86868b; margin-top:7px; text-align:center; }
+
+/* --- Dark Theme Support --- */
+html.dark .pfchat-fab, [data-theme="dark"] .pfchat-fab {
+  background:#141A26; border-color:#242E40; box-shadow:0 8px 22px rgba(0,0,0,.5);
+}
+html.dark .pfchat-fab:hover, [data-theme="dark"] .pfchat-fab:hover {
+  box-shadow:0 12px 28px rgba(0,102,204,.35); border-color:#38BDF8;
+}
+html.dark .pfchat-fab span, [data-theme="dark"] .pfchat-fab span {
+  color:#F9FAFB;
+}
+
+html.dark .pfchat-panel, [data-theme="dark"] .pfchat-panel {
+  background:#141A26; border-color:#242E40; box-shadow:0 18px 48px rgba(0,0,0,.65);
+}
+html.dark .pfchat-head, [data-theme="dark"] .pfchat-head {
+  border-bottom-color:#1E2638;
+}
+html.dark .pfchat-head .n, [data-theme="dark"] .pfchat-head .n {
+  color:#F9FAFB;
+}
+html.dark .pfchat-head button, [data-theme="dark"] .pfchat-head button {
+  color:#94A3B8;
+}
+html.dark .pfchat-head button:hover, [data-theme="dark"] .pfchat-head button:hover {
+  background:#1E2638; color:#F9FAFB;
+}
+
+html.dark .pfchat-body, [data-theme="dark"] .pfchat-body {
+  background:#0E131E;
+}
+html.dark .pfchat-empty, [data-theme="dark"] .pfchat-empty {
+  color:#94A3B8;
+}
+html.dark .pfchat-empty b, [data-theme="dark"] .pfchat-empty b {
+  color:#F9FAFB;
+}
+
+html.dark .pfchat-sugg button, [data-theme="dark"] .pfchat-sugg button {
+  background:#141A26; border-color:#242E40; color:#F9FAFB;
+}
+html.dark .pfchat-sugg button:hover, [data-theme="dark"] .pfchat-sugg button:hover {
+  border-color:#38BDF8; background:#1E293B;
+}
+
+html.dark .pfchat-msg.assistant, [data-theme="dark"] .pfchat-msg.assistant {
+  background:#141A26; color:#F9FAFB; border-color:#242E40;
+}
+html.dark .pfchat-msg.user, [data-theme="dark"] .pfchat-msg.user {
+  background:#0066cc; color:#FFFFFF;
+}
+
+html.dark .pfchat-typing, [data-theme="dark"] .pfchat-typing {
+  background:#141A26; border-color:#242E40;
+}
+html.dark .pfchat-typing i, [data-theme="dark"] .pfchat-typing i {
+  background:#64748B;
+}
+
+html.dark .pfchat-err, [data-theme="dark"] .pfchat-err {
+  background:rgba(127,29,29,0.3); border-color:rgba(239,68,68,0.4); color:#FCA5A5;
+}
+html.dark .pfchat-err button, [data-theme="dark"] .pfchat-err button {
+  color:#FCA5A5;
+}
+
+html.dark .pfchat-foot, [data-theme="dark"] .pfchat-foot {
+  border-top-color:#1E2638; background:#141A26;
+}
+html.dark .pfchat-in, [data-theme="dark"] .pfchat-in {
+  border-color:#242E40; background:#0E131E;
+}
+html.dark .pfchat-in:focus-within, [data-theme="dark"] .pfchat-in:focus-within {
+  border-color:#38BDF8; box-shadow:0 0 0 3px rgba(56,189,248,.18);
+}
+html.dark .pfchat-in textarea, [data-theme="dark"] .pfchat-in textarea {
+  color:#F9FAFB; background:transparent;
+}
+html.dark .pfchat-in textarea::placeholder, [data-theme="dark"] .pfchat-in textarea::placeholder {
+  color:#64748B;
+}
+
+html.dark .pfchat-send, [data-theme="dark"] .pfchat-send {
+  background:#0066cc; color:#FFFFFF;
+}
+html.dark .pfchat-send:hover:not(:disabled), [data-theme="dark"] .pfchat-send:hover:not(:disabled) {
+  background:#0052a3;
+}
+
+html.dark .pfchat-ctx, [data-theme="dark"] .pfchat-ctx {
+  color:#64748B;
+}
+
 @media (prefers-reduced-motion:reduce){ .pfchat-typing i{ animation:none } .pfchat-fab{ transition:none } }
 `
 
