@@ -63,34 +63,37 @@ export default function YourSkillsStep({
       
       <div>
         {/* Top Header Row with ThemeToggle only (No account option) */}
-        <div className="flex items-center justify-end mb-3">
+        <div className="flex items-center justify-end mb-2">
           <ThemeToggle />
         </div>
 
-        <h1
-          className="font-extrabold text-[#1d1d1f] dark:text-[#F8FAFC]"
-          style={{ fontSize: 'clamp(26px,3.4vw,38px)', letterSpacing: '-.025em', lineHeight: 1.1 }}
-        >
-          Your skills
-        </h1>
-        <p
-          className="text-[#494949] dark:text-[#94A3B8] mt-2 mb-6 font-normal"
-          style={{ fontSize: 'clamp(15px,1.4vw,17px)' }}
-        >
-          {currentTopics.length > 0 ? (
-            <>
-              We identified {currentTopics.length} skill{currentTopics.length === 1 ? '' : 's'} in your profile
-              {detectedYears ? ` (≈${detectedYears} years experience)` : ''}. Review your detected skills or add more below.
-            </>
-          ) : (
-            <>
-              We didn't detect any skills from a resume or GitHub sync. Add the skills you actually have below and tell us your real level for each.
-            </>
-          )}
-        </p>
+        {/* Centered Heading and Subtitle */}
+        <div className="text-center max-w-3xl mx-auto mb-8">
+          <h1
+            className="font-extrabold text-[#1d1d1f] dark:text-[#F8FAFC]"
+            style={{ fontSize: 'clamp(26px,3.4vw,36px)', letterSpacing: '-.025em', lineHeight: 1.15 }}
+          >
+            Your skills
+          </h1>
+          <p
+            className="text-[#494949] dark:text-[#94A3B8] mt-2 font-normal leading-relaxed"
+            style={{ fontSize: 'clamp(14.5px,1.3vw,16.5px)' }}
+          >
+            {currentTopics.length > 0 ? (
+              <>
+                We identified {currentTopics.length} skill{currentTopics.length === 1 ? '' : 's'} in your profile
+                {detectedYears ? ` (≈${detectedYears} years experience)` : ''}. Review your detected skills or add more below.
+              </>
+            ) : (
+              <>
+                We didn't detect any skills from a resume or GitHub sync. Add the skills you actually have below and tell us your real level for each.
+              </>
+            )}
+          </p>
+        </div>
 
-        {/* DETECTED SKILLS & STACKS TABLE / CARD */}
-        <div className="rounded-2xl border border-[#e6e6e6] dark:border-[#202B3C] bg-white dark:bg-[#101726] shadow-sm overflow-hidden p-6 transition-colors">
+        {/* Centered DETECTED SKILLS & STACKS CARD (NO % badges) */}
+        <div className="max-w-[960px] mx-auto rounded-2xl border border-[#e6e6e6] dark:border-[#202B3C] bg-white dark:bg-[#101726] shadow-sm overflow-hidden p-6 transition-colors">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#f0f0f0] dark:border-[#1E293B]">
             <div className="flex items-center gap-3">
               <span className="grid place-items-center rounded-xl flex-none w-10 h-10 bg-[#eaf2fc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8]">
@@ -152,14 +155,9 @@ export default function YourSkillsStep({
                 {currentTopics.map((t) => (
                   <span
                     key={t.name}
-                    className="group inline-flex items-center gap-2 rounded-xl bg-[#f0f4f9] dark:bg-[#172236] border border-[#dce4f0] dark:border-[#223552] text-[#1d1d1f] dark:text-[#F8FAFC] px-3.5 py-2 text-[13.5px] font-bold shadow-xs hover:border-[#0066cc] dark:hover:border-[#38BDF8] transition-all"
+                    className="group inline-flex items-center gap-2 rounded-xl bg-[#f0f4f9] dark:bg-[#172236] border border-[#dce4f0] dark:border-[#223552] text-[#1d1d1f] dark:text-[#F8FAFC] px-3.5 py-2 text-[13.5px] font-semibold shadow-xs hover:border-[#0066cc] dark:hover:border-[#38BDF8] transition-all"
                   >
                     <span>{t.name}</span>
-                    {typeof t.confidence_pct === 'number' && (
-                      <span className="text-[11px] font-extrabold text-[#0066cc] dark:text-[#38BDF8] bg-white dark:bg-[#0B0F17] px-1.5 py-0.5 rounded-md border border-[#cfe4fb] dark:border-[#1E3A5F]">
-                        {t.confidence_pct}%
-                      </span>
-                    )}
                     <button
                       type="button"
                       onClick={() => handleRemoveSkill(t.name)}
