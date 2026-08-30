@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 /**
  * PathFinder Floating Glassmorphic Sidebar
  * - Detached floating pill design (not attached to any screen edge)
- * - Navigation icons with spring-animated active pill
+ * - Vertically centered 8 navigation features with small gaps
+ * - Expanded thickness (68px width) with 48px tactile buttons
  * - Smooth right-side flyout tooltip on hover showing feature text & badges
  * - Bottom Sign Out and live system status pulse
  */
@@ -19,27 +20,27 @@ export const SidebarIcon = ({ className = 'w-4 h-4' }) => (
 
 export const ICONS = {
   roadmap: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
       <path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z" /><path d="M9 3v15M15 6v15" />
     </svg>
   ),
   progress: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
       <path d="M3 3v18h18" /><path d="m7 14 3-3 3 3 5-6" />
     </svg>
   ),
   skills: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
       <path d="M12 5a3 3 0 0 0-3 3 3 3 0 0 0-1 5.8V17a3 3 0 0 0 4 2.8A3 3 0 0 0 16 17v-3.2A3 3 0 0 0 15 8a3 3 0 0 0-3-3z" />
     </svg>
   ),
   resources: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
       <path d="M4 5a2 2 0 0 1 2-2h13v18H6a2 2 0 0 0-2 2z" /><path d="M4 5v14" />
     </svg>
   ),
   hackathons: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
       <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
       <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
       <path d="M4 22h16" />
@@ -49,13 +50,13 @@ export const ICONS = {
     </svg>
   ),
   internships: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
       <rect width="20" height="14" x="2" y="7" rx="2" ry="2" />
       <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
     </svg>
   ),
   interview: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
       <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
       <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
       <line x1="12" x2="12" y1="19" y2="22" />
@@ -63,7 +64,7 @@ export const ICONS = {
     </svg>
   ),
   coach: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
       <path d="M21 12a8 8 0 1 1-4.9-7.4L21 3l-1.4 4.9A7.9 7.9 0 0 1 21 12z" />
     </svg>
   ),
@@ -138,7 +139,7 @@ function NavItem({ item, isActive, onClick }) {
         onMouseLeave={() => setHovered(false)}
         aria-label={item.label}
         aria-current={isActive ? 'page' : undefined}
-        className="relative w-11 h-11 flex items-center justify-center rounded-2xl transition-all duration-150 cursor-pointer border-none outline-none bg-transparent"
+        className="relative w-12 h-12 flex items-center justify-center rounded-2xl transition-all duration-150 cursor-pointer border-none outline-none bg-transparent"
       >
         {/* Spring-animated active capsule pill */}
         {isActive ? (
@@ -152,7 +153,7 @@ function NavItem({ item, isActive, onClick }) {
             transition={{ type: 'spring', stiffness: 420, damping: 32 }}
           />
         ) : (
-          <div className="absolute inset-0 rounded-2xl transition-colors duration-150 hover:bg-black/[0.04] dark:hover:bg-white/[0.06]" />
+          <div className="absolute inset-0 rounded-2xl transition-colors duration-150 hover:bg-black/[0.05] dark:hover:bg-white/[0.07]" />
         )}
 
         {/* Icon */}
@@ -170,7 +171,7 @@ function NavItem({ item, isActive, onClick }) {
 
         {/* Micro badge dot for Beta */}
         {item.badge && !isActive && (
-          <span className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-[#0066cc] dark:bg-[#38BDF8]" />
+          <span className="absolute top-2.5 right-2.5 w-1.5 h-1.5 rounded-full bg-[#0066cc] dark:bg-[#38BDF8]" />
         )}
       </button>
 
@@ -192,13 +193,13 @@ function SignOutButton({ onClick }) {
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         aria-label="Sign Out"
-        className="w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-150 cursor-pointer border-none outline-none"
+        className="w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-150 cursor-pointer border-none outline-none"
         style={{
           color: hovered ? '#ef4444' : 'var(--muted, #7a7a7a)',
           background: hovered ? 'rgba(239,68,68,0.1)' : 'transparent',
         }}
       >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
           <polyline points="16 17 21 12 16 7" />
           <line x1="21" y1="12" x2="9" y2="12" />
@@ -225,8 +226,11 @@ export default function AppSidebar() {
       className="pf-sidebar-floating hidden md:flex flex-col items-center justify-between py-4 px-2 select-none"
       aria-label="Primary Navigation"
     >
-      {/* Navigation Icons Group */}
-      <nav className="flex flex-col items-center gap-2 w-full">
+      {/* Top micro spacing */}
+      <div className="h-1 flex-none" />
+
+      {/* Navigation Icons Group — Vertically Centered with small tight gaps */}
+      <nav className="my-auto flex flex-col items-center gap-2 w-full">
         {NAV.map((item) => (
           <NavItem
             key={item.key}
@@ -238,8 +242,8 @@ export default function AppSidebar() {
       </nav>
 
       {/* Bottom Section: Separator + Sign Out + System Pulse */}
-      <div className="flex flex-col items-center gap-2.5 pt-2 w-full">
-        <div className="w-6 h-px bg-black/[0.08] dark:bg-white/[0.1]" />
+      <div className="flex flex-col items-center gap-2.5 pt-2 flex-none w-full">
+        <div className="w-7 h-px bg-black/[0.08] dark:bg-white/[0.1]" />
 
         {/* Sign Out Button */}
         <SignOutButton onClick={handleSignOut} />
