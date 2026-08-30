@@ -1014,32 +1014,46 @@ export default function PersonalizedRoadmap({
               Recommended for you
             </h3>
 
-            {currentWeekData.webResources?.[0] ? (
-              <div className="flex items-center justify-between gap-3 p-3.5 bg-[#f9fcff] dark:bg-[#0E131E] border border-[#e1effe] dark:border-[#1E2638] rounded-xl shadow-2xs">
-                <div className="flex items-center gap-3 min-w-0">
-                  <span className="w-9 h-9 rounded-full bg-[#dbeafc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center flex-none">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-                      <polygon points="5 3 19 12 5 21 5 3" />
-                    </svg>
-                  </span>
-                  <div className="min-w-0">
-                    <h4 className="text-xs font-bold text-[#1d1d1f] dark:text-[#F9FAFB] max-w-[130px] truncate">
-                      {currentWeekData.webResources[0].title || currentWeekData.webResources[0].url}
-                    </h4>
-                    <p className="text-[11px] text-[#7a7a7a] dark:text-[#94A3B8] truncate max-w-[150px]">
-                      {currentWeekData.webResources[0].provider || 'Learning Resource'}
-                    </p>
-                  </div>
-                </div>
+            {currentWeekData.webResources && currentWeekData.webResources.length > 0 ? (
+              <div className="space-y-2.5">
+                {currentWeekData.webResources.slice(0, 2).map((res, idx) => (
+                  <div key={res.url || idx} className="flex items-center justify-between gap-3 p-3 bg-[#f9fcff] dark:bg-[#0E131E] border border-[#e1effe] dark:border-[#1E2638] rounded-xl shadow-2xs">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span className={`w-8 h-8 rounded-lg flex items-center justify-center flex-none ${
+                        res.resource_type === 'video' || (res.provider || '').toLowerCase().includes('youtube')
+                          ? 'bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/50'
+                          : 'bg-[#dbeafc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8]'
+                      }`}>
+                        {res.resource_type === 'video' || (res.provider || '').toLowerCase().includes('youtube') ? (
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                            <polygon points="5 3 19 12 5 21 5 3" />
+                          </svg>
+                        ) : (
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                          </svg>
+                        )}
+                      </span>
+                      <div className="min-w-0">
+                        <h4 className="text-xs font-bold text-[#1d1d1f] dark:text-[#F9FAFB] max-w-[135px] truncate">
+                          {res.title || res.url}
+                        </h4>
+                        <p className="text-[10px] text-[#7a7a7a] dark:text-[#94A3B8] truncate max-w-[140px]">
+                          {res.provider || 'Learning Resource'}
+                        </p>
+                      </div>
+                    </div>
 
-                <a
-                  href={currentWeekData.webResources[0].url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-3.5 py-1.5 bg-white dark:bg-[#141A26] border border-[#0066cc] dark:border-[#38BDF8] text-[#0066cc] dark:text-[#38BDF8] hover:bg-[#0066cc] hover:text-white rounded-lg text-xs font-bold transition-all shadow-2xs flex-none"
-                >
-                  Open
-                </a>
+                    <a
+                      href={res.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-2.5 py-1 bg-white dark:bg-[#141A26] border border-[#0066cc] dark:border-[#38BDF8] text-[#0066cc] dark:text-[#38BDF8] hover:bg-[#0066cc] hover:text-white rounded-lg text-xs font-bold transition-all shadow-2xs flex-none"
+                    >
+                      Open
+                    </a>
+                  </div>
+                ))}
               </div>
             ) : (
               <p className="text-xs text-[#86868b]">No extra resources found for this week yet.</p>

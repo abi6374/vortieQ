@@ -20,31 +20,126 @@ import ThemeToggle from '../ui/ThemeToggle'
 const LEVEL_TO_NUM = { basic: 35, intermediate: 60, advanced: 82, expert: 95 }
 const HOURS_PER_POINT = 1.2
 
-// Covers all 4 domains in the real course dataset (Data Science/ML, Web Dev,
-// Cloud/DevOps, Product/Business). Keys are natural-language skill names,
-// matching what the resume-extraction prompt actually outputs (e.g.
-// "Machine Learning", not a "machine-learning" slug) since these are
-// matched against topicRatings' real t.name values, not the course
-// dataset's internal tag vocabulary. "custom" has no req thresholds -
-// there's nothing real to benchmark an arbitrary typed-in role against, so
-// its meter degrades to a simpler honest state instead of inventing
-// requirement numbers.
 const ROLES = {
-  aiml:    { name: 'AIML Engineer',        req: { python: 80, statistics: 70, 'machine learning': 75 } },
-  da:      { name: 'Data Analyst',         req: { python: 55, sql: 70, statistics: 70 } },
-  py:      { name: 'Python Developer',     req: { python: 88, git: 55, databases: 60 } },
-  web:     { name: 'Web Developer',        req: { javascript: 75, react: 65, html: 60 } },
-  cloud:   { name: 'Cloud/DevOps Engineer', req: { linux: 60, docker: 70, aws: 65 } },
-  product: { name: 'Product Manager',      req: { 'product management': 70, sql: 55, 'business intelligence': 60 } },
-  custom:  { name: 'Custom role', req: null },
+  sde: {
+    name: 'Software Engineer (SDE)',
+    req: { 'Data Structures & Algorithms': 80, 'System Design & APIs': 70, 'Core Programming': 80, 'Databases & Storage': 65 },
+  },
+  fullstack: {
+    name: 'Full-Stack Developer',
+    req: { 'Frontend (React/UI)': 75, 'Backend & APIs': 75, 'Databases & Storage': 70, 'Git & DevOps Tools': 60 },
+  },
+  aiml: {
+    name: 'AI / ML Engineer',
+    req: { 'Python Core': 80, 'Machine Learning & AI': 75, 'Math & Statistics': 70 },
+  },
+  web: {
+    name: 'Frontend Developer',
+    req: { 'JavaScript / TS': 75, 'React & Modern UI': 70, 'Web Foundations': 65 },
+  },
+  cloud: {
+    name: 'Cloud / DevOps Engineer',
+    req: { 'Linux & Scripting': 65, 'Docker & Containers': 70, 'AWS & Cloud Infra': 65 },
+  },
+  da: {
+    name: 'Data Analyst',
+    req: { 'SQL & Databases': 75, 'Python Analytics': 65, 'BI & Statistics': 70 },
+  },
+  product: {
+    name: 'Product Manager',
+    req: { 'Product Strategy': 70, 'SQL & Metrics': 55, 'Business Analysis': 60 },
+  },
+  custom: { name: 'Custom role', req: null },
 }
-const SELECTABLE_ROLE_IDS = ['aiml', 'da', 'py', 'web', 'cloud', 'product']
 
-// Auto-suggest the best-matching role from the learner's real detected
-// skills (topicRatings), rather than always defaulting to the same one.
-// Falls back to keyword-matching the learner's own goal text when there
-// are no resume skills yet (the chat-only lane), and only defaults to
-// 'aiml' when neither signal is available.
+const SELECTABLE_ROLE_IDS = ['sde', 'fullstack', 'aiml', 'web', 'cloud', 'da', 'product']
+
+const ALIAS_MAP = {
+  'Data Structures & Algorithms': [
+    'dsa', 'data structures', 'algorithms', 'data structures and algorithms', 'data structures & algorithms',
+    'leetcode', 'competitive programming', 'core cs', 'problem solving', 'oop'
+  ],
+  'System Design & APIs': [
+    'system design', 'system architecture', 'distributed systems', 'rest apis', 'restful apis',
+    'microservices', 'fastapi', 'express', 'express.js', 'software engineering', 'oop'
+  ],
+  'Core Programming': [
+    'java', 'c++', 'python', 'javascript', 'typescript', 'c', 'go', 'rust', 'c#', 'programming', 'software development'
+  ],
+  'Databases & Storage': [
+    'postgresql', 'postgres', 'mysql', 'mongodb', 'database', 'databases', 'supabase', 'redis', 'sql', 'dbms'
+  ],
+  'Frontend (React/UI)': [
+    'react', 'react.js', 'reactjs', 'next.js', 'vue', 'angular', 'javascript', 'typescript', 'html', 'css', 'tailwind', 'flutter', 'frontend'
+  ],
+  'Backend & APIs': [
+    'node.js', 'nodejs', 'express', 'express.js', 'fastapi', 'flask', 'django', 'spring', 'spring boot', 'nest.js', 'rest apis', 'restful apis', 'backend'
+  ],
+  'Git & DevOps Tools': [
+    'git', 'github', 'docker', 'postman', 'linux', 'aws', 'developer tools', 'ci/cd', 'rest apis'
+  ],
+  'Python Core': [
+    'python', 'python3', 'oop', 'fastapi', 'django', 'flask'
+  ],
+  'Machine Learning & AI': [
+    'machine learning', 'ml', 'deep learning', 'ai', 'artificial intelligence', 'scikit-learn', 'pytorch', 'tensorflow', 'agentic ai', 'ollama', 'pycaret', 'pandasai', 'data science'
+  ],
+  'Math & Statistics': [
+    'statistics', 'linear algebra', 'calculus', 'probability', 'applied statistics', 'mathematics', 'data science'
+  ],
+  'JavaScript / TS': [
+    'javascript', 'typescript', 'es6', 'js', 'ts', 'node.js', 'react'
+  ],
+  'React & Modern UI': [
+    'react', 'react.js', 'reactjs', 'next.js', 'tailwind', 'html', 'css', 'frontend'
+  ],
+  'Web Foundations': [
+    'html', 'css', 'javascript', 'web development', 'rest apis', 'responsive design'
+  ],
+  'Linux & Scripting': [
+    'linux', 'bash', 'shell', 'unix', 'operating systems'
+  ],
+  'Docker & Containers': [
+    'docker', 'containers', 'kubernetes', 'containerization'
+  ],
+  'AWS & Cloud Infra': [
+    'aws', 'cloud', 'cloud computing', 'gcp', 'azure', 'infrastructure'
+  ],
+  'SQL & Databases': [
+    'sql', 'postgresql', 'postgres', 'mysql', 'mongodb', 'database', 'databases', 'dbms'
+  ],
+  'Python Analytics': [
+    'python', 'pandas', 'numpy', 'scipy', 'matplotlib', 'seaborn', 'data analysis'
+  ],
+  'BI & Statistics': [
+    'powerbi', 'power bi', 'tableau', 'excel', 'statistics', 'bi', 'visualization', 'business intelligence'
+  ],
+  'Product Strategy': [
+    'product management', 'product strategy', 'agile', 'scrum', 'user research'
+  ],
+  'SQL & Metrics': [
+    'sql', 'metrics', 'analytics', 'data analysis', 'kpis'
+  ],
+  'Business Analysis': [
+    'business intelligence', 'business analysis', 'excel', 'reporting', 'strategy'
+  ],
+}
+
+function getCategoryScore(categoryName, userSkills) {
+  const aliases = ALIAS_MAP[categoryName] || [categoryName.toLowerCase()]
+  let bestScore = 0
+  for (const [skillName, score] of Object.entries(userSkills)) {
+    const sLower = skillName.toLowerCase().trim()
+    for (const alias of aliases) {
+      if (sLower === alias || sLower.includes(alias) || alias.includes(sLower)) {
+        if (score > bestScore) bestScore = score
+      }
+    }
+  }
+  return bestScore
+}
+
+// Auto-suggest the best-matching role from the learner's real detected skills
 function suggestRole(topicRatings, goalText) {
   if (topicRatings && topicRatings.length) {
     const current = {}
@@ -53,18 +148,19 @@ function suggestRole(topicRatings, goalText) {
     SELECTABLE_ROLE_IDS.forEach((id) => {
       const req = ROLES[id].req
       const keys = Object.keys(req)
-      const score = keys.reduce((sum, k) => sum + Math.min((current[k] || 0) / req[k], 1), 0) / keys.length
+      const score = keys.reduce((sum, k) => sum + Math.min(getCategoryScore(k, current) / req[k], 1), 0) / keys.length
       if (score > bestScore) { bestScore = score; best = id }
     })
     if (best && bestScore > 0) return best
   }
   const g = (goalText || '').toLowerCase()
+  if (/sde|software engineer|software dev|backend|system design|dsa|algorithms/.test(g)) return 'sde'
+  if (/full[- ]?stack|fullstack/.test(g)) return 'fullstack'
   if (/react|frontend|web dev|javascript|html|css/.test(g)) return 'web'
   if (/devops|cloud|aws|docker|kubernetes|infrastructure/.test(g)) return 'cloud'
   if (/product manager|product management|business analy|agile|scrum/.test(g)) return 'product'
-  if (/data analy/.test(g)) return 'da'
-  if (/python developer|backend developer/.test(g)) return 'py'
-  return 'aiml'
+  if (/data analy|tableau|powerbi|bi/.test(g)) return 'da'
+  return 'sde'
 }
 
 const cap = (s) => s.replace(/\b\w/g, (c) => c.toUpperCase())
@@ -108,46 +204,53 @@ const PREVIEW_ICONS = {
 }
 
 const ROLE_PATH_PREVIEWS = {
+  sde: [
+    { t: 'Advanced Data Structures & Algorithms', ic: 'code' },
+    { t: 'Object-Oriented Design & System Patterns', ic: 'cloud' },
+    { t: 'Scalable Microservices & Distributed APIs', ic: 'db' },
+    { t: 'Production-Grade Capstone Project', ic: 'project' },
+    { t: 'SDE Technical & Coding Interview Prep', ic: 'user' },
+  ],
+  fullstack: [
+    { t: 'Modern Frontend & Component Architecture', ic: 'code' },
+    { t: 'Scalable Backend APIs & Middleware', ic: 'cloud' },
+    { t: 'Relational & NoSQL Database Pipelines', ic: 'db' },
+    { t: 'Full-Stack Production Application', ic: 'project' },
+    { t: 'System Design & Full-Stack Prep', ic: 'user' },
+  ],
   aiml: [
-    { t: 'Python foundations', ic: 'code' },
-    { t: 'Applied Statistics', ic: 'stat' },
-    { t: 'Machine Learning', ic: 'ai' },
-    { t: 'Capstone Portfolio', ic: 'project' },
-    { t: 'AI Interview Prep', ic: 'user' },
+    { t: 'Python Foundations & Math for AI', ic: 'code' },
+    { t: 'Applied Statistics & Feature Engineering', ic: 'stat' },
+    { t: 'Deep Learning & Neural Networks', ic: 'ai' },
+    { t: 'AI Portfolio & Model Deployment', ic: 'project' },
+    { t: 'AI/ML Engineering Interview Prep', ic: 'user' },
   ],
   da: [
     { t: 'SQL & Data Modeling', ic: 'db' },
-    { t: 'Python Data Wrangling', ic: 'code' },
-    { t: 'BI & Visualization', ic: 'stat' },
-    { t: 'Analytics Case Study', ic: 'project' },
+    { t: 'Python Data Wrangling & Pandas', ic: 'code' },
+    { t: 'BI & Interactive Visualization', ic: 'stat' },
+    { t: 'Analytics Case Study & Dashboard', ic: 'project' },
     { t: 'Analytics Interview Prep', ic: 'user' },
   ],
-  py: [
-    { t: 'Python Core & OOP', ic: 'code' },
-    { t: 'Databases & ORM', ic: 'db' },
-    { t: 'REST APIs & Architecture', ic: 'cloud' },
-    { t: 'Production Web App', ic: 'project' },
-    { t: 'Backend Systems Prep', ic: 'user' },
-  ],
   web: [
-    { t: 'HTML5 & Modern CSS', ic: 'code' },
-    { t: 'JavaScript (ES6+) Core', ic: 'code' },
+    { t: 'HTML5, Modern CSS & Tailwind', ic: 'code' },
+    { t: 'JavaScript (ES6+) & TypeScript Core', ic: 'code' },
     { t: 'React & State Architecture', ic: 'ai' },
-    { t: 'Full-Stack Deployed App', ic: 'project' },
+    { t: 'Full-Stack Deployed Web App', ic: 'project' },
     { t: 'Frontend Interview Prep', ic: 'user' },
   ],
   cloud: [
-    { t: 'Linux & Scripting', ic: 'code' },
-    { t: 'Docker & Containers', ic: 'cloud' },
-    { t: 'AWS / Cloud Architecture', ic: 'cloud' },
+    { t: 'Linux Systems & Shell Scripting', ic: 'code' },
+    { t: 'Docker & Container Orchestration', ic: 'cloud' },
+    { t: 'AWS & Cloud Infrastructure', ic: 'cloud' },
     { t: 'CI/CD Pipeline Project', ic: 'project' },
     { t: 'DevOps Scenario Prep', ic: 'user' },
   ],
   product: [
     { t: 'Product Strategy & Vision', ic: 'user' },
-    { t: 'User Research & Metrics', ic: 'stat' },
-    { t: 'Agile Roadmapping', ic: 'cloud' },
-    { t: 'End-to-End Product Spec', ic: 'project' },
+    { t: 'User Research & Data Metrics', ic: 'stat' },
+    { t: 'Agile Roadmapping & Specs', ic: 'cloud' },
+    { t: 'End-to-End Product PRD', ic: 'project' },
     { t: 'PM Case Interviews', ic: 'user' },
   ],
   custom: [
@@ -158,6 +261,7 @@ const ROLE_PATH_PREVIEWS = {
     { t: 'Career Readiness & Prep', ic: 'user' },
   ],
 }
+
 
 const STYLES = `
 .gc{ --violet:#0066cc; --violet-2:#0071e3; --violet-dark:#004fa3; --navy:#1d1d1f; --slate:#333333;
@@ -398,13 +502,11 @@ export default function GoalCompass({ topicRatings = [], detectedYears = 0, init
 
   const calc = useMemo(() => {
     const req = ROLES[role].req
-    // Custom roles have no stored requirement thresholds to benchmark
-    // against - nothing real to show a gauge/gap breakdown for, so this
-    // degrades to an honest "we can't measure readiness yet" state instead
-    // of inventing requirement numbers for an arbitrary typed-in role.
     if (!req) {
       return {
-        readiness: null, weeksNeeded: null, state: 'ok',
+        readiness: null,
+        weeksNeeded: null,
+        state: 'ok',
         msg: `We'll build your path around "${effectiveRoleName}" using your goal description.`,
         bars: [],
         insight: `Readiness scoring isn't available for a custom role yet — describe your goal below and PathFinder will still tailor real courses to it.`,
@@ -413,29 +515,29 @@ export default function GoalCompass({ topicRatings = [], detectedYears = 0, init
     const skills = Object.keys(req)
     let attain = 0, gap = 0
     skills.forEach((s) => {
-      const cur = current[s] || 0
+      const cur = getCategoryScore(s, current)
       attain += Math.min(cur / req[s], 1)
       gap += Math.max(0, req[s] - cur)
     })
-    const readiness = Math.round((attain / skills.length) * 100)
-    const hours = gap * HOURS_PER_POINT
-    const weeksNeeded = Math.max(1, Math.ceil(hours / weekly))
+    const readiness = Math.min(100, Math.round((attain / skills.length) * 100))
+    const estimatedCurriculumHours = Math.max(16, Math.round(55 * (1.15 - (readiness / 100) * 0.45)))
+    const weeksNeeded = Math.max(1, Math.ceil(estimatedCurriculumHours / Math.max(1, weekly)))
     const weeksAvail = weeksUntil(target)
 
     let state = 'ok', msg = `Achievable with ${weekly} hours/week`
     if (weeksNeeded > weeksAvail) {
-      const need = Math.ceil(hours / Math.max(1, weeksAvail))
+      const need = Math.ceil(estimatedCurriculumHours / Math.max(1, weeksAvail))
       if (weeksNeeded <= weeksAvail * 1.25) { state = 'warn'; msg = `Tight — try about ${need} hours/week` }
       else { state = 'bad'; msg = (isFinite(weeksAvail) && weeksAvail > 0) ? `Not in time — you'd need ~${need} hours/week` : 'Pick a target date in the future' }
     }
 
-    const bars = skills.map((s) => ({ name: cap(s), cur: current[s] || 0, req: req[s] }))
-    const behind = skills.filter((s) => (current[s] || 0) < req[s]).sort((a, b) => (req[a] - (current[a] || 0)) - (req[b] - (current[b] || 0)))
+    const bars = skills.map((s) => ({ name: s, cur: getCategoryScore(s, current), req: req[s] }))
+    const behind = skills.filter((s) => getCategoryScore(s, current) < req[s]).sort((a, b) => (req[a] - getCategoryScore(a, current)) - (req[b] - getCategoryScore(b, current)))
     const biggest = behind[behind.length - 1]
-    const strong = skills.find((s) => (current[s] || 0) >= req[s])
+    const strong = skills.find((s) => getCategoryScore(s, current) >= req[s])
     const insight = biggest
-      ? `${strong ? `You're solid in ${cap(strong)}. ` : ''}Focus on ${cap(biggest)} next — it's your biggest gap toward ${ROLES[role].name}.`
-      : `You already meet the target levels for ${ROLES[role].name}. Polish with a portfolio project.`
+      ? `${strong ? `You're solid in ${strong}. ` : ''}Focus on ${biggest} next — it's your key growth area for ${ROLES[role].name}.`
+      : `You have strong foundations for ${ROLES[role].name}. Your path will focus on production projects & advanced patterns.`
 
     return { readiness, weeksNeeded, state, msg, bars, insight }
   }, [role, weekly, target, current, effectiveRoleName])
@@ -499,12 +601,13 @@ export default function GoalCompass({ topicRatings = [], detectedYears = 0, init
 
           <div className="sec">
             <h3 className="sec-h">Choose a target role</h3>
-            <div className="roles">
-              <RoleBtn id="aiml" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="7" width="18" height="13" rx="2" /><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>} />
-              <RoleBtn id="da" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18" /><path d="M7 15v-4" /><path d="M12 15V8" /><path d="M17 15v-6" /></svg>} />
-              <RoleBtn id="py" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="16" rx="2" /><path d="m8 10-2 2 2 2M13 10l2 2-2 2" /></svg>} />
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
+              <RoleBtn id="sde" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6" /><polyline points="8 6 2 12 8 18" /></svg>} />
+              <RoleBtn id="fullstack" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" /><line x1="8" y1="21" x2="16" y2="21" /><line x1="12" y1="17" x2="12" y2="21" /></svg>} />
+              <RoleBtn id="aiml" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M12 2v4M12 18v4M2 12h4M18 12h4" /></svg>} />
               <RoleBtn id="web" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a13 13 0 0 1 0 18 13 13 0 0 1 0-18z" /></svg>} />
               <RoleBtn id="cloud" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.5 19a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.6 1.5A4 4 0 0 0 6.5 19z" /></svg>} />
+              <RoleBtn id="da" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18" /><path d="M7 15v-4" /><path d="M12 15V8" /><path d="M17 15v-6" /></svg>} />
               <RoleBtn id="product" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18" /><circle cx="9" cy="14" r="2" /><circle cx="15" cy="9" r="2" /><path d="M9 12 15 9" /></svg>} />
               <button
                 type="button"
@@ -515,6 +618,7 @@ export default function GoalCompass({ topicRatings = [], detectedYears = 0, init
                 <span className="role-name">Custom role</span>
               </button>
             </div>
+
 
             {isCustomRole && (
               <input

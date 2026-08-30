@@ -126,6 +126,34 @@ def generate_path(user_id: str, profile: dict) -> dict:
     if not courses:
         raise ValueError("No courses returned from recommender")
 
+    # If YouTube provider is configured, search verified top tutorial videos for learner's target role & skills
+    # and offer them as candidate resources for the LLM path planner
+    try:
+        from app.services import youtube_provider
+        if youtube_provider.is_configured():
+            adapter = youtube_provider.get_default_adapter()
+            query_parts = [profile.get("target_role") or ""] + (profile.get("interests") or [])[:2]
+            search_query = " ".join([p for p in query_parts if p]).strip()
+            if search_query:
+                yt_videos = adapter.search_videos(search_query, max_results=3, skill_tags=profile.get("interests") or [])
+                for v in yt_videos:
+                    try:
+                        promoted = _ensure_course_in_catalog({
+                            "title": v["title"],
+                            "description": v.get("description", ""),
+                            "provider": "YouTube",
+                            "resource_url": v["canonical_url"],
+                            "difficulty": profile.get("current_level") or "beginner",
+                            "duration_hrs": v.get("duration_hrs") or 3,
+                            "skill_tags": profile.get("interests") or [],
+                        })
+                        if promoted and not any(c.get("id") == promoted.get("id") for c in courses):
+                            courses.append(promoted)
+                    except Exception as e:
+                        print(f"[generate_path] YouTube video candidate add failed: {e}", flush=True)
+    except Exception as e:
+        print(f"[generate_path] YouTube search failed: {e}", flush=True)
+
     candidates_for_llm = [
         {
             "id": c["id"],
@@ -137,6 +165,7 @@ def generate_path(user_id: str, profile: dict) -> dict:
         }
         for c in courses
     ]
+
 
     user_msg = f"""<<<LEARNER_TEXT>>>
 {json.dumps(profile, indent=2, default=str)}

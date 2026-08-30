@@ -30,19 +30,18 @@ const V_BORDER = '#cfe4fb'
 // ── Type mapping. We only actually have courses in the DB, so we synthesise
 // "type" from difficulty + duration to keep the reference screenshot's variety.
 function typeOf(step) {
-  // Real filter buckets. DB stores only "courses" so we synthesise the
-  // reference screenshot's variety from real signals: URL host, title
-  // keywords, milestone label, then duration as a last resort.
+  // Real filter buckets. Synthesise variety from real signals: URL host,
+  // provider, title keywords, milestone label, duration.
   const url = (step.resource_url || '').toLowerCase()
   const title = (step.title || '').toLowerCase()
+  const provider = (step.provider || '').toLowerCase()
   const ms = (step.milestone_label || '').toLowerCase()
   const tags = (step.skill_tags || []).map((t) => (t || '').toLowerCase())
-  const hasWord = (w) => title.includes(w) || ms.includes(w) || tags.includes(w)
+  const hasWord = (w) => title.includes(w) || ms.includes(w) || tags.includes(w) || provider.includes(w)
   const dur = step.duration_hrs || 0
 
-  if (url.includes('youtube.') || url.includes('vimeo.') || hasWord('video')) return { kind: 'VIDEO', label: 'Watch video' }
+  if (url.includes('youtube.') || url.includes('youtu.be') || url.includes('vimeo.') || provider.includes('youtube') || step.resource_type === 'video' || hasWord('video') || hasWord('tutorial')) return { kind: 'VIDEO', label: 'Watch video' }
   if (url.includes('docs.') || url.includes('/docs/') || url.includes('developer.mozilla') || hasWord('documentation')) return { kind: 'DOC', label: 'Open docs' }
-  if (hasWord('practice') || hasWord('exercise') || hasWord('problem')) return { kind: 'PRACTICE', label: 'Start practice' }
   if (hasWord('project') || hasWord('portfolio') || hasWord('capstone') || dur >= 20) return { kind: 'PROJECT', label: 'View project' }
   if (hasWord('article') || hasWord('blog') || (dur > 0 && dur <= 2)) return { kind: 'ARTICLE', label: 'Read article' }
   return { kind: 'COURSE', label: 'Start learning' }
@@ -351,8 +350,8 @@ html.dark .rx-bar {
 @media (prefers-reduced-motion:reduce){ .rx *{ transition:none !important; } }
 `
 
-const CHIPS = ['All', 'Recommended', 'Videos', 'Articles', 'Courses', 'Practice', 'Projects', 'Documentation']
-const CHIP_TO_TYPE = { All: null, Recommended: null, Videos: 'VIDEO', Articles: 'ARTICLE', Courses: 'COURSE', Practice: 'PRACTICE', Projects: 'PROJECT', Documentation: 'DOC' }
+const CHIPS = ['All', 'Recommended', 'Videos', 'Articles', 'Courses', 'Projects', 'Documentation']
+const CHIP_TO_TYPE = { All: null, Recommended: null, Videos: 'VIDEO', Articles: 'ARTICLE', Courses: 'COURSE', Projects: 'PROJECT', Documentation: 'DOC' }
 
 // ── Icons ───────────────────────────────────────────────
 const I = {

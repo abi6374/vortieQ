@@ -160,8 +160,8 @@ def enrich_with_web_resources(groups: list, label_key: str = "label", steps_key:
                                 target_role: str = "") -> None:
     """
     Mutates a list of milestone/week dicts in place, adding a `web_resources`
-    list of real, live-searched supplementary resources (GeeksforGeeks, TakeUForward Striver sheets,
-    Official Docs, YouTube, NPTEL) to each one.
+    list of real, live-searched supplementary resources (YouTube video tutorials, GeeksforGeeks,
+    TakeUForward Striver sheets, Official Docs, NPTEL) to each one.
     """
     if not groups:
         return
@@ -171,17 +171,45 @@ def enrich_with_web_resources(groups: list, label_key: str = "label", steps_key:
         for step in group.get(steps_key, []):
             tags.update(step.get("skill_tags") or [])
         query = " ".join(list(tags)[:3]) or group.get(label_key, "") or target_role
+
+        results = []
+        # 1. If YouTube is configured, search verified high-quality video tutorials
         try:
-            return search_learning_resources(query, max_results=4)
+            from app.services import youtube_provider
+            if youtube_provider.is_configured() and query.strip():
+                adapter = youtube_provider.get_default_adapter()
+                yt_vids = adapter.search_videos(query.strip(), max_results=2, skill_tags=list(tags))
+                for v in yt_vids:
+                    results.append({
+                        "title": v.get("title", ""),
+                        "url": v.get("canonical_url", ""),
+                        "snippet": (v.get("description") or "")[:240],
+                        "provider": f"YouTube ({v.get('channel_title', 'Video Tutorial')})",
+                        "resource_type": "video",
+                        "is_free": True,
+                    })
         except Exception as e:
-            print(f"[web_search_service] enrich failed for '{query}': {e}", flush=True)
-            return []
+            print(f"[web_search_service] YouTube video enrich note: {e}", flush=True)
+
+        # 2. Complement with live web resources
+        try:
+            web_res = search_learning_resources(query, max_results=4)
+            seen_urls = {r["url"] for r in results}
+            for wr in web_res:
+                if wr.get("url") not in seen_urls:
+                    seen_urls.add(wr.get("url"))
+                    results.append(wr)
+        except Exception as e:
+            print(f"[web_search_service] web search enrich failed for '{query}': {e}", flush=True)
+
+        return results[:4]
 
     with ThreadPoolExecutor(max_workers=min(len(groups), 10)) as ex:
         results = list(ex.map(_one, groups))
 
     for group, web_resources in zip(groups, results):
         group["web_resources"] = web_resources
+
 
 
 if __name__ == "__main__":
