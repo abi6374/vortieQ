@@ -103,7 +103,6 @@ export default function SkillInsightsScreen() {
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearchFocused, setIsSearchFocused] = useState(false)
   const searchContainerRef = useRef(null)
-  const [activeTab, setActiveTab] = useState('overview') // 'overview' | 'deep_analytics' | 'heatmap'
 
   // Tooltip hover states for info icons
   const [activeTooltip, setActiveTooltip] = useState(null)
@@ -551,16 +550,9 @@ export default function SkillInsightsScreen() {
             </div>
           </div>
 
-          {/* Right Side: Real Goal & Last Updated (live-computed, so "now") */}
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 lg:self-center">
-            <div className="flex items-center gap-2 px-3.5 py-2 bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-xl text-xs font-bold text-[#1d1d1f] dark:text-white shadow-sm max-w-xs">
-              <Target className="w-4 h-4 text-[#0066cc] dark:text-[#C9D0D6] flex-none" strokeWidth={2.2} />
-              <span className="truncate">
-                {roadmap.path?.goal_text ? `Goal: ${roadmap.path.goal_text.split('.')[0]}` : 'No active goal yet'}
-              </span>
-            </div>
-
-            <span className="text-xs font-medium text-[#7a7a7a] dark:text-[#94A3B8] self-center sm:self-auto">
+          {/* Right Side: Last Updated */}
+          <div className="flex items-center gap-2 lg:self-center">
+            <span className="text-xs font-medium text-[#7a7a7a] dark:text-[#94A3B8]">
               Last updated: {new Date().toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
             </span>
           </div>
@@ -580,10 +572,6 @@ export default function SkillInsightsScreen() {
                 </span>
                 <span className="text-xs font-bold text-[#333333] dark:text-[#CBD5E1]">Overall Skill Readiness</span>
               </div>
-              <Info
-                className="w-3.5 h-3.5 text-[#86868b] dark:text-[#64748B] cursor-pointer hover:text-[#0066cc] dark:hover:text-[#C9D0D6]"
-                title="Calculated from assessments, completed learning activities, practice performance, and skill progress."
-              />
             </div>
 
             <div className="flex items-baseline gap-3 my-3">
@@ -689,10 +677,6 @@ export default function SkillInsightsScreen() {
                   <h2 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">
                     Skill Proficiency Comparison
                   </h2>
-                  <Info
-                    className="w-3.5 h-3.5 text-[#86868b] dark:text-[#64748B] cursor-pointer hover:text-[#0066cc] dark:hover:text-[#C9D0D6]"
-                    title="Current completion compared with full completion of the steps assigned for each skill in your roadmap."
-                  />
                 </div>
 
                 {/* Chart Legend */}
@@ -777,10 +761,6 @@ export default function SkillInsightsScreen() {
                       <h2 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">
                         Skill Radar
                       </h2>
-                      <Info
-                        className="w-3.5 h-3.5 text-[#86868b] dark:text-[#64748B] cursor-pointer hover:text-[#0066cc] dark:hover:text-[#C9D0D6]"
-                        title="Multidimensional visualization of technical competencies vs role benchmarks."
-                      />
                     </div>
                   </div>
 
@@ -849,10 +829,6 @@ export default function SkillInsightsScreen() {
                       <h2 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">
                         Top Skill Gaps
                       </h2>
-                      <Info
-                        className="w-3.5 h-3.5 text-[#86868b] dark:text-[#64748B] cursor-pointer hover:text-[#0066cc] dark:hover:text-[#C9D0D6]"
-                        title="Difference between your current proficiency and the target proficiency for this career goal."
-                      />
                     </div>
                   </div>
 
@@ -898,146 +874,26 @@ export default function SkillInsightsScreen() {
             {/* ---------------------------------------------------------------------
                 MAIN ANALYTICS GRID - ROW 2:
                 1. Learning Trend (AreaChart + Green Banner)
-                2. Skill Category Breakdown (Donut Chart)
-                3. Recommended Focus (Actionable Card)
+            {/* ---------------------------------------------------------------------
+                MAIN ANALYTICS GRID - ROW 2:
+                1. Skill Category Breakdown (Donut Chart)
+                2. Recommended Focus (Actionable Card)
                --------------------------------------------------------------------- */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6">
-              
-              {/* CARD 1: Learning Trend (Large, 5.5 of 12 cols) */}
-              <div className="lg:col-span-6 bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between pb-3 border-b border-[#f5f5f7] dark:border-[#202026]">
-                    <div className="flex items-center gap-2">
-                      <h2 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">
-                        Learning Trend
-                      </h2>
-                      <Info
-                        className="w-3.5 h-3.5 text-[#86868b] dark:text-[#64748B] cursor-pointer hover:text-[#0066cc] dark:hover:text-[#C9D0D6]"
-                        title="Skill readiness evolution across consecutive study weeks."
-                      />
-                    </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 lg:gap-6">
 
-                    {/* Timeframe Filter Dropdown */}
-                    <div className="relative">
-                      <button
-                        type="button"
-                        onClick={() => setIsTrendDropdownOpen((v) => !v)}
-                        className="flex items-center gap-1.5 px-3 py-1 bg-[#f5f5f7] dark:bg-[#18181D] border border-[#f0f0f0] dark:border-[#27272F] rounded-lg text-xs font-semibold text-[#1d1d1f] dark:text-white hover:bg-gray-100 dark:hover:bg-[#27272F]"
-                      >
-                        <span>{trendTimeframe}</span>
-                        <ChevronDown className="w-3.5 h-3.5 text-[#7a7a7a] dark:text-[#94A3B8]" />
-                      </button>
-
-                      {isTrendDropdownOpen && (
-                        <div className="absolute right-0 mt-1 w-32 bg-white dark:bg-[#121216] rounded-lg border border-[#e0e0e0] dark:border-[#27272F] shadow-lg p-1 z-20">
-                          {['Last 4 Weeks', 'Last 8 Weeks', 'All Time'].map((tf) => (
-                            <button
-                              key={tf}
-                              type="button"
-                              onClick={() => {
-                                setTrendTimeframe(tf)
-                                setIsTrendDropdownOpen(false)
-                              }}
-                              className="w-full text-left px-2.5 py-1.5 text-xs font-medium hover:bg-[#eaf2fc] dark:hover:bg-[#18181D] hover:text-[#0066cc] dark:hover:text-[#C9D0D6] rounded"
-                            >
-                              {tf}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Area Chart with Soft Gradient */}
-                  <div className="h-44 w-full pt-3 relative">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={trendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                        <defs>
-                          <linearGradient id="silverGradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#C9D0D6" stopOpacity={0.35} />
-                            <stop offset="95%" stopColor="#C9D0D6" stopOpacity={0.0} />
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f5f5f7" className="stroke-[#f0f0f0] dark:stroke-[#27272F]" />
-                        <XAxis
-                          dataKey="week"
-                          tick={{ fill: '#A1A1AA', fontSize: 11, fontWeight: 600 }}
-                          axisLine={{ stroke: '#27272F' }}
-                          tickLine={false}
-                        />
-                        <YAxis
-                          domain={[0, 100]}
-                          ticks={[0, 20, 40, 60, 80, 100]}
-                          tickFormatter={(v) => `${v}%`}
-                          tick={{ fill: '#A1A1AA', fontSize: 10, fontWeight: 600 }}
-                          axisLine={false}
-                          tickLine={false}
-                        />
-                        <RechartsTooltip
-                          content={({ active, payload }) => {
-                            if (active && payload && payload.length) {
-                              return (
-                                <div className="bg-[#1d1d1f] dark:bg-[#0E0E12] border border-gray-700 dark:border-[#27272F] text-white px-2.5 py-1.5 rounded-lg text-xs font-bold shadow-lg">
-                                  {payload[0].payload.week}: {payload[0].value}% Readiness
-                                </div>
-                              )
-                            }
-                            return null
-                          }}
-                        />
-                        <Area
-                          type="monotone"
-                          dataKey="readiness"
-                          stroke="#C9D0D6"
-                          strokeWidth={2.5}
-                          fillOpacity={1}
-                          fill="url(#silverGradient)"
-                          dot={{ fill: '#C9D0D6', stroke: '#0E0E12', strokeWidth: 2, r: 4 }}
-                          activeDot={{ fill: '#C9D0D6', stroke: '#ffffff', strokeWidth: 2, r: 6 }}
-                        />
-                      </AreaChart>
-                    </ResponsiveContainer>
-
-                    {/* Real current readiness, pinned at the latest week */}
-                    <div className="absolute top-1 right-2 sm:right-4 bg-[#0066cc] dark:bg-[#C9D0D6] text-white dark:text-[#09090B] text-[11px] font-extrabold px-2 py-0.5 rounded-md shadow-md">
-                      {roadmap.percent}%
-                    </div>
-                  </div>
-                </div>
-
-                {/* Green Insight Banner at bottom */}
-                {trendData.length > 1 && (
-                  <div className="mt-3 p-3 bg-[#ECFDF3] dark:bg-emerald-950/40 border border-[#D1FADF] dark:border-emerald-800/60 rounded-xl flex items-center gap-2.5">
-                    <CheckCircle className="w-4 h-4 text-[#22A06B] dark:text-emerald-400 flex-none" />
-                    <p className="text-xs font-semibold text-[#1d1d1f] dark:text-white">
-                      {(() => {
-                        const gain = trendData[trendData.length - 1].readiness - trendData[0].readiness
-                        return gain > 0
-                          ? `Great progress! Your skill readiness improved by ${gain}% over ${trendData.length} weeks.`
-                          : "Complete more steps to build up your readiness trend."
-                      })()}
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {/* CARD 2: Skill Category Breakdown (Donut Chart, 3.5 of 12 cols) */}
-              <div className="lg:col-span-3 bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+              {/* CARD 1: Skill Category Breakdown (Donut Chart) */}
+              <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between pb-2 border-b border-[#f5f5f7] dark:border-[#202026]">
                     <div className="flex items-center gap-2">
                       <h2 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">
                         Skill Category Breakdown
                       </h2>
-                      <Info
-                        className="w-3.5 h-3.5 text-[#86868b] dark:text-[#64748B] cursor-pointer hover:text-[#0066cc] dark:hover:text-[#C9D0D6]"
-                        title="Distribution of learning content and assessments by domain."
-                      />
                     </div>
                   </div>
 
                   {/* Donut Chart with Centered Callout */}
-                  <div className="h-44 w-full relative flex items-center justify-center pt-1">
+                  <div className="h-48 w-full relative flex items-center justify-center pt-1">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
@@ -1046,8 +902,8 @@ export default function SkillInsightsScreen() {
                           nameKey="name"
                           cx="50%"
                           cy="50%"
-                          innerRadius={50}
-                          outerRadius={70}
+                          innerRadius={55}
+                          outerRadius={75}
                           paddingAngle={3}
                         >
                           {categoryData.map((entry, index) => (
@@ -1082,7 +938,7 @@ export default function SkillInsightsScreen() {
                   </div>
 
                   {/* Clean Legend */}
-                  <div className="grid grid-cols-2 gap-x-2 gap-y-1.5 text-[11px] font-medium text-[#333333] dark:text-[#CBD5E1] pt-2 border-t border-[#f5f5f7] dark:border-[#202026]">
+                  <div className="grid grid-cols-2 gap-x-2 gap-y-1.5 text-[11px] font-medium text-[#333333] dark:text-[#CBD5E1] pt-3 border-t border-[#f5f5f7] dark:border-[#202026]">
                     {categoryData.map((item) => (
                       <div key={item.name} className="flex items-center justify-between pr-1">
                         <div className="flex items-center gap-1.5 truncate">
@@ -1096,18 +952,14 @@ export default function SkillInsightsScreen() {
                 </div>
               </div>
 
-              {/* CARD 3: Recommended Focus (Actionable Card, 3 of 12 cols) */}
-              <div className="lg:col-span-3 bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+              {/* CARD 2: Recommended Focus (Actionable Card) */}
+              <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between pb-2 border-b border-[#f5f5f7] dark:border-[#202026]">
                     <div className="flex items-center gap-2">
                       <h2 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">
                         Recommended Focus
                       </h2>
-                      <Info
-                        className="w-3.5 h-3.5 text-[#86868b] dark:text-[#64748B] cursor-pointer hover:text-[#0066cc] dark:hover:text-[#C9D0D6]"
-                        title="AI-prioritized roadmap steps based on your current skill gaps."
-                      />
                     </div>
                   </div>
 
@@ -1157,203 +1009,175 @@ export default function SkillInsightsScreen() {
 
             {/* ---------------------------------------------------------------------
                 SECONDARY DEEP ANALYTICS & AI INSIGHTS
-                (Heatmap Matrix, Learning Velocity, Time Spent, Strengths, AI Insight)
+                (Section 1: Intelligence Grid, Section 2: Skill-Gap Heatmap Matrix)
                --------------------------------------------------------------------- */}
             <div className="pt-6 border-t border-[#f0f0f0] dark:border-[#202026] space-y-6">
               
-              <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-                <div>
-                  <h3 className="font-['Manrope'] font-bold text-lg text-[#1d1d1f] dark:text-white">
-                    Skill Matrix & Diagnostic Intelligence
-                  </h3>
-                  <p className="text-xs text-[#7a7a7a] dark:text-[#94A3B8]">
-                    Granular breakdown of competence tiers, learning velocity, and active AI recommendations.
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('overview')}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                      activeTab === 'overview'
-                        ? 'bg-[#0066cc] dark:bg-[#C9D0D6] text-white dark:text-[#09090B] shadow-sm'
-                        : 'bg-[#f5f5f7] dark:bg-[#18181D] text-[#333333] dark:text-[#CBD5E1] hover:text-[#1d1d1f] dark:hover:text-white'
-                    }`}
-                  >
-                    Intelligence Grid
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('heatmap')}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                      activeTab === 'heatmap'
-                        ? 'bg-[#0066cc] dark:bg-[#C9D0D6] text-white dark:text-[#09090B] shadow-sm'
-                        : 'bg-[#f5f5f7] dark:bg-[#18181D] text-[#333333] dark:text-[#CBD5E1] hover:text-[#1d1d1f] dark:hover:text-white'
-                    }`}
-                  >
-                    Skill-Gap Heatmap
-                  </button>
-                </div>
+              <div>
+                <h3 className="font-['Manrope'] font-bold text-lg text-[#1d1d1f] dark:text-white">
+                  Skill Matrix & Diagnostic Intelligence
+                </h3>
+                <p className="text-xs text-[#7a7a7a] dark:text-[#94A3B8] mt-0.5">
+                  Granular breakdown of competence tiers, learning velocity, and active AI recommendations.
+                </p>
               </div>
 
-              {activeTab === 'heatmap' ? (
-                /* SKILL GAP HEATMAP MATRIX */
-                <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-6 shadow-sm">
-                  <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-                    <span className="font-bold text-sm text-[#1d1d1f] dark:text-white">
-                      Tiered Skill-Gap Matrix (Foundations → Intermediate → Advanced)
-                    </span>
-                    <div className="flex items-center gap-3.5 text-xs font-semibold text-[#333333] dark:text-[#CBD5E1]">
-                      <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-md bg-[#ECFDF3] dark:bg-emerald-950/70 border border-[#D1FADF] dark:border-emerald-800" /> <span className="text-[#22A06B] dark:text-emerald-300">Strong (≥75%)</span></span>
-                      <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-md bg-[#FFF7E6] dark:bg-amber-950/70 border border-[#FEE4B2] dark:border-amber-800" /> <span className="text-[#D88700] dark:text-amber-300">Developing (50–74%)</span></span>
-                      <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-md bg-[#FFF0F0] dark:bg-rose-950/70 border border-[#FECDCA] dark:border-rose-800" /> <span className="text-[#E5484D] dark:text-rose-300">Priority Gap (&lt;50%)</span></span>
+              {/* SECTION 1: INTELLIGENCE GRID (4 Focused Cards) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6">
+                
+                {/* Card 1: Learning Velocity */}
+                <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-bold text-[#7a7a7a] dark:text-[#94A3B8] uppercase tracking-wider">
+                        Learning Pace
+                      </span>
+                    </div>
+                    <h4 className="font-['Manrope'] font-extrabold text-2xl text-[#1d1d1f] dark:text-white">
+                      {stepsPerWeek} steps / week
+                    </h4>
+                    <p className="text-[11px] text-[#333333] dark:text-[#CBD5E1] mt-0.5 font-medium">
+                      {roadmap.completedSteps} steps done over {roadmap.currentWeek} week{roadmap.currentWeek === 1 ? '' : 's'}
+                    </p>
+                  </div>
+                  {/* Real cumulative-readiness trend */}
+                  <div className="h-10 w-full mt-3">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={trendData.map((d) => ({ v: d.readiness }))}>
+                        <Line type="monotone" dataKey="v" stroke="#C9D0D6" strokeWidth={2} dot={false} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Card 2: Time Spent by Category */}
+                <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-bold text-[#7a7a7a] dark:text-[#94A3B8] uppercase tracking-wider">
+                        Time Spent
+                      </span>
+                      <span className="text-[11px] font-bold text-[#0066cc] dark:text-[#C9D0D6]">{totalRealHours.toFixed(1)} hrs</span>
+                    </div>
+                    <div className="space-y-1.5 mt-2">
+                      {timeSpentData.map((item) => (
+                        <div key={item.name} className="flex justify-between text-[11px]">
+                          <span className="text-[#333333] dark:text-[#CBD5E1]">{item.name}</span>
+                          <span className="font-bold text-[#1d1d1f] dark:text-white">{item.value}% ({item.hours})</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
+                </div>
 
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-xs text-left">
-                      <thead>
-                        <tr className="border-b border-[#f0f0f0] dark:border-[#202026] text-[#7a7a7a] dark:text-[#94A3B8]">
-                          <th className="py-3 px-4 font-bold uppercase tracking-wider text-[11px]">Tier Level</th>
-                          {heatmapSkills.map((s) => (
-                            <th key={s.tag} className="py-3 px-4 font-bold text-center text-[#1d1d1f] dark:text-white">{cap(s.tag)}</th>
-                          ))}
+                {/* Card 3: Top Strengths */}
+                <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-bold text-[#7a7a7a] dark:text-[#94A3B8] uppercase tracking-wider">
+                        Top Strengths
+                      </span>
+                      <span className="text-[10px] font-bold text-[#22A06B] dark:text-emerald-400">{strengthsList.length} Skill{strengthsList.length === 1 ? '' : 's'} Strong</span>
+                    </div>
+                    <div className="space-y-1.5 mt-2">
+                      {strengthsList.length === 0 && (
+                        <p className="text-[11px] text-[#7a7a7a] dark:text-[#94A3B8] italic">Complete some steps to see your strengths here.</p>
+                      )}
+                      {strengthsList.slice(0, 4).map((s) => (
+                        <div key={s.name} className="flex items-center justify-between text-[11px]">
+                          <span className="text-[#1d1d1f] dark:text-white font-semibold truncate">{s.rank}. {s.name}</span>
+                          <span className="text-[#22A06B] dark:text-emerald-400 font-bold flex-none">{s.score}%</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  {strengthsList.length > 0 && (
+                    <div className="mt-2 text-[10px] text-[#22A06B] dark:text-emerald-400 font-bold bg-[#ECFDF3] dark:bg-emerald-950/40 border border-[#D1FADF] dark:border-emerald-800/60 px-2 py-1 rounded-lg text-center">
+                      Great job! Build on these strengths.
+                    </div>
+                  )}
+                </div>
+
+                {/* Card 4: AI-Powered PathFinder Explanation */}
+                <div className="bg-[#eaf2fc] dark:bg-[#18181D] border border-[#dcecfd] dark:border-[#27272F] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center gap-1.5 text-[#0066cc] dark:text-[#C9D0D6] mb-1.5">
+                      <Sparkles className="w-4 h-4" />
+                      <span className="text-xs font-bold font-['Manrope']">PathFinder insight</span>
+                    </div>
+                    <p className="text-[11px] text-[#333333] dark:text-[#CBD5E1] leading-relaxed">
+                      {topStrength && biggestGap && topStrength.name !== biggestGap.name ? (
+                        <>Your strongest foundation is <strong>{topStrength.name}</strong>, while <strong>{biggestGap.name}</strong> is your biggest real gap right now. Focus there next to keep your roadmap moving.</>
+                      ) : topStrength ? (
+                        <>You're making solid progress across the board — <strong>{topStrength.name}</strong> is your strongest skill at {topStrength.score}%.</>
+                      ) : (
+                        'Complete a few roadmap steps to start seeing real insights here.'
+                      )}
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      openAICoach()
+                      sendToAICoach(biggestGap ? `Why should I prioritize ${cap(biggestGap.tag)}?` : 'What should I focus on next?')
+                    }}
+                    className="mt-3 text-xs font-bold text-[#0066cc] dark:text-[#C9D0D6] hover:underline flex items-center gap-1 self-start cursor-pointer"
+                  >
+                    <span>Ask PathFinder why</span>
+                    <span>→</span>
+                  </button>
+                </div>
+
+              </div>
+
+              {/* SECTION 2: SKILL GAP HEATMAP MATRIX (Directly below) */}
+              <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-6 shadow-sm">
+                <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+                  <span className="font-bold text-sm text-[#1d1d1f] dark:text-white">
+                    Tiered Skill-Gap Matrix (Foundations → Intermediate → Advanced)
+                  </span>
+                  <div className="flex items-center gap-3.5 text-xs font-semibold text-[#333333] dark:text-[#CBD5E1]">
+                    <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-md bg-[#ECFDF3] dark:bg-emerald-950/70 border border-[#D1FADF] dark:border-emerald-800" /> <span className="text-[#22A06B] dark:text-emerald-300">Strong (≥75%)</span></span>
+                    <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-md bg-[#FFF7E6] dark:bg-amber-950/70 border border-[#FEE4B2] dark:border-amber-800" /> <span className="text-[#D88700] dark:text-amber-300">Developing (50–74%)</span></span>
+                    <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-md bg-[#FFF0F0] dark:bg-rose-950/70 border border-[#FECDCA] dark:border-rose-800" /> <span className="text-[#E5484D] dark:text-rose-300">Priority Gap (&lt;50%)</span></span>
+                  </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs text-left">
+                    <thead>
+                      <tr className="border-b border-[#f0f0f0] dark:border-[#202026] text-[#7a7a7a] dark:text-[#94A3B8]">
+                        <th className="py-3 px-4 font-bold uppercase tracking-wider text-[11px]">Tier Level</th>
+                        {heatmapSkills.map((s) => (
+                          <th key={s.tag} className="py-3 px-4 font-bold text-center text-[#1d1d1f] dark:text-white">{cap(s.tag)}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {heatmapData.map((row) => (
+                        <tr key={row.level} className="border-b border-[#f5f5f7] dark:border-[#202026] hover:bg-gray-50/50 dark:hover:bg-[#18181D]/50 transition-colors">
+                          <td className="py-3.5 px-4 font-extrabold text-[#1d1d1f] dark:text-white">{row.level}</td>
+                          {heatmapSkills.map((s) => {
+                            const val = row[s.tag]
+                            return (
+                              <td key={s.tag} className="py-3.5 px-4 text-center">
+                                {val === null ? (
+                                  <span className="text-[#c3c4c5] dark:text-[#475569] font-bold">—</span>
+                                ) : (
+                                  <span className={`inline-block px-3.5 py-1.5 rounded-lg border font-extrabold text-xs shadow-xs transition-transform hover:scale-105 ${getHeatmapColor(val)}`}>
+                                    {val}%
+                                  </span>
+                                )}
+                              </td>
+                            )
+                          })}
                         </tr>
-                      </thead>
-                      <tbody>
-                        {heatmapData.map((row) => (
-                          <tr key={row.level} className="border-b border-[#f5f5f7] dark:border-[#202026] hover:bg-gray-50/50 dark:hover:bg-[#18181D]/50 transition-colors">
-                            <td className="py-3.5 px-4 font-extrabold text-[#1d1d1f] dark:text-white">{row.level}</td>
-                            {heatmapSkills.map((s) => {
-                              const val = row[s.tag]
-                              return (
-                                <td key={s.tag} className="py-3.5 px-4 text-center">
-                                  {val === null ? (
-                                    <span className="text-[#c3c4c5] dark:text-[#475569] font-bold">—</span>
-                                  ) : (
-                                    <span className={`inline-block px-3.5 py-1.5 rounded-lg border font-extrabold text-xs shadow-xs transition-transform hover:scale-105 ${getHeatmapColor(val)}`}>
-                                      {val}%
-                                    </span>
-                                  )}
-                                </td>
-                              )
-                            })}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-              ) : (
-                /* INTELLIGENCE GRID: 4 Focused Cards */
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6">
-                  
-                  {/* Card 1: Learning Velocity */}
-                  <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-bold text-[#7a7a7a] dark:text-[#94A3B8] uppercase tracking-wider">
-                          Learning Pace
-                        </span>
-                      </div>
-                      <h4 className="font-['Manrope'] font-extrabold text-2xl text-[#1d1d1f] dark:text-white">
-                        {stepsPerWeek} steps / week
-                      </h4>
-                      <p className="text-[11px] text-[#333333] dark:text-[#CBD5E1] mt-0.5 font-medium">
-                        {roadmap.completedSteps} steps done over {roadmap.currentWeek} week{roadmap.currentWeek === 1 ? '' : 's'}
-                      </p>
-                    </div>
-                    {/* Real cumulative-readiness trend (same series as the chart above) */}
-                    <div className="h-10 w-full mt-3">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={trendData.map((d) => ({ v: d.readiness }))}>
-                          <Line type="monotone" dataKey="v" stroke="#C9D0D6" strokeWidth={2} dot={false} />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </div>
-
-                  {/* Card 2: Time Spent by Category */}
-                  <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-bold text-[#7a7a7a] dark:text-[#94A3B8] uppercase tracking-wider">
-                          Time Spent
-                        </span>
-                        <span className="text-[11px] font-bold text-[#0066cc] dark:text-[#C9D0D6]">{totalRealHours.toFixed(1)} hrs</span>
-                      </div>
-                      <div className="space-y-1.5 mt-2">
-                        {timeSpentData.map((item) => (
-                          <div key={item.name} className="flex justify-between text-[11px]">
-                            <span className="text-[#333333] dark:text-[#CBD5E1]">{item.name}</span>
-                            <span className="font-bold text-[#1d1d1f] dark:text-white">{item.value}% ({item.hours})</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Card 3: Top Strengths */}
-                  <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-bold text-[#7a7a7a] dark:text-[#94A3B8] uppercase tracking-wider">
-                          Top Strengths
-                        </span>
-                        <span className="text-[10px] font-bold text-[#22A06B] dark:text-emerald-400">{strengthsList.length} Skill{strengthsList.length === 1 ? '' : 's'} Strong</span>
-                      </div>
-                      <div className="space-y-1.5 mt-2">
-                        {strengthsList.length === 0 && (
-                          <p className="text-[11px] text-[#7a7a7a] dark:text-[#94A3B8] italic">Complete some steps to see your strengths here.</p>
-                        )}
-                        {strengthsList.slice(0, 4).map((s) => (
-                          <div key={s.name} className="flex items-center justify-between text-[11px]">
-                            <span className="text-[#1d1d1f] dark:text-white font-semibold truncate">{s.rank}. {s.name}</span>
-                            <span className="text-[#22A06B] dark:text-emerald-400 font-bold flex-none">{s.score}%</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    {strengthsList.length > 0 && (
-                      <div className="mt-2 text-[10px] text-[#22A06B] dark:text-emerald-400 font-bold bg-[#ECFDF3] dark:bg-emerald-950/40 border border-[#D1FADF] dark:border-emerald-800/60 px-2 py-1 rounded-lg text-center">
-                        Great job! Build on these strengths.
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Card 4: AI-Powered PathFinder Explanation */}
-                  <div className="bg-[#eaf2fc] dark:bg-[#18181D] border border-[#dcecfd] dark:border-[#27272F] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center gap-1.5 text-[#0066cc] dark:text-[#C9D0D6] mb-1.5">
-                        <Sparkles className="w-4 h-4" />
-                        <span className="text-xs font-bold font-['Manrope']">PathFinder insight</span>
-                      </div>
-                      <p className="text-[11px] text-[#333333] dark:text-[#CBD5E1] leading-relaxed">
-                        {topStrength && biggestGap && topStrength.name !== biggestGap.name ? (
-                          <>Your strongest foundation is <strong>{topStrength.name}</strong>, while <strong>{biggestGap.name}</strong> is your biggest real gap right now. Focus there next to keep your roadmap moving.</>
-                        ) : topStrength ? (
-                          <>You're making solid progress across the board — <strong>{topStrength.name}</strong> is your strongest skill at {topStrength.score}%.</>
-                        ) : (
-                          'Complete a few roadmap steps to start seeing real insights here.'
-                        )}
-                      </p>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        openAICoach()
-                        sendToAICoach(biggestGap ? `Why should I prioritize ${cap(biggestGap.tag)}?` : 'What should I focus on next?')
-                      }}
-                      className="mt-3 text-xs font-bold text-[#0066cc] dark:text-[#C9D0D6] hover:underline flex items-center gap-1 self-start cursor-pointer"
-                    >
-                      <span>Ask PathFinder why</span>
-                      <span>→</span>
-                    </button>
-                  </div>
-
-                </div>
-              )}
+              </div>
 
             </div>
       </div>
