@@ -96,6 +96,62 @@ class TestTooHardFeedback:
         assert parsed.event_type == "too_hard"
 
 
+class TestResourceUnavailableFeedback:
+    def test_confirmed_dead_resource_gets_swapped(self):
+        step, path = _step_and_path()
+        fake_swap_result = {"swapped": True, "new_step": {"step_id": "step-2"}, "path_version": 4}
+        with patch("app.services.feedback_service._load_step_with_path", return_value=(step, path)), \
+             patch("app.services.feedback_service._write_feedback_event", return_value="fb-1"), \
+             patch("app.services.catalog_service.revalidate_course", return_value=False) as mock_revalidate, \
+             patch("app.services.path_service.swap_step", return_value=fake_swap_result) as mock_swap:
+            result = feedback_service.handle_feedback("step-1", "resource_unavailable", "", "user-1")
+
+        mock_revalidate.assert_called_once_with("course-1")
+        mock_swap.assert_called_once_with("step-1", "user-1", level_hint=0)
+        assert result["path_updated"] is True
+        assert "swapped in a verified alternative" in result["reason_for_change"]
+
+    def test_a_single_report_cannot_blacklist_a_resource_that_is_actually_fine(self):
+        """The core safety property: revalidate_course independently confirms
+        the resource is dead before anything is swapped - one learner's
+        mistaken report (or a transient network blip) about a resource that
+        is, on re-check, still reachable must not swap anything or mark it
+        unavailable for other learners."""
+        step, path = _step_and_path()
+        with patch("app.services.feedback_service._load_step_with_path", return_value=(step, path)), \
+             patch("app.services.feedback_service._write_feedback_event", return_value="fb-1"), \
+             patch("app.services.catalog_service.revalidate_course", return_value=True), \
+             patch("app.services.path_service.swap_step") as mock_swap:
+            result = feedback_service.handle_feedback("step-1", "resource_unavailable", "", "user-1")
+
+        mock_swap.assert_not_called()
+        assert result["path_updated"] is False
+        assert "still reachable" in result["reason_for_change"]
+
+    def test_never_touches_mastery(self):
+        """A dead link says nothing about the learner's competency."""
+        step, path = _step_and_path()
+        with patch("app.services.feedback_service._load_step_with_path", return_value=(step, path)), \
+             patch("app.services.feedback_service._write_feedback_event", return_value="fb-1"), \
+             patch("app.services.catalog_service.revalidate_course", return_value=False), \
+             patch("app.services.path_service.swap_step", return_value={"swapped": True, "new_step": {}}), \
+             patch("app.services.mastery_service.update_mastery_from_feedback") as mock_mastery:
+            feedback_service.handle_feedback("step-1", "resource_unavailable", "", "user-1")
+
+        mock_mastery.assert_not_called()
+
+    def test_revalidation_failure_degrades_honestly_without_a_fake_swap(self):
+        step, path = _step_and_path()
+        with patch("app.services.feedback_service._load_step_with_path", return_value=(step, path)), \
+             patch("app.services.feedback_service._write_feedback_event", return_value="fb-1"), \
+             patch("app.services.catalog_service.revalidate_course", side_effect=RuntimeError("network down")), \
+             patch("app.services.path_service.swap_step") as mock_swap:
+            result = feedback_service.handle_feedback("step-1", "resource_unavailable", "", "user-1")
+
+        mock_swap.assert_not_called()  # a failed check must never be treated as "confirmed dead"
+        assert result["path_updated"] is False
+
+
 class TestApplyRecentFeedbackIsRealTime:
     def test_fires_and_returns_false_with_no_note(self):
         # No real feedback text -> nothing to act on, no LLM call, no writes.

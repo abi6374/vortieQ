@@ -579,8 +579,33 @@ class TestResourceURLValidation:
 
     def test_feedback_schema_accepts_real_event_types(self):
         from app.schemas.feedback import FeedbackCreateSchema
-        for et in ("completed", "too_easy", "not_interested"):
+        for et in ("completed", "too_easy", "too_hard", "not_interested", "resource_unavailable"):
             assert FeedbackCreateSchema(event_type=et).event_type == et
+
+    def test_feedback_and_task_completion_routes_accept_idempotency_key(self):
+        # Real gap this closes: POST /steps/{id}/feedback and PATCH
+        # /roadmap/tasks/{id} can each trigger a real mastery-evidence write
+        # and (via swap_step / apply_recent_feedback) an LLM+web-search call
+        # that inserts a new course into the shared catalog - a duplicate
+        # click/retry without idempotency protection could double-apply
+        # either. Confirms the Idempotency-Key header parameter is actually
+        # present on both routes (not just that idempotency_service itself
+        # works in isolation, which test_idempotency_service.py already
+        # covers) - a regression here (dropping the Header(...) parameter)
+        # is exactly the kind of one-line change that's easy to silently
+        # reintroduce, same rationale as test_rerecommend_route_rate_limited
+        # above.
+        import inspect
+        from app.routers import feedback as feedback_router
+        from app.routers import roadmap as roadmap_router
+
+        feedback_sig = inspect.signature(feedback_router.post_feedback)
+        assert "idempotency_key" in feedback_sig.parameters
+        assert feedback_sig.parameters["idempotency_key"].default.alias == "Idempotency-Key"
+
+        task_sig = inspect.signature(roadmap_router.set_task)
+        assert "idempotency_key" in task_sig.parameters
+        assert task_sig.parameters["idempotency_key"].default.alias == "Idempotency-Key"
 
     def test_rerecommend_route_rate_limited(self):
         # Real gap this closes: /api/roadmap/rerecommend does up to 3 live

@@ -112,9 +112,15 @@ export default function FeedbackButtons({ stepId, stepStatus, onFeedbackGiven })
     setInfo(null)
     setLoadingType(buttonType)
     try {
+      // One fresh idempotency key per click, not per retry - see
+      // useRoadmap.js's genIdempotencyKey for why this matters (a double
+      // click/retry must not double-apply a mastery-evidence write).
+      const idemKey = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+        ? crypto.randomUUID()
+        : `idem-${Date.now()}-${Math.random().toString(36).slice(2)}`
       const response = await apiClient.post(`/api/steps/${stepId}/feedback`, {
         event_type: buttonType, note: '',
-      })
+      }, { headers: { 'Idempotency-Key': idemKey } })
       const data = response.data || {}
 
       // Idempotency guard (step already terminal) returns a plain note.

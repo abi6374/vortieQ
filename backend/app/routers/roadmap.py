@@ -29,19 +29,37 @@ def set_task(
     step_id: str,
     payload: TaskCompletionSchema,
     user_id: str = Depends(verify_jwt),
+    idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
 ):
     """Toggle a task complete/incomplete. `note`, `rating`, `tag`: the
     learner's real feedback on this task. Returns the full recomputed
-    roadmap."""
+    roadmap.
+
+    Optional Idempotency-Key header: completion writes a mastery-evidence
+    row AND can trigger apply_recent_feedback (a real LLM+web-search call
+    that can insert a new course into the shared catalog and swap it into
+    the path) - a duplicate click/retry with the SAME key replays the
+    first real result instead of double-applying either.
+    """
+    cached = idempotency_service.check_and_reserve(idempotency_key, user_id, "roadmap.set_task")
+    if cached is not None:
+        if cached["status"] >= 400:
+            raise HTTPException(cached["status"], cached["body"])
+        return cached["body"]
+
     try:
-        return roadmap_service.set_task_completion(
+        result = roadmap_service.set_task_completion(
             step_id=step_id, user_id=user_id, completed=payload.completed,
             note=payload.note, rating=payload.rating, tag=payload.tag,
         )
+        idempotency_service.store_result(idempotency_key, 200, result)
+        return result
     except PermissionError as e:
         # Prerequisite violation — 409 so the UI can show the lock message.
+        idempotency_service.store_result(idempotency_key, 409, {"detail": str(e)})
         raise HTTPException(409, str(e))
     except ValueError as e:
+        idempotency_service.store_result(idempotency_key, 404, {"detail": str(e)})
         raise HTTPException(404, str(e))
 
 

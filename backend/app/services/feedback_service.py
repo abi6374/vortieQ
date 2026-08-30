@@ -38,9 +38,6 @@ from app.llm_client import chat_completion
 from app.ml.registry import get_recommender
 
 
-LEVEL_ORDER = ["beginner", "intermediate", "advanced"]
-
-
 # ---------------------------------------------------------------- LLM helpers
 def _load_prompt(name: str) -> str:
     return (_Path(__file__).parent.parent / "prompts" / name).read_text(encoding="utf-8")
@@ -109,30 +106,18 @@ def _set_step_status(step_id: str, status: str) -> None:
     ).execute()
 
 
-# ---------------------------------------------------------------- Profile mutation
-def _bump_level(profile: dict) -> dict:
-    """Advance current_level by one tier (capped at 'advanced')."""
-    cur = profile.get("current_level", "beginner")
-    idx = LEVEL_ORDER.index(cur) if cur in LEVEL_ORDER else 0
-    profile["current_level"] = LEVEL_ORDER[min(idx + 1, len(LEVEL_ORDER) - 1)]
-    return profile
-
-
-def _drop_interests(profile: dict, tags_to_remove: list) -> dict:
-    """Remove any interest that matches (case-insensitively) a skill tag of the
-    disliked course. Keeps interests non-empty so the recommender still works."""
-    remove = {t.lower() for t in tags_to_remove if t}
-    kept = [i for i in profile.get("interests") or [] if i.lower() not in remove]
-    if kept:
-        profile["interests"] = kept
-    return profile
-
-
-def _persist_profile_change(user_id: str, profile: dict) -> None:
-    supabase_client.table("profiles").update({
-        "current_level": profile.get("current_level"),
-        "interests": profile.get("interests"),
-    }).eq("id", user_id).execute()
+# NOTE: this module used to mutate profiles.current_level/interests directly
+# (_bump_level/_drop_interests/_persist_profile_change) before the
+# swap_step-based single-course-replacement redesign. Removed as dead code
+# (zero call sites) rather than left in place, since their presence
+# incorrectly implied too_easy/not_interested still touch the global
+# profile - they don't; too_easy/too_hard move per-skill mastery evidence
+# (mastery_service), and not_interested currently changes neither mastery
+# nor any stored preference (the "reduce format/provider preference" half
+# of the platform audit's not_interested spec needs a learning-pattern/
+# preference-signal system that doesn't exist yet - see the remediation
+# report for this as an open item, not silently working via this removed
+# code).
 
 
 # ---------------------------------------------------------------- Re-sequencing
@@ -286,7 +271,7 @@ Generate the learning path JSON now."""
 
 # ---------------------------------------------------------------- Public entry point
 def handle_feedback(step_id: str, event_type: str, note: str, user_id: str) -> dict:
-    if event_type not in ("completed", "too_easy", "too_hard", "not_interested"):
+    if event_type not in ("completed", "too_easy", "too_hard", "not_interested", "resource_unavailable"):
         raise ValueError(f"Unknown event_type: {event_type}")
 
     step, path = _load_step_with_path(step_id, user_id)
@@ -325,6 +310,46 @@ def handle_feedback(step_id: str, event_type: str, note: str, user_id: str) -> d
         except Exception as e:
             print(f"[feedback_service] mastery update from completion failed: {type(e).__name__}: {e}", flush=True)
         return {"feedback_id": feedback_id, "path_updated": False, "updated_steps": []}
+
+    # resource_unavailable: a learner-reported dead/broken resource_url.
+    # Never touches mastery (a link being dead says nothing about the
+    # learner's competency). Re-checks the URL LIVE before doing anything -
+    # a single report (mistaken, or a transient network blip) must not
+    # alone mark a real, working resource unavailable for every other
+    # learner who might get recommended it. Only a confirmed-dead resource
+    # gets marked unavailable (excluded from all future recommendations via
+    # ranking_engine.hard_filter) and swapped for a verified alternative.
+    if event_type == "resource_unavailable":
+        course_id = course.get("id")
+        confirmed_dead = False
+        if course_id:
+            from app.services import catalog_service
+            try:
+                confirmed_dead = not catalog_service.revalidate_course(course_id)
+            except Exception as e:
+                print(f"[feedback_service] resource revalidation failed: {type(e).__name__}: {e}", flush=True)
+        if not confirmed_dead:
+            return {
+                "feedback_id": feedback_id,
+                "path_updated": False,
+                "updated_steps": [],
+                "reason_for_change": "We re-checked this resource and it's still reachable - thanks for flagging it, though.",
+            }
+        from app.services import path_service as _path_service
+        swap_result = _path_service.swap_step(step_id, user_id, level_hint=0)
+        return {
+            "feedback_id": feedback_id,
+            "path_updated": bool(swap_result.get("swapped")),
+            "updated_steps": [swap_result["new_step"]] if swap_result.get("new_step") else [],
+            "swap_result": swap_result,
+            "reason_for_change": (
+                "Confirmed this resource is no longer available and swapped in a verified alternative."
+                if swap_result.get("swapped")
+                else "Confirmed this resource is no longer available, but no verified alternative was found."
+            ),
+            "path_version": swap_result.get("path_version"),
+            "last_recomputed_at": swap_result.get("last_recomputed_at"),
+        }
 
     # too_easy: real signal the recommender UNDERESTIMATED this skill -
     # update mastery BEFORE swapping, so the replacement course (and every

@@ -15,5 +15,8 @@ class FeedbackCreateSchema(BaseModel):
     # 'too_hard' is the symmetric opposite of 'too_easy': a real signal the
     # recommender OVERESTIMATED this skill, not merely "I disliked this" -
     # see mastery_service.update_mastery_from_feedback.
-    event_type: Literal["completed", "too_easy", "too_hard", "not_interested"]
+    # 'resource_unavailable': a learner-reported dead/broken resource_url -
+    # triggers a live re-check (catalog_service.revalidate_course) before
+    # any swap, so one report can't alone blacklist a real working resource.
+    event_type: Literal["completed", "too_easy", "too_hard", "not_interested", "resource_unavailable"]
     note: str = Field(default="", max_length=1000)
