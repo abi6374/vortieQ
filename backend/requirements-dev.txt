@@ -1,0 +1,7 @@
+# Test-only and security-tooling dependencies - never installed in the
+# production Docker image (backend/Dockerfile only installs requirements.txt).
+# Pulled in by CI (.github/workflows/ci.yml) and for local `pytest` runs.
+-r requirements.txt
+pytest
+pytest-asyncio
+pip-audit

@@ -298,8 +298,12 @@ class TestSearchVideosEndToEnd:
         good_item = _video_item(video_id="goodvideo01", title="Python Tutorial for Beginners",
                                  description="A complete walkthrough of Python fundamentals." + " padding" * 10)
         private_item = _video_item(video_id="privatevid1", privacy="private")
+        # _score_quality resolves each skill tag through the real taxonomy
+        # service - unmocked, that hits the live skill_aliases table. This
+        # test only cares about eligibility filtering, not taxonomy scoring.
         with patch.object(adapter, "_search_video_ids", return_value=["goodvideo01", "privatevid1"]), \
-             patch.object(adapter, "_fetch_video_details", return_value=[good_item, private_item]):
+             patch.object(adapter, "_fetch_video_details", return_value=[good_item, private_item]), \
+             patch("app.services.taxonomy_service.resolve_skill", return_value=None):
             results = adapter.search_videos("python tutorial", skill_tags=["Python"])
         assert len(results) == 1
         assert results[0]["external_id"] == "goodvideo01"

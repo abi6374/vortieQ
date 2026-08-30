@@ -1,0 +1,100 @@
+name: CI
+
+# Runs the backend test suite and dependency vulnerability scans on every
+# push/PR touching backend/ or frontend/. Separate from deploy-backend.yml,
+# which only builds+ships the Docker image and never runs tests - this is
+# the workflow that actually gates on the suite passing.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - "frontend/**"
+      - ".github/workflows/ci.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - "frontend/**"
+      - ".github/workflows/ci.yml"
+  workflow_dispatch:
+
+jobs:
+  backend-test:
+    runs-on: ubuntu-latest
+    # No real Supabase/Groq credentials are used here on purpose - the
+    # suite must be fully isolated from live infrastructure (every test
+    # that touches the DB/LLM mocks the relevant supabase_client/llm_client
+    # reference). Fake values only prove that isolation; a test that
+    # accidentally reaches a real network call fails loudly here instead
+    # of silently reading/writing production data, which is exactly the
+    # failure mode this job exists to catch.
+    env:
+      SUPABASE_URL: https://ci-fake.supabase.co
+      SUPABASE_ANON_KEY: ci-fake-anon-key
+      SUPABASE_SERVICE_ROLE_KEY: ci-fake-service-role-key
+      SUPABASE_JWT_SECRET: ci-fake-jwt-secret-not-real
+      GROQ_API_KEY: ci-fake-groq-key
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: backend/requirements-dev.txt
+
+      - name: Install dependencies
+        working-directory: backend
+        run: pip install -r requirements-dev.txt
+
+      - name: Run test suite
+        working-directory: backend
+        run: python -m pytest tests/ -v
+
+      - name: pip-audit (dependency vulnerability scan)
+        working-directory: backend
+        # Scans the production dependency set (requirements.txt), not the
+        # test-only extras in requirements-dev.txt. Blocking: as of this
+        # workflow's introduction the set is clean, so any future finding
+        # is a real regression worth failing the build over.
+        run: pip-audit -r requirements.txt
+
+  frontend-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build (fails on compile errors)
+        working-directory: frontend
+        run: npm run build
+
+      - name: npm audit (dependency vulnerability scan)
+        working-directory: frontend
+        # Report-only at moderate/high: as of this workflow's introduction
+        # there are known moderate/high advisories (esbuild dev-server-only
+        # request forgery; react-router-dom open-redirect + SSR-hydration
+        # CVEs) whose fix is a major-version bump (vite 6->8, react-router
+        # 6->7) - a breaking change deliberately out of scope for a
+        # security-hardening pass that must not weaken or redesign existing
+        # functionality. Tracked in the Phase 4 security audit report as a
+        # follow-up needing its own tested migration. Still fails the build
+        # on a NEW critical finding, which would need immediate attention
+        # regardless of migration cost.
+        run: |
+          npm audit --audit-level=high || echo "::warning::npm audit found moderate/high advisories - see backend/SECURITY_AUDIT_PHASE4.md for the tracked follow-up. Failing only on critical."
+          npm audit --audit-level=critical

@@ -608,7 +608,10 @@ class TestResourceURLValidation:
              patch("app.services.youtube_provider.YouTubeProviderAdapter._fetch_video_details",
                    return_value=[real_video_item]), \
              patch("app.services.catalog_service.ingest_youtube_result", return_value={"id": "provider-resource-id"}) as mock_ingest, \
-             patch("app.services.catalog_service.promote_to_course", return_value=promoted_course) as mock_promote:
+             patch("app.services.catalog_service.promote_to_course", return_value=promoted_course) as mock_promote, \
+             patch("app.services.taxonomy_service.resolve_skill", return_value=None):
+            # taxonomy_service.resolve_skill (called from _score_quality)
+            # reaches the real skill_aliases table if unmocked here.
             result = _ensure_course_in_catalog({
                 "title": "A Completely Made Up Title The LLM Invented",
                 "resource_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ&utm_source=llm",
