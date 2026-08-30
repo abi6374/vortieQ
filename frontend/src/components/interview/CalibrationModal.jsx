@@ -345,10 +345,10 @@ export default function CalibrationModal({
                 <span className="px-2.5 py-1 rounded-lg bg-black/60 backdrop-blur-md text-[11px] font-semibold text-white flex items-center gap-1.5">
                   <span
                     className={`w-2 h-2 rounded-full animate-pulse ${permissionState === 'granted'
-                        ? 'bg-emerald-400'
-                        : permissionState === 'checking'
-                          ? 'bg-amber-400'
-                          : 'bg-red-400'
+                      ? 'bg-emerald-400'
+                      : permissionState === 'checking'
+                        ? 'bg-amber-400'
+                        : 'bg-red-400'
                       }`}
                   />
                   {permissionState === 'granted'
@@ -441,8 +441,8 @@ export default function CalibrationModal({
                         type="button"
                         onClick={() => setSelectedTrack(t.id)}
                         className={`p-3.5 rounded-xl text-left border transition-all cursor-pointer flex flex-col gap-1 ${isSelected
-                            ? 'bg-[#eaf2fc] dark:bg-[rgba(41,151,255,0.18)] border-[#0066cc] dark:border-[#38BDF8] shadow-xs'
-                            : 'bg-white dark:bg-[#141A26] border-[#e0e0e0] dark:border-[#242E40] hover:border-[#0066cc]/40'
+                          ? 'bg-[#eaf2fc] dark:bg-[rgba(41,151,255,0.18)] border-[#0066cc] dark:border-[#38BDF8] shadow-xs'
+                          : 'bg-white dark:bg-[#141A26] border-[#e0e0e0] dark:border-[#242E40] hover:border-[#0066cc]/40'
                           }`}
                       >
                         <div className="flex items-center justify-between">
@@ -488,8 +488,8 @@ export default function CalibrationModal({
                       type="button"
                       onClick={() => setQuestionCount(cnt)}
                       className={`flex-1 py-2.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${questionCount === cnt
-                          ? 'bg-[#0066cc] text-white border-[#0066cc] shadow-xs'
-                          : 'bg-white dark:bg-[#141A26] border-[#e0e0e0] dark:border-[#242E40] text-[#1d1d1f] dark:text-white hover:bg-[#f5f5f7]'
+                        ? 'bg-[#0066cc] text-white border-[#0066cc] shadow-xs'
+                        : 'bg-white dark:bg-[#141A26] border-[#e0e0e0] dark:border-[#242E40] text-[#1d1d1f] dark:text-white hover:bg-[#f5f5f7]'
                         }`}
                     >
                       {cnt} Q (~{cnt * 2} min)
@@ -503,7 +503,7 @@ export default function CalibrationModal({
             <div className="flex flex-col gap-3 pt-4 border-t border-[#f0f0f0] dark:border-[#242E40]">
               {!hasCamera && permissionState === 'granted' && (
                 <div className="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 border border-amber-500/20 p-2.5 rounded-xl text-center font-medium">
-                  📸 Camera not detected — continuing in Voice-Only mode
+                  Camera not detected — continuing in Voice-Only mode
                 </div>
               )}
 
@@ -528,7 +528,6 @@ export default function CalibrationModal({
                 >
                   Switch to Voice-Only Mode
                 </button>
-
               </div>
             </div>
           </div>
