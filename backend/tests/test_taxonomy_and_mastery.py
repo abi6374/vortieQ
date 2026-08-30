@@ -107,7 +107,7 @@ class TestMasteryUpdates:
         assert updated == 0
         mock_table.upsert.assert_not_called()
 
-    def test_update_mastery_from_feedback_only_moves_on_too_easy(self):
+    def test_update_mastery_from_feedback_only_moves_on_too_easy_or_too_hard(self):
         mock_supabase, mock_table = self._mock_supabase_for_upsert()
         with patch("app.services.mastery_service.supabase_client", mock_supabase), \
              patch("app.services.taxonomy_service.resolve_or_create_skill", return_value="skill-x"):
@@ -117,8 +117,75 @@ class TestMasteryUpdates:
             updated_too_easy = mastery_service.update_mastery_from_feedback(
                 "user-1", ["python"], "too_easy"
             )
+            updated_too_hard = mastery_service.update_mastery_from_feedback(
+                "user-1", ["python"], "too_hard"
+            )
         assert updated_not_interested == 0
         assert updated_too_easy == 1
+        assert updated_too_hard == 1
+
+    def test_too_easy_raises_and_too_hard_lowers_mastery_symmetrically(self):
+        mock_supabase = MagicMock()
+        mock_table = MagicMock()
+        mock_supabase.table.return_value = mock_table
+        mock_table.select.return_value.eq.return_value.eq.return_value.execute.return_value = MagicMock(
+            data=[{"mastery_probability": 0.5, "confidence": 0.4}]
+        )
+        mock_table.upsert.return_value.execute.return_value = MagicMock(data=[{"id": "row-1"}])
+        with patch("app.services.mastery_service.supabase_client", mock_supabase), \
+             patch("app.services.taxonomy_service.resolve_or_create_skill", return_value="skill-x"):
+            mastery_service.update_mastery_from_feedback("user-1", ["python"], "too_easy")
+            too_easy_payload = mock_table.upsert.call_args[0][0]
+
+            mastery_service.update_mastery_from_feedback("user-1", ["python"], "too_hard")
+            too_hard_payload = mock_table.upsert.call_args[0][0]
+
+        assert too_easy_payload["mastery_probability"] > 0.5  # underestimated -> nudge up
+        assert too_hard_payload["mastery_probability"] < 0.5  # overestimated -> nudge down
+
+    def test_too_hard_never_lowers_mastery_below_zero(self):
+        mock_supabase, mock_table = self._mock_supabase_for_upsert()
+        # No existing estimate at all - current defaults to 0.4 inside the service.
+        with patch("app.services.mastery_service.supabase_client", mock_supabase), \
+             patch("app.services.taxonomy_service.resolve_or_create_skill", return_value="skill-x"):
+            mastery_service.update_mastery_from_feedback("user-1", ["python"], "too_hard")
+        payload = mock_table.upsert.call_args[0][0]
+        assert payload["mastery_probability"] >= 0.0
+
+
+class TestUnmetPrerequisites:
+    def test_returns_empty_when_no_real_gap(self):
+        mock_supabase = MagicMock()
+        with patch("app.services.mastery_service.supabase_client", mock_supabase), \
+             patch("app.services.mastery_service.get_mastery_map", return_value={}), \
+             patch("app.services.taxonomy_service.resolve_skill", return_value="skill-react"), \
+             patch("app.services.taxonomy_service.get_prerequisites", return_value=[]):
+            gaps = mastery_service.find_unmet_prerequisites("user-1", ["React"])
+        assert gaps == []
+
+    def test_detects_a_real_unmet_prerequisite(self):
+        mock_supabase = MagicMock()
+        with patch("app.services.mastery_service.supabase_client", mock_supabase), \
+             patch("app.services.mastery_service.get_mastery_map", return_value={}), \
+             patch("app.services.taxonomy_service.resolve_skill", return_value="skill-react"), \
+             patch("app.services.taxonomy_service.get_prerequisites",
+                   return_value=[{"prerequisite_skill_id": "skill-js", "required_level": 0.5}]), \
+             patch("app.services.taxonomy_service.get_skill_names", return_value={"skill-js": "JavaScript"}):
+            gaps = mastery_service.find_unmet_prerequisites("user-1", ["React"])
+        assert len(gaps) == 1
+        assert gaps[0]["name"] == "JavaScript"
+        assert gaps[0]["current_mastery"] is None  # no evidence at all -> honestly reported, not fabricated as 0
+
+    def test_does_not_flag_a_prerequisite_the_learner_already_meets(self):
+        mock_supabase = MagicMock()
+        with patch("app.services.mastery_service.supabase_client", mock_supabase), \
+             patch("app.services.mastery_service.get_mastery_map",
+                   return_value={"skill-js": {"mastery_probability": 0.9}}), \
+             patch("app.services.taxonomy_service.resolve_skill", return_value="skill-react"), \
+             patch("app.services.taxonomy_service.get_prerequisites",
+                   return_value=[{"prerequisite_skill_id": "skill-js", "required_level": 0.5}]):
+            gaps = mastery_service.find_unmet_prerequisites("user-1", ["React"])
+        assert gaps == []
 
     def test_update_mastery_from_completion_never_lowers_existing_higher_estimate(self):
         mock_supabase = MagicMock()

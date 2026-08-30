@@ -153,12 +153,21 @@ def update_mastery_from_completion(user_id: str, skill_tags: list[str]) -> int:
 
 def update_mastery_from_feedback(user_id: str, skill_tags: list[str], event_type: str) -> int:
     """'too_easy' feedback means the recommender UNDERESTIMATED this skill -
-    real signal, nudges mastery up. Other feedback event types
-    (completed/not_interested) don't move mastery here - completion is
-    handled by update_mastery_from_completion, and "not interested" says
-    nothing about competency."""
-    if event_type != "too_easy":
+    real signal, nudges mastery up. 'too_hard' is the symmetric opposite -
+    the recommender OVERESTIMATED this skill, real signal, nudges mastery
+    down (never below 0, and never claims the learner has zero prior
+    exposure - it's a correction to an estimate, not a reset). Other
+    feedback event types (completed/not_interested) don't move mastery
+    here - completion is handled by update_mastery_from_completion, and
+    "not interested" says nothing about competency."""
+    if event_type not in ("too_easy", "too_hard"):
         return 0
+    delta = 0.15 if event_type == "too_easy" else -0.15
+    note = (
+        "Learner marked a step covering this skill as too easy."
+        if event_type == "too_easy"
+        else "Learner marked a step covering this skill as too hard."
+    )
     updated = 0
     for tag in skill_tags or []:
         skill_id = taxonomy_service.resolve_or_create_skill(tag)
@@ -169,9 +178,9 @@ def update_mastery_from_feedback(user_id: str, skill_tags: list[str], event_type
             .select("mastery_probability").eq("user_id", user_id).eq("skill_id", skill_id).execute()
         )
         current = existing_r.data[0]["mastery_probability"] if existing_r.data else 0.4
-        bumped = min(1.0, float(current) + 0.15)
-        _upsert_mastery(user_id, skill_id, bumped, _DEFAULT_CONFIDENCE_BY_SOURCE["feedback"],
-                         "feedback", note="Learner marked a step covering this skill as too easy.")
+        adjusted = max(0.0, min(1.0, float(current) + delta))
+        _upsert_mastery(user_id, skill_id, adjusted, _DEFAULT_CONFIDENCE_BY_SOURCE["feedback"],
+                         "feedback", note=note)
         updated += 1
     return updated
 
@@ -205,3 +214,40 @@ def get_mastery_by_name(user_id: str) -> dict[str, dict]:
         if m:
             by_name[s["canonical_name"].lower()] = m
     return by_name
+
+
+def find_unmet_prerequisites(user_id: str, skill_tags: list[str]) -> list[dict]:
+    """For a course's real skill_tags, real skill_prerequisites edges (taxonomy_
+    service.get_prerequisites) whose required_level the learner's current
+    mastery doesn't meet - including "no evidence at all" (treated as 0).
+    Used by 'too_hard' feedback to give an honest, specific reason
+    ("this needed X, which you haven't shown evidence of yet") instead of a
+    generic "here's an easier one." Returns [] when there's no real gap -
+    never invents a missing prerequisite for a skill that has no edges."""
+    mastery = get_mastery_map(user_id)
+    seen_prereq_ids: set[str] = set()
+    gaps: list[dict] = []
+    for tag in skill_tags or []:
+        skill_id = taxonomy_service.resolve_skill(tag)
+        if not skill_id:
+            continue
+        for edge in taxonomy_service.get_prerequisites(skill_id):
+            prereq_id = edge.get("prerequisite_skill_id")
+            if not prereq_id or prereq_id in seen_prereq_ids:
+                continue
+            seen_prereq_ids.add(prereq_id)
+            required = float(edge.get("required_level") or 0.5)
+            current_entry = mastery.get(prereq_id)
+            current = float(current_entry["mastery_probability"]) if current_entry else 0.0
+            if current < required:
+                gaps.append({
+                    "prerequisite_skill_id": prereq_id,
+                    "required_level": required,
+                    "current_mastery": current if current_entry else None,
+                })
+    if not gaps:
+        return []
+    names = taxonomy_service.get_skill_names([g["prerequisite_skill_id"] for g in gaps])
+    for g in gaps:
+        g["name"] = names.get(g["prerequisite_skill_id"], "")
+    return [g for g in gaps if g["name"]]  # drop any id that didn't resolve to a real name

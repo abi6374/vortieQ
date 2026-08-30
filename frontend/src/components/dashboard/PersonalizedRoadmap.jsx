@@ -371,7 +371,10 @@ export default function PersonalizedRoadmap({
         rerecommendNote.trim()
       )
       if (res.ok) {
-        showToast(`✨ Re-recommended alternative for "${rerecommendTaskTarget.title}"!`)
+        // Prefer the real, specific reason (mastery-adjusted / prerequisite
+        // gap) when the backend produced one; otherwise the generic
+        // confirmation for format/style preferences that don't touch mastery.
+        showToast(res.reasonForChange || `✨ Re-recommended alternative for "${rerecommendTaskTarget.title}"!`)
         setRerecommendTaskTarget(null)
       } else {
         showToast(res.reason || 'Could not re-recommend course.')

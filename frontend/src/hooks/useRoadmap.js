@@ -155,7 +155,11 @@ export function useRoadmap() {
         note,
       })
       setData(res.data) // full recomputed roadmap
-      return { ok: true }
+      // Real reason for the change (mastery-adjusted, prerequisite gap,
+      // etc.) when the preference was too_advanced/too_basic - see
+      // roadmap_service.rerecommend_task. Absent for format/style
+      // preferences (free_resource/hands_on/custom) that don't touch mastery.
+      return { ok: true, reasonForChange: res.data?.reason_for_change || null }
     } catch (err) {
       const msg = err?.response?.data?.detail || 'Unable to re-recommend course for this week.'
       return { ok: false, reason: msg }

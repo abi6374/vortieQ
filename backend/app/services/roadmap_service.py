@@ -20,23 +20,32 @@ from app.services import web_search_service
 TERMINAL = ("completed", "skipped")
 
 
-def bump_path_version(path_id: str) -> None:
+def bump_path_version(path_id: str) -> dict | None:
     """Real-time-ish freshness signal (learning_paths.version/
     last_recomputed_at, migration 008): a client can cheaply detect a stale
     cached roadmap by comparing `version` instead of a blind refresh timer,
     and every response carries a real timestamp of when the path was
     actually last recomputed. Called from every real path mutation (task
     completion, swap, rerecommend). Best-effort - never blocks the real
-    mutation that triggered it."""
+    mutation that triggered it.
+
+    Returns {"version", "last_recomputed_at"} on success so a caller (e.g.
+    feedback_service) can echo the real new version back in its own
+    response instead of the client having to re-fetch the whole roadmap
+    just to learn it changed. Returns None on failure - callers must not
+    treat that as "version 0"."""
     try:
         current = supabase_client.table("learning_paths").select("version").eq("id", path_id).execute()
         next_version = (current.data[0].get("version") or 0) + 1 if current.data else 1
+        stamp = datetime.now(timezone.utc).isoformat()
         supabase_client.table("learning_paths").update({
             "version": next_version,
-            "last_recomputed_at": datetime.now(timezone.utc).isoformat(),
+            "last_recomputed_at": stamp,
         }).eq("id", path_id).execute()
+        return {"version": next_version, "last_recomputed_at": stamp}
     except Exception as e:
         print(f"[roadmap] path version bump failed for {path_id}: {type(e).__name__}: {e}", flush=True)
+        return None
 
 # ── part-splitting schema support ───────────────────────────────────────────
 # migration 002_course_parts.sql adds part_number/part_total/part_hours to
@@ -283,10 +292,10 @@ def set_task_completion(
     not just in the UI.
 
     `note`, `rating` (1-5 stars), `tag`: learner's real feedback on this task.
-    Stored as a real feedback_events row - once the note's
-    WEEK becomes fully complete, it's used to reconsider the next
-    not-started week's course selection (see feedback_service.
-    apply_week_feedback). Ignored on un-complete (nothing to act on there).
+    Stored as a real feedback_events row and applied IMMEDIATELY (not gated
+    on finishing the task's whole week) to reconsider the not-started tail
+    of the path's course selection (see feedback_service.
+    apply_recent_feedback). Ignored on un-complete (nothing to act on there).
     """
     step = _owned_step(step_id, user_id)
     path_id = step["path_id"]
@@ -342,18 +351,17 @@ def set_task_completion(
         except Exception as e:
             print(f"[roadmap] feedback note write failed: {type(e).__name__}: {e}", flush=True)
 
-        # If this was the last not-yet-terminal step in its week, the week is
-        # now fully done - fold this week's feedback into the upcoming week's course selection.
+        # Real-time, not week-gated: this feedback is applied to the
+        # not-started tail of the path immediately, the moment it's left -
+        # it used to wait until every remaining step in the CURRENT week
+        # was also terminal, which meant feedback on the first task of a
+        # 5-task week sat unused until the other four were done too. See
+        # feedback_service.apply_recent_feedback.
         try:
-            remaining = (
-                supabase_client.table("path_steps")
-                .select("status").eq("path_id", path_id).eq("week_number", week).execute()
-            ).data or []
-            if remaining and all(s.get("status") in TERMINAL for s in remaining):
-                from app.services import feedback_service
-                feedback_service.apply_week_feedback(path_id, user_id, week)
+            from app.services import feedback_service
+            feedback_service.apply_recent_feedback(path_id, user_id, combined_note)
         except Exception as e:
-            print(f"[roadmap] week-feedback application failed: {type(e).__name__}: {e}", flush=True)
+            print(f"[roadmap] recent-feedback application failed: {type(e).__name__}: {e}", flush=True)
 
     # Keep profiles.completed_courses in step with the toggle, both directions,
     # so the recommender never re-suggests something the learner just finished.
@@ -398,14 +406,24 @@ def set_task_completion(
 def rerecommend_task(
     step_id: str, user_id: str, preference: str = "custom", note: str = ""
 ) -> dict:
-    """Re-recommends a single week course based on learner preferences and returns the recomputed roadmap."""
+    """Re-recommends a single week course based on learner preferences and
+    returns the recomputed roadmap, enriched with the real reason for the
+    change and any unmet prerequisite this swap surfaced (see
+    path_service.swap_step_with_preference - this is the actual reachable
+    "too hard"/"too easy" signal in the live app, via the 'too_advanced'/
+    'too_basic' preference options, and it updates real mastery evidence
+    before this function ever runs). Previously this data was computed and
+    then silently discarded here in favor of the plain roadmap object."""
     from app.services import path_service
     res = path_service.swap_step_with_preference(
         step_id=step_id, user_id=user_id, preference=preference, note=note
     )
     if not res.get("swapped"):
         raise ValueError(res.get("reason", "Could not re-recommend course for this week"))
-    return get_roadmap(user_id)
+    roadmap = get_roadmap(user_id)
+    roadmap["reason_for_change"] = res.get("reason_for_change")
+    roadmap["unmet_prerequisites"] = res.get("unmet_prerequisites") or []
+    return roadmap
 
 
 def assign_week_numbers(path_id: str, weekly_hours: int = 10) -> None:

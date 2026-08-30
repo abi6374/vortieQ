@@ -1,17 +1,33 @@
-"""Feedback handling and adaptive re-sequencing of remaining path steps.
+"""Feedback handling and real-time, single-step adaptive replacement.
 
-Semantics (see MASTER_README section 5.1):
-  - completed        -> mark step completed; no path change.
-  - too_easy         -> mark step skipped; bump profile level up one tier;
-                        re-sequence the not_started tail of the path.
-  - not_interested   -> mark step skipped; remove the course's skill_tags from
-                        the profile's interests; re-sequence the not_started tail.
+Semantics (handle_feedback, POST /api/steps/{step_id}/feedback):
+  - completed        -> mark step completed; real (weak) positive mastery
+                        evidence for the course's skill_tags
+                        (mastery_service.update_mastery_from_completion); no
+                        path change.
+  - too_easy         -> real signal the recommender UNDERESTIMATED this
+                        skill: mastery nudged up BEFORE swapping, then
+                        path_service.swap_step(level_hint=+1) replaces just
+                        this one step with a harder alternative.
+  - too_hard         -> symmetric opposite: mastery nudged down, a real
+                        skill_prerequisites gap is looked up
+                        (mastery_service.find_unmet_prerequisites) for an
+                        honest reason_for_change, then
+                        path_service.swap_step(level_hint=-1) replaces this
+                        one step with an easier alternative.
+  - not_interested   -> path_service.swap_step(level_hint=0): a same-level
+                        alternative, no mastery change (disliking a course
+                        says nothing about competency).
 
-Re-sequencing means: delete all not_started rows in this path, call the
-recommender with the adjusted profile, filter out courses already present in
-the path (completed / in_progress / skipped), and let the LLM sequence what
-remains into fresh milestones which we then insert with sequence_order
-continuing from the last kept step.
+Every swap is a single in-place replacement (path_service.swap_step), never
+a full tail rebuild - see `rebuild_tail_full` below for the old escape-hatch
+behavior, kept only for the explicit "start over" endpoint, not the normal
+feedback flow.
+
+Real-time, not week-gated: apply_recent_feedback() reconsiders the
+not-started tail of the path immediately whenever a task is completed with
+a real note/rating/tag - it does not wait for an entire week to finish (see
+its docstring for the platform-audit finding this replaced).
 """
 
 import json
@@ -270,7 +286,7 @@ Generate the learning path JSON now."""
 
 # ---------------------------------------------------------------- Public entry point
 def handle_feedback(step_id: str, event_type: str, note: str, user_id: str) -> dict:
-    if event_type not in ("completed", "too_easy", "not_interested"):
+    if event_type not in ("completed", "too_easy", "too_hard", "not_interested"):
         raise ValueError(f"Unknown event_type: {event_type}")
 
     step, path = _load_step_with_path(step_id, user_id)
@@ -319,18 +335,55 @@ def handle_feedback(step_id: str, event_type: str, note: str, user_id: str) -> d
         except Exception as e:
             print(f"[feedback_service] mastery update from feedback failed: {type(e).__name__}: {e}", flush=True)
 
-    # too_easy / not_interested: delegate to path_service.swap_step so we do a
-    # single-course in-place replacement instead of nuking the whole tail.
-    # Local imports to avoid circular imports at module load.
+    # too_hard: symmetric opposite - real signal the recommender OVERESTIMATED
+    # this skill. Lower mastery BEFORE swapping (same ordering reason as
+    # too_easy above), and check for a real, named prerequisite gap so the
+    # learner gets an honest, specific reason rather than just a quieter
+    # course of the same topic.
+    unmet_prerequisites: list = []
+    if event_type == "too_hard":
+        try:
+            mastery_service.update_mastery_from_feedback(user_id, course.get("skill_tags") or [], "too_hard")
+        except Exception as e:
+            print(f"[feedback_service] mastery update from feedback failed: {type(e).__name__}: {e}", flush=True)
+        try:
+            unmet_prerequisites = mastery_service.find_unmet_prerequisites(user_id, course.get("skill_tags") or [])
+        except Exception as e:
+            print(f"[feedback_service] prerequisite-gap check failed: {type(e).__name__}: {e}", flush=True)
+
+    # too_easy / too_hard / not_interested: delegate to path_service.swap_step
+    # so we do a single-course in-place replacement instead of nuking the
+    # whole tail. Local imports to avoid circular imports at module load.
     from app.services import path_service
 
-    level_hint = 1 if event_type == "too_easy" else 0
+    level_hint = {"too_easy": 1, "too_hard": -1}.get(event_type, 0)
     swap_result = path_service.swap_step(step_id, user_id, level_hint=level_hint)
+
+    reason_for_change = None
+    if event_type == "too_hard" and swap_result.get("swapped"):
+        if unmet_prerequisites:
+            names = ", ".join(g["name"] for g in unmet_prerequisites)
+            reason_for_change = (
+                f"This looked too hard, likely because of a gap in {names} - "
+                "swapped in an easier alternative and lowered our confidence "
+                "in your mastery of this skill."
+            )
+        else:
+            reason_for_change = "Swapped in an easier alternative and lowered our confidence in your mastery of this skill."
+    elif event_type == "too_easy" and swap_result.get("swapped"):
+        reason_for_change = "Swapped in a more advanced alternative and raised our confidence in your mastery of this skill."
+    elif event_type == "not_interested" and swap_result.get("swapped"):
+        reason_for_change = "Swapped in an alternative that better matches your stated interests."
+
     return {
         "feedback_id": feedback_id,
         "path_updated": bool(swap_result.get("swapped")),
         "updated_steps": [swap_result["new_step"]] if swap_result.get("new_step") else [],
         "swap_result": swap_result,
+        "reason_for_change": reason_for_change,
+        "unmet_prerequisites": unmet_prerequisites,
+        "path_version": swap_result.get("path_version"),
+        "last_recomputed_at": swap_result.get("last_recomputed_at"),
     }
 
 
@@ -351,13 +404,22 @@ def _append_completed_course(user_id: str, course_id: str) -> None:
         supabase_client.table("profiles").update({"completed_courses": ids}).eq("id", user_id).execute()
 
 
-def apply_week_feedback(path_id: str, user_id: str, finished_week: int) -> None:
-    """Called once a week is fully completed (see roadmap_service.
-    set_task_completion). If the learner left real natural-language feedback
-    on any task during that week, use it to reconsider the NEXT not-started
-    week's course selection - replacing a course only when the feedback
-    clearly suggests it's a poor fit, never touching anything beyond that one
-    upcoming week.
+def apply_recent_feedback(path_id: str, user_id: str, note: str) -> bool:
+    """Called immediately after ANY task completion that carries a real note/
+    rating/tag (see roadmap_service.set_task_completion) - NOT gated on
+    finishing a whole week. The platform-audit finding this replaces: a
+    learner's feedback on the first task of a five-task week previously sat
+    unused until the other four were also done, because the old
+    apply_week_feedback() only fired once every step in the CURRENT week
+    was terminal. Real-time now means real-time: this fires on the
+    completion event itself.
+
+    Uses this specific feedback to reconsider the entire NOT-STARTED tail of
+    the path (the only steps that can still change), replacing a course only
+    when the feedback clearly suggests it's a poor fit - never touching
+    anything already completed or in progress. Returns True if at least one
+    real replacement was applied (so the caller can decide whether to bump
+    path_version), False otherwise.
 
     Best-effort by design: any failure here is logged and swallowed so it can
     never break the actual task-completion request that triggered it - this
@@ -365,38 +427,23 @@ def apply_week_feedback(path_id: str, user_id: str, finished_week: int) -> None:
     into a 500.
     """
     try:
-        week_step_ids = [
-            r["id"] for r in (
-                supabase_client.table("path_steps")
-                .select("id").eq("path_id", path_id).eq("week_number", finished_week).execute().data or []
-            )
-        ]
-        if not week_step_ids:
-            return
+        note = (note or "").strip()
+        if not note:
+            return False  # no real feedback was left - nothing to act on
 
-        notes = [
-            (r.get("note") or "").strip()
-            for r in (
-                supabase_client.table("feedback_events")
-                .select("note").eq("path_id", path_id).in_("step_id", week_step_ids).execute().data or []
-            )
-        ]
-        notes = [n for n in notes if n]
-        if not notes:
-            return  # no real feedback was left - nothing to act on
-
-        next_week_rows = (
+        upcoming_rows = (
             supabase_client.table("path_steps")
             .select("id, course_id, courses(id, title, description, difficulty, skill_tags)")
-            .eq("path_id", path_id).eq("week_number", finished_week + 1).eq("status", "not_started")
+            .eq("path_id", path_id).eq("status", "not_started")
+            .order("sequence_order")
             .execute()
         ).data or []
-        if not next_week_rows:
-            return  # no upcoming week to adjust (path ends here, or it's already underway)
+        if not upcoming_rows:
+            return False  # nothing left in this path to adjust
 
         prof_r = supabase_client.table("profiles").select("*").eq("id", user_id).execute()
         if not prof_r.data:
-            return
+            return False
         profile = prof_r.data[0]
 
         in_path = {
@@ -406,21 +453,20 @@ def apply_week_feedback(path_id: str, user_id: str, finished_week: int) -> None:
         }
         candidates = [c for c in (get_recommender().recommend(profile) or []) if c.get("id") not in in_path]
         if not candidates:
-            return
+            return False
 
         current_courses = [
             {"id": r["course_id"], "title": (r.get("courses") or {}).get("title", "")}
-            for r in next_week_rows
+            for r in upcoming_rows
         ]
         candidate_courses = [
             {"id": c["id"], "title": c.get("title", ""), "description": c.get("description", ""),
              "difficulty": c.get("difficulty", ""), "skill_tags": c.get("skill_tags", [])}
             for c in candidates[:20]
         ]
-        combined_note = " | ".join(notes)[:1500]
         user_msg = (
-            f'Learner feedback on the week just finished: "{combined_note}"\n\n'
-            f"Upcoming week's current courses:\n{json.dumps(current_courses)}\n\n"
+            f'Learner feedback just left on a task they completed: "{note}"\n\n'
+            f"Upcoming not-started courses in this path:\n{json.dumps(current_courses)}\n\n"
             f"Real alternative courses:\n{json.dumps(candidate_courses)}\n\n"
             "Decide replacements now."
         )
@@ -434,13 +480,14 @@ def apply_week_feedback(path_id: str, user_id: str, finished_week: int) -> None:
         try:
             replacements = json.loads(_strip_fences(raw)).get("replacements", [])
         except Exception:
-            return
+            return False
 
         current_ids = {c["id"] for c in current_courses}
         candidate_lookup = {c["id"]: c for c in candidate_courses}
         courses_full = {c["id"]: c for c in candidates}
-        row_by_course = {r["course_id"]: r for r in next_week_rows}
+        row_by_course = {r["course_id"]: r for r in upcoming_rows}
 
+        applied = False
         for rep in replacements:
             old_id = rep.get("replace_course_id")
             new_id = rep.get("with_course_id")
@@ -458,7 +505,10 @@ def apply_week_feedback(path_id: str, user_id: str, finished_week: int) -> None:
                 "explanation": explanation,
             }).eq("id", row["id"]).execute()
             in_path.add(new_id)  # don't let a second replacement reuse it too
+            applied = True
+        return applied
     except Exception as e:
-        print(f"[apply_week_feedback] failed: {type(e).__name__}: {e}", flush=True)
+        print(f"[apply_recent_feedback] failed: {type(e).__name__}: {e}", flush=True)
+        return False
 
 

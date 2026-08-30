@@ -362,7 +362,9 @@ def swap_step(step_id: str, user_id: str, level_hint: int = 0) -> dict:
     Args:
       step_id:    the step being swapped out.
       user_id:    caller (ownership-checked).
-      level_hint: +1 = "too easy" (find a harder replacement), 0 = plain swap.
+      level_hint: +1 = "too easy" (find a harder replacement), -1 = "too
+                  hard" (find an easier one), 0 = plain swap (e.g.
+                  "not interested" - no difficulty change implied).
 
     Behavior:
       1. Marks the skipped step as `skipped` in place (kept for history).
@@ -435,11 +437,13 @@ def swap_step(step_id: str, user_id: str, level_hint: int = 0) -> dict:
         note=f"swapped for {replacement.get('title')} (level_hint={level_hint})",
     )
     from app.services.roadmap_service import bump_path_version
-    bump_path_version(path["id"])
+    version_info = bump_path_version(path["id"])
 
     return {
         "swapped": True,
         "old_step_id": step_id,
+        "path_version": version_info.get("version") if version_info else None,
+        "last_recomputed_at": version_info.get("last_recomputed_at") if version_info else None,
         "new_step": {
             "step_id": new_row["id"] if new_row else "",
             "course_id": replacement["id"],
@@ -723,18 +727,57 @@ Return ONLY a JSON object with this exact schema (no markdown fences, no extra k
         "status": "not_started",
     }).eq("id", step_id).execute()
 
+    # Real mastery evidence from the learner's own stated preference - this
+    # is the ACTUAL reachable "too easy"/"too hard" signal in the live app
+    # (the modal's "Too Advanced"/"Too Basic" options on the Roadmap page;
+    # FeedbackButtons.jsx/handle_feedback's too_easy/too_hard branches exist
+    # but are currently unreachable dead code - see PROGRESS_TRACKER / audit
+    # notes). 'too_advanced' means the recommender OVERESTIMATED this
+    # skill (too hard); 'too_basic' means it UNDERESTIMATED it (too easy).
+    # Every other preference (free_resource/hands_on/custom) is a format/
+    # style choice, not a competency signal, so it must not move mastery.
+    unmet_prerequisites: list = []
+    reason_for_change = None
+    if preference in ("too_advanced", "too_basic"):
+        from app.services import mastery_service
+        event_type = "too_hard" if preference == "too_advanced" else "too_easy"
+        try:
+            mastery_service.update_mastery_from_feedback(user_id, old_skills, event_type)
+        except Exception as e:
+            print(f"[path_service] mastery update from swap preference failed: {type(e).__name__}: {e}", flush=True)
+        if preference == "too_advanced":
+            try:
+                unmet_prerequisites = mastery_service.find_unmet_prerequisites(user_id, old_skills)
+            except Exception as e:
+                print(f"[path_service] prerequisite-gap check failed: {type(e).__name__}: {e}", flush=True)
+            if unmet_prerequisites:
+                names = ", ".join(g["name"] for g in unmet_prerequisites)
+                reason_for_change = (
+                    f"This looked too hard, likely because of a gap in {names} - "
+                    "swapped in an easier alternative and lowered our confidence "
+                    "in your mastery of this skill."
+                )
+            else:
+                reason_for_change = "Swapped in an easier alternative and lowered our confidence in your mastery of this skill."
+        else:
+            reason_for_change = "Swapped in a more advanced alternative and raised our confidence in your mastery of this skill."
+
     _log_swap_event(
         user_id, path["id"], step_id,
         note=f"rerecommended for {replacement.get('title')} (preference={preference}, note={note[:200]})"
     )
     from app.services.roadmap_service import bump_path_version
-    bump_path_version(path["id"])
+    version_info = bump_path_version(path["id"])
 
     return {
         "swapped": True,
         "step_id": step_id,
         "replacement": replacement,
         "explanation": explanation,
+        "path_version": version_info.get("version") if version_info else None,
+        "last_recomputed_at": version_info.get("last_recomputed_at") if version_info else None,
+        "reason_for_change": reason_for_change,
+        "unmet_prerequisites": unmet_prerequisites,
     }
 
 

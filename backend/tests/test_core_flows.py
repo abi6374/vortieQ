@@ -240,13 +240,29 @@ def test_swap_step_with_preference_realtime_flow():
          patch("app.services.web_search_service.search_learning_resources", return_value=mock_search), \
          patch("app.services.path_service._call_groq", return_value=mock_llm_json), \
          patch("app.services.path_service._validate_resource_url", return_value=True), \
-         patch("app.ml.embedder.embed_text", return_value=[0.1] * 384):
-
+         patch("app.ml.embedder.embed_text", return_value=[0.1] * 384), \
+         patch("app.services.mastery_service.update_mastery_from_feedback") as mock_mastery, \
+         patch("app.services.mastery_service.find_unmet_prerequisites", return_value=[]) as mock_gaps:
+        # 'too_advanced' now updates real mastery evidence (see path_service.
+        # swap_step_with_preference) - without these patches this call would
+        # otherwise reach the REAL app.services.mastery_service.supabase_client
+        # (a module-level import, unaffected by patching path_service's
+        # reference), i.e. a live network call against whatever
+        # SUPABASE_URL .env points at. Confirmed via the live DB that an
+        # earlier unpatched run of this exact test wrote nothing (the fake
+        # "u-1" user id isn't valid UUID syntax, so the write failed closed) -
+        # but that was luck, not test isolation, so it's fixed here rather
+        # than left relying on it again.
         res = swap_step_with_preference("step-1", "u-1", preference="too_advanced", note="Need a gentler intro")
 
         assert res["swapped"] is True
         assert res["replacement"]["title"] == "Kubernetes Basics & Interactive Labs"
         assert res["replacement"]["id"] == "c-k8s-new"
+        # Real mastery evidence recorded for the OLD course's skills, as
+        # too_hard (too_advanced = the recommender overestimated this skill).
+        mock_mastery.assert_called_once_with("u-1", ["Kubernetes", "DevOps"], "too_hard")
+        mock_gaps.assert_called_once_with("u-1", ["Kubernetes", "DevOps"])
+        assert res["reason_for_change"]
 
 
 def test_bump_path_version_increments_and_stamps_freshness():

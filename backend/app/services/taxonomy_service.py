@@ -111,3 +111,15 @@ def get_prerequisites(skill_id: str) -> list[dict]:
         .execute()
     )
     return r.data or []
+
+
+def get_skill_names(skill_ids: list[str]) -> dict[str, str]:
+    """{skill_id: canonical_name} for the given ids - any id that doesn't
+    resolve is simply absent from the result (never a fabricated label).
+    Used to turn a prerequisite-gap UUID into human-readable text for an
+    honest reason_for_change message."""
+    ids = [i for i in dict.fromkeys(skill_ids or []) if i]
+    if not ids:
+        return {}
+    r = supabase_client.table("skills").select("id, canonical_name").in_("id", ids).execute()
+    return {row["id"]: row["canonical_name"] for row in (r.data or [])}
