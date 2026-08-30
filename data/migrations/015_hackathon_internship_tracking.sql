@@ -23,8 +23,8 @@ CREATE TABLE IF NOT EXISTS public.user_hackathons (
     id                uuid         DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id           uuid         NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     hackathon_id      text         NOT NULL,
-    status            text         NOT NULL DEFAULT 'registered'
-                                   CHECK (status IN ('registered', 'interested', 'submitted')),
+    status            text         NOT NULL DEFAULT 'tracked'
+                                   CHECK (status IN ('tracked', 'saved', 'registered', 'interested', 'submitted')),
     registration_date timestamptz  DEFAULT now(),
     created_at        timestamptz  DEFAULT now(),
     updated_at        timestamptz  DEFAULT now(),
@@ -61,8 +61,8 @@ CREATE TABLE IF NOT EXISTS public.user_internships (
     id                 uuid         DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id            uuid         NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     internship_id      text         NOT NULL,
-    application_status text         NOT NULL DEFAULT 'applied'
-                                    CHECK (application_status IN ('applied', 'saved', 'interviewing', 'offer', 'rejected')),
+    application_status text         NOT NULL DEFAULT 'tracked'
+                                    CHECK (application_status IN ('tracked', 'applied', 'saved', 'interviewing', 'offer', 'rejected')),
     applied_on         timestamptz  DEFAULT now(),
     created_at         timestamptz  DEFAULT now(),
     updated_at         timestamptz  DEFAULT now(),

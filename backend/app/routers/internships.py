@@ -62,11 +62,11 @@ def apply_to_internship(
     internship_id: str,
     # Matches user_internships.application_status's real DB CHECK
     # constraint (migration 015) exactly.
-    status: Literal["applied", "saved"] = Query("applied"),
+    status: Literal["tracked", "applied", "saved"] = Query("tracked"),
     user_id: str = Depends(verify_jwt),
 ):
     """
-    Track that the user has applied to or saved this internship.
+    Track that the user has tracked, applied to, or saved this internship.
     Persists to Supabase user_internships table.
     """
     try:
@@ -98,7 +98,7 @@ def update_internship_status(
     internship_id: str,
     # Matches user_internships.application_status's full real DB CHECK
     # constraint (migration 015) exactly.
-    new_status: Literal["applied", "saved", "interviewing", "offer", "rejected"] = Query(...),
+    new_status: Literal["tracked", "applied", "saved", "interviewing", "offer", "rejected"] = Query(...),
     user_id: str = Depends(verify_jwt),
 ):
     """Update the application status for a tracked internship."""

@@ -71,7 +71,7 @@ def register_for_hackathon(
     # value would only ever be caught by the DB itself, surfacing as the
     # RuntimeError/500 branch below (and, before this fix, leaking the
     # raw Postgres error string to the client).
-    status: Literal["registered", "interested", "submitted"] = Query("registered"),
+    status: Literal["tracked", "saved", "registered", "interested", "submitted"] = Query("tracked"),
     user_id: str = Depends(verify_jwt),
 ):
     """
