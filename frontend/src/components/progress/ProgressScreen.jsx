@@ -943,19 +943,24 @@ export default function ProgressScreen() {
                     Completed tasks and learning sessions
                   </p>
                 </div>
-                {allRecentActivities.length > 4 && (
-                  <button
-                    type="button"
-                    onClick={() => setShowAllLogs((v) => !v)}
-                    className="text-xs font-bold text-[#0066cc] dark:text-[#38BDF8] hover:underline cursor-pointer"
-                  >
-                    {showAllLogs ? 'Show recent (4)' : 'View full log'}
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={() => setShowAllLogs((v) => !v)}
+                  className="text-xs font-bold text-[#0066cc] dark:text-[#38BDF8] hover:underline cursor-pointer flex items-center gap-1 select-none"
+                >
+                  <span>{showAllLogs ? 'Show recent (4)' : 'View All logs'}</span>
+                  <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${showAllLogs ? 'rotate-180' : ''}`} />
+                </button>
               </div>
 
               {/* Scrollable container when full log is viewed */}
-              <div className={`space-y-3 mt-4 ${showAllLogs ? 'max-h-[380px] overflow-y-auto pr-1 pf-custom-scrollbar' : ''}`}>
+              <div
+                className={`mt-4 ${
+                  showAllLogs
+                    ? 'space-y-2.5 max-h-[340px] overflow-y-auto pr-2 pf-custom-scrollbar border border-[#e6eef8] dark:border-[#1E293B] rounded-xl p-2.5 bg-[#f8fbff]/60 dark:bg-[#0B0F17]/60'
+                    : 'space-y-3'
+                }`}
+              >
                 {displayedActivities.length === 0 ? (
                   <div className="py-12 text-center text-xs text-[#6e6e73] dark:text-[#94A3B8]">
                     No completed activities yet. Check off your first task on the Roadmap!
@@ -966,17 +971,17 @@ export default function ProgressScreen() {
                       key={act.id}
                       className="flex items-center justify-between p-3 rounded-xl bg-[#fafafc] dark:bg-[#0E0E12] border border-[#f5f5f7] dark:border-[#202026] hover:bg-white dark:hover:bg-[#121216] hover:border-[#cfe4fb] dark:hover:border-[#27272F] transition-all"
                     >
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 min-w-0 flex-1 pr-2">
                         <span className="w-7 h-7 rounded-full flex items-center justify-center flex-none bg-[#ECFDF3] dark:bg-emerald-950/70 text-[#16A34A] dark:text-emerald-400 border border-[#D1FADF] dark:border-emerald-800/60">
                           <Check className="w-3.5 h-3.5" />
                         </span>
-                        <div>
-                          <h4 className="font-bold text-xs text-[#1d1d1f] dark:text-white">{act.title}</h4>
+                        <div className="min-w-0 flex-1">
+                          <h4 className="font-bold text-xs text-[#1d1d1f] dark:text-white truncate">{act.title}</h4>
                           <p className="text-[11px] text-[#6e6e73] dark:text-[#94A3B8]">{act.time}</p>
                         </div>
                       </div>
 
-                      <span className="text-[11px] font-bold text-[#16A34A] dark:text-emerald-300 bg-[#ECFDF3] dark:bg-emerald-950/70 px-2 py-0.5 rounded-md border border-[#D1FADF] dark:border-emerald-800 font-['Manrope']">
+                      <span className="text-[11px] font-bold text-[#16A34A] dark:text-emerald-300 bg-[#ECFDF3] dark:bg-emerald-950/70 px-2 py-0.5 rounded-md border border-[#D1FADF] dark:border-emerald-800 font-['Manrope'] flex-none">
                         {act.progressChange}
                       </span>
                     </div>
