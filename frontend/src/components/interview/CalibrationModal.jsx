@@ -501,13 +501,13 @@ export default function CalibrationModal({
                 type="button"
                 disabled={!canProceed}
                 onClick={handleStartInterview}
-                className="w-full py-3.5 px-5 rounded-xl text-sm font-bold text-white bg-[#0066cc] hover:bg-[#0052a3] dark:bg-[#C9D0D6] dark:text-[#09090B] dark:hover:bg-[#CBD5E1] disabled:opacity-40 disabled:cursor-not-allowed shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-3.5 px-5 rounded-xl text-sm font-bold text-white bg-[#0066cc] hover:bg-[#0052a3] dark:bg-[#C9D0D6] dark:text-black dark:!text-black dark:hover:bg-[#CBD5E1] disabled:opacity-40 disabled:cursor-not-allowed shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-white dark:text-black dark:!text-black">
                   <circle cx="12" cy="12" r="10" />
                   <polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none" />
                 </svg>
-                <span>Start Live AI Interview</span>
+                <span className="text-white dark:text-black dark:!text-black font-bold">Start Live AI Interview</span>
               </button>
 
               <div className="flex items-center justify-between">
