@@ -196,10 +196,6 @@ export default function SkillConfidenceStep({
     onContinue(ratings)
   }
 
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-
   return (
     <div className="w-full max-w-[1140px] bg-white dark:bg-[#0E1522] rounded-2xl border border-[#f0f0f0] dark:border-[#202B3C] shadow-[0_14px_38px_rgba(25,49,75,0.08)] dark:shadow-[0_14px_38px_rgba(0,0,0,0.5)] p-6 sm:p-10 flex flex-col justify-between overflow-hidden transition-colors min-h-[580px]">
       
@@ -244,21 +240,6 @@ export default function SkillConfidenceStep({
             ))
           )}
         </div>
-
-        {topics.length > 3 && (
-          <div className="flex justify-center mt-6">
-            <button
-              type="button"
-              onClick={scrollToTop}
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0066cc] dark:text-[#38BDF8] bg-[#eaf2fc] dark:bg-[#132238] px-3.5 py-1.5 rounded-full border border-[#cfe4fb] dark:border-[#1E3A5F] hover:bg-[#dbeafc] transition-all cursor-pointer shadow-2xs"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="m18 15-6-6-6 6" />
-              </svg>
-              <span>Back to top</span>
-            </button>
-          </div>
-        )}
       </div>
 
       {/* Action Buttons (Continue and Back) */}
