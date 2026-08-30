@@ -144,8 +144,8 @@ export default function LandingPage() {
           <SpecularButton
             size="lg"
             radius={16}
-            lineColor="#000000"
-            baseColor="#000000"
+            lineColor={isDark ? '#ffffff' : '#000000'}
+            baseColor={isDark ? '#525252' : '#000000'}
             intensity={1.25}
             thickness={1.5}
             shineSize={12}
@@ -164,8 +164,8 @@ export default function LandingPage() {
           <SpecularButton
             size="lg"
             radius={16}
-            lineColor="#000000"
-            baseColor="#000000"
+            lineColor={isDark ? '#ffffff' : '#000000'}
+            baseColor={isDark ? '#525252' : '#000000'}
             intensity={1.25}
             thickness={1.5}
             shineSize={12}
@@ -389,8 +389,8 @@ export default function LandingPage() {
             <SpecularButton
               size="lg"
               radius={16}
-              lineColor="#000000"
-              baseColor="#000000"
+              lineColor={isDark ? '#ffffff' : '#000000'}
+              baseColor={isDark ? '#525252' : '#000000'}
               intensity={1.25}
               thickness={1.5}
               shineSize={12}

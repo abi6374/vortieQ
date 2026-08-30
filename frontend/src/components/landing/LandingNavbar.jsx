@@ -15,6 +15,7 @@ export default function LandingNavbar() {
   const navigate = useNavigate()
   const [scrolled, setScrolled] = useState(false)
 
+  const isDark = theme === 'dark'
   const isAuthed = Boolean(user || session)
 
   useEffect(() => {
@@ -114,8 +115,8 @@ export default function LandingNavbar() {
             <SpecularButton
               size="sm"
               radius={12}
-              lineColor="#000000"
-              baseColor="#000000"
+              lineColor={isDark ? '#ffffff' : '#000000'}
+              baseColor={isDark ? '#525252' : '#000000'}
               intensity={1.25}
               thickness={1.5}
               speed={0.35}
@@ -138,8 +139,8 @@ export default function LandingNavbar() {
               <SpecularButton
                 size="sm"
                 radius={12}
-                lineColor="#000000"
-                baseColor="#000000"
+                lineColor={isDark ? '#ffffff' : '#000000'}
+                baseColor={isDark ? '#525252' : '#000000'}
                 intensity={1.25}
                 thickness={1.5}
                 speed={0.35}
