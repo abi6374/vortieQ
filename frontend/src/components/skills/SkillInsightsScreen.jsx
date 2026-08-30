@@ -670,7 +670,7 @@ export default function SkillInsightsScreen() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6">
           
           {/* CARD 1: Skill Proficiency Comparison (5.5 of 12 cols or 6 cols) */}
-          <div className="lg:col-span-6 bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+          <div className="lg:col-span-6 pf-glass-card p-6 shadow-sm flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between pb-3 border-b border-[#f5f5f7] dark:border-[#202026]">
                 <div className="flex items-center gap-2">
@@ -754,7 +754,7 @@ export default function SkillInsightsScreen() {
           </div>
 
               {/* CARD 2: Skill Radar (3.5 of 12 cols) */}
-              <div className="lg:col-span-3 bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+              <div className="lg:col-span-3 pf-glass-card p-6 shadow-sm flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between pb-3 border-b border-[#f5f5f7] dark:border-[#202026]">
                     <div className="flex items-center gap-2">
@@ -822,7 +822,7 @@ export default function SkillInsightsScreen() {
               </div>
 
               {/* CARD 3: Top Skill Gaps (3 of 12 cols) */}
-              <div className="lg:col-span-3 bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+              <div className="lg:col-span-3 pf-glass-card p-6 shadow-sm flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between pb-3 border-b border-[#f5f5f7] dark:border-[#202026]">
                     <div className="flex items-center gap-2">
@@ -843,7 +843,7 @@ export default function SkillInsightsScreen() {
                       return (
                         <div
                           key={gap.title}
-                          className="p-3 rounded-xl border border-[#f5f5f7] dark:border-[#202026] hover:border-[#0066cc] dark:hover:border-[#C9D0D6] hover:bg-[#fafafb] dark:hover:bg-[#0E0E12] cursor-pointer transition-all flex items-center justify-between"
+                          className="p-3 rounded-xl border border-[#f5f5f7] dark:border-[#202026] hover:-translate-y-0.5 hover:border-black/40 hover:shadow-md dark:hover:border-[#C9D0D6]/40 dark:hover:shadow-lg hover:bg-white dark:hover:bg-[#0E0E12] cursor-pointer transition-all flex items-center justify-between"
                           onClick={() => setSelectedSkillModal(gap)}
                         >
                           <div className="flex items-center gap-2.5">
@@ -882,7 +882,7 @@ export default function SkillInsightsScreen() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 lg:gap-6">
 
               {/* CARD 1: Skill Category Breakdown (Donut Chart) */}
-              <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+              <div className="pf-glass-card p-6 shadow-sm flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between pb-2 border-b border-[#f5f5f7] dark:border-[#202026]">
                     <div className="flex items-center gap-2">
@@ -953,7 +953,7 @@ export default function SkillInsightsScreen() {
               </div>
 
               {/* CARD 2: Recommended Focus (Actionable Card) */}
-              <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+              <div className="pf-glass-card p-6 shadow-sm flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between pb-2 border-b border-[#f5f5f7] dark:border-[#202026]">
                     <div className="flex items-center gap-2">
@@ -983,7 +983,7 @@ export default function SkillInsightsScreen() {
                       return (
                         <div
                           key={item.title}
-                          className="p-3 rounded-xl border border-[#f5f5f7] dark:border-[#202026] hover:border-[#0066cc] dark:hover:border-[#C9D0D6] hover:bg-[#fafafb] dark:hover:bg-[#0E0E12] cursor-pointer transition-all flex items-center justify-between group"
+                          className="p-3 rounded-xl border border-[#f5f5f7] dark:border-[#202026] hover:-translate-y-0.5 hover:border-black/40 hover:shadow-md dark:hover:border-[#C9D0D6]/40 dark:hover:shadow-lg hover:bg-white dark:hover:bg-[#0E0E12] cursor-pointer transition-all flex items-center justify-between group"
                           onClick={() => navigate('/dashboard')}
                         >
                           <div className="flex items-center gap-2.5">
@@ -1026,7 +1026,7 @@ export default function SkillInsightsScreen() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6">
                 
                 {/* Card 1: Learning Velocity */}
-                <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
+                <div className="pf-glass-card p-5 sm:p-6 shadow-sm flex flex-col justify-between">
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-xs font-bold text-[#7a7a7a] dark:text-[#94A3B8] uppercase tracking-wider">
@@ -1051,7 +1051,7 @@ export default function SkillInsightsScreen() {
                 </div>
 
                 {/* Card 2: Time Spent by Category */}
-                <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
+                <div className="pf-glass-card p-5 sm:p-6 shadow-sm flex flex-col justify-between">
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-xs font-bold text-[#7a7a7a] dark:text-[#94A3B8] uppercase tracking-wider">
@@ -1071,7 +1071,7 @@ export default function SkillInsightsScreen() {
                 </div>
 
                 {/* Card 3: Top Strengths */}
-                <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
+                <div className="pf-glass-card p-5 sm:p-6 shadow-sm flex flex-col justify-between">
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-xs font-bold text-[#7a7a7a] dark:text-[#94A3B8] uppercase tracking-wider">
@@ -1099,7 +1099,7 @@ export default function SkillInsightsScreen() {
                 </div>
 
                 {/* Card 4: AI-Powered PathFinder Explanation */}
-                <div className="bg-[#eaf2fc] dark:bg-[#18181D] border border-[#dcecfd] dark:border-[#27272F] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
+                <div className="pf-glass-card p-5 sm:p-6 shadow-sm flex flex-col justify-between bg-[#eaf2fc] dark:bg-[#18181D] border border-[#dcecfd] dark:border-[#27272F]">
                   <div>
                     <div className="flex items-center gap-1.5 text-[#0066cc] dark:text-[#C9D0D6] mb-1.5">
                       <Sparkles className="w-4 h-4" />
@@ -1132,7 +1132,7 @@ export default function SkillInsightsScreen() {
               </div>
 
               {/* SECTION 2: SKILL GAP HEATMAP MATRIX (Directly below) */}
-              <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-6 shadow-sm">
+              <div className="pf-glass-card p-6 shadow-sm">
                 <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
                   <span className="font-bold text-sm text-[#1d1d1f] dark:text-white">
                     Tiered Skill-Gap Matrix (Foundations → Intermediate → Advanced)

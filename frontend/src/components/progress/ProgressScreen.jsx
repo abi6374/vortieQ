@@ -873,7 +873,7 @@ export default function ProgressScreen() {
                 </p>
               </div>
 
-              <div className="space-y-3 mt-4 max-h-[380px] overflow-y-auto pr-1 pf-custom-scrollbar">
+              <div className="space-y-3 mt-3.5 max-h-[380px] overflow-y-auto pt-2 pb-2 px-1 -mx-1 pf-custom-scrollbar">
                 {milestones.length === 0 ? (
                   <div className="py-12 text-center text-xs text-[#6e6e73] dark:text-[#94A3B8]">
                     No milestones found on your current path.
@@ -960,8 +960,8 @@ export default function ProgressScreen() {
               <div
                 className={`mt-4 ${
                   showAllLogs
-                    ? 'space-y-2.5 max-h-[340px] overflow-y-auto pr-2 pf-custom-scrollbar border border-[#e6eef8] dark:border-[#1E293B] rounded-xl p-2.5 bg-[#f8fbff]/60 dark:bg-[#0B0F17]/60'
-                    : 'space-y-3'
+                    ? 'space-y-2.5 max-h-[340px] overflow-y-auto pt-2 pb-2 px-2 pf-custom-scrollbar border border-[#e6eef8] dark:border-[#1E293B] rounded-xl p-2.5 bg-[#f8fbff]/60 dark:bg-[#0B0F17]/60'
+                    : 'space-y-3 pt-2 pb-2 px-1 -mx-1'
                 }`}
               >
                 {displayedActivities.length === 0 ? (
