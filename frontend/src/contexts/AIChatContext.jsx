@@ -17,9 +17,9 @@ const AIChatContext = createContext(null)
 // where the learner is standing when they ask.
 function pageContextFor(pathname) {
   if (pathname.startsWith('/progress')) return 'Progress'
-  if (pathname.startsWith('/skill')) return 'Skill insights'
+  if (pathname.startsWith('/skill')) return 'Skill Insights'
   if (pathname.startsWith('/resources')) return 'Resources'
-  if (pathname.startsWith('/roadmap') || pathname.startsWith('/dashboard')) return 'My roadmap'
+  if (pathname.startsWith('/roadmap') || pathname.startsWith('/dashboard')) return 'My Roadmap'
   if (pathname.startsWith('/onboarding')) return 'Onboarding'
   return 'PathFinder'
 }

@@ -83,14 +83,14 @@ export const ICONS = {
 
 // Terminology is fixed — see the brief. Do not rename these labels.
 export const NAV = [
-  { key: 'roadmap',     label: 'My roadmap',     path: '/dashboard' },
+  { key: 'roadmap',     label: 'My Roadmap',     path: '/dashboard' },
   { key: 'progress',   label: 'Progress',        path: '/progress' },
-  { key: 'skills',     label: 'Skill insights',  path: '/skills' },
+  { key: 'skills',     label: 'Skill Insights',  path: '/skills' },
   { key: 'resources',  label: 'Resources',       path: '/resources' },
   { key: 'hackathons', label: 'Hackathons',      path: '/hackathons' },
   { key: 'internships',label: 'Internships',     path: '/internships' },
   { key: 'interview',  label: 'AI Interview',    path: '/interview', badge: 'Beta' },
-  { key: 'coach',      label: 'AI coach',        path: '/coach' },
+  { key: 'coach',      label: 'AI Coach',        path: '/coach' },
 ]
 
 export function activeKeyFor(pathname) {
