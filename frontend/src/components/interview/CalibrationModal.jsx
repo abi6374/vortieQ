@@ -2,10 +2,6 @@ import React, { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { INTERVIEW_TRACKS } from './interviewQuestions'
 
-/**
- * CalibrationScreen (Stage 1) — Pre-interview hardware and environment calibration.
- * Designed to sit seamlessly inside AppShell with full Light / Dark theme support.
- */
 export default function CalibrationModal({
   onStart,
   onClose,
@@ -17,7 +13,7 @@ export default function CalibrationModal({
   const [mediaStream, setMediaStream] = useState(null)
   const [hasCamera, setHasCamera] = useState(false)
   const [hasMic, setHasMic] = useState(false)
-  const [permissionState, setPermissionState] = useState('prompt') // 'prompt' | 'checking' | 'granted' | 'denied'
+  const [permissionState, setPermissionState] = useState('prompt')
   const [voiceOnlyFallback, setVoiceOnlyFallback] = useState(false)
   const [micLevel, setMicLevel] = useState(0)
   const [noiseStatus, setNoiseStatus] = useState('Calibrating...')
@@ -30,7 +26,6 @@ export default function CalibrationModal({
   const postureIntervalRef = useRef(null)
   const canvasRef = useRef(null)
 
-  // Helper to completely stop camera & mic hardware stream
   const stopAllTracks = (stream = mediaStream) => {
     if (stream) {
       stream.getTracks().forEach(track => {
@@ -143,7 +138,6 @@ export default function CalibrationModal({
     }
   }
 
-  // Camera Posture & Framing Detection Interval
   useEffect(() => {
     if (!hasCamera || voiceOnlyFallback) {
       setPostureNotice(null)
@@ -213,7 +207,6 @@ export default function CalibrationModal({
     }
   }, [hasCamera, voiceOnlyFallback])
 
-  // Request permissions on mount & cleanup completely on unmount
   useEffect(() => {
     requestMediaAccess()
 
@@ -227,20 +220,17 @@ export default function CalibrationModal({
     }
   }, [])
 
-  // Bind video srcObject when stream updates
   useEffect(() => {
     if (videoPreviewRef.current && mediaStream && hasCamera && !voiceOnlyFallback) {
       videoPreviewRef.current.srcObject = mediaStream
     }
   }, [mediaStream, hasCamera, voiceOnlyFallback])
 
-  // Exit handler (Stops hardware camera light immediately)
   const handleExit = () => {
     stopAllTracks()
     onClose()
   }
 
-  // Start interview handler
   const handleStartInterview = () => {
     onStart({
       trackId: selectedTrack,
@@ -421,7 +411,7 @@ export default function CalibrationModal({
 
             {/* Privacy Note */}
             <div className="text-[11px] text-[#6e6e73] dark:text-[#94A3B8] leading-relaxed bg-[#eaf2fc]/60 dark:bg-[#1E293B]/60 p-3.5 rounded-xl border border-[#0066cc]/10 dark:border-[#38BDF8]/10">
-              <span className="font-bold text-[#1d1d1f] dark:text-slate-200">🔒 Privacy & Consent:</span> Camera and microphone feeds are processed locally in your browser. Video is never uploaded to any external server.
+              <span className="font-bold text-[#1d1d1f] dark:text-slate-200">Privacy & Consent:</span> Camera and microphone feeds are processed locally in your browser. Video is never uploaded to any external server.
             </div>
           </div>
 
