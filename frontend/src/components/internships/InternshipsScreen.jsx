@@ -440,11 +440,6 @@ export default function InternshipsScreen() {
           </div>
           <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
             <div>
-              <div className="flex items-center gap-2 mb-3">
-                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-white/20 border border-white/30">
-                  Verified Employer API
-                </span>
-              </div>
               <h1 className="font-['Manrope'] font-extrabold text-3xl sm:text-4xl leading-tight mb-2">
                 Launch Your Career with<br />Curated Internships
               </h1>
