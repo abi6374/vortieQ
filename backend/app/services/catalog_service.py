@@ -25,6 +25,7 @@ from urllib.parse import urlparse
 import httpx
 
 from app.config import supabase_client
+from app.services.web_search_service import PREFERRED_DOMAINS
 
 
 class ResourceValidationError(Exception):
@@ -47,9 +48,100 @@ _BLOCKED_BARE_DOMAINS = {
     "yahoo.com", "www.yahoo.com",
 }
 
+# URL shorteners hide the real destination domain until resolved, and are a
+# common phishing/spam vector - "reject... unapproved shorteners" from the
+# audit. Rejected outright rather than resolved-then-checked: even a
+# shortener that currently redirects somewhere legitimate is an
+# unnecessary indirection layer a course catalog entry has no reason to
+# use, and the destination can change after the fact without this catalog
+# ever re-checking it.
+_BLOCKED_SHORTENER_DOMAINS = {
+    "bit.ly", "tinyurl.com", "t.co", "goo.gl", "ow.ly", "buff.ly",
+    "is.gd", "rebrand.ly", "cutt.ly", "shorturl.at", "rb.gy", "s.id",
+}
+
+# Trusted-provider allowlist - "maintain trusted domain/provider allowlist"
+# from the audit. Built from web_search_service.PREFERRED_DOMAINS (the
+# pre-existing, real, already-in-production ranking allowlist for search
+# results) PLUS additional verified providers not covered by that list -
+# a single set of domain KNOWLEDGE with two different consumers (search-
+# result ranking there, provenance/trust-labeling here) rather than two
+# hand-maintained lists that would silently drift apart. This is
+# deliberately NOT the only gate (a blocklist + HTTPS + live-reachability
+# check still runs for everything, allowlisted or not - see _check_url),
+# because the real, honest constraint on this deployment is "no paid
+# provider-partner API access" (see this module's top docstring), not "we
+# can enumerate every legitimate education site in advance." An
+# allowlisted domain skips nothing; it is simply never treated as
+# "unrecognized" for provenance/trust-labeling purposes.
+TRUSTED_PROVIDER_DOMAINS = set(PREFERRED_DOMAINS) | {
+    "www.docker.com", "www.coursera.org", "www.edx.org",
+    "www.udemy.com", "udemy.com", "www.khanacademy.org", "khanacademy.org",
+    "vuejs.org", "angular.dev", "nodejs.org", "go.dev",
+    "www.tensorflow.org", "pytorch.org", "scikit-learn.org",
+    "www.postgresql.org", "www.mongodb.com", "cloud.google.com",
+    "learn.microsoft.com", "docs.microsoft.com", "www.geeksforgeeks.org",
+    "www.udacity.com", "udacity.com", "www.pluralsight.com",
+    "leetcode.com", "www.hackerrank.com", "www.codecademy.com",
+}
+
+
+def is_trusted_provider_domain(url: str) -> bool:
+    """Real, cheap trust signal usable outside the live-reachability check
+    too (e.g. to prioritize allowlisted results in web-search ranking).
+
+    TRUSTED_PROVIDER_DOMAINS mixes bare apex domains (from
+    web_search_service.PREFERRED_DOMAINS, e.g. "coursera.org") with a few
+    full hostnames (e.g. "www.docker.com") - matches a host against an
+    entry if they're equal OR the host is a genuine subdomain of the entry
+    (host.endswith("." + entry)), never a bare substring match (which could
+    wrongly trust something like "coursera.org.evil.example")."""
+    try:
+        host = urlparse(url).netloc.lower().split(":")[0]
+    except ValueError:
+        return False
+    if not host:
+        return False
+    return any(host == d or host.endswith(f".{d}") for d in TRUSTED_PROVIDER_DOMAINS)
+
+
+def canonicalize_url(url: str) -> str:
+    """Normalizes a URL for dedup purposes: lowercases the host, strips a
+    trailing slash and common tracking query params (utm_*, ref, fbclid,
+    gclid), and drops the fragment. Two links to the same real resource
+    that differ only by tracking params or a trailing slash must dedupe to
+    ONE provider_resources row, not two - previously ingest_web_result only
+    matched on an exact canonical_url string, so "https://x.com/course" and
+    "https://x.com/course?utm_source=search" would have been ingested (and
+    independently verified, and potentially promoted) as two distinct
+    catalog entries for the same real resource."""
+    try:
+        parsed = urlparse(url.strip())
+    except (ValueError, AttributeError):
+        return url
+    if not parsed.scheme or not parsed.netloc:
+        return url
+    host = parsed.netloc.lower()
+    path = parsed.path.rstrip("/") or ""
+    tracking_prefixes = ("utm_",)
+    tracking_exact = {"ref", "fbclid", "gclid", "mc_cid", "mc_eid"}
+    if parsed.query:
+        kept = [
+            p for p in parsed.query.split("&")
+            if p and not p.split("=")[0].lower().startswith(tracking_prefixes)
+            and p.split("=")[0].lower() not in tracking_exact
+        ]
+        query = "&".join(kept)
+    else:
+        query = ""
+    canonical = f"{parsed.scheme}://{host}{path}"
+    if query:
+        canonical += f"?{query}"
+    return canonical
+
 
 def _check_url(url: str) -> dict:
-    """Runs all three checks and returns the raw verdict, used both by
+    """Runs all checks and returns the raw verdict, used both by
     validate_resource_url (the boolean gate) and record_verification (the
     audit row) so they can never disagree."""
     result = {"https_ok": False, "domain_allowed": False, "reachable": False, "http_status": None}
@@ -63,7 +155,9 @@ def _check_url(url: str) -> dict:
     if not result["https_ok"]:
         return result
     host = parsed.netloc.lower().split(":")[0]
-    result["domain_allowed"] = not (host in _BLOCKED_BARE_DOMAINS and not parsed.path.strip("/"))
+    is_bare_blocked_homepage = host in _BLOCKED_BARE_DOMAINS and not parsed.path.strip("/")
+    is_shortener = host in _BLOCKED_SHORTENER_DOMAINS
+    result["domain_allowed"] = not is_bare_blocked_homepage and not is_shortener
     if not result["domain_allowed"]:
         return result
 
@@ -117,10 +211,11 @@ def ingest_web_result(result: dict, skill_tags: list[str] | None = None, difficu
     never inserts an unverified record, and never fabricates one that
     "looks" valid to paper over a failure.
     """
-    url = (result.get("url") or "").strip()
+    raw_url = (result.get("url") or "").strip()
     title = (result.get("title") or "").strip()
-    if not url or not title:
+    if not raw_url or not title:
         return None
+    url = canonicalize_url(raw_url)
 
     existing = supabase_client.table("provider_resources").select("*").eq("canonical_url", url).execute()
     if existing.data:
@@ -137,6 +232,7 @@ def ingest_web_result(result: dict, skill_tags: list[str] | None = None, difficu
         "difficulty": difficulty if difficulty in ("beginner", "intermediate", "advanced") else None,
         "cost": "free" if _looks_free(url) else "unknown",
         "format": "unknown",
+        "is_trusted_domain": is_trusted_provider_domain(url),
         "availability_status": "unverified",
     }
     inserted = supabase_client.table("provider_resources").insert(row).execute()
@@ -208,6 +304,11 @@ def promote_to_course(provider_resource_id: str) -> dict | None:
         "provider_resource_id": resource["id"],
         "last_verified_at": resource.get("last_checked_at") or datetime.now(timezone.utc).isoformat(),
         "availability_status": "available",
+        # Carries the provider_resource's own trust determination forward
+        # rather than recomputing it from a URL that may have changed
+        # shape by promotion time - the resource was verified as this
+        # exact canonical_url, so its trust label is tied to that check.
+        "is_trusted_domain": bool(resource.get("is_trusted_domain")),
     }).execute()
     if not course.data:
         raise ResourceValidationError(f"Failed to persist promoted course for {provider_resource_id}")
@@ -223,7 +324,15 @@ def revalidate_course(course_id: str) -> bool:
     no longer resolves - "mark stale resources unavailable; do not
     recommend them" from the audit. Not currently scheduled (no cron/task
     queue infra in this deployment) - available for a maintenance endpoint
-    or future scheduled job to call."""
+    or future scheduled job to call.
+
+    Also refreshes is_trusted_domain (migration 013) against the CURRENT
+    TRUSTED_PROVIDER_DOMAINS allowlist - the honest way an old seed-era
+    course (ingested before this column existed, defaulted to false) gets
+    a real trust determination without a one-off backfill migration: it
+    happens naturally the next time this course is actually re-checked,
+    rather than a blanket UPDATE guessing at rows that were never
+    independently verified against the allowlist."""
     c = supabase_client.table("courses").select("id, resource_url").eq("id", course_id).execute()
     if not c.data:
         return False
@@ -231,6 +340,7 @@ def revalidate_course(course_id: str) -> bool:
     ok = validate_resource_url(url)
     supabase_client.table("courses").update({
         "availability_status": "available" if ok else "unavailable",
+        "is_trusted_domain": is_trusted_provider_domain(url),
         "last_verified_at": datetime.now(timezone.utc).isoformat(),
     }).eq("id", course_id).execute()
     return ok
