@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import AppShell from '../layout/AppShell'
 import api from '../../lib/apiClient'
-import CustomSelect from '../ui/CustomSelect'
 
 const CATEGORY_CHIPS = ['All', 'AI/ML', 'Web Dev', 'Data Science', 'DevOps', 'Security', 'Mobile', 'Design', 'Product', 'Marketing']
 const STATUS_STAGES = [
   { id: 'applied', label: 'Applied', color: 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800' },
+  { id: 'saved', label: 'Saved / Reviewing', color: 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800' },
   { id: 'interviewing', label: 'Interviewing', color: 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800' },
   { id: 'offer', label: 'Offer Received', color: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800' },
   { id: 'rejected', label: 'Archived / Closed', color: 'text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700' },
@@ -18,7 +18,63 @@ function fmtDate(dateStr) {
   } catch { return dateStr }
 }
 
-function InternshipDetailModal({ internship, applied, onApply, onClose }) {
+function ApplyConfirmModal({ internship, onConfirm, onSaveForLater, onClose }) {
+  if (!internship) return null
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+      <div
+        className="relative z-10 w-full max-w-md bg-white dark:bg-[#141A26] rounded-3xl border border-[#e0e0e0] dark:border-[#242E40] p-6 shadow-2xl"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-50 dark:bg-blue-900/20 text-[#0066cc] dark:text-[#38BDF8] border border-blue-200 dark:border-blue-800/40">
+            Application Tracking
+          </span>
+          <button
+            onClick={onClose}
+            className="w-7 h-7 rounded-full bg-[#fafafc] dark:bg-[#1E2638] text-[#7a7a7a] hover:text-[#1d1d1f] dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+
+        <h3 className="font-['Manrope'] font-extrabold text-lg text-[#1d1d1f] dark:text-white leading-tight mb-2">
+          Did you submit an application to {internship.company}?
+        </h3>
+        <p className="text-xs text-[#6e6e73] dark:text-[#9CA3AF] leading-relaxed mb-6">
+          We opened {internship.company}'s official job board in a new tab. Once you complete the application, let us know so we can track its status in your dashboard.
+        </p>
+
+        <div className="flex flex-col gap-2.5">
+          <button
+            type="button"
+            onClick={() => onConfirm(internship.id, 'applied')}
+            className="w-full py-2.5 px-4 rounded-xl bg-[#0066cc] hover:bg-[#004fa3] dark:bg-[#38BDF8] dark:hover:bg-[#0ea5e9] text-white dark:text-[#0B0E14] font-bold text-xs text-center transition-all shadow-sm cursor-pointer"
+          >
+            ✓ Yes, I Submitted My Application
+          </button>
+          <button
+            type="button"
+            onClick={() => onSaveForLater(internship.id, 'saved')}
+            className="w-full py-2.5 px-4 rounded-xl border border-[#0066cc] dark:border-[#38BDF8] text-[#0066cc] dark:text-[#38BDF8] font-bold text-xs text-center hover:bg-[#eaf2fc] dark:hover:bg-white/5 transition-colors cursor-pointer"
+          >
+            Save for Later (Not applied yet)
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-full py-2 rounded-xl text-xs text-[#7a7a7a] hover:text-[#1d1d1f] dark:hover:text-white font-semibold transition-colors cursor-pointer"
+          >
+            Just Browsing (Don't track yet)
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function InternshipDetailModal({ internship, applied, onVisitBoard, onToggleTrack, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
@@ -119,17 +175,27 @@ function InternshipDetailModal({ internship, applied, onApply, onClose }) {
           )}
 
           {/* Action CTAs */}
-          <div className="flex gap-3 pt-2">
-            <a
-              href={internship.apply_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-1 py-3 rounded-xl bg-[#0066cc] hover:bg-[#004fa3] dark:bg-[#38BDF8] dark:hover:bg-[#0ea5e9] text-white dark:text-[#0B0E14] font-bold text-sm text-center transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
-              onClick={() => onApply(internship.id, internship.apply_url)}
-            >
-              <span>{applied ? '✓ Applied — View Posting' : 'Apply on Official Board ↗'}</span>
-            </a>
+          <div className="flex flex-col sm:flex-row gap-3 pt-2">
             <button
+              type="button"
+              onClick={() => onVisitBoard(internship)}
+              className="flex-1 py-3 rounded-xl bg-[#0066cc] hover:bg-[#004fa3] dark:bg-[#38BDF8] dark:hover:bg-[#0ea5e9] text-white dark:text-[#0B0E14] font-bold text-sm text-center transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <span>Apply on Official Board ↗</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => onToggleTrack(internship.id, applied ? 'remove' : 'applied')}
+              className={`px-4 py-3 rounded-xl border font-bold text-xs transition-colors cursor-pointer ${
+                applied
+                  ? 'border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20'
+                  : 'border-[#0066cc] dark:border-[#38BDF8] text-[#0066cc] dark:text-[#38BDF8] hover:bg-[#eaf2fc] dark:hover:bg-white/5'
+              }`}
+            >
+              {applied ? 'Undo Applied' : 'Mark as Applied'}
+            </button>
+            <button
+              type="button"
               onClick={onClose}
               className="px-5 py-3 rounded-xl border border-[#e0e0e0] dark:border-[#242E40] text-[#1d1d1f] dark:text-white font-semibold text-sm hover:bg-[#f5f5f7] dark:hover:bg-white/5 transition-colors cursor-pointer"
             >
@@ -142,7 +208,7 @@ function InternshipDetailModal({ internship, applied, onApply, onClose }) {
   )
 }
 
-function InternshipCard({ internship, applied, onApply, onView }) {
+function InternshipCard({ internship, applied, onVisitBoard, onToggleTrack, onView }) {
   return (
     <div
       className="group bg-white dark:bg-[#141A26] rounded-2xl border border-[#e0e0e0] dark:border-[#242E40] p-5 shadow-sm hover:shadow-[0_8px_32px_rgba(0,102,204,0.10)] dark:hover:shadow-[0_8px_32px_rgba(56,189,248,0.08)] transition-all duration-200 hover:-translate-y-0.5 cursor-pointer flex flex-col justify-between"
@@ -199,26 +265,38 @@ function InternshipCard({ internship, applied, onApply, onView }) {
       </div>
 
       {/* Footer CTA */}
-      <div className="mt-4 pt-3 border-t border-[#f0f0f0] dark:border-[#242E40] flex items-center justify-between gap-3">
-        <span className="text-xs font-semibold text-[#1d1d1f] dark:text-white">
+      <div className="mt-4 pt-3 border-t border-[#f0f0f0] dark:border-[#242E40] flex items-center justify-between gap-2">
+        <span className="text-xs font-semibold text-[#1d1d1f] dark:text-white truncate">
           {internship.stipend || 'Competitive'}
         </span>
-        <a
-          href={internship.apply_url || '#'}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={e => {
-            e.stopPropagation()
-            onApply(internship.id, internship.apply_url)
-          }}
-          className={`px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all flex items-center gap-1 cursor-pointer ${
-            applied
-              ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
-              : 'bg-[#0066cc] hover:bg-[#004fa3] dark:bg-[#38BDF8] dark:hover:bg-[#0ea5e9] text-white dark:text-[#0B0E14] shadow-sm'
-          }`}
-        >
-          <span>{applied ? '✓ Applied — View Job ↗' : 'Apply on Website ↗'}</span>
-        </a>
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={e => { e.stopPropagation(); onVisitBoard(internship) }}
+            className="px-3 py-1.5 rounded-xl font-bold text-xs bg-[#0066cc] hover:bg-[#004fa3] dark:bg-[#38BDF8] dark:hover:bg-[#0ea5e9] text-white dark:text-[#0B0E14] shadow-sm flex items-center gap-1 cursor-pointer"
+          >
+            <span>Apply on Website ↗</span>
+          </button>
+          {applied ? (
+            <button
+              type="button"
+              title="Remove from My Applications"
+              onClick={e => { e.stopPropagation(); onToggleTrack(internship.id, 'remove') }}
+              className="px-2.5 py-1.5 rounded-xl font-bold text-xs bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 hover:bg-red-50 hover:text-red-600 transition-colors cursor-pointer"
+            >
+              ✓ Applied
+            </button>
+          ) : (
+            <button
+              type="button"
+              title="Track application status"
+              onClick={e => { e.stopPropagation(); onToggleTrack(internship.id, 'applied') }}
+              className="px-2.5 py-1.5 rounded-xl font-bold text-xs border border-[#e0e0e0] dark:border-[#242E40] text-[#7a7a7a] hover:text-[#0066cc] dark:hover:text-[#38BDF8] transition-colors cursor-pointer"
+            >
+              Track
+            </button>
+          )}
+        </div>
       </div>
     </div>
   )
@@ -235,6 +313,7 @@ export default function InternshipsScreen() {
   const [searchQuery, setSearchQuery] = useState('')
   const [appliedIds, setAppliedIds] = useState(new Set())
   const [activeDetail, setActiveDetail] = useState(null)
+  const [confirmTarget, setConfirmTarget] = useState(null)
   const [toast, setToast] = useState(null)
 
   const showToast = (msg, type = 'success') => {
@@ -263,15 +342,51 @@ export default function InternshipsScreen() {
 
   useEffect(() => { loadInternships() }, [loadInternships])
 
-  const handleApply = (internshipId, applyUrl) => {
-    setAppliedIds(prev => new Set([...prev, internshipId]))
-    const item = internships.find(x => x.id === internshipId)
-    if (item && !myInternships.some(m => m.id === internshipId)) {
-      setMyInternships(prev => [...prev, { ...item, application_status: 'applied', applied_on: new Date().toISOString() }])
+  const handleVisitBoard = (internship) => {
+    if (internship.apply_url) {
+      window.open(internship.apply_url, '_blank', 'noopener')
     }
-    showToast('Redirecting to official job posting...')
-    // Track in background
-    api.post(`/api/internships/${internshipId}/apply`).catch(() => {})
+    // If not already tracked as applied, open confirmation dialog
+    if (!appliedIds.has(internship.id)) {
+      setConfirmTarget(internship)
+    }
+  }
+
+  const handleToggleTrack = async (internshipId, status = 'applied') => {
+    if (status === 'remove') {
+      try {
+        await api.delete(`/api/internships/${internshipId}/apply`)
+        setAppliedIds(prev => {
+          const next = new Set(prev)
+          next.delete(internshipId)
+          return next
+        })
+        setMyInternships(prev => prev.filter(i => i.id !== internshipId))
+        showToast('Removed from My Applications')
+      } catch {
+        showToast('Could not remove application', 'error')
+      }
+      return
+    }
+
+    try {
+      await api.post(`/api/internships/${internshipId}/apply`)
+      if (status !== 'applied') {
+        await api.patch(`/api/internships/${internshipId}/status?new_status=${status}`)
+      }
+      setAppliedIds(prev => new Set([...prev, internshipId]))
+      const item = internships.find(x => x.id === internshipId)
+      if (item) {
+        setMyInternships(prev => {
+          const filtered = prev.filter(i => i.id !== internshipId)
+          return [...filtered, { ...item, application_status: status, applied_on: new Date().toISOString() }]
+        })
+      }
+      showToast(status === 'saved' ? 'Saved to My Applications!' : 'Tracked as Applied! ✓')
+      setConfirmTarget(null)
+    } catch {
+      showToast('Could not record application', 'error')
+    }
   }
 
   const handleStatusChange = async (internshipId, newStatus) => {
@@ -305,235 +420,260 @@ export default function InternshipsScreen() {
         )}
 
         {/* Hero Banner */}
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0066cc] via-[#0052a3] to-[#003d7a] p-8 sm:p-10 text-white shadow-[0_20px_60px_rgba(0,102,204,0.25)]">
-            <div className="absolute inset-0 opacity-10">
-              <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-white transform translate-x-32 -translate-y-32" />
-              <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full bg-white transform -translate-x-16 translate-y-16" />
-            </div>
-            <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-white/20 border border-white/30">
-                    Verified Employer API
-                  </span>
-                </div>
-                <h1 className="font-['Manrope'] font-extrabold text-3xl sm:text-4xl leading-tight mb-2">
-                  Launch Your Career with<br />Curated Internships
-                </h1>
-                <p className="text-white/75 text-sm sm:text-base max-w-md">
-                  Live openings aggregated directly from company Greenhouse job boards (Anthropic, OpenAI, Stripe, Figma, Vercel & more).
-                </p>
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0066cc] via-[#0052a3] to-[#003d7a] p-8 sm:p-10 text-white shadow-[0_20px_60px_rgba(0,102,204,0.25)]">
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-white transform translate-x-32 -translate-y-32" />
+            <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full bg-white transform -translate-x-16 translate-y-16" />
+          </div>
+          <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-white/20 border border-white/30">
+                  Verified Employer API
+                </span>
               </div>
-              <div className="flex flex-col gap-2 text-sm">
-                <div className="flex items-center gap-3 bg-white/15 rounded-xl px-4 py-3">
-                  <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center font-bold">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-                  </div>
-                  <div>
-                    <p className="font-bold">{internships.filter(i => i.is_remote).length} Remote-Friendly</p>
-                    <p className="text-white/70 text-xs">internships available</p>
-                  </div>
+              <h1 className="font-['Manrope'] font-extrabold text-3xl sm:text-4xl leading-tight mb-2">
+                Launch Your Career with<br />Curated Internships
+              </h1>
+              <p className="text-white/75 text-sm sm:text-base max-w-md">
+                Live openings aggregated directly from company Greenhouse job boards (Anthropic, OpenAI, Stripe, Figma, Vercel & more).
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 text-sm">
+              <div className="flex items-center gap-3 bg-white/15 rounded-xl px-4 py-3">
+                <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center font-bold">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
                 </div>
-                <div className="flex items-center gap-3 bg-white/15 rounded-xl px-4 py-3">
-                  <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center font-bold">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
-                  </div>
-                  <div>
-                    <p className="font-bold">{new Set(internships.map(i => i.company)).size} Tech Companies</p>
-                    <p className="text-white/70 text-xs">live greenhouse feeds</p>
-                  </div>
+                <div>
+                  <p className="font-bold">{internships.filter(i => i.is_remote).length} Remote-Friendly</p>
+                  <p className="text-white/70 text-xs">internships available</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 bg-white/15 rounded-xl px-4 py-3">
+                <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center font-bold">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+                </div>
+                <div>
+                  <p className="font-bold">{new Set(internships.map(i => i.company)).size} Tech Companies</p>
+                  <p className="text-white/70 text-xs">live greenhouse feeds</p>
                 </div>
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Navigation Tabs */}
-          <div className="flex border-b border-[#e0e0e0] dark:border-[#242E40]">
-            {[
-              { id: 'discover', label: 'Discover Internships', count: filtered.length },
-              { id: 'mine', label: 'My Applications', count: myInternships.length },
-            ].map(t => (
-              <button
-                key={t.id}
-                onClick={() => setTab(t.id)}
-                className={`pb-3 px-4 text-sm font-bold border-b-2 transition-all flex items-center gap-2 cursor-pointer ${
-                  tab === t.id
-                    ? 'border-[#0066cc] text-[#0066cc] dark:border-[#38BDF8] dark:text-[#38BDF8]'
-                    : 'border-transparent text-[#7a7a7a] hover:text-[#1d1d1f] dark:hover:text-white'
-                }`}
-              >
-                {t.label}
-                <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-black/5 dark:bg-white/10 text-[#64748b] dark:text-slate-400">{t.count}</span>
-              </button>
-            ))}
-          </div>
+        {/* Navigation Tabs */}
+        <div className="flex border-b border-[#e0e0e0] dark:border-[#242E40]">
+          {[
+            { id: 'discover', label: 'Discover Internships', count: filtered.length },
+            { id: 'mine', label: 'My Applications', count: myInternships.length },
+          ].map(t => (
+            <button
+              key={t.id}
+              onClick={() => setTab(t.id)}
+              className={`pb-3 px-4 text-sm font-bold border-b-2 transition-all flex items-center gap-2 cursor-pointer ${
+                tab === t.id
+                  ? 'border-[#0066cc] text-[#0066cc] dark:border-[#38BDF8] dark:text-[#38BDF8]'
+                  : 'border-transparent text-[#7a7a7a] hover:text-[#1d1d1f] dark:hover:text-white'
+              }`}
+            >
+              {t.label}
+              <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-black/5 dark:bg-white/10 text-[#64748b] dark:text-slate-400">{t.count}</span>
+            </button>
+          ))}
+        </div>
 
-          {tab === 'discover' && (
-            <>
-              {/* Filter controls */}
-              <div className="flex flex-col gap-3">
-                <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
-                  {/* Search Bar */}
-                  <div className="relative flex-1 max-w-md">
-                    <input
-                      type="text"
-                      placeholder="Search title, company, or location…"
-                      value={searchQuery}
-                      onChange={e => setSearchQuery(e.target.value)}
-                      className="w-full pl-9 pr-4 py-2 rounded-xl border border-[#e0e0e0] dark:border-[#242E40] bg-white dark:bg-[#141A26] text-sm text-[#1d1d1f] dark:text-white placeholder-[#888] focus:outline-none focus:border-[#0066cc] dark:focus:border-[#38BDF8]"
-                    />
-                    <svg className="absolute left-3 top-2.5 text-[#888]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                  </div>
-
-                  {/* Remote Toggle with Rounded Box */}
-                  <label className="flex items-center gap-2.5 text-xs sm:text-sm font-semibold text-[#1d1d1f] dark:text-white cursor-pointer select-none px-3 py-2 rounded-xl border border-[#e0e0e0] dark:border-[#242E40] bg-white dark:bg-[#141A26] hover:border-[#0066cc] dark:hover:border-[#38BDF8] transition-colors shadow-xs">
-                    <input
-                      type="checkbox"
-                      checked={remoteOnly}
-                      onChange={e => setRemoteOnly(e.target.checked)}
-                      className="w-4 h-4 rounded-md text-[#0066cc] border-[#d1d5db] dark:border-[#4b5563] focus:ring-0 cursor-pointer accent-[#0066cc]"
-                    />
-                    <span>Remote Only</span>
-                  </label>
+        {tab === 'discover' && (
+          <>
+            {/* Filter controls */}
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+                {/* Search Bar */}
+                <div className="relative flex-1 max-w-md">
+                  <input
+                    type="text"
+                    placeholder="Search title, company, or location…"
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    className="w-full pl-9 pr-4 py-2 rounded-xl border border-[#e0e0e0] dark:border-[#242E40] bg-white dark:bg-[#141A26] text-sm text-[#1d1d1f] dark:text-white placeholder-[#888] focus:outline-none focus:border-[#0066cc] dark:focus:border-[#38BDF8]"
+                  />
+                  <svg className="absolute left-3 top-2.5 text-[#888]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                 </div>
 
-                {/* Category Chips */}
-                <div className="overflow-x-auto pb-1">
-                  <div className="flex gap-2">
-                    {CATEGORY_CHIPS.map(cat => (
-                      <button
-                        key={cat}
-                        onClick={() => setSelectedCategory(cat)}
-                        className={`flex-none px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer ${
-                          selectedCategory === cat
-                            ? 'bg-[#0066cc] dark:bg-[#38BDF8] text-white dark:text-[#0B0E14] border-[#0066cc] dark:border-[#38BDF8]'
-                            : 'bg-white dark:bg-[#141A26] text-[#333] dark:text-[#D1D5DB] border-[#e0e0e0] dark:border-[#242E40] hover:border-[#0066cc] dark:hover:border-[#38BDF8]'
-                        }`}
-                      >
-                        {cat}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                {/* Remote Toggle with Rounded Box */}
+                <label className="flex items-center gap-2.5 text-xs sm:text-sm font-semibold text-[#1d1d1f] dark:text-white cursor-pointer select-none px-3.5 py-2 rounded-xl border border-[#e0e0e0] dark:border-[#242E40] bg-white dark:bg-[#141A26] hover:border-[#0066cc] dark:hover:border-[#38BDF8] transition-colors shadow-xs">
+                  <input
+                    type="checkbox"
+                    checked={remoteOnly}
+                    onChange={e => setRemoteOnly(e.target.checked)}
+                    className="w-4 h-4 rounded-md text-[#0066cc] border-[#d1d5db] dark:border-[#4b5563] focus:ring-0 cursor-pointer accent-[#0066cc]"
+                  />
+                  <span>Remote Only</span>
+                </label>
               </div>
 
-              {/* Feed Count */}
-              {!loading && !error && (
-                <p className="text-sm text-[#7a7a7a] dark:text-[#9CA3AF]">
-                  Showing <strong className="text-[#1d1d1f] dark:text-white">{filtered.length}</strong> verified opportunities
-                  {selectedCategory !== 'All' && ` in ${selectedCategory}`}
-                  {remoteOnly && ' · Remote Only'}
-                </p>
-              )}
-
-              {/* States */}
-              {loading && (
-                <div className="flex flex-col items-center justify-center py-20 gap-4">
-                  <div className="w-10 h-10 rounded-full border-4 border-[#e0e0e0] border-t-[#0066cc] animate-spin" />
-                  <p className="text-sm text-[#7a7a7a] dark:text-[#9CA3AF]">Querying live Greenhouse boards in parallel…</p>
-                </div>
-              )}
-              {error && !loading && (
-                <div className="flex flex-col items-center gap-4 py-16">
-                  <p className="text-[#6e6e73] dark:text-[#9CA3AF] text-sm">{error}</p>
-                  <button onClick={loadInternships} className="px-4 py-2 rounded-xl bg-[#0066cc] text-white text-sm font-semibold cursor-pointer">Retry</button>
-                </div>
-              )}
-              {!loading && !error && filtered.length === 0 && (
-                <div className="flex flex-col items-center gap-3 py-16 bg-white dark:bg-[#141A26] rounded-2xl border border-[#e0e0e0] dark:border-[#242E40]">
-                  <p className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">No Internships Found</p>
-                  <p className="text-xs sm:text-sm text-[#7a7a7a] dark:text-[#9CA3AF] text-center max-w-sm">
-                    No internship openings match your active filter and search criteria.
-                  </p>
-                  <button onClick={() => { setSelectedCategory('All'); setRemoteOnly(false); setSearchQuery('') }} className="mt-2 text-xs font-bold text-[#0066cc] dark:text-[#38BDF8] cursor-pointer">
-                    Reset all filters
-                  </button>
-                </div>
-              )}
-
-              {/* Cards Grid */}
-              {!loading && !error && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                  {filtered.map(i => (
-                    <InternshipCard
-                      key={i.id}
-                      internship={i}
-                      applied={appliedIds.has(i.id)}
-                      onApply={handleApply}
-                      onView={setActiveDetail}
-                    />
+              {/* Category Chips */}
+              <div className="overflow-x-auto pb-1">
+                <div className="flex gap-2">
+                  {CATEGORY_CHIPS.map(cat => (
+                    <button
+                      key={cat}
+                      onClick={() => setSelectedCategory(cat)}
+                      className={`flex-none px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer ${
+                        selectedCategory === cat
+                          ? 'bg-[#0066cc] dark:bg-[#38BDF8] text-white dark:text-[#0B0E14] border-[#0066cc] dark:border-[#38BDF8]'
+                          : 'bg-white dark:bg-[#141A26] text-[#333] dark:text-[#D1D5DB] border-[#e0e0e0] dark:border-[#242E40] hover:border-[#0066cc] dark:hover:border-[#38BDF8]'
+                      }`}
+                    >
+                      {cat}
+                    </button>
                   ))}
                 </div>
-              )}
-            </>
-          )}
-
-          {tab === 'mine' && (
-            <div className="flex flex-col gap-4">
-              {myInternships.length === 0 ? (
-                <div className="flex flex-col items-center gap-3 py-16 bg-white dark:bg-[#141A26] rounded-2xl border border-[#e0e0e0] dark:border-[#242E40]">
-                  <p className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">No Applications Tracked</p>
-                  <p className="text-xs sm:text-sm text-[#7a7a7a] dark:text-[#9CA3AF] text-center max-w-xs">
-                    Click "Apply Now" on any internship in Discover to automatically track its progress here.
-                  </p>
-                  <button onClick={() => setTab('discover')} className="mt-2 px-4 py-2 rounded-xl bg-[#0066cc] text-white text-xs font-bold cursor-pointer">
-                    Explore Internships
-                  </button>
-                </div>
-              ) : (
-                myInternships.map(item => {
-                  const currentStatus = item.application_status || 'applied'
-                  const stageObj = STATUS_STAGES.find(s => s.id === currentStatus) || STATUS_STAGES[0]
-                  return (
-                    <div key={item.id} className="bg-white dark:bg-[#141A26] rounded-2xl border border-[#e0e0e0] dark:border-[#242E40] p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm">
-                      <div className="flex flex-col gap-1.5 flex-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-xs font-bold uppercase text-[#0066cc] dark:text-[#38BDF8]">{item.company}</span>
-                          <h3 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">{item.title}</h3>
-                          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase border ${stageObj.color}`}>
-                            {stageObj.label}
-                          </span>
-                        </div>
-                        <p className="text-xs text-[#7a7a7a] dark:text-[#9CA3AF]">
-                          {item.location} · Tracked on {fmtDate(item.applied_on)}
-                        </p>
-                      </div>
-
-                      {/* Status Pipeline Changer */}
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-xs text-[#7a7a7a] font-medium">Stage:</span>
-                        <CustomSelect
-                          value={currentStatus}
-                          onChange={newStatus => handleStatusChange(item.id, newStatus)}
-                          options={STATUS_STAGES.map(s => ({ value: s.id, label: s.label }))}
-                          className="flex-none"
-                          buttonClassName="!py-1.5 !px-3 !text-xs !rounded-xl !border-[#e0e0e0] dark:!border-[#242E40] !bg-[#fafafc] dark:!bg-[#1a2032] font-bold"
-                          menuClassName="right-0 left-auto !rounded-xl"
-                        />
-                        <a
-                          href={item.apply_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="px-3 py-1.5 rounded-xl border border-[#0066cc] dark:border-[#38BDF8] text-[#0066cc] dark:text-[#38BDF8] text-xs font-bold hover:bg-[#eaf2fc] dark:hover:bg-white/5 transition-colors cursor-pointer"
-                        >
-                          View Job ↗
-                        </a>
-                      </div>
-                    </div>
-                  )
-                })
-              )}
+              </div>
             </div>
-          )}
-        </div>
+
+            {/* Feed Count */}
+            {!loading && !error && (
+              <p className="text-sm text-[#7a7a7a] dark:text-[#9CA3AF]">
+                Showing <strong className="text-[#1d1d1f] dark:text-white">{filtered.length}</strong> verified opportunities
+                {selectedCategory !== 'All' && ` in ${selectedCategory}`}
+                {remoteOnly && ' · Remote Only'}
+              </p>
+            )}
+
+            {/* States */}
+            {loading && (
+              <div className="flex flex-col items-center justify-center py-20 gap-4">
+                <div className="w-10 h-10 rounded-full border-4 border-[#e0e0e0] border-t-[#0066cc] animate-spin" />
+                <p className="text-sm text-[#7a7a7a] dark:text-[#9CA3AF]">Querying live Greenhouse boards in parallel…</p>
+              </div>
+            )}
+            {error && !loading && (
+              <div className="flex flex-col items-center gap-4 py-16">
+                <p className="text-[#6e6e73] dark:text-[#9CA3AF] text-sm">{error}</p>
+                <button onClick={loadInternships} className="px-4 py-2 rounded-xl bg-[#0066cc] text-white text-sm font-semibold cursor-pointer">Retry</button>
+              </div>
+            )}
+            {!loading && !error && filtered.length === 0 && (
+              <div className="flex flex-col items-center gap-3 py-16 bg-white dark:bg-[#141A26] rounded-2xl border border-[#e0e0e0] dark:border-[#242E40]">
+                <p className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">No Internships Found</p>
+                <p className="text-xs sm:text-sm text-[#7a7a7a] dark:text-[#9CA3AF] text-center max-w-sm">
+                  No internship openings match your active filter and search criteria.
+                </p>
+                <button onClick={() => { setSelectedCategory('All'); setRemoteOnly(false); setSearchQuery('') }} className="mt-2 text-xs font-bold text-[#0066cc] dark:text-[#38BDF8] cursor-pointer">
+                  Reset all filters
+                </button>
+              </div>
+            )}
+
+            {/* Cards Grid */}
+            {!loading && !error && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {filtered.map(i => (
+                  <InternshipCard
+                    key={i.id}
+                    internship={i}
+                    applied={appliedIds.has(i.id)}
+                    onVisitBoard={handleVisitBoard}
+                    onToggleTrack={handleToggleTrack}
+                    onView={setActiveDetail}
+                  />
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {tab === 'mine' && (
+          <div className="flex flex-col gap-4">
+            {myInternships.length === 0 ? (
+              <div className="flex flex-col items-center gap-3 py-16 bg-white dark:bg-[#141A26] rounded-2xl border border-[#e0e0e0] dark:border-[#242E40]">
+                <p className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">No Applications Tracked</p>
+                <p className="text-xs sm:text-sm text-[#7a7a7a] dark:text-[#9CA3AF] text-center max-w-xs">
+                  Click "Apply on Website" or "Track" on any internship in Discover to automatically track its progress here.
+                </p>
+                <button onClick={() => setTab('discover')} className="mt-2 px-4 py-2 rounded-xl bg-[#0066cc] text-white text-xs font-bold cursor-pointer">
+                  Explore Internships
+                </button>
+              </div>
+            ) : (
+              myInternships.map(item => {
+                const currentStatus = item.application_status || 'applied'
+                const stageObj = STATUS_STAGES.find(s => s.id === currentStatus) || STATUS_STAGES[0]
+                return (
+                  <div key={item.id} className="bg-white dark:bg-[#141A26] rounded-2xl border border-[#e0e0e0] dark:border-[#242E40] p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm">
+                    <div className="flex flex-col gap-1.5 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-xs font-bold uppercase text-[#0066cc] dark:text-[#38BDF8]">{item.company}</span>
+                        <h3 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">{item.title}</h3>
+                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase border ${stageObj.color}`}>
+                          {stageObj.label}
+                        </span>
+                      </div>
+                      <p className="text-xs text-[#7a7a7a] dark:text-[#9CA3AF]">
+                        {item.location} · Tracked on {fmtDate(item.applied_on)}
+                      </p>
+                    </div>
+
+                    {/* Status Pipeline Changer */}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs text-[#7a7a7a] font-medium">Stage:</span>
+                      <div className="relative">
+                        <select
+                          value={currentStatus}
+                          onChange={e => handleStatusChange(item.id, e.target.value)}
+                          className="appearance-none pl-3 pr-7 py-1.5 rounded-xl border border-[#e0e0e0] dark:border-[#242E40] bg-[#fafafc] dark:bg-[#1a2032] text-xs font-bold text-[#1d1d1f] dark:text-white cursor-pointer focus:outline-none focus:border-[#0066cc]"
+                        >
+                          {STATUS_STAGES.map(s => (
+                            <option key={s.id} value={s.id}>{s.label}</option>
+                          ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-[#7a7a7a]">
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleToggleTrack(item.id, 'remove')}
+                        className="px-2.5 py-1.5 rounded-xl border border-red-200 dark:border-red-900/40 text-red-600 dark:text-red-400 text-xs font-semibold hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors cursor-pointer"
+                      >
+                        Remove
+                      </button>
+                      <a
+                        href={item.apply_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-3 py-1.5 rounded-xl border border-[#0066cc] dark:border-[#38BDF8] text-[#0066cc] dark:text-[#38BDF8] text-xs font-bold hover:bg-[#eaf2fc] dark:hover:bg-white/5 transition-colors"
+                      >
+                        View Job ↗
+                      </a>
+                    </div>
+                  </div>
+                )
+              })
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Modal View */}
       {activeDetail && (
         <InternshipDetailModal
           internship={activeDetail}
           applied={appliedIds.has(activeDetail.id)}
-          onApply={handleApply}
+          onVisitBoard={handleVisitBoard}
+          onToggleTrack={handleToggleTrack}
           onClose={() => setActiveDetail(null)}
+        />
+      )}
+
+      {/* Post-Visit Confirmation Modal */}
+      {confirmTarget && (
+        <ApplyConfirmModal
+          internship={confirmTarget}
+          onConfirm={handleToggleTrack}
+          onSaveForLater={handleToggleTrack}
+          onClose={() => setConfirmTarget(null)}
         />
       )}
     </AppShell>

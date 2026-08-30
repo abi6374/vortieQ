@@ -315,3 +315,13 @@ def update_application_status(user_id: str, internship_id: str, new_status: str)
         except Exception as e:
             logger.warning(f"update_application_status failed: {e}")
     return {"success": True, "new_status": new_status}
+
+
+def unapply_from_internship(user_id: str, internship_id: str) -> dict:
+    """Remove an internship from user's tracked applications."""
+    if _HAS_SUPABASE:
+        try:
+            supabase_client.table("user_internships").delete().eq("user_id", user_id).eq("internship_id", internship_id).execute()
+        except Exception as e:
+            logger.warning(f"user_internships delete failed: {e}")
+    return {"success": True, "internship_id": internship_id, "status": "removed"}
