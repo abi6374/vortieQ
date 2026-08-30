@@ -254,9 +254,7 @@ function ToggleSidebarButton({ isExpanded, onClick }) {
       >
         <SidebarIcon className="w-5 h-5" />
       </button>
-      {!isExpanded && (
-        <Tooltip label="Expand Sidebar" visible={hovered} />
-      )}
+      <Tooltip label={isExpanded ? 'Collapse Sidebar' : 'Expand Sidebar'} visible={hovered} />
     </div>
   )
 }
@@ -324,8 +322,8 @@ export default function AppSidebar() {
       }`}
       aria-label="Primary Navigation"
     >
-      {/* ── Top Section: Symmetrical Expand/Collapse Button ── */}
-      <div className={`flex items-center flex-none w-full ${isExpanded ? 'justify-end px-1.5 pb-2' : 'justify-center pb-1'}`}>
+      {/* ── Top Section: Fixed-Position Expand/Collapse Button ── */}
+      <div className={`flex items-center flex-none w-full ${isExpanded ? 'justify-start px-0.5 pb-1' : 'justify-center pb-1'}`}>
         <ToggleSidebarButton
           isExpanded={isExpanded}
           onClick={() => setCollapsed(isExpanded)}
