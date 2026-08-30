@@ -1,14 +1,18 @@
 import React, { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useSidebar } from '../../contexts/SidebarContext'
 
 /**
  * PathFinder Floating Glassmorphic Sidebar
- * - Detached floating pill design (not attached to any screen edge)
- * - Vertically centered 8 navigation features with small gaps
- * - Expanded thickness (68px width) with 48px tactile buttons
- * - Smooth right-side flyout tooltip on hover showing feature text & badges
- * - Bottom Sign Out and live system status pulse
+ * - Collapsed State (68px width):
+ *   - Top Expand button (symmetrically positioned matching the Logout button at the bottom)
+ *   - Vertically centered 8 feature icons with smooth hover tooltips
+ *   - Bottom Sign Out button + live green health indicator
+ * - Expanded State (240px width):
+ *   - Top Header with brand and Collapse button
+ *   - Full-width feature items with Icon + Text Label + Badge
+ *   - Bottom Sign Out with text + System Operational status
  */
 
 export const SidebarIcon = ({ className = 'w-4 h-4' }) => (
@@ -125,13 +129,13 @@ function Tooltip({ label, badge, visible }) {
   )
 }
 
-// ─── Nav Item Component ───────────────────────────────────────────────────────
+// ─── Collapsed Nav Item (Icon Only with Flyout Tooltip) ────────────────────────
 
-function NavItem({ item, isActive, onClick }) {
+function CollapsedNavItem({ item, isActive, onClick }) {
   const [hovered, setHovered] = useState(false)
 
   return (
-    <div className="relative flex items-center justify-center">
+    <div className="relative flex items-center justify-center w-full">
       <button
         type="button"
         onClick={() => onClick(item.path)}
@@ -144,7 +148,7 @@ function NavItem({ item, isActive, onClick }) {
         {/* Spring-animated active capsule pill */}
         {isActive ? (
           <motion.span
-            layoutId="sidebar-active-pill"
+            layoutId="sidebar-active-pill-collapsed"
             className="absolute inset-0 rounded-2xl"
             style={{
               background: 'linear-gradient(135deg, #0066cc, #004fa3)',
@@ -181,10 +185,113 @@ function NavItem({ item, isActive, onClick }) {
   )
 }
 
+// ─── Expanded Nav Item (Icon + Text Label + Badge) ─────────────────────────────
+
+function ExpandedNavItem({ item, isActive, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={() => onClick(item.path)}
+      aria-label={item.label}
+      aria-current={isActive ? 'page' : undefined}
+      className={`relative w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition-all duration-150 cursor-pointer border-none outline-none text-left ${
+        isActive
+          ? 'text-white'
+          : 'text-[#333333] dark:text-[#E2E8F0] hover:bg-black/[0.04] dark:hover:bg-white/[0.06]'
+      }`}
+    >
+      {/* Spring active background */}
+      {isActive && (
+        <motion.span
+          layoutId="sidebar-active-pill-expanded"
+          className="absolute inset-0 rounded-2xl z-0"
+          style={{
+            background: 'linear-gradient(135deg, #0066cc, #004fa3)',
+            boxShadow: '0 4px 16px rgba(0,102,204,0.38), 0 1px 3px rgba(0,102,204,0.25)',
+          }}
+          transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+        />
+      )}
+
+      {/* Icon */}
+      <span
+        className="relative z-10 flex-none flex items-center justify-center"
+        style={{
+          color: isActive ? '#ffffff' : 'var(--muted, #7a7a7a)',
+        }}
+      >
+        {React.cloneElement(ICONS[item.key], {
+          style: { strokeWidth: isActive ? 2.2 : 1.8 }
+        })}
+      </span>
+
+      {/* Label Text */}
+      <span className="relative z-10 font-semibold text-sm truncate flex-1">
+        {item.label}
+      </span>
+
+      {/* Badge */}
+      {item.badge && (
+        <span
+          className={`relative z-10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md ${
+            isActive
+              ? 'bg-white/20 text-white'
+              : 'bg-[#0066cc]/10 dark:bg-[#38BDF8]/20 text-[#0066cc] dark:text-[#38BDF8]'
+          }`}
+        >
+          {item.badge}
+        </span>
+      )}
+    </button>
+  )
+}
+
+// ─── Expand / Collapse Toggle Button ──────────────────────────────────────────
+
+function ToggleSidebarButton({ isExpanded, onClick }) {
+  const [hovered, setHovered] = useState(false)
+
+  return (
+    <div className="relative flex items-center justify-center">
+      <button
+        type="button"
+        onClick={onClick}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        aria-label={isExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
+        className="w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-150 cursor-pointer border-none outline-none text-[#7a7a7a] hover:text-[#0066cc] dark:hover:text-[#38BDF8] hover:bg-[#0066cc]/10 dark:hover:bg-white/10"
+      >
+        <SidebarIcon className="w-5 h-5" />
+      </button>
+      {!isExpanded && (
+        <Tooltip label="Expand Sidebar" visible={hovered} />
+      )}
+    </div>
+  )
+}
+
 // ─── Sign Out Button ──────────────────────────────────────────────────────────
 
-function SignOutButton({ onClick }) {
+function SignOutButton({ isExpanded, onClick }) {
   const [hovered, setHovered] = useState(false)
+
+  if (isExpanded) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition-all duration-150 cursor-pointer border-none outline-none text-[#7a7a7a] hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20"
+      >
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+          <polyline points="16 17 21 12 16 7" />
+          <line x1="21" y1="12" x2="9" y2="12" />
+        </svg>
+        <span className="font-semibold text-sm">Sign Out</span>
+      </button>
+    )
+  }
+
   return (
     <div className="relative flex items-center justify-center">
       <button
@@ -193,11 +300,7 @@ function SignOutButton({ onClick }) {
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         aria-label="Sign Out"
-        className="w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-150 cursor-pointer border-none outline-none"
-        style={{
-          color: hovered ? '#ef4444' : 'var(--muted, #7a7a7a)',
-          background: hovered ? 'rgba(239,68,68,0.1)' : 'transparent',
-        }}
+        className="w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-150 cursor-pointer border-none outline-none text-[#7a7a7a] hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20"
       >
         <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
@@ -210,12 +313,14 @@ function SignOutButton({ onClick }) {
   )
 }
 
-// ─── Main Floating Sidebar ────────────────────────────────────────────────────
+// ─── Main Floating Sidebar Component ──────────────────────────────────────────
 
 export default function AppSidebar() {
   const navigate = useNavigate()
   const location = useLocation()
   const active = activeKeyFor(location.pathname)
+  const { isCollapsed, setCollapsed } = useSidebar()
+  const isExpanded = !isCollapsed
 
   const handleSignOut = () => {
     navigate('/login')
@@ -223,37 +328,69 @@ export default function AppSidebar() {
 
   return (
     <aside
-      className="pf-sidebar-floating hidden md:flex flex-col items-center justify-between py-4 px-2 select-none"
+      className={`pf-sidebar-floating hidden md:flex flex-col select-none transition-all duration-300 ${
+        isExpanded ? 'w-[240px] px-3' : 'w-[68px] px-2'
+      }`}
       aria-label="Primary Navigation"
     >
-      {/* Top micro spacing */}
-      <div className="h-1 flex-none" />
+      {/* ── Top Section: Symmetrical Expand/Collapse Button ── */}
+      <div className={`flex items-center flex-none w-full ${isExpanded ? 'justify-between px-1.5 pb-2' : 'justify-center pb-1'}`}>
+        {isExpanded && (
+          <span className="font-['Manrope'] font-bold text-xs uppercase tracking-wider text-[#7a7a7a] dark:text-[#94A3B8]">
+            Menu
+          </span>
+        )}
+        <ToggleSidebarButton
+          isExpanded={isExpanded}
+          onClick={() => setCollapsed(isExpanded)}
+        />
+      </div>
 
-      {/* Navigation Icons Group — Vertically Centered with small tight gaps */}
-      <nav className="my-auto flex flex-col items-center gap-2 w-full">
-        {NAV.map((item) => (
-          <NavItem
-            key={item.key}
-            item={item}
-            isActive={active === item.key}
-            onClick={navigate}
-          />
-        ))}
+      <div className={`w-full flex justify-center py-1 flex-none`}>
+        <div className="w-full h-px bg-black/[0.08] dark:bg-white/[0.1]" />
+      </div>
+
+      {/* ── Center Section: Vertically Centered 8 Features ── */}
+      <nav className={`my-auto flex flex-col items-center gap-1.5 w-full ${isExpanded ? 'py-2' : 'py-1'}`}>
+        {NAV.map((item) =>
+          isExpanded ? (
+            <ExpandedNavItem
+              key={item.key}
+              item={item}
+              isActive={active === item.key}
+              onClick={navigate}
+            />
+          ) : (
+            <CollapsedNavItem
+              key={item.key}
+              item={item}
+              isActive={active === item.key}
+              onClick={navigate}
+            />
+          )
+        )}
       </nav>
 
-      {/* Bottom Section: Separator + Sign Out + System Pulse */}
-      <div className="flex flex-col items-center gap-2.5 pt-2 flex-none w-full">
-        <div className="w-7 h-px bg-black/[0.08] dark:bg-white/[0.1]" />
+      {/* ── Bottom Section: Separator + Sign Out + System Pulse ── */}
+      <div className="flex flex-col gap-2 pt-2 flex-none w-full">
+        <div className="w-full h-px bg-black/[0.08] dark:bg-white/[0.1]" />
 
-        {/* Sign Out Button */}
-        <SignOutButton onClick={handleSignOut} />
+        {/* Sign Out */}
+        <SignOutButton isExpanded={isExpanded} onClick={handleSignOut} />
 
-        {/* System active health indicator */}
-        <div className="relative w-7 h-7 rounded-full flex items-center justify-center" title="System Operational">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 block shadow-[0_0_8px_rgba(34,197,94,0.7)]" />
-          <span className="absolute inset-0 flex items-center justify-center">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping opacity-60" />
-          </span>
+        {/* Live System Status Pulse */}
+        <div className={`flex items-center gap-2.5 py-1 ${isExpanded ? 'px-3' : 'justify-center'}`} title="System Operational">
+          <div className="relative w-4 h-4 flex items-center justify-center flex-none">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 block shadow-[0_0_8px_rgba(34,197,94,0.7)]" />
+            <span className="absolute inset-0 flex items-center justify-center">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping opacity-60" />
+            </span>
+          </div>
+          {isExpanded && (
+            <span className="text-[11px] font-semibold text-[#7a7a7a] dark:text-[#94A3B8]">
+              System Operational
+            </span>
+          )}
         </div>
       </div>
     </aside>
