@@ -9,7 +9,7 @@ export default function ComparisonMatrix() {
   const rows = [
     {
       feature: 'Curriculum Model',
-      traditional: 'Static, one-size-fits-all 40hr video playlist',
+      traditional: 'Static, one-size-fits-all video playlists',
       pathfinder: 'Dynamic custom-week graph calibrated to your exact skill gaps',
     },
     {

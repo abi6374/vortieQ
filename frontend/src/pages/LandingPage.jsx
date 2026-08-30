@@ -197,7 +197,7 @@ export default function LandingPage() {
             FOUR PILLARS OF ADAPTIVE INTELLIGENCE
           </h2>
           <p className="mt-4 text-base sm:text-lg text-[#666666] dark:text-[#94A3B8]">
-            Traditional courses give everyone the same 40 hours of static video. PathFinder builds a live learning graph that reacts to every concept you master or struggle with.
+            Traditional courses give everyone the same rigid, static video curriculum. PathFinder builds a live learning graph that reacts to every concept you master or struggle with.
           </p>
         </div>
 
