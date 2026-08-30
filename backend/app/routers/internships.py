@@ -69,6 +69,16 @@ def apply_to_internship(
         raise HTTPException(status_code=404, detail=str(e))
 
 
+@router.delete("/{internship_id}/apply")
+def unapply_from_internship(
+    internship_id: str,
+    user_id: str = Depends(verify_jwt),
+):
+    """Remove an internship from user's tracked applications."""
+    result = internship_service.unapply_from_internship(user_id, internship_id)
+    return result
+
+
 @router.patch("/{internship_id}/status")
 def update_internship_status(
     internship_id: str,

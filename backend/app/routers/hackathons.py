@@ -61,17 +61,28 @@ def get_hackathon_detail(
 @router.post("/{hackathon_id}/register")
 def register_for_hackathon(
     hackathon_id: str,
+    status: str = Query("registered", description="registered | interested | submitted"),
     user_id: str = Depends(verify_jwt),
 ):
     """
-    Register the current user for a hackathon.
-    Records the registration in Supabase user_hackathons table.
+    Track user registration or interest for a hackathon.
+    Records the status in Supabase user_hackathons table.
     """
     try:
-        result = hackathon_service.register_for_hackathon(user_id, hackathon_id)
+        result = hackathon_service.register_for_hackathon(user_id, hackathon_id, status=status)
         return result
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+
+
+@router.delete("/{hackathon_id}/register")
+def unregister_from_hackathon(
+    hackathon_id: str,
+    user_id: str = Depends(verify_jwt),
+):
+    """Remove a hackathon from the user's tracked registrations."""
+    result = hackathon_service.unregister_from_hackathon(user_id, hackathon_id)
+    return result
 
 
 @router.post("/refresh")

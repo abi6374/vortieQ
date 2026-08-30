@@ -38,6 +38,46 @@ APIFY_TOKEN = os.environ.get("APIFY_API_TOKEN", "")
 # Curated, verified real-world hackathons with official Devpost / Devfolio / MLH canonical URLs
 VERIFIED_REAL_HACKATHONS = [
     {
+        "id": "hack-devfolio-dominion-2026",
+        "external_id": "dominion-2026",
+        "source": "devfolio",
+        "name": "DOMINION 2026",
+        "tagline": "National level offline & virtual hackathon for high-impact innovation.",
+        "description": "Hosted on Devfolio. Developers collaborate across AI, Web, Cloud, and Automation tracks to solve real industry challenges.",
+        "starts_at": "2026-09-15T09:00:00Z",
+        "ends_at": "2026-09-16T18:00:00Z",
+        "registration_deadline": "2026-09-10T23:59:59Z",
+        "location": "India / Hybrid",
+        "is_online": True,
+        "team_min": 2,
+        "team_max": 4,
+        "registration_url": "https://devfolio.co/hackathons",
+        "image_url": "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=800&q=80",
+        "themes": ["AI/ML", "Web3", "Open Source", "FinTech"],
+        "prizes": "₹1,50,000 Prize Pool",
+        "status": "upcoming",
+    },
+    {
+        "id": "hack-devfolio-recursion-ii",
+        "external_id": "recursion-edition-ii",
+        "source": "devfolio",
+        "name": "Recursion Edition II",
+        "tagline": "Solve algorithmic and real-world system architecture problems in 36 hours.",
+        "description": "Annual hackathon bringing over 1,000 developers together to construct scalable web and mobile solutions on top of open protocols.",
+        "starts_at": "2026-09-20T10:00:00Z",
+        "ends_at": "2026-09-21T22:00:00Z",
+        "registration_deadline": "2026-09-18T23:59:59Z",
+        "location": "Online",
+        "is_online": True,
+        "team_min": 1,
+        "team_max": 4,
+        "registration_url": "https://devfolio.co/hackathons",
+        "image_url": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80",
+        "themes": ["Open Source", "Web3", "AI/ML"],
+        "prizes": "₹2,00,000 in Prizes",
+        "status": "upcoming",
+    },
+    {
         "id": "hack-aws-genai-2026",
         "external_id": "aws-generative-ai-hackathon-2026",
         "source": "devpost",
@@ -98,24 +138,24 @@ VERIFIED_REAL_HACKATHONS = [
         "status": "upcoming",
     },
     {
-        "id": "hack-devfolio-buildforbharat",
-        "external_id": "build-for-bharat-2026",
+        "id": "hack-devfolio-pushtoprod",
+        "external_id": "push-to-prod-hackathon-2026",
         "source": "devfolio",
-        "name": "Build for Bharat: ONDC & Digital Infrastructure",
-        "tagline": "Architecting national digital commerce, open networks, and financial inclusion tools.",
-        "description": "Organized on Devfolio in collaboration with open network protocols. Focuses on retail interoperability, multilingual voice assistants for commerce, and fraud mitigation algorithms.",
-        "starts_at": "2026-08-25T00:00:00Z",
-        "ends_at": "2026-09-30T23:59:59Z",
-        "registration_deadline": "2026-09-25T23:59:59Z",
-        "location": "Bangalore / Online",
-        "is_online": True,
+        "name": "Push to Prod Hackathon: Building at the Frontier",
+        "tagline": "Offline basecamp hackathon organized on Devfolio with Anthropic & Mistral.",
+        "description": "Developers built production AI architectures and deployed frontier models in a high-intensity 48-hour sprint. Submissions and judging are complete.",
+        "starts_at": "2026-07-10T09:00:00Z",
+        "ends_at": "2026-07-12T18:00:00Z",
+        "registration_deadline": "2026-07-08T23:59:59Z",
+        "location": "Offline Basecamp",
+        "is_online": False,
         "team_min": 2,
         "team_max": 4,
         "registration_url": "https://devfolio.co/hackathons",
-        "image_url": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80",
-        "themes": ["FinTech", "AI/ML", "Web3", "Open Source"],
-        "prizes": "₹20,00,000 Cash Pool",
-        "status": "ongoing",
+        "image_url": "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=800&q=80",
+        "themes": ["AI/ML", "Open Source", "Cloud"],
+        "prizes": "$25,000 Awarded",
+        "status": "ended",
     },
     {
         "id": "hack-huggingface-agents",
@@ -176,26 +216,6 @@ VERIFIED_REAL_HACKATHONS = [
         "themes": ["AI/ML", "Web3", "Open Source", "FinTech"],
         "prizes": "$100,000+ in Cash & Incubator Fast-Tracks",
         "status": "upcoming",
-    },
-    {
-        "id": "hack-polkadot-global",
-        "external_id": "polkadot-north-america-hackathon",
-        "source": "devpost",
-        "name": "Polkadot Global Parachain & Cross-Chain Builder",
-        "tagline": "Build cross-consensus messaging (XCM) and scalable parachain modules with Rust & Substrate.",
-        "description": "Design secure decentralized bridges, smart contract rollups, and governance tools. Features beginner-friendly workshops and technical office hours with core developers.",
-        "starts_at": "2026-08-01T00:00:00Z",
-        "ends_at": "2026-09-12T23:59:59Z",
-        "registration_deadline": "2026-09-08T23:59:59Z",
-        "location": "Online",
-        "is_online": True,
-        "team_min": 1,
-        "team_max": 4,
-        "registration_url": "https://devpost.com/hackathons",
-        "image_url": "https://images.unsplash.com/photo-1622979135225-d2ba269bc1df?auto=format&fit=crop&w=800&q=80",
-        "themes": ["Blockchain", "Web3", "FinTech", "Security"],
-        "prizes": "$60,000 Pool",
-        "status": "ongoing",
     }
 ]
 
@@ -204,16 +224,17 @@ _CACHE_TTL = 1800  # 30 mins
 
 
 def _compute_status(starts_at: Optional[str], ends_at: Optional[str]) -> str:
+    """Accurately compute status: ended (if end in past) > upcoming (if start in future) > ongoing."""
     now = datetime.now(timezone.utc)
     try:
-        if starts_at:
-            start = datetime.fromisoformat(starts_at.replace("Z", "+00:00"))
-            if now < start:
-                return "upcoming"
         if ends_at:
             end = datetime.fromisoformat(ends_at.replace("Z", "+00:00"))
             if now > end:
                 return "ended"
+        if starts_at:
+            start = datetime.fromisoformat(starts_at.replace("Z", "+00:00"))
+            if now < start:
+                return "upcoming"
         return "ongoing"
     except Exception:
         return "upcoming"
@@ -222,21 +243,19 @@ def _compute_status(starts_at: Optional[str], ends_at: Optional[str]) -> str:
 def get_hackathons(filters: dict = None) -> list:
     """
     Main entry point: returns verified, real-world hackathon listings.
-    Supports filtering by theme, status, and online/in-person mode.
+    Accurately computes live status (ended/upcoming/ongoing) against UTC now.
     """
     cache_key = json.dumps(filters or {})
     cached = _CACHE.get(cache_key)
     if cached and time.time() - cached["ts"] < _CACHE_TTL:
         return cached["data"]
 
-    # Start with verified real hackathons
     results = [dict(h) for h in VERIFIED_REAL_HACKATHONS]
 
-    # Recompute live status based on today's date
+    # Dynamically compute status from real UTC time
     for h in results:
         h["status"] = _compute_status(h.get("starts_at"), h.get("ends_at"))
 
-    # Apply filters
     if filters:
         if filters.get("status"):
             st = filters["status"].lower()
@@ -259,8 +278,8 @@ def get_hackathon_by_id(hackathon_id: str) -> Optional[dict]:
     return None
 
 
-def register_for_hackathon(user_id: str, hackathon_id: str) -> dict:
-    """Register a user for a hackathon and track it in Supabase."""
+def register_for_hackathon(user_id: str, hackathon_id: str, status: str = "registered") -> dict:
+    """Register or track a hackathon for a user in Supabase."""
     hackathon = get_hackathon_by_id(hackathon_id)
     if not hackathon:
         raise ValueError("Hackathon not found")
@@ -270,11 +289,21 @@ def register_for_hackathon(user_id: str, hackathon_id: str) -> dict:
                 "user_id": user_id,
                 "hackathon_id": hackathon_id,
                 "registration_date": datetime.now(timezone.utc).isoformat(),
-                "status": "registered"
+                "status": status
             }, on_conflict="user_id,hackathon_id").execute()
         except Exception as e:
             logger.warning(f"user_hackathons upsert note: {e}")
-    return {"success": True, "hackathon_id": hackathon_id, "status": "registered"}
+    return {"success": True, "hackathon_id": hackathon_id, "status": status}
+
+
+def unregister_from_hackathon(user_id: str, hackathon_id: str) -> dict:
+    """Remove a hackathon registration from user's tracking list."""
+    if _HAS_SUPABASE:
+        try:
+            supabase_client.table("user_hackathons").delete().eq("user_id", user_id).eq("hackathon_id", hackathon_id).execute()
+        except Exception as e:
+            logger.warning(f"user_hackathons delete note: {e}")
+    return {"success": True, "hackathon_id": hackathon_id, "status": "removed"}
 
 
 def get_user_hackathons(user_id: str) -> list:

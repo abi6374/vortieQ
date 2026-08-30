@@ -36,7 +36,7 @@ export default function CalibrationModal({
       stream.getTracks().forEach(track => {
         try {
           track.stop()
-        } catch {}
+        } catch { }
       })
     }
     if (videoPreviewRef.current) {
@@ -221,7 +221,7 @@ export default function CalibrationModal({
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current)
       if (postureIntervalRef.current) clearInterval(postureIntervalRef.current)
       if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-        audioContextRef.current.close().catch(() => {})
+        audioContextRef.current.close().catch(() => { })
       }
       stopAllTracks()
     }
@@ -316,17 +316,17 @@ export default function CalibrationModal({
                     {permissionState === 'checking'
                       ? 'Requesting camera access...'
                       : voiceOnlyFallback
-                      ? 'Voice-Only Mode Active'
-                      : permissionState === 'denied'
-                      ? 'Camera/Mic Permission Denied'
-                      : 'Waiting for camera permission'}
+                        ? 'Voice-Only Mode Active'
+                        : permissionState === 'denied'
+                          ? 'Camera/Mic Permission Denied'
+                          : 'Waiting for camera permission'}
                   </span>
                   <span className="text-xs text-slate-400 mt-1.5 max-w-xs leading-relaxed">
                     {permissionState === 'denied'
                       ? 'Please allow camera and microphone access in your browser settings.'
                       : voiceOnlyFallback
-                      ? 'The interview will rely on speech input without capturing candidate video.'
-                      : 'Grant camera access in your browser to enable the video call simulation.'}
+                        ? 'The interview will rely on speech input without capturing candidate video.'
+                        : 'Grant camera access in your browser to enable the video call simulation.'}
                   </span>
                   {permissionState === 'denied' && (
                     <button
@@ -344,19 +344,18 @@ export default function CalibrationModal({
               <div className="absolute top-3 left-3 flex items-center gap-2">
                 <span className="px-2.5 py-1 rounded-lg bg-black/60 backdrop-blur-md text-[11px] font-semibold text-white flex items-center gap-1.5">
                   <span
-                    className={`w-2 h-2 rounded-full animate-pulse ${
-                      permissionState === 'granted'
+                    className={`w-2 h-2 rounded-full animate-pulse ${permissionState === 'granted'
                         ? 'bg-emerald-400'
                         : permissionState === 'checking'
-                        ? 'bg-amber-400'
-                        : 'bg-red-400'
-                    }`}
+                          ? 'bg-amber-400'
+                          : 'bg-red-400'
+                      }`}
                   />
                   {permissionState === 'granted'
                     ? 'Hardware Ready'
                     : permissionState === 'checking'
-                    ? 'Checking...'
-                    : 'Permission Required'}
+                      ? 'Checking...'
+                      : 'Permission Required'}
                 </span>
               </div>
 
@@ -400,8 +399,8 @@ export default function CalibrationModal({
                     background: micLevel > 0.75
                       ? 'linear-gradient(90deg, #10b981, #f59e0b, #ef4444)'
                       : micLevel > 0.35
-                      ? 'linear-gradient(90deg, #10b981, #34d399)'
-                      : '#10b981'
+                        ? 'linear-gradient(90deg, #10b981, #34d399)'
+                        : '#10b981'
                   }}
                 />
               </div>
@@ -441,11 +440,10 @@ export default function CalibrationModal({
                         key={t.id}
                         type="button"
                         onClick={() => setSelectedTrack(t.id)}
-                        className={`p-3.5 rounded-xl text-left border transition-all cursor-pointer flex flex-col gap-1 ${
-                          isSelected
+                        className={`p-3.5 rounded-xl text-left border transition-all cursor-pointer flex flex-col gap-1 ${isSelected
                             ? 'bg-[#eaf2fc] dark:bg-[rgba(41,151,255,0.18)] border-[#0066cc] dark:border-[#38BDF8] shadow-xs'
                             : 'bg-white dark:bg-[#141A26] border-[#e0e0e0] dark:border-[#242E40] hover:border-[#0066cc]/40'
-                        }`}
+                          }`}
                       >
                         <div className="flex items-center justify-between">
                           <span className={`text-sm font-bold ${isSelected ? 'text-[#0066cc] dark:text-[#38BDF8]' : 'text-[#1d1d1f] dark:text-white'}`}>
@@ -489,11 +487,10 @@ export default function CalibrationModal({
                       key={cnt}
                       type="button"
                       onClick={() => setQuestionCount(cnt)}
-                      className={`flex-1 py-2.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
-                        questionCount === cnt
+                      className={`flex-1 py-2.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${questionCount === cnt
                           ? 'bg-[#0066cc] text-white border-[#0066cc] shadow-xs'
                           : 'bg-white dark:bg-[#141A26] border-[#e0e0e0] dark:border-[#242E40] text-[#1d1d1f] dark:text-white hover:bg-[#f5f5f7]'
-                      }`}
+                        }`}
                     >
                       {cnt} Q (~{cnt * 2} min)
                     </button>
@@ -531,9 +528,7 @@ export default function CalibrationModal({
                 >
                   Switch to Voice-Only Mode
                 </button>
-                <span className="text-[11px] text-[#6e6e73] dark:text-[#94A3B8]">
-                  Amazon Bedrock Adaptive AI
-                </span>
+
               </div>
             </div>
           </div>
