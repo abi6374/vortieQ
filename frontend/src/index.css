@@ -320,7 +320,8 @@ textarea[class*="border-none"]:focus-visible {
 }
 .coach-chat-card {
   min-height: 0;
-  height: min(690px, calc(100dvh - 220px));
+  height: 100%;
+  flex: 1 1 0%;
   display: flex;
   flex-direction: column;
 }

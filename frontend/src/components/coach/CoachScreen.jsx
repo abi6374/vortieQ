@@ -52,24 +52,24 @@ function ChatTab() {
   }
 
   return (
-    <div className="coach-chat-card bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl overflow-hidden shadow-xs">
-      <div ref={bodyRef} className="flex-1 min-h-0 overflow-y-auto p-5 space-y-3 bg-[#fafcfe] dark:bg-[#0E0E12]">
+    <div className="coach-chat-card flex-1 min-h-0 h-full bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl overflow-hidden shadow-xs flex flex-col">
+      <div ref={bodyRef} className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-5 space-y-3 bg-[#fafcfe] dark:bg-[#0E0E12] pf-custom-scrollbar">
         {hydrating && <p className="text-xs text-[#7a7a7a] dark:text-[#94A3B8] text-center">Loading your conversation…</p>}
         {!hydrating && messages.length === 0 && (
-          <div className="h-full flex flex-col items-center justify-center text-center text-[#7a7a7a] dark:text-[#94A3B8] text-sm max-w-lg mx-auto py-6">
-            <b className="block text-[#1d1d1f] dark:text-white text-lg mb-2 font-['Manrope'] font-bold">Ask PathFinder anything</b>
-            <p className="mb-6 text-sm text-[#555555] dark:text-[#94A3B8] leading-relaxed max-w-md">Why a course is in your path, what to learn next, how you're tracking against your goal — this is the same real assistant everywhere in the app, just full-page here.</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
+          <div className="h-full flex flex-col items-center justify-center text-center text-[#7a7a7a] dark:text-[#94A3B8] text-sm max-w-lg mx-auto py-4 sm:py-6">
+            <b className="block text-[#1d1d1f] dark:text-white text-base sm:text-lg mb-1.5 font-['Manrope'] font-bold">Ask PathFinder anything</b>
+            <p className="mb-4 sm:mb-6 text-xs sm:text-sm text-[#555555] dark:text-[#94A3B8] leading-relaxed max-w-md">Why a course is in your path, what to learn next, how you're tracking against your goal — this is the same real assistant everywhere in the app, just full-page here.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full">
               {STARTER_PROMPTS.map((p) => (
                 <button
                   key={p}
                   type="button"
                   onClick={() => send(p)}
-                  className="text-left p-4 bg-white dark:bg-[#18181D] border-[1.5px] border-[#D0D7E2] dark:border-[#27272F] hover:border-black/50 dark:hover:border-[#C9D0D6] hover:bg-[#fafafc] dark:hover:bg-[#202026] rounded-2xl text-[13.5px] font-semibold text-[#1d1d1f] dark:text-white transition-all hover:translate-y-[-2px] shadow-sm cursor-pointer"
+                  className="text-left p-3.5 bg-white dark:bg-[#18181D] border-[1.5px] border-[#D0D7E2] dark:border-[#27272F] hover:border-black/50 dark:hover:border-[#C9D0D6] hover:bg-[#fafafc] dark:hover:bg-[#202026] rounded-xl text-xs sm:text-[13px] font-semibold text-[#1d1d1f] dark:text-white transition-all hover:-translate-y-0.5 shadow-sm cursor-pointer"
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span>{p}</span>
-                    <span className="text-[#86868b] dark:text-[#94A3B8] text-sm font-bold flex-none">→</span>
+                    <span className="text-[#86868b] dark:text-[#94A3B8] text-xs sm:text-sm font-bold flex-none">→</span>
                   </div>
                 </button>
               ))}
@@ -101,13 +101,13 @@ function ChatTab() {
       </div>
 
       {error && (
-        <div className="mx-4 mb-2 text-xs text-[#B42318] dark:text-red-400 bg-[#FDECEC] dark:bg-red-950/40 border border-[#F3B9B9] dark:border-red-800/60 rounded-lg px-3 py-2 flex items-center justify-between">
+        <div className="mx-4 mb-2 text-xs text-[#B42318] dark:text-red-400 bg-[#FDECEC] dark:bg-red-950/40 border border-[#F3B9B9] dark:border-red-800/60 rounded-lg px-3 py-2 flex items-center justify-between flex-none">
           <span>{error.text}</span>
           <button type="button" className="font-bold underline" onClick={() => { setError(null); send(error.retry) }}>Retry</button>
         </div>
       )}
 
-      <form onSubmit={submit} className="p-3 border-t border-[#f5f5f7] dark:border-[#27272F] flex items-end gap-2 bg-white dark:bg-[#121216]">
+      <form onSubmit={submit} className="p-3 border-t border-[#f5f5f7] dark:border-[#27272F] flex items-end gap-2 bg-white dark:bg-[#121216] flex-none">
         <textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -332,23 +332,23 @@ export default function CoachScreen() {
   }
 
   return (
-    <AppShell>
-      <div className="w-full font-['Inter',sans-serif] text-[#1d1d1f] dark:text-white">
-        <header className="mb-6">
-          <h1 className="font-['Manrope'] font-extrabold text-2xl sm:text-[28px] text-[#1d1d1f] dark:text-white tracking-tight">AI Coach</h1>
-          <p className="mt-0.5 text-sm text-[#333333] dark:text-[#94A3B8]">Chat, practice questions, and project ideas — all grounded in your real progress.</p>
+    <AppShell contentClassName="h-full overflow-hidden flex flex-col !p-4 sm:!p-6 lg:!p-7">
+      <div className="w-full h-full flex flex-col min-h-0 font-['Inter',sans-serif] text-[#1d1d1f] dark:text-white">
+        <header className="mb-3.5 flex-none">
+          <h1 className="font-['Manrope'] font-extrabold text-2xl sm:text-[26px] text-[#1d1d1f] dark:text-white tracking-tight">AI Coach</h1>
+          <p className="mt-0.5 text-xs sm:text-sm text-[#333333] dark:text-[#94A3B8]">Chat, practice questions, and project ideas — all grounded in your real progress.</p>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-7 items-start w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6 items-stretch w-full flex-1 min-h-0">
           {/* Main Coach Column */}
-          <div className="lg:col-span-7 flex flex-col gap-4 min-w-0">
-            <div className="flex gap-1.5 bg-[#f5f5f7] dark:bg-[#121216] border border-transparent dark:border-[#27272F] rounded-xl p-1 w-fit">
+          <div className="lg:col-span-7 flex flex-col min-h-0 h-full">
+            <div className="flex gap-1.5 bg-[#f5f5f7] dark:bg-[#121216] border border-transparent dark:border-[#27272F] rounded-xl p-1 w-fit mb-2.5 flex-none">
               {TABS.map((t) => (
                 <button
                   key={t.key}
                   type="button"
                   onClick={() => setTab(t.key)}
-                  className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors cursor-pointer ${
+                  className={`px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-colors cursor-pointer ${
                     tab === t.key ? 'bg-white dark:bg-[#18181D] text-[#0066cc] dark:text-[#C9D0D6] shadow-sm' : 'text-[#6e6e73] dark:text-[#94A3B8] hover:text-[#1d1d1f] dark:hover:text-white'
                   }`}
                 >
@@ -357,28 +357,30 @@ export default function CoachScreen() {
               ))}
             </div>
 
-            {tab === 'chat' && <ChatTab />}
-            {tab === 'practice' && <PracticeTab />}
-            {tab === 'projects' && <ProjectsTab />}
+            <div className="flex-1 min-h-0 h-full flex flex-col overflow-hidden">
+              {tab === 'chat' && <ChatTab />}
+              {tab === 'practice' && <div className="h-full overflow-y-auto pf-custom-scrollbar pr-1.5"><PracticeTab /></div>}
+              {tab === 'projects' && <div className="h-full overflow-y-auto pf-custom-scrollbar pr-1.5"><ProjectsTab /></div>}
+            </div>
           </div>
 
           {/* Right Rail: Quick Actions & Coach Context */}
-          <div className="lg:col-span-5 space-y-6">
+          <div className="lg:col-span-5 flex flex-col gap-3.5 min-h-0 h-full overflow-y-auto pr-1.5 pf-custom-scrollbar">
             {/* Quick Prompts */}
-            <div className="bg-white dark:bg-[#121216] border-[1.5px] border-[#D0D7E2] dark:border-[#27272F] rounded-2xl p-6 sm:p-7 shadow-sm">
-              <h3 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white mb-4">
+            <div className="bg-white dark:bg-[#121216] border-[1.5px] border-[#D0D7E2] dark:border-[#27272F] rounded-2xl p-4 sm:p-5 shadow-sm flex-none">
+              <h3 className="font-['Manrope'] font-bold text-sm sm:text-base text-[#1d1d1f] dark:text-white mb-3">
                 Suggested Questions
               </h3>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {STARTER_PROMPTS.map((p) => (
                   <button
                     key={p}
                     type="button"
                     onClick={() => handleQuickPrompt(p)}
-                    className="w-full text-left px-5 py-3.5 sm:py-4 bg-white dark:bg-[#0E0E12] hover:bg-[#fafafc] dark:hover:bg-[#18181D] border-[1.5px] border-[#D0D7E2] dark:border-[#27272F] hover:border-black/50 dark:hover:border-[#C9D0D6] text-[13.5px] sm:text-sm font-semibold text-[#1d1d1f] dark:text-white rounded-2xl transition-all hover:translate-x-1.5 shadow-2xs cursor-pointer flex items-center justify-between group"
+                    className="w-full text-left px-4 py-3 bg-white dark:bg-[#0E0E12] hover:bg-[#fafafc] dark:hover:bg-[#18181D] border-[1.5px] border-[#D0D7E2] dark:border-[#27272F] hover:border-black/50 dark:hover:border-[#C9D0D6] text-xs sm:text-[13px] font-semibold text-[#1d1d1f] dark:text-white rounded-xl transition-all hover:-translate-y-0.5 shadow-2xs cursor-pointer flex items-center justify-between group"
                   >
                     <span>{p}</span>
-                    <span className="w-7 h-7 rounded-lg bg-[#F5F5F7] dark:bg-[#18181D] group-hover:bg-[#0066cc] text-[#86868b] dark:text-[#94A3B8] group-hover:text-white flex items-center justify-center transition-all text-xs font-bold flex-none ml-3 shadow-2xs">
+                    <span className="w-6 h-6 rounded-lg bg-[#F5F5F7] dark:bg-[#18181D] group-hover:bg-[#0066cc] text-[#86868b] dark:text-[#94A3B8] group-hover:text-white flex items-center justify-center transition-all text-xs font-bold flex-none ml-2 shadow-2xs">
                       →
                     </span>
                   </button>
@@ -387,28 +389,28 @@ export default function CoachScreen() {
             </div>
 
             {/* Context Awareness Notice */}
-            <div className="bg-gradient-to-br from-[#fafbfc] to-[#eaf2fc] dark:from-[#121216] dark:to-[#18181D] border-[1.5px] border-[#BFDBFE] dark:border-[#27272F] rounded-2xl p-6 sm:p-7 shadow-sm">
-              <h4 className="font-['Manrope'] font-bold text-sm text-[#1d1d1f] dark:text-[#F9FAFB] mb-2 flex items-center gap-2">
+            <div className="bg-gradient-to-br from-[#fafbfc] to-[#eaf2fc] dark:from-[#121216] dark:to-[#18181D] border-[1.5px] border-[#BFDBFE] dark:border-[#27272F] rounded-2xl p-4 sm:p-5 shadow-sm flex-none">
+              <h4 className="font-['Manrope'] font-bold text-xs sm:text-sm text-[#1d1d1f] dark:text-[#F9FAFB] mb-1.5 flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#22A06B] shadow-[0_0_8px_rgba(34,160,107,0.6)]" />
                 Roadmap-Grounded
               </h4>
-              <p className="text-xs sm:text-[13px] text-[#444444] dark:text-[#CBD5E1] leading-relaxed">
+              <p className="text-xs text-[#444444] dark:text-[#CBD5E1] leading-relaxed">
                 Your AI Coach continuously inspects your completed lessons, quiz outcomes, and target roles to provide accurate, tailored answers.
               </p>
             </div>
 
             {/* Study Mode Tips */}
-            <div className="bg-white dark:bg-[#121216] border-[1.5px] border-[#D0D7E2] dark:border-[#27272F] rounded-2xl p-6 sm:p-7 shadow-sm">
-              <h4 className="font-['Manrope'] font-bold text-xs uppercase tracking-wider text-[#7a7a7a] dark:text-[#94A3B8] mb-3">
+            <div className="bg-white dark:bg-[#121216] border-[1.5px] border-[#D0D7E2] dark:border-[#27272F] rounded-2xl p-4 sm:p-5 shadow-sm flex-none">
+              <h4 className="font-['Manrope'] font-bold text-[11px] uppercase tracking-wider text-[#7a7a7a] dark:text-[#94A3B8] mb-2">
                 Coaching Modes
               </h4>
-              <ul className="text-xs sm:text-[13px] text-[#333333] dark:text-[#CBD5E1] space-y-3">
-                <li className="flex items-start gap-2.5">
-                  <span className="text-[#0066cc] dark:text-[#C9D0D6] font-bold text-base leading-none mt-0.5">•</span>
+              <ul className="text-xs text-[#333333] dark:text-[#CBD5E1] space-y-2">
+                <li className="flex items-start gap-2">
+                  <span className="text-[#0066cc] dark:text-[#C9D0D6] font-bold text-sm leading-none mt-0.5">•</span>
                   <span><strong>Practice:</strong> Generate multiple-choice questions tailored to your active skills.</span>
                 </li>
-                <li className="flex items-start gap-2.5">
-                  <span className="text-[#0066cc] dark:text-[#C9D0D6] font-bold text-base leading-none mt-0.5">•</span>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#0066cc] dark:text-[#C9D0D6] font-bold text-sm leading-none mt-0.5">•</span>
                   <span><strong>Project Ideas:</strong> Get portfolio-ready project concepts with step-by-step guidance.</span>
                 </li>
               </ul>

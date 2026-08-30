@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 
 /**
@@ -10,6 +11,7 @@ import { motion, AnimatePresence } from 'framer-motion'
  */
 export default function BackToTop() {
   const [visible, setVisible] = useState(false)
+  const location = useLocation()
 
   useEffect(() => {
     const checkScroll = () => {
@@ -50,6 +52,10 @@ export default function BackToTop() {
         el.scrollTo({ top: 0, behavior: 'smooth' })
       }
     })
+  }
+
+  if (location.pathname === '/coach') {
+    return null
   }
 
   return (
