@@ -12,10 +12,10 @@ import React from 'react'
  */
 const STEPS = [
   { n: 1, label: 'Learner Intake' },
-  { n: 2, label: 'Assess skills' },
-  { n: 3, label: 'Set your goal' },
-  { n: 4, label: 'Create roadmap' },
-  { n: 5, label: 'Track progress' },
+  { n: 2, label: 'GitHub Integration' },
+  { n: 3, label: 'Assess skills' },
+  { n: 4, label: 'Set your goal' },
+  { n: 5, label: 'Create roadmap' },
 ]
 
 export default function SetupSidebar({ current = 1 }) {

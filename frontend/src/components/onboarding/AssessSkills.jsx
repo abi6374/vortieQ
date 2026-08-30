@@ -284,8 +284,8 @@ export default function AssessSkills({ topics = [], detectedYears = 0, onContinu
       
       {/* Top Header Row with Step Badge, ThemeToggle, and User Profile */}
       <div className="flex items-center justify-between mb-4">
-        <span className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[12px] font-bold uppercase tracking-wider text-[#0066cc] dark:text-[#38BDF8] bg-[#eaf2fc] dark:bg-[#1E293B] border border-[#eaf2fc] dark:border-[#2D3A4F]">
-          Step 2 · Skill Confidence
+        <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#0066cc] dark:text-[#38BDF8] bg-[#eaf2fc] dark:bg-[#132238] border border-[#cfe4fb] dark:border-[#1E3A5F] px-3.5 py-1 rounded-full mb-3 shadow-2xs">
+          Step 3 · Skill Confidence
         </span>
         <div className="flex items-center gap-2 sm:gap-2.5">
           <ThemeToggle />

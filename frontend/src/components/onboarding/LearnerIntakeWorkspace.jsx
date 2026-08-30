@@ -3,97 +3,23 @@ import apiClient from '../../lib/apiClient'
 import UserProfileDropdown from '../ui/UserProfileDropdown'
 import ThemeToggle from '../ui/ThemeToggle'
 
-const EMPTY_DRAFT = { skills: '', education: '', projects: '', confidence: '', goal: '', summary: '' }
-
-// REMOVED: extractKeywordsFromText()/COMMON_TECH_SKILLS used to scan the
-// learner's free-text description for substring matches against a
-// hardcoded 49-word tech list, and for every match FABRICATED
-// suggested_level: 'intermediate' + confidence_pct: 82 as if it were a
-// real detected skill - with no regard for context. "I want to LEARN
-// Python" and "I have 5 years of Python" both matched identically. Those
-// invented topics flowed straight into onExtracted() -> OnboardingPage's
-// resumeTopics -> POST /api/profile/'s topic_ratings ->
-// mastery_service.update_mastery_from_self_assessment(), landing as REAL
-// learner_skill_mastery rows (evidence_source='self_assessment',
-// mastery_probability=0.55, confidence=0.82) indistinguishable from
-// genuine self-assessment. The backend already has a real, safe mechanism
-// for interpreting free-text goal descriptions - profile_service.
-// extract_profile() (LLM-based, prompt-injection-defended, output-validated),
-// called from OnboardingPage.runPlan() via POST /api/profile/ - so this
-// client-side heuristic was both harmful (fabricated evidence) and
-// redundant (a real interpreter already exists downstream). No skills are
-// invented locally now: a goal-only signup (no resume, no GitHub) honestly
-// reports zero detected topics until the learner explicitly self-assesses
-// them (see AssessSkills.jsx's "No skills confirmed yet" state) or the
-// real backend extraction runs.
-
-// Qualitative label for an average suggested_level across real extracted topics.
-// Purely descriptive of what was actually detected — never a guess.
-function levelLabel(topics) {
-  if (!topics.length) return ''
-  const order = { basic: 0, intermediate: 1, advanced: 2, expert: 3 }
-  const avg = topics.reduce((s, t) => s + (order[t.suggested_level] ?? 0), 0) / topics.length
-  if (avg >= 2.5) return 'Expert'
-  if (avg >= 1.5) return 'Advanced'
-  if (avg >= 0.5) return 'Intermediate'
-  return 'Basic'
-}
-
-// Averages only the topics that actually carry a real confidence_pct from
-// the backend (resume/GitHub extraction) - never substitutes a fabricated
-// number for a topic that has none.
-function avgConfidence(topics) {
-  if (!topics || !topics.length) return ''
-  const withConfidence = topics.filter((t) => typeof t.confidence_pct === 'number')
-  if (!withConfidence.length) return ''
-  const sum = withConfidence.reduce((acc, t) => acc + t.confidence_pct, 0)
-  return `${Math.round(sum / withConfidence.length)}%`
-}
-
-// Combined "62% (Advanced)" display string - omits the percentage clause
-// entirely when no topic carries a real confidence_pct, rather than
-// rendering a dangling "(Advanced)" with an invisible fabricated number.
-function confidenceDisplay(topics) {
-  if (!topics || !topics.length) return ''
-  const pct = avgConfidence(topics)
-  const label = levelLabel(topics)
-  if (pct && label) return `${pct} (${label})`
-  return pct || label || ''
-}
-
-// "~62% confidence" parenthetical for summary sentences - empty string
-// when there is no real confidence to report.
-function confidenceClause(topics) {
-  const pct = avgConfidence(topics)
-  return pct ? ` (~${pct} confidence)` : ''
-}
-
 /**
  * LearnerIntakeWorkspace
  * High-fidelity Step 1 Intake Workspace for PathFinder.
- * Designed to fit seamlessly inside the unified 5-step Onboarding layout with SetupSidebar.
+ * Features symmetrical Resume Upload (Optional) and Background Description (Required) cards,
+ * with full-width "What PathFinder will understand" indicator pills.
  */
 export default function LearnerIntakeWorkspace({
   onExtracted,
-  onChatSubmit,
   onSkip,
-  githubData,
-  githubLoading,
-  githubSyncError = '',
-  authenticatedUsername = '',
-  onSyncGithub,
+  hasExistingPath = false,
 }) {
-  // Selection mode: 'text' (default selected) or 'resume'
+  // Selection mode: 'text' (default) or 'resume'
   const [selectedMethod, setSelectedMethod] = useState('text')
 
   // Single Text input state (Required)
   const [singleDescription, setSingleDescription] = useState('')
   const descInputRef = useRef(null)
-
-  // Per-user GitHub username state
-  const [customUsername, setCustomUsername] = useState(authenticatedUsername || '')
-  const [showUsernameInput, setShowUsernameInput] = useState(false)
-  const [stackConfirmed, setStackConfirmed] = useState(false)
 
   // Resume upload state
   const [file, setFile] = useState(null)
@@ -104,69 +30,8 @@ export default function LearnerIntakeWorkspace({
 
   const [continueError, setContinueError] = useState('')
 
-  // AI Profile Draft
-  const [profileDraft, setProfileDraft] = useState(null)
-
-  // Sync draft if GitHub data arrives
-  React.useEffect(() => {
-    if (githubData?.topics && githubData.topics.length > 0 && !file && !singleDescription.trim()) {
-      const topics = githubData.topics
-      const stacks = githubData.top_languages?.length ? githubData.top_languages.join(', ') : 'the languages in your repositories'
-      setProfileDraft((prev) => ({
-        ...EMPTY_DRAFT,
-        ...prev,
-        skills: topics.map((t) => t.name).join(', '),
-        confidence: confidenceDisplay(topics),
-        summary: `Imported ${githubData.github_projects?.length || topics.length} repositories for ${customUsername || authenticatedUsername || 'your profile'} with ${stacks}. Detected ${topics.length} skill${topics.length === 1 ? '' : 's'}${confidenceClause(topics)}.`,
-      }))
-    }
-  }, [githubData, customUsername, authenticatedUsername])
-
-  const handleCustomSync = (e) => {
-    e?.preventDefault()
-    if (!customUsername.trim()) return
-    onSyncGithub?.(customUsername.trim())
-    setShowUsernameInput(false)
-  }
-
-  // Handle GitHub "Continue with this Stack" button confirmation
-  const handleConfirmStack = () => {
-    setStackConfirmed(true)
-    setContinueError('')
-
-    if (githubData?.topics && githubData.topics.length > 0) {
-      const topics = githubData.topics
-      const stacks = githubData.top_languages?.length ? githubData.top_languages.join(', ') : 'the languages in your repositories'
-      setProfileDraft((prev) => ({
-        ...EMPTY_DRAFT,
-        ...prev,
-        skills: topics.map((t) => t.name).join(', '),
-        confidence: confidenceDisplay(topics),
-        summary: prev?.summary && !prev.summary.includes('ready')
-          ? prev.summary
-          : `Imported ${githubData.github_projects?.length || topics.length} repositories for ${customUsername || authenticatedUsername || 'your profile'} with ${stacks}. Detected ${topics.length} skill${topics.length === 1 ? '' : 's'}${confidenceClause(topics)}.`,
-      }))
-    }
-
-    if (!singleDescription.trim()) {
-      setContinueError('GitHub stack confirmed! Please fill out the "Describe in a single text" box (Required) to complete your intake.')
-      setSelectedMethod('text')
-      setTimeout(() => {
-        descInputRef.current?.focus()
-      }, 100)
-    } else {
-      handleContinue()
-    }
-  }
-
-  // Review & Edit Modal state
-  const [isEditingDraft, setIsEditingDraft] = useState(false)
-  const [editFormData, setEditFormData] = useState({ ...EMPTY_DRAFT })
-
   // Cached topics extracted from natural language text
   const parsedTopicsRef = useRef([])
-  const [isExtractingText, setIsExtractingText] = useState(false)
-  const extractTimerRef = useRef(null)
 
   const acceptTypes =
     '.pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document'
@@ -185,105 +50,15 @@ export default function LearnerIntakeWorkspace({
     setUploadError('')
     setContinueError('')
     setFile(f)
-    setProfileDraft((prev) => ({
-      ...EMPTY_DRAFT,
-      ...prev,
-      // Don't stomp a real "Identified N skills..." summary that live text
-      // extraction may have already produced before this file was picked -
-      // only show the generic "attached" placeholder if nothing real is
-      // there yet.
-      summary: (prev?.skills && prev.skills.trim() !== '')
-        ? prev.summary
-        : `"${f.name}" is attached. It will be analyzed together with your single text description.`,
-    }))
   }
 
-  // Live extraction from natural language description. Previously also
-  // gated on `file` here (in addition to the two call-site gates already
-  // removed) - meaning a resume + typed description together STILL never
-  // extracted anything live, because this internal guard silently no-op'd
-  // regardless of what the callers did. This was the actual remaining root
-  // cause of the reported "AI Profile Draft empty/wrong" bug.
-  const runTextExtraction = async (text) => {
-    if (!text || text.trim().length < 20) return
-    setIsExtractingText(true)
-    try {
-      const { data } = await apiClient.post('/api/profile/extract-text', { text: text.trim() })
-      if (data?.topics) {
-        parsedTopicsRef.current = data.topics
-        setProfileDraft((prev) => {
-          const skillsStr = data.topics.map((t) => t.name).join(', ')
-          return {
-            ...EMPTY_DRAFT,
-            ...prev,
-            skills: prev?.skills && prev.skills !== '' ? prev.skills : skillsStr,
-            education: prev?.education || data.education || '',
-            projects: prev?.projects || data.projects || '',
-            goal: prev?.goal && prev.goal !== text.trim() ? prev.goal : (data.suggested_goal || text.trim()),
-            confidence: confidenceDisplay(data.topics),
-            summary: data.topics.length > 0
-              ? `Identified ${data.topics.length} skill${data.topics.length === 1 ? '' : 's'} (${data.topics.slice(0, 4).map((t) => t.name).join(', ')}${data.topics.length > 4 ? '…' : ''})${data.detected_years_experience ? ` with ~${data.detected_years_experience} years experience` : ''}. Target: ${data.suggested_goal || 'Custom goal'}.`
-              : (text.trim().length > 15
-                ? `Draft from your description: "${text.slice(0, 140)}${text.length > 140 ? '…' : ''}"`
-                : 'Describe your background to build your AI Profile Draft.'),
-          }
-        })
-      }
-    } catch (err) {
-      console.warn('Natural language extraction note:', err)
-    } finally {
-      setIsExtractingText(false)
-    }
-  }
-
-  // Handle single description typing
   const handleDescriptionChange = (e) => {
     const val = e.target.value
     setSingleDescription(val)
-    setContinueError('')
-
-    setProfileDraft((prev) => ({
-      ...EMPTY_DRAFT,
-      ...prev,
-      goal: prev?.goal && prev.goal !== prev.summary ? prev.goal : val,
-      summary: val.trim().length > 15
-        ? `Draft from your description: "${val.slice(0, 140)}${val.length > 140 ? '…' : ''}"`
-        : (prev?.summary || 'Describe your background to build your AI Profile Draft.'),
-    }))
-
-    // Debounce natural language extraction. Previously gated on `!file` -
-    // meaning the moment a resume was ALSO picked, typing here silently did
-    // nothing (no live preview, no real skills ever populated, the "Skills
-    // & tools not verified yet" warning just stayed up forever) with no
-    // indication to the user that this was expected. Text extraction is
-    // independent of the file (it only reads what was typed), and
-    // handleContinue's resume branch already merges resume-derived skills
-    // over whatever this populates, so there's no reason to disable it.
-    if (extractTimerRef.current) clearTimeout(extractTimerRef.current)
-    if (val.trim().length >= 25) {
-      extractTimerRef.current = setTimeout(() => {
-        runTextExtraction(val)
-      }, 700)
-    }
+    if (continueError && val.trim()) setContinueError('')
   }
 
-  const handleOpenEditDraft = async () => {
-    if (!profileDraft?.skills && singleDescription.trim().length >= 20) {
-      await runTextExtraction(singleDescription)
-    }
-    setEditFormData({
-      skills: profileDraft?.skills || parsedTopicsRef.current.map((t) => t.name).join(', ') || '',
-      education: profileDraft?.education || '',
-      projects: profileDraft?.projects || '',
-      goal: profileDraft?.goal || singleDescription.trim(),
-      summary: profileDraft?.summary || '',
-    })
-    setIsEditingDraft(true)
-  }
-
-  // Handle Continue button action
   const handleContinue = async () => {
-    setContinueError('')
     const trimmedDesc = singleDescription.trim()
 
     // Filling the single text description is strictly REQUIRED
@@ -294,8 +69,10 @@ export default function LearnerIntakeWorkspace({
       return
     }
 
+    setUploading(true)
+    setContinueError('')
+
     if (file) {
-      setUploading(true)
       setUploadError('')
       try {
         const form = new FormData()
@@ -304,87 +81,41 @@ export default function LearnerIntakeWorkspace({
           headers: { 'Content-Type': 'multipart/form-data' },
         })
         const resumeTopics = data.topics || []
-        const updatedDraft = {
-          ...EMPTY_DRAFT,
-          ...profileDraft,
-          skills: resumeTopics.map((t) => t.name).join(', ') || profileDraft?.skills || '',
-          confidence: confidenceDisplay(resumeTopics) || profileDraft?.confidence || '',
-          education: data.education || profileDraft?.education || '',
-          projects: data.projects || profileDraft?.projects || '',
-          goal: trimmedDesc || data.suggested_goal || profileDraft?.goal || '',
-          summary: resumeTopics.length
-            ? `Identified ${resumeTopics.length} skill${resumeTopics.length === 1 ? '' : 's'}${confidenceClause(resumeTopics)}${
-                data.detected_years_experience ? ` and ~${data.detected_years_experience} years experience` : ''
-              }: ${resumeTopics.map((t) => t.name).join(', ')}.`
-            : profileDraft?.summary || 'Profile draft updated.',
-        }
-        setProfileDraft(updatedDraft)
         onExtracted(
           resumeTopics,
           data.detected_years_experience || 0,
-          updatedDraft.education,
-          updatedDraft.projects,
-          updatedDraft.goal || data.suggested_goal || trimmedDesc
+          data.education || '',
+          data.projects || '',
+          trimmedDesc || data.suggested_goal || ''
         )
       } catch (err) {
         console.error('Resume extraction failed:', err)
         setUploadError(
           err?.response?.data?.detail ||
-            'Could not analyze this resume. Continuing with your description.'
+            'Could not analyze this resume. Continuing with your background description.'
         )
-        onExtracted(
-          [],
-          0,
-          profileDraft?.education || '',
-          profileDraft?.projects || '',
-          trimmedDesc
-        )
+        onExtracted([], 0, '', '', trimmedDesc)
       } finally {
         setUploading(false)
       }
-    } else if (githubData?.topics && githubData.topics.length > 0) {
-      onExtracted(
-        githubData.topics,
-        githubData.detected_years_experience || 0,
-        profileDraft?.education || '',
-        profileDraft?.projects || '',
-        trimmedDesc || profileDraft?.goal || ''
-      )
     } else {
       // Natural Language background description flow
-      setUploading(true)
       try {
         let topicsToPass = parsedTopicsRef.current || []
         let detectedYears = 0
-        let educationStr = profileDraft?.education || ''
-        let projectsStr = profileDraft?.projects || ''
-        let goalStr = profileDraft?.goal || trimmedDesc
+        let educationStr = ''
+        let projectsStr = ''
+        let goalStr = trimmedDesc
 
-        // If manual skills were typed in profileDraft
-        if (profileDraft?.skills) {
-          const rawSkills = profileDraft.skills.split(',').map((s) => s.trim()).filter(Boolean)
-          topicsToPass = rawSkills.map((name) => {
-            const existing = (parsedTopicsRef.current || []).find(
-              (t) => t.name.toLowerCase() === name.toLowerCase()
-            )
-            return (
-              existing || {
-                name,
-                suggested_level: 'intermediate',
-                evidence: 'Extracted from background',
-                confidence_pct: 70,
-              }
-            )
-          })
-        } else if (topicsToPass.length === 0 && trimmedDesc.length >= 20) {
+        if (topicsToPass.length === 0 && trimmedDesc.length >= 15) {
           try {
             const { data } = await apiClient.post('/api/profile/extract-text', { text: trimmedDesc })
             if (data?.topics && data.topics.length > 0) {
               topicsToPass = data.topics
               detectedYears = data.detected_years_experience || 0
-              if (data.education && !educationStr) educationStr = data.education
-              if (data.projects && !projectsStr) projectsStr = data.projects
-              if (data.suggested_goal && !goalStr) goalStr = data.suggested_goal
+              if (data.education) educationStr = data.education
+              if (data.projects) projectsStr = data.projects
+              if (data.suggested_goal) goalStr = data.suggested_goal
             }
           } catch (e) {
             console.warn('Inline text extraction fallback:', e)
@@ -404,44 +135,15 @@ export default function LearnerIntakeWorkspace({
     }
   }
 
-  const handleSaveDraft = () => {
-    const rawSkills = (editFormData.skills || '').split(',').map((s) => s.trim()).filter(Boolean)
-    const customTopics = rawSkills.map((name) => {
-      const existing = (parsedTopicsRef.current || []).find(
-        (t) => t.name.toLowerCase() === name.toLowerCase()
-      )
-      return (
-        existing || {
-          name,
-          suggested_level: 'intermediate',
-          evidence: 'Specified in profile draft',
-          confidence_pct: 70,
-        }
-      )
-    })
-    parsedTopicsRef.current = customTopics
-
-    setProfileDraft({
-      ...EMPTY_DRAFT,
-      ...editFormData,
-      confidence: confidenceDisplay(customTopics),
-      summary: rawSkills.length > 0
-        ? `Custom profile: ${rawSkills.length} skill${rawSkills.length === 1 ? '' : 's'} (${rawSkills.slice(0, 4).join(', ')}${rawSkills.length > 4 ? '…' : ''}), target ${editFormData.goal || 'your goal'}.`
-        : `Custom profile: target ${editFormData.goal || 'your goal'}.`,
-    })
-    setIsEditingDraft(false)
-  }
-
-
   return (
-    <div className="w-full max-w-[1140px] bg-white dark:bg-[#0E1522] rounded-2xl border border-[#f0f0f0] dark:border-[#202B3C] shadow-[0_14px_38px_rgba(25,49,75,0.08)] dark:shadow-[0_14px_38px_rgba(0,0,0,0.5)] flex flex-col justify-between overflow-hidden transition-colors">
+    <div className="w-full max-w-[1140px] bg-white dark:bg-[#0E1522] rounded-2xl border border-[#f0f0f0] dark:border-[#202B3C] shadow-[0_14px_38px_rgba(25,49,75,0.08)] dark:shadow-[0_14px_38px_rgba(0,0,0,0.5)] flex flex-col justify-between overflow-hidden transition-colors min-h-[640px]">
       
-      {/* Top Header Row with ThemeToggle and Profile Dropdown */}
+      {/* Top Header Row with ThemeToggle & conditional Profile Dropdown */}
       <div className="pt-6 sm:pt-8 pb-3 px-6 sm:px-10 relative">
         <div className="flex items-center justify-end mb-2">
           <div className="flex items-center gap-2 sm:gap-2.5">
             <ThemeToggle />
-            <UserProfileDropdown />
+            {hasExistingPath && <UserProfileDropdown />}
           </div>
         </div>
 
@@ -455,159 +157,14 @@ export default function LearnerIntakeWorkspace({
               </svg>
             </span>
           </h1>
-          {githubData?.topics?.length > 0 && (
-            <p className="text-[16px] text-[#333333] dark:text-[#94A3B8] mt-2 font-normal">
-              Your GitHub repositories are linked. Uploading a resume or adding notes is completely optional.
-            </p>
-          )}
-        </div>
-
-        {/* GitHub Ingestion Banner if active */}
-        {githubLoading && (
-          <div className="mt-4 bg-[#eaf2fc] dark:bg-[#132238] border border-[#cfe4fb] dark:border-[#1E3A5F] rounded-xl p-3 flex items-center justify-center gap-2 text-sm text-[#0066cc] dark:text-[#38BDF8] animate-pulse">
-            <svg className="animate-spin h-4 w-4 text-[#0066cc] dark:text-[#38BDF8]" viewBox="0 0 24 24" fill="none">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-            </svg>
-            <span>Analyzing repositories, commit velocity, and stacks for {customUsername || 'your profile'}...</span>
-          </div>
-        )}
-
-        {githubSyncError && !githubLoading && (
-          <p className="mt-4 text-xs font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800/60 rounded-lg px-3.5 py-2.5">
-            {githubSyncError}
+          <p className="text-[15px] sm:text-[16px] text-[#555555] dark:text-[#94A3B8] mt-2 font-normal">
+            Upload your resume or describe your background to build your customized curriculum.
           </p>
-        )}
-
-        {githubData?.topics && githubData.topics.length > 0 && !githubLoading && (
-          <div className="mt-4 bg-[#F8FAFD] dark:bg-[#141C2B] border border-[#DCE4F0] dark:border-[#24334A] rounded-xl p-3.5 flex flex-col gap-3 shadow-2xs">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-[#181717] dark:bg-[#1E293B] text-white flex items-center justify-center flex-none">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                    <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-[#0E1B38] dark:text-[#F8FAFC] flex items-center gap-1.5 flex-wrap">
-                    <span>GitHub: @{customUsername || authenticatedUsername || 'Connected User'}</span>
-                    <span className="bg-[#ECFDF3] dark:bg-[#064E3B]/30 text-[#22A06B] dark:text-[#34D399] text-[11px] px-2 py-0.5 rounded-full font-bold">
-                      {githubData.github_projects?.length || 0} Repos Synced
-                    </span>
-                  </p>
-                  <p className="text-[12px] text-[#52617D] dark:text-[#94A3B8] mt-0.5">
-                    Stack: {githubData.top_languages?.length ? githubData.top_languages.join(', ') : 'No languages detected'}
-                    {typeof githubData.detected_years_experience === 'number' && githubData.detected_years_experience > 0
-                      ? ` · Experience: ~${githubData.detected_years_experience} yrs`
-                      : ''}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowUsernameInput((v) => !v)}
-                  className="px-2.5 py-1.5 border border-[#D8DFEB] dark:border-[#2D3F59] hover:bg-white dark:hover:bg-[#1E293B] text-[#52617D] dark:text-[#CBD5E1] text-xs font-semibold rounded-lg transition-colors cursor-pointer"
-                >
-                  {showUsernameInput ? 'Hide' : 'Switch GitHub User'}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleConfirmStack}
-                  className={`px-3.5 py-1.5 text-xs font-bold rounded-lg shadow-xs transition-all cursor-pointer flex-none flex items-center gap-1.5 ${
-                    stackConfirmed
-                      ? 'bg-[#ECFDF3] dark:bg-emerald-950/40 text-[#22A06B] dark:text-emerald-400 border border-[#B7E7C9] dark:border-emerald-800/60'
-                      : 'bg-[#0066CC] hover:bg-[#0052A3] text-white'
-                  }`}
-                >
-                  {stackConfirmed ? (
-                    <>
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M20 6 9 17l-5-5" />
-                      </svg>
-                      <span>Stack Confirmed</span>
-                    </>
-                  ) : (
-                    <span>Continue with this Stack →</span>
-                  )}
-                </button>
-              </div>
-            </div>
-
-            {/* Inline Username Switcher */}
-            {showUsernameInput && (
-              <form onSubmit={handleCustomSync} className="pt-2 border-t border-[#E6EAF2] dark:border-[#24334A] flex items-center gap-2">
-                <div className="flex-1 flex items-center bg-white dark:bg-[#0B0F17] border border-[#D8DFEB] dark:border-[#2D3F59] rounded-full p-1 pl-3.5 shadow-2xs focus-within:border-[#0066cc] dark:focus-within:border-[#38BDF8] focus-within:ring-2 focus-within:ring-[#0066cc]/15 transition-all">
-                  <span className="text-[#888888] dark:text-[#94A3B8] text-xs font-mono font-bold mr-1 select-none">
-                    github.com/
-                  </span>
-                  <input
-                    type="text"
-                    value={customUsername}
-                    onChange={(e) => setCustomUsername(e.target.value)}
-                    placeholder="your-username"
-                    className="bg-transparent border-0 border-none outline-none focus:outline-none focus:ring-0 text-xs text-[#0E1B38] dark:text-[#F8FAFC] placeholder-[#888888] dark:placeholder-[#64748B] w-full flex-1"
-                    style={{ border: 'none', outline: 'none', boxShadow: 'none' }}
-                  />
-                </div>
-                <button
-                  type="submit"
-                  disabled={!customUsername.trim()}
-                  className="px-3.5 py-1.5 bg-[#0066CC] hover:bg-[#0052A3] text-white text-xs font-bold rounded-full transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 shadow-2xs active:scale-95 flex-none"
-                >
-                  <span>Sync Repos</span>
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
-                  </svg>
-                </button>
-              </form>
-            )}
-          </div>
-        )}
-
-        {/* Sync Prompt if no GitHub data loaded yet */}
-        {!githubData && !githubLoading && (
-          <div className="mt-4 bg-[#F8FAFD] dark:bg-[#141C2B] border border-[#E1E6F0] dark:border-[#24334A] rounded-2xl sm:rounded-full p-2 sm:px-4 sm:py-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <span className="w-7 h-7 rounded-full bg-[#181717] dark:bg-[#1E293B] text-white flex items-center justify-center flex-none text-xs shadow-2xs">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-                  <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
-                </svg>
-              </span>
-              <p className="text-xs text-[#52617D] dark:text-[#94A3B8] font-medium leading-tight truncate">
-                Have a GitHub profile? Connect your handle to automatically import your repos & stack.
-              </p>
-            </div>
-            <form onSubmit={handleCustomSync} className="flex items-center bg-white dark:bg-[#0B0F17] border border-[#D8DFEB] dark:border-[#2D3F59] rounded-full p-1 pl-3.5 shadow-2xs focus-within:border-[#0066cc] dark:focus-within:border-[#38BDF8] focus-within:ring-2 focus-within:ring-[#0066cc]/15 transition-all w-full sm:w-auto min-w-[220px]">
-              <span className="text-[#888888] dark:text-[#94A3B8] text-xs font-mono font-bold mr-1 select-none">
-                @
-              </span>
-              <input
-                type="text"
-                value={customUsername}
-                onChange={(e) => setCustomUsername(e.target.value)}
-                placeholder="github-handle"
-                className="bg-transparent border-0 border-none outline-none focus:outline-none focus:ring-0 text-xs text-[#0E1B38] dark:text-[#F8FAFC] placeholder-[#888888] dark:placeholder-[#64748B] w-full flex-1"
-                style={{ border: 'none', outline: 'none', boxShadow: 'none' }}
-              />
-              <button
-                type="submit"
-                disabled={!customUsername.trim()}
-                className="px-3.5 py-1.5 bg-[#0066CC] hover:bg-[#0052A3] text-white text-xs font-bold rounded-full transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 shadow-2xs active:scale-95 flex-none"
-              >
-                <span>Sync</span>
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
-                </svg>
-              </button>
-            </form>
-          </div>
-        )}
+        </div>
       </div>
 
-      {/* Primary Input Area: Two Equal Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 px-6 sm:px-10 py-4">
+      {/* Primary Input Area: Two Symmetrical Equal Cards */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 px-6 sm:px-10 py-3 flex-1">
         
         {/* Left Card: Resume Upload */}
         <div
@@ -619,10 +176,10 @@ export default function LearnerIntakeWorkspace({
           }`}
         >
           <div>
-            <div className="w-[74px] h-[74px] rounded-2xl bg-[#dbeafc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center mb-4">
+            <div className="w-[68px] h-[68px] rounded-2xl bg-[#dbeafc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center mb-4 shadow-xs">
               <svg
-                width="34"
-                height="34"
+                width="32"
+                height="32"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -637,11 +194,11 @@ export default function LearnerIntakeWorkspace({
               </svg>
             </div>
 
-            <h2 className="text-[22px] font-bold text-[#1d1d1f] dark:text-[#F8FAFC] mb-1">
+            <h2 className="text-[20px] sm:text-[22px] font-bold text-[#1d1d1f] dark:text-[#F8FAFC] mb-1">
               Upload my resume <span className="text-xs font-semibold text-[#7a7a7a] dark:text-[#94A3B8]">(Optional)</span>
             </h2>
-            <p className="text-[14.5px] text-[#333333] dark:text-[#94A3B8] leading-snug mb-4 text-balance">
-              Extraction of your skills and past project 
+            <p className="text-[14px] text-[#555555] dark:text-[#94A3B8] leading-snug mb-4">
+              Automatic extraction of your skills, past projects, and experience level.
             </p>
           </div>
 
@@ -660,7 +217,7 @@ export default function LearnerIntakeWorkspace({
               e.stopPropagation()
               fileInputRef.current?.click()
             }}
-            className={`border-2 border-dashed rounded-xl p-5 text-center flex flex-col items-center justify-center relative min-h-[160px] transition-colors ${
+            className={`border-2 border-dashed rounded-xl p-5 text-center flex flex-col items-center justify-center relative min-h-[175px] transition-colors ${
               dragOver
                 ? 'border-[#0066cc] dark:border-[#38BDF8] bg-[#eaf2fc] dark:bg-[#18263D]'
                 : 'border-[#abd2fb] dark:border-[#263750] bg-[#fafbfc] dark:bg-[#121927] hover:bg-[#f1f7fe] dark:hover:bg-[#162133]'
@@ -676,8 +233,8 @@ export default function LearnerIntakeWorkspace({
 
             {file ? (
               <div className="flex flex-col items-center py-1">
-                <div className="w-9 h-9 rounded-full bg-[#ECFDF3] dark:bg-[#064E3B]/40 text-[#22A06B] dark:text-[#34D399] flex items-center justify-center mb-1.5">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <div className="w-10 h-10 rounded-full bg-[#ECFDF3] dark:bg-[#064E3B]/40 text-[#22A06B] dark:text-[#34D399] flex items-center justify-center mb-1.5 shadow-xs">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M20 6 9 17l-5-5" />
                   </svg>
                 </div>
@@ -738,14 +295,14 @@ export default function LearnerIntakeWorkspace({
               </>
             )}
 
-            <div className="absolute left-3.5 bottom-2.5 flex items-center gap-1.5 text-[11.5px] font-medium text-[#333333] dark:text-[#94A3B8]">
+            <div className="absolute left-3.5 bottom-2.5 flex items-center gap-1.5 text-[11.5px] font-medium text-[#555555] dark:text-[#94A3B8]">
               <span className="text-[#22A06B] dark:text-emerald-400">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                   <path d="m9 12 2 2 4-4" />
                 </svg>
               </span>
-              <span>Private and secure</span>
+              <span>Private & secure</span>
             </div>
           </div>
 
@@ -764,10 +321,10 @@ export default function LearnerIntakeWorkspace({
           }`}
         >
           <div>
-            <div className="w-[74px] h-[74px] rounded-2xl bg-[#dbeafc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center mb-4">
+            <div className="w-[68px] h-[68px] rounded-2xl bg-[#dbeafc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center mb-4 shadow-xs">
               <svg
-                width="34"
-                height="34"
+                width="32"
+                height="32"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -780,15 +337,15 @@ export default function LearnerIntakeWorkspace({
               </svg>
             </div>
 
-            <h2 className="text-[22px] font-bold text-[#1d1d1f] dark:text-[#F8FAFC] mb-1">
+            <h2 className="text-[20px] sm:text-[22px] font-bold text-[#1d1d1f] dark:text-[#F8FAFC] mb-1">
               Describe your background <span className="text-xs font-bold text-[#0066cc] dark:text-[#38BDF8]">(Required)</span>
             </h2>
-            <p className="text-[14.5px] text-[#333333] dark:text-[#94A3B8] leading-snug mb-4 text-balance">
-              We’ll build your learner profile 
+            <p className="text-[14px] text-[#555555] dark:text-[#94A3B8] leading-snug mb-4">
+              Share your current skills, experience, and target career goal.
             </p>
           </div>
 
-          <div className="relative mt-2" onClick={(e) => e.stopPropagation()}>
+          <div className="relative mt-1" onClick={(e) => e.stopPropagation()}>
             <textarea
               ref={descInputRef}
               value={singleDescription}
@@ -796,11 +353,11 @@ export default function LearnerIntakeWorkspace({
               maxLength={1500}
               placeholder="e.g. I have 2 years of Python experience building APIs with FastAPI and Flask. I understand descriptive statistics and basic Pandas for data analysis. I have built 1 data visualization project with Matplotlib. I want to learn Machine Learning from scratch..."
               className="w-full resize-none rounded-xl border border-[#D8DFEB] dark:border-[#263750] bg-[#fbfbfb] dark:bg-[#0E1522] p-3.5 text-[14px] text-[#1d1d1f] dark:text-[#F8FAFC] placeholder-[#7a7a7a] dark:placeholder-[#64748B] leading-relaxed focus:outline-none focus:border-[#0066cc] dark:focus:border-[#38BDF8] focus:bg-white dark:focus:bg-[#141C2B] focus:ring-2 focus:ring-[#0066cc]/15 transition-all shadow-inner"
-              style={{ minHeight: 155 }}
+              style={{ minHeight: 175 }}
             />
             <div className="flex items-center justify-between mt-1 text-[11.5px] font-semibold text-[#7a7a7a] dark:text-[#64748B]">
               <span className={singleDescription.trim() ? "text-emerald-600 dark:text-emerald-400 font-bold" : "text-amber-600 dark:text-amber-400"}>
-                {singleDescription.trim() ? "✓ Description entered" : "* Required to continue"}
+                {singleDescription.trim() ? "✓ Background entered" : "* Required to continue"}
               </span>
               <span className="tabular-nums">{singleDescription.length}/1500</span>
             </div>
@@ -808,144 +365,83 @@ export default function LearnerIntakeWorkspace({
         </div>
       </div>
 
-
-
-      {/* Bottom Profile-Understanding Panel */}
-      <div className="mx-6 sm:mx-10 bg-[#f9fcff]/90 dark:bg-[#101622] border border-[#ddedfe] dark:border-[#242E40] rounded-2xl p-4 sm:p-5 my-3 shadow-xs">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-center">
-          
-          {/* Left Column: 5 Compact Chips */}
-          <div className="lg:col-span-7 xl:col-span-8">
-            <h3 className="font-bold text-[#1d1d1f] dark:text-white text-[14.5px] mb-2.5">
-              What PathFinder will understand
-            </h3>
-            
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
-              <div className="h-[42px] bg-white dark:bg-[#141A26] border border-[#f0f0f0] dark:border-[#242E40] rounded-xl px-2.5 flex items-center gap-1.5 text-[#1d1d1f] dark:text-[#F9FAFB] text-[12.5px] font-semibold shadow-xs hover:border-[#0066cc] dark:hover:border-[#38BDF8] transition-all">
-                <span className="text-[#0066cc] dark:text-[#38BDF8] flex-shrink-0">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-2.04z" />
-                    <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-2.04z" />
-                  </svg>
-                </span>
-                <span className="truncate">Skills</span>
-              </div>
-
-              <div className="h-[42px] bg-white dark:bg-[#141A26] border border-[#f0f0f0] dark:border-[#242E40] rounded-xl px-2.5 flex items-center gap-1.5 text-[#1d1d1f] dark:text-[#F9FAFB] text-[12.5px] font-semibold shadow-xs hover:border-[#0066cc] dark:hover:border-[#38BDF8] transition-all">
-                <span className="text-[#0066cc] dark:text-[#38BDF8] flex-shrink-0">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-                    <path d="M6 12v5c3 3 9 3 12 0v-5" />
-                  </svg>
-                </span>
-                <span className="truncate">Education</span>
-              </div>
-
-              <div className="h-[42px] bg-white dark:bg-[#141A26] border border-[#f0f0f0] dark:border-[#242E40] rounded-xl px-2.5 flex items-center gap-1.5 text-[#1d1d1f] dark:text-[#F9FAFB] text-[12.5px] font-semibold shadow-xs hover:border-[#0066cc] dark:hover:border-[#38BDF8] transition-all">
-                <span className="text-[#0066cc] dark:text-[#38BDF8] flex-shrink-0">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
-                  </svg>
-                </span>
-                <span className="truncate">Projects</span>
-              </div>
-
-              <div className="h-[42px] bg-white dark:bg-[#141A26] border border-[#f0f0f0] dark:border-[#242E40] rounded-xl px-2.5 flex items-center gap-1.5 text-[#1d1d1f] dark:text-[#F9FAFB] text-[12.5px] font-semibold shadow-xs hover:border-[#0066cc] dark:hover:border-[#38BDF8] transition-all">
-                <span className="text-[#0066cc] dark:text-[#38BDF8] flex-shrink-0">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-                    <polyline points="17 6 23 6 23 12" />
-                  </svg>
-                </span>
-                <span className="truncate">Confidence</span>
-              </div>
-
-              <div className="h-[42px] bg-white dark:bg-[#141A26] border border-[#f0f0f0] dark:border-[#242E40] rounded-xl px-2.5 flex items-center gap-1.5 text-[#1d1d1f] dark:text-[#F9FAFB] text-[12.5px] font-semibold shadow-xs hover:border-[#0066cc] dark:hover:border-[#38BDF8] transition-all">
-                <span className="text-[#0066cc] dark:text-[#38BDF8] flex-shrink-0">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10" />
-                    <circle cx="12" cy="12" r="6" />
-                    <circle cx="12" cy="12" r="2" />
-                  </svg>
-                </span>
-                <span className="truncate">Goal & time</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Column: AI Profile Draft */}
-          <div className="lg:col-span-5 xl:col-span-4 lg:border-l lg:border-[#f0f0f0] dark:lg:border-[#242E40] lg:pl-5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5 text-[#1d1d1f] dark:text-white font-bold text-[14.5px]">
-                <span className="text-[#0066cc] dark:text-[#38BDF8]">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2L14.4 7.6L20 10L14.4 12.4L12 18L9.6 12.4L4 10L9.6 7.6L12 2Z" />
-                  </svg>
-                </span>
-                <span>AI Profile Draft</span>
-              </div>
-              {isExtractingText && (
-                <span className="text-[11px] text-[#0066cc] dark:text-[#38BDF8] font-semibold flex items-center gap-1 animate-pulse">
-                  <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                  </svg>
-                  <span>Analyzing...</span>
-                </span>
-              )}
-            </div>
-
-            <p className="text-[13px] text-[#333333] dark:text-[#94A3B8] leading-relaxed mt-1">
-              {profileDraft?.summary
-                ? `"${profileDraft.summary}"`
-                : 'Describe your background in the text box above to generate your AI Profile Draft.'}
-            </p>
-
-            {/* If skills are not yet extracted or empty, show helpful review notice */}
-            {(!profileDraft?.skills || profileDraft.skills.trim() === '') && singleDescription.trim().length > 10 && (
-              <div className="mt-2 flex items-center gap-1.5 text-[11px] font-semibold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 px-2.5 py-1 rounded-lg">
-                <span>⚠️ Skills & tools not verified yet. Review & edit to confirm.</span>
-              </div>
-            )}
-
-            <button
-              type="button"
-              disabled={!profileDraft && !singleDescription.trim()}
-              onClick={handleOpenEditDraft}
-              className="mt-2 text-[#0066cc] dark:text-[#38BDF8] text-[12.5px] font-bold inline-flex items-center gap-1.5 hover:underline cursor-pointer focus:outline-none disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:no-underline"
-            >
-              <svg
-                width="13"
-                height="13"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
+      {/* Full-Width "What PathFinder will understand" Indicator Panel */}
+      <div className="mx-6 sm:mx-10 bg-[#f9fcff]/90 dark:bg-[#101622] border border-[#ddedfe] dark:border-[#242E40] rounded-2xl p-4 sm:p-5 my-2 shadow-xs">
+        <h3 className="font-bold text-[#1d1d1f] dark:text-white text-[14.5px] mb-3">
+          What PathFinder will understand
+        </h3>
+        
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5">
+          {/* 1. Skills */}
+          <div className="h-[44px] bg-white dark:bg-[#141A26] border border-[#e8eff8] dark:border-[#242E40] rounded-full px-3.5 flex items-center gap-2 text-[#1d1d1f] dark:text-[#F9FAFB] text-[13px] font-semibold shadow-xs hover:border-[#0066cc] dark:hover:border-[#38BDF8] transition-all">
+            <span className="text-[#0066cc] dark:text-[#38BDF8] flex-shrink-0">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="2" y1="12" x2="22" y2="12" />
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
               </svg>
-              <span>Review and edit</span>
-            </button>
+            </span>
+            <span className="truncate">Skills</span>
           </div>
 
+          {/* 2. Education */}
+          <div className="h-[44px] bg-white dark:bg-[#141A26] border border-[#e8eff8] dark:border-[#242E40] rounded-full px-3.5 flex items-center gap-2 text-[#1d1d1f] dark:text-[#F9FAFB] text-[13px] font-semibold shadow-xs hover:border-[#0066cc] dark:hover:border-[#38BDF8] transition-all">
+            <span className="text-[#0066cc] dark:text-[#38BDF8] flex-shrink-0">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+                <path d="M6 12v5c3 3 9 3 12 0v-5" />
+              </svg>
+            </span>
+            <span className="truncate">Education</span>
+          </div>
 
+          {/* 3. Projects */}
+          <div className="h-[44px] bg-white dark:bg-[#141A26] border border-[#e8eff8] dark:border-[#242E40] rounded-full px-3.5 flex items-center gap-2 text-[#1d1d1f] dark:text-[#F9FAFB] text-[13px] font-semibold shadow-xs hover:border-[#0066cc] dark:hover:border-[#38BDF8] transition-all">
+            <span className="text-[#0066cc] dark:text-[#38BDF8] flex-shrink-0">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+              </svg>
+            </span>
+            <span className="truncate">Projects</span>
+          </div>
+
+          {/* 4. Confidence */}
+          <div className="h-[44px] bg-white dark:bg-[#141A26] border border-[#e8eff8] dark:border-[#242E40] rounded-full px-3.5 flex items-center gap-2 text-[#1d1d1f] dark:text-[#F9FAFB] text-[13px] font-semibold shadow-xs hover:border-[#0066cc] dark:hover:border-[#38BDF8] transition-all">
+            <span className="text-[#0066cc] dark:text-[#38BDF8] flex-shrink-0">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                <polyline points="17 6 23 6 23 12" />
+              </svg>
+            </span>
+            <span className="truncate">Confidence</span>
+          </div>
+
+          {/* 5. Goal & time */}
+          <div className="h-[44px] bg-white dark:bg-[#141A26] border border-[#e8eff8] dark:border-[#242E40] rounded-full px-3.5 flex items-center gap-2 text-[#1d1d1f] dark:text-[#F9FAFB] text-[13px] font-semibold shadow-xs hover:border-[#0066cc] dark:hover:border-[#38BDF8] transition-all">
+            <span className="text-[#0066cc] dark:text-[#38BDF8] flex-shrink-0">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <circle cx="12" cy="12" r="6" />
+                <circle cx="12" cy="12" r="2" />
+              </svg>
+            </span>
+            <span className="truncate">Goal & time</span>
+          </div>
         </div>
       </div>
 
-      {/* Continue-blocking validation, shown right above the footer */}
+      {/* Continue-blocking validation message */}
       {continueError && (
         <div className="mx-6 sm:mx-10 -mt-1 mb-2">
-          <p className="text-xs font-semibold text-red-600 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800/60 rounded-lg px-3.5 py-2">
+          <p className="text-xs font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800/60 rounded-lg px-3.5 py-2">
             {continueError}
           </p>
         </div>
       )}
 
       {/* Footer Controls */}
-      <div className="h-[76px] px-6 sm:px-10 border-t border-[#f0f0f0] dark:border-[#1E2638] flex items-center justify-between">
-        <div className="flex items-center gap-2 text-[13.5px] font-medium text-[#333333] dark:text-[#94A3B8]">
+      <div className="h-[76px] px-6 sm:px-10 border-t border-[#f0f0f0] dark:border-[#1E2638] flex items-center justify-between mt-auto">
+        <div className="flex items-center gap-2 text-[13.5px] font-medium text-[#555555] dark:text-[#94A3B8]">
           <span className="text-[#22A06B] dark:text-emerald-400">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
@@ -975,106 +471,10 @@ export default function LearnerIntakeWorkspace({
               <span>Analyzing...</span>
             </span>
           ) : (
-            'Continue'
+            <span>Continue</span>
           )}
         </button>
       </div>
-
-      {/* Edit Modal */}
-      {isEditingDraft && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-[#141A26] rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-[#e0e0e0] dark:border-[#242E40] animate-in fade-in zoom-in duration-150">
-            <div className="flex items-center justify-between pb-4 border-b border-[#f0f0f0] dark:border-[#242E40]">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-[#dbeafc] dark:bg-[#1E293B] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2L14.4 7.6L20 10L14.4 12.4L12 18L9.6 12.4L4 10L9.6 7.6L12 2Z" />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-bold text-[#1d1d1f] dark:text-white">Edit AI Profile Draft</h3>
-              </div>
-              <button
-                onClick={() => setIsEditingDraft(false)}
-                className="text-[#7a7a7a] hover:text-[#1d1d1f] dark:hover:text-white text-xl font-bold p-1"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="space-y-4 py-4 text-left">
-              <div>
-                <label className="block text-xs font-bold text-[#1d1d1f] dark:text-[#CBD5E1] uppercase tracking-wider mb-1">
-                  Skills & Tools <span className="text-[#7a7a7a] font-normal normal-case">(comma separated)</span>
-                </label>
-                <input
-                  type="text"
-                  value={editFormData.skills}
-                  placeholder="e.g. Python, SQL, Excel, PowerBI, Tableau, Pandas, NumPy, Scikit-Learn"
-                  onChange={(e) => setEditFormData({ ...editFormData, skills: e.target.value })}
-                  className="w-full bg-[#fbfbfb] dark:bg-[#0E131E] border border-[#e0e0e0] dark:border-[#242E40] rounded-xl px-3.5 py-2.5 text-sm text-[#1d1d1f] dark:text-white focus:border-[#0066cc] dark:focus:border-[#38BDF8] outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-[#1d1d1f] dark:text-[#CBD5E1] uppercase tracking-wider mb-1">
-                  Education & Background
-                </label>
-                <input
-                  type="text"
-                  value={editFormData.education}
-                  placeholder="e.g. B.Tech in Computer Science / 2 years working experience"
-                  onChange={(e) => setEditFormData({ ...editFormData, education: e.target.value })}
-                  className="w-full bg-[#fbfbfb] dark:bg-[#0E131E] border border-[#e0e0e0] dark:border-[#242E40] rounded-xl px-3.5 py-2.5 text-sm text-[#1d1d1f] dark:text-white focus:border-[#0066cc] dark:focus:border-[#38BDF8] outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-[#1d1d1f] dark:text-[#CBD5E1] uppercase tracking-wider mb-1">
-                  Projects Mentioned
-                </label>
-                <input
-                  type="text"
-                  value={editFormData.projects}
-                  placeholder="e.g. Built automated ETL pipelines and interactive dashboards in PowerBI"
-                  onChange={(e) => setEditFormData({ ...editFormData, projects: e.target.value })}
-                  className="w-full bg-[#fbfbfb] dark:bg-[#0E131E] border border-[#e0e0e0] dark:border-[#242E40] rounded-xl px-3.5 py-2.5 text-sm text-[#1d1d1f] dark:text-white focus:border-[#0066cc] dark:focus:border-[#38BDF8] outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-[#1d1d1f] dark:text-[#CBD5E1] uppercase tracking-wider mb-1">
-                  Career Goal & Target
-                </label>
-                <input
-                  type="text"
-                  value={editFormData.goal}
-                  placeholder="e.g. Data Scientist / Machine Learning Engineer"
-                  onChange={(e) => setEditFormData({ ...editFormData, goal: e.target.value })}
-                  className="w-full bg-[#fbfbfb] dark:bg-[#0E131E] border border-[#e0e0e0] dark:border-[#242E40] rounded-xl px-3.5 py-2.5 text-sm text-[#1d1d1f] dark:text-white focus:border-[#0066cc] dark:focus:border-[#38BDF8] outline-none"
-                />
-              </div>
-
-            </div>
-
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#f0f0f0] dark:border-[#242E40]">
-              <button
-                type="button"
-                onClick={() => setIsEditingDraft(false)}
-                className="px-4 py-2 text-sm font-semibold text-[#333333] dark:text-[#CBD5E1] hover:text-[#1d1d1f] dark:hover:text-white"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleSaveDraft}
-                className="px-5 py-2 bg-[#0066cc] hover:bg-[#004fa3] text-white text-sm font-bold rounded-xl shadow-sm"
-              >
-                Save Draft
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

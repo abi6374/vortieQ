@@ -557,7 +557,7 @@ export default function GoalCompass({ topicRatings = [], detectedYears = 0, init
       <div className="head">
         <div className="head-left">
           <span className="step-badge">
-            Step 3 · Goal Compass
+            Step 4 · Goal Compass
           </span>
           <div className="head-title-row">
             <span className="head-icon" aria-hidden="true">
