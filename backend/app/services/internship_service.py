@@ -265,63 +265,90 @@ def get_internship_by_id(internship_id: str) -> Optional[dict]:
     return None
 
 
-def apply_to_internship(user_id: str, internship_id: str) -> dict:
-    """Record that a user applied to an internship."""
+def apply_to_internship(user_id: str, internship_id: str, status: str = "applied") -> dict:
+    """Record that a user applied to an internship (persistent via Supabase)."""
     internship = get_internship_by_id(internship_id)
     if not internship:
         raise ValueError("Internship not found")
-    if _HAS_SUPABASE:
-        try:
-            supabase_client.table("user_internships").upsert({
-                "user_id": user_id,
-                "internship_id": internship_id,
-                "applied_on": datetime.now(timezone.utc).isoformat(),
-                "application_status": "applied"
-            }, on_conflict="user_id,internship_id").execute()
-        except Exception as e:
-            logger.warning(f"user_internships upsert failed: {e}")
-    return {"success": True, "internship_id": internship_id, "status": "applied"}
+    if not _HAS_SUPABASE:
+        logger.warning("Supabase not configured — internship application will not persist.")
+        return {"success": True, "internship_id": internship_id, "status": status, "persisted": False}
+    try:
+        supabase_client.table("user_internships").upsert({
+            "user_id": user_id,
+            "internship_id": internship_id,
+            "applied_on": datetime.now(timezone.utc).isoformat(),
+            "application_status": status
+        }, on_conflict="user_id,internship_id").execute()
+        logger.info(f"Internship {internship_id} tracked for user {user_id[:8]}... status={status}")
+    except Exception as e:
+        logger.error(f"user_internships upsert FAILED: {e}")
+        raise RuntimeError(f"Failed to persist internship application: {e}") from e
+    return {"success": True, "internship_id": internship_id, "status": status, "persisted": True}
 
 
 def get_user_internships(user_id: str) -> list:
-    """Get all internships a user has applied to."""
+    """Get all internships a user has applied to — loaded fresh from Supabase."""
     if not _HAS_SUPABASE:
+        logger.warning("Supabase not configured — returning empty user internships.")
         return []
     try:
-        resp = supabase_client.table("user_internships").select("*, internships(*)").eq("user_id", user_id).execute()
+        resp = supabase_client.table("user_internships").select("*").eq("user_id", user_id).execute()
         rows = resp.data or []
         result = []
         for row in rows:
-            i = row.get("internships") or {}
-            i["application_status"] = row.get("application_status", "applied")
-            i["applied_on"] = row.get("applied_on")
-            result.append(i)
+            internship_id = row.get("internship_id")
+            internship = get_internship_by_id(internship_id)
+            if internship:
+                i_copy = dict(internship)
+                i_copy["application_status"] = row.get("application_status", "applied")
+                i_copy["applied_on"] = row.get("applied_on")
+                result.append(i_copy)
+            else:
+                # Internship may have been removed from the live feed; include raw row data
+                result.append({
+                    "id": internship_id,
+                    "title": row.get("internship_id", "Unknown Position"),
+                    "company": "Unknown",
+                    "application_status": row.get("application_status", "applied"),
+                    "applied_on": row.get("applied_on"),
+                    "location": "",
+                    "apply_url": ""
+                })
+        logger.info(f"Loaded {len(result)} internships for user {user_id[:8]}...")
         return result
     except Exception as e:
-        logger.warning(f"get_user_internships failed: {e}")
+        logger.error(f"get_user_internships FAILED: {e}")
         return []
 
 
 def update_application_status(user_id: str, internship_id: str, new_status: str) -> dict:
     """Update internship application status (applied → interviewing → offer/rejected)."""
-    valid = {"applied", "interviewing", "offer", "rejected"}
+    valid = {"applied", "saved", "interviewing", "offer", "rejected"}
     if new_status not in valid:
         raise ValueError(f"Invalid status. Must be one of: {valid}")
-    if _HAS_SUPABASE:
-        try:
-            supabase_client.table("user_internships").update(
-                {"application_status": new_status}
-            ).eq("user_id", user_id).eq("internship_id", internship_id).execute()
-        except Exception as e:
-            logger.warning(f"update_application_status failed: {e}")
-    return {"success": True, "new_status": new_status}
+    if not _HAS_SUPABASE:
+        return {"success": True, "new_status": new_status, "persisted": False}
+    try:
+        supabase_client.table("user_internships").update(
+            {"application_status": new_status}
+        ).eq("user_id", user_id).eq("internship_id", internship_id).execute()
+        logger.info(f"Internship {internship_id} status updated to {new_status} for user {user_id[:8]}...")
+    except Exception as e:
+        logger.error(f"update_application_status FAILED: {e}")
+        raise RuntimeError(f"Failed to update internship status: {e}") from e
+    return {"success": True, "new_status": new_status, "persisted": True}
 
 
 def unapply_from_internship(user_id: str, internship_id: str) -> dict:
     """Remove an internship from user's tracked applications."""
-    if _HAS_SUPABASE:
-        try:
-            supabase_client.table("user_internships").delete().eq("user_id", user_id).eq("internship_id", internship_id).execute()
-        except Exception as e:
-            logger.warning(f"user_internships delete failed: {e}")
-    return {"success": True, "internship_id": internship_id, "status": "removed"}
+    if not _HAS_SUPABASE:
+        return {"success": True, "internship_id": internship_id, "status": "removed", "persisted": False}
+    try:
+        supabase_client.table("user_internships").delete().eq("user_id", user_id).eq("internship_id", internship_id).execute()
+        logger.info(f"Internship {internship_id} removed for user {user_id[:8]}...")
+    except Exception as e:
+        logger.error(f"user_internships delete FAILED: {e}")
+        raise RuntimeError(f"Failed to remove internship application: {e}") from e
+    return {"success": True, "internship_id": internship_id, "status": "removed", "persisted": True}
+

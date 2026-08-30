@@ -56,17 +56,20 @@ def get_internship_detail(
 @router.post("/{internship_id}/apply")
 def apply_to_internship(
     internship_id: str,
+    status: str = Query("applied", description="applied | saved"),
     user_id: str = Depends(verify_jwt),
 ):
     """
-    Record that the user has applied to this internship.
-    The actual application is handled by the employer's own Greenhouse page.
+    Track that the user has applied to or saved this internship.
+    Persists to Supabase user_internships table.
     """
     try:
-        result = internship_service.apply_to_internship(user_id, internship_id)
+        result = internship_service.apply_to_internship(user_id, internship_id, status=status)
         return result
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+    except RuntimeError as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.delete("/{internship_id}/apply")
@@ -75,14 +78,17 @@ def unapply_from_internship(
     user_id: str = Depends(verify_jwt),
 ):
     """Remove an internship from user's tracked applications."""
-    result = internship_service.unapply_from_internship(user_id, internship_id)
-    return result
+    try:
+        result = internship_service.unapply_from_internship(user_id, internship_id)
+        return result
+    except RuntimeError as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.patch("/{internship_id}/status")
 def update_internship_status(
     internship_id: str,
-    new_status: str = Query(..., description="applied | interviewing | offer | rejected"),
+    new_status: str = Query(..., description="applied | saved | interviewing | offer | rejected"),
     user_id: str = Depends(verify_jwt),
 ):
     """Update the application status for a tracked internship."""
@@ -91,3 +97,6 @@ def update_internship_status(
         return result
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+    except RuntimeError as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
