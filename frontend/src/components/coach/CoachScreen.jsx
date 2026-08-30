@@ -366,8 +366,7 @@ export default function CoachScreen() {
           <div className="lg:col-span-5 space-y-6">
             {/* Quick Prompts */}
             <div className="bg-white dark:bg-[#121216] border-[1.5px] border-[#D0D7E2] dark:border-[#27272F] rounded-2xl p-6 sm:p-7 shadow-sm">
-              <h3 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white mb-4 flex items-center gap-2.5">
-                <span className="w-7 h-7 rounded-xl bg-[#eaf2fc] dark:bg-[#18181D] text-[#0066cc] dark:text-[#C9D0D6] flex items-center justify-center text-sm shadow-xs font-bold">⚡</span>
+              <h3 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white mb-4">
                 Suggested Questions
               </h3>
               <div className="space-y-3">
