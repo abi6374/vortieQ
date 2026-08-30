@@ -35,10 +35,10 @@ export default function LandingNavbar() {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b ${
         scrolled
-          ? 'py-3 bg-white/80 dark:bg-[#0B0F17]/80 backdrop-blur-xl border-b border-[#E0E0E0]/80 dark:border-[#1E293B]/80 shadow-xs'
-          : 'py-5 bg-transparent'
+          ? 'py-3 bg-white/85 dark:bg-[#0B0F17]/90 backdrop-blur-xl border-[#E0E0E0]/80 dark:border-[#1E2638] shadow-sm dark:shadow-[0_4px_20px_rgba(0,0,0,0.5)]'
+          : 'py-5 bg-transparent border-transparent'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">

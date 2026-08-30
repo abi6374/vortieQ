@@ -177,9 +177,9 @@ export default function PersonalizedRoadmap({
 
   const [pendingCompleteTask, setPendingCompleteTask] = useState(null)
   const [completeNote, setCompleteNote] = useState('')
-  const [completeRating, setCompleteRating] = useState(5)
+  const [completeRating, setCompleteRating] = useState(0)
   const [completeHoverRating, setCompleteHoverRating] = useState(0)
-  const [completeTag, setCompleteTag] = useState('Just right')
+  const [completeTag, setCompleteTag] = useState('')
   const [completeNoteError, setCompleteNoteError] = useState('')
 
   // Re-recommendation Modal State
@@ -322,8 +322,9 @@ export default function PersonalizedRoadmap({
     if (!isCompleted) {
       setPendingCompleteTask(task)
       setCompleteNote('')
-      setCompleteRating(5)
-      setCompleteTag('Just right')
+      setCompleteRating(0)
+      setCompleteHoverRating(0)
+      setCompleteTag('')
       setCompleteNoteError('')
       return
     }
@@ -416,10 +417,16 @@ export default function PersonalizedRoadmap({
   const weekCompletedCount = currentWeekData.tasks.filter((t) => completedTaskIds.has(t.id)).length
 
   const rawGoalText = profile?.goal_text || roadmap.path?.goal_text || pathData?.goal_text || ''
-  const targetRole = roadmap.path?.target_role || ''
+  const targetRole = roadmap.path?.target_role || profile?.target_role || pathData?.target_role || ''
+
   const cleanGoalTitle = useMemo(() => {
-    if (targetRole) return targetRole
+    if (targetRole && targetRole.trim()) return targetRole.trim()
     if (!rawGoalText) return 'your learning goal'
+
+    // Extract explicit (Target role: ...) tag if present
+    const targetMatch = rawGoalText.match(/\(Target\s+role:\s*([^.)]+)\.?\)/i)
+    if (targetMatch && targetMatch[1]) return targetMatch[1].trim()
+
     let text = rawGoalText.split('I can study')[0].trim()
     text = text.replace(
       /^(I want to become an?|I want to become|I want to be an?|I want to be|I want an?|I want|My goal is to become an?|My goal is to be an?|My goal is to|My goal is)\s+/i,
@@ -427,8 +434,35 @@ export default function PersonalizedRoadmap({
     )
     text = text.charAt(0).toUpperCase() + text.slice(1)
     text = text.replace(/\.$/, '').trim()
+
+    if (text.length > 35) {
+      const roleInTextMatch = text.match(/(?:transition into|become|work as)(?:\s+an?|\s+a)?\s+([A-Z][a-zA-Z\s/]+(?:Engineer|Analyst|Developer|Scientist|Specialist|Lead|Manager))/i)
+      if (roleInTextMatch && roleInTextMatch[1]) {
+        return roleInTextMatch[1].trim()
+      }
+      return text.split('.')[0].trim()
+    }
     return text || 'your learning goal'
   }, [rawGoalText, targetRole])
+
+  // Show a polished loading state when roadmap is fetching
+  if (roadmap.loading && !roadmap.weeks.length && !pathData?.path_steps?.length) {
+    return (
+      <AppShell>
+        <div className="min-h-[60vh] flex flex-col items-center justify-center text-center px-4 py-16 animate-in fade-in duration-300">
+          <div className="w-14 h-14 rounded-2xl bg-[#EAF2FC] dark:bg-[#142238] border border-[#CFE4FB] dark:border-[#1E3A5F] flex items-center justify-center text-[#0066CC] dark:text-[#38BDF8] mb-5 shadow-sm">
+            <div className="w-7 h-7 border-3 border-[#0066CC] dark:border-[#38BDF8] border-t-transparent rounded-full animate-spin" />
+          </div>
+          <h2 className="font-['Manrope'] font-bold text-xl sm:text-2xl text-[#1D1D1F] dark:text-[#F8FAFC] tracking-tight mb-1.5">
+            Loading your learning path...
+          </h2>
+          <p className="text-sm text-[#555555] dark:text-[#94A3B8] max-w-md">
+            Calibrating your customized roadmap milestones and study schedule.
+          </p>
+        </div>
+      </AppShell>
+    )
+  }
 
   return (
     <AppShell
@@ -1059,14 +1093,28 @@ export default function PersonalizedRoadmap({
                       onMouseEnter={() => setCompleteHoverRating(star)}
                       onMouseLeave={() => setCompleteHoverRating(0)}
                       onClick={() => setCompleteRating(star)}
-                      className="p-1 text-2xl transition-transform hover:scale-125 cursor-pointer focus:outline-none"
+                      className="p-1 transition-transform hover:scale-125 cursor-pointer focus:outline-none"
+                      aria-label={`${star} star`}
                     >
-                      {active ? '⭐' : '☆'}
+                      <svg
+                        width="26"
+                        height="26"
+                        viewBox="0 0 24 24"
+                        fill={active ? '#F59E0B' : 'none'}
+                        stroke={active ? '#D97706' : '#94A3B8'}
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="transition-colors"
+                      >
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                      </svg>
                     </button>
                   )
                 })}
               </div>
-              <div className="text-xs font-semibold text-[#0066cc] dark:text-[#38BDF8] mt-1.5">
+              <div className="text-xs font-semibold text-[#0066cc] dark:text-[#38BDF8] mt-1.5 min-h-[18px]">
+                {completeRating === 0 && <span className="text-[#888888] dark:text-[#94A3B8] font-normal">Click stars to rate (1–5)</span>}
                 {completeRating === 1 && '1/5 — Too basic / Needed better depth'}
                 {completeRating === 2 && '2/5 — Needed more practical exercises'}
                 {completeRating === 3 && '3/5 — Good match & steady pace'}
@@ -1085,7 +1133,7 @@ export default function PersonalizedRoadmap({
                   <button
                     key={tag}
                     type="button"
-                    onClick={() => setCompleteTag(tag)}
+                    onClick={() => setCompleteTag((prev) => (prev === tag ? '' : tag))}
                     className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer border ${
                       completeTag === tag
                         ? 'bg-[#0066cc] text-white border-[#0066cc] shadow-xs'

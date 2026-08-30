@@ -21,7 +21,7 @@ export default function DashboardPage() {
       const { data: paths } = await supabase
         .from('learning_paths')
         .select(`
-          id, goal_text, status, generated_at,
+          id, goal_text, target_role, status, generated_at,
           path_steps (
             id, sequence_order, milestone_label, status, explanation,
             courses ( id, title, provider, difficulty, skill_tags, duration_hrs, resource_url )

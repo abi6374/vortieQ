@@ -72,12 +72,36 @@ export default function GoalSelectorDropdown({
     }
   }, [isOpen])
 
+function formatGoalTitle(targetRole, rawGoalText) {
+  if (targetRole && targetRole.trim()) return targetRole.trim()
+  if (!rawGoalText) return 'Personalized Goal'
+
+  // Extract explicit (Target role: ...) tag if present
+  const targetMatch = rawGoalText.match(/\(Target\s+role:\s*([^.)]+)\.?\)/i)
+  if (targetMatch && targetMatch[1]) return targetMatch[1].trim()
+
+  let text = rawGoalText.split('I can study')[0].trim()
+  text = text.replace(
+    /^(I want to become an?|I want to become|I want to be an?|I want to be|I want an?|I want|My goal is to become an?|My goal is to be an?|My goal is to|My goal is)\s+/i,
+    ''
+  )
+  text = text.charAt(0).toUpperCase() + text.slice(1)
+  text = text.replace(/\.$/, '').trim()
+
+  if (text.length > 35) {
+    const roleInTextMatch = text.match(/(?:transition into|become|work as)(?:\s+an?|\s+a)?\s+([A-Z][a-zA-Z\s/]+(?:Engineer|Analyst|Developer|Scientist|Specialist|Lead|Manager))/i)
+    if (roleInTextMatch && roleInTextMatch[1]) {
+      return roleInTextMatch[1].trim()
+    }
+    return text.split('.')[0].trim()
+  }
+  return text || 'Personalized Goal'
+}
+
   // Determine current active goal title and target text
   const currentGoalTitle =
-    activePath?.goal_text?.split('.')[0] ||
-    activePath?.target_role ||
-    userPaths[0]?.goal_text?.split('.')[0] ||
-    'Personalized Goal'
+    formatGoalTitle(activePath?.target_role, activePath?.goal_text) ||
+    (userPaths.length > 0 ? formatGoalTitle(userPaths[0]?.target_role, userPaths[0]?.goal_text) : 'Personalized Goal')
 
   const currentTargetSubtitle = activePath?.timeframe
     ? `Target: ${activePath.timeframe}`
@@ -152,7 +176,7 @@ export default function GoalSelectorDropdown({
 
             <div className="max-h-60 overflow-y-auto space-y-1 pr-0.5">
               {displayPaths.map((pathItem, idx) => {
-                const title = pathItem.goal_text?.split('.')[0] || pathItem.target_role || `Roadmap #${idx + 1}`
+                const title = formatGoalTitle(pathItem.target_role, pathItem.goal_text) || `Roadmap #${idx + 1}`
                 const isSelected =
                   (activePath && activePath.id === pathItem.id) ||
                   (!activePath && idx === 0)

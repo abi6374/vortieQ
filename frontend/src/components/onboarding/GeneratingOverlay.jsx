@@ -46,7 +46,7 @@ const STYLES = `
 .genov .ic .step-ring{ width:22px; height:22px; display:block; box-shadow:none; outline:none; border:none; }
 .genov .progress-wrap{ margin-top:24px; }
 .genov .track{ width:100%; height:9px; background:#e2e8f0; border-radius:999px; overflow:hidden; }
-.genov .fill{ height:100%; background:linear-gradient(90deg,#0066cc,#0077ed); border-radius:999px; box-shadow:0 0 10px rgba(0,102,204,.45); }
+.genov .fill{ width:0%; height:100%; background:linear-gradient(90deg,#0066cc,#0077ed); border-radius:999px; box-shadow:0 0 10px rgba(0,102,204,.45); will-change:width; }
 .genov .ptext{ margin:12px 0 0; font-size:14.5px; font-weight:700; color:#0f172a; }
 .genov .foot{ display:flex; align-items:center; justify-content:center; gap:7px; margin-top:20px;
   font-size:13px; color:#64748b; }
@@ -155,44 +155,35 @@ export default function GeneratingOverlay({ status = 'loading', onFinished, onRe
             clearInterval(interval)
             return 100
           }
-          const step = Math.max(1.5, (100 - p) * 0.35)
-          const next = p + step
+          const next = p + Math.max(2, (100 - p) * 0.4)
           return next >= 99.5 ? 100 : next
         })
-      }, 30)
+      }, 25)
       return () => clearInterval(interval)
     }
 
-    // Dynamic continuous progress during loading
+    // Steady, constant forward progress animation starting strictly from 0%
+    setPct(0)
     const startTime = Date.now()
     const interval = setInterval(() => {
-      setPct((current) => {
-        const elapsed = (Date.now() - startTime) / 1000 // in seconds
-        
-        // Target dynamic curve:
-        // 0-2s   : reaches ~25%
-        // 2-4.5s : reaches ~52%
-        // 4.5-7s : reaches ~76%
-        // 7-10s  : reaches ~90%
-        // 10s+   : asymptotically reaches ~97% smoothly
-        let target = 0
-        if (elapsed <= 2) {
-          target = (elapsed / 2) * 25
-        } else if (elapsed <= 4.5) {
-          target = 25 + ((elapsed - 2) / 2.5) * 27
-        } else if (elapsed <= 7) {
-          target = 52 + ((elapsed - 4.5) / 2.5) * 24
-        } else if (elapsed <= 10) {
-          target = 76 + ((elapsed - 7) / 3) * 14
-        } else {
-          // Asymptotic micro-creep towards 97%
-          const extra = elapsed - 10
-          target = 90 + 7 * (1 - Math.exp(-extra / 6))
-        }
+      const elapsed = (Date.now() - startTime) / 1000 // in seconds
+      
+      // Constant, smooth pace starting at 0%
+      let target = 0
+      if (elapsed <= 2.5) {
+        target = (elapsed / 2.5) * 30
+      } else if (elapsed <= 5.5) {
+        target = 30 + ((elapsed - 2.5) / 3.0) * 30
+      } else if (elapsed <= 8.5) {
+        target = 60 + ((elapsed - 5.5) / 3.0) * 22
+      } else {
+        const extra = elapsed - 8.5
+        target = 82 + 14 * (1 - Math.exp(-extra / 4.5))
+      }
 
-        // Smoothly interpolate towards target, always strictly monotonic (never decrease)
-        const delta = Math.max(0, (target - current) * 0.25)
-        const next = Math.max(current, current + delta + 0.05)
+      setPct((current) => {
+        // Monotonically increase only, perfectly constant motion
+        const next = Math.max(current, target)
         return Math.min(97.5, next)
       })
     }, 40)
@@ -282,7 +273,13 @@ export default function GeneratingOverlay({ status = 'loading', onFinished, onRe
 
             <div className="progress-wrap">
               <div className="track" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(pct)}>
-                <motion.div className="fill" animate={{ width: `${pct}%` }} transition={{ ease: 'easeOut', duration: 0.3 }} />
+                <div
+                  className="fill"
+                  style={{
+                    width: `${Math.min(100, Math.max(0, pct))}%`,
+                    transition: isSuccess ? 'width 0.35s cubic-bezier(0.16, 1, 0.3, 1)' : 'width 0.08s linear',
+                  }}
+                />
               </div>
               <p className="ptext">
                 {isSuccess ? 'Your roadmap is ready · 100%' : `Building your roadmap · ${Math.round(pct)}%`}
