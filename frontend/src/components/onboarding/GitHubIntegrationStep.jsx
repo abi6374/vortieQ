@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import apiClient from '../../lib/apiClient'
+import { supabase } from '../../lib/supabaseClient'
 import ThemeToggle from '../ui/ThemeToggle'
 import { useAuth } from '../../hooks/useAuth'
 
@@ -55,6 +56,52 @@ export default function GitHubIntegrationStep({
       setLoading(false)
     }
   }
+
+  const handleOAuthConnect = async () => {
+    setError('')
+    setLoading(true)
+    try {
+      await linkGithub('/onboarding?step=2&github_linked=true')
+    } catch (err) {
+      console.warn('[GitHubIntegrationStep] OAuth error:', err)
+      setError(err?.message || 'Could not initiate GitHub connection.')
+      setLoading(false)
+    }
+  }
+
+  // Handle return from GitHub OAuth authorization
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('github_linked') !== 'true') return
+
+    ;(async () => {
+      setLoading(true)
+      try {
+        const { data: { user: currentUser } } = await supabase.auth.getUser()
+        const ghIdentity = currentUser?.identities?.find((i) => i.provider === 'github')
+        const detectedHandle =
+          currentUser?.user_metadata?.user_name ||
+          currentUser?.user_metadata?.preferred_username ||
+          ghIdentity?.identity_data?.user_name ||
+          ''
+
+        if (detectedHandle) {
+          const res = await apiClient.post('/api/profile/github', { username: detectedHandle })
+          if (res?.data) {
+            setSyncedData(res.data)
+            onGithubSynced?.(res.data)
+            localStorage.setItem(`pf_github_preference_${userId}`, 'connected')
+            setShowSwitchUser(false)
+          }
+        }
+      } catch (err) {
+        console.warn('[GitHubIntegrationStep] Post-OAuth sync note:', err)
+      } finally {
+        setLoading(false)
+      }
+    })()
+  }, [userId, onGithubSynced])
 
   const handleProceed = () => {
     if (syncedData) {
@@ -219,6 +266,30 @@ export default function GitHubIntegrationStep({
                   {error}
                 </p>
               )}
+            </div>
+
+            {/* Divider */}
+            <div className="flex items-center gap-3 my-1">
+              <div className="flex-1 h-px bg-[#E6EAF2] dark:border-[#27272F]" />
+              <span className="text-xs font-bold text-[#888888] dark:text-[#71717A] uppercase tracking-wider">
+                OR
+              </span>
+              <div className="flex-1 h-px bg-[#E6EAF2] dark:border-[#27272F]" />
+            </div>
+
+            {/* 1-Click OAuth Option */}
+            <div className="flex justify-center">
+              <button
+                type="button"
+                onClick={handleOAuthConnect}
+                disabled={loading}
+                className="w-full sm:w-auto px-6 py-3 bg-[#181717] dark:bg-[#18181D] hover:bg-black dark:hover:bg-[#27272F] border border-transparent dark:border-[rgba(201,208,214,0.2)] text-white text-sm font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2.5 shadow-sm active:scale-[0.99]"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                  <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+                </svg>
+                <span>Authorize & Sync via GitHub</span>
+              </button>
             </div>
           </div>
         )}

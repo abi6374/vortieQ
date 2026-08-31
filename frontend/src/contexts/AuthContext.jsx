@@ -183,33 +183,43 @@ export function AuthProvider({ children }) {
   // settings (this project already has at least one real linked identity in
   // auth.identities, so it's on; if this ever starts failing with a
   // "manual linking is disabled" error, that's the toggle to check).
-  const linkGithub = async () => {
+  const linkGithub = async (redirectToPath = '/account?github_linked=true') => {
+    const fullRedirectUrl = `${window.location.origin}${redirectToPath.startsWith('/') ? redirectToPath : '/' + redirectToPath}`
     try {
+      // Attempt manual identity linking first
       const { data, error } = await supabase.auth.linkIdentity({
         provider: 'github',
         options: {
-          redirectTo: `${window.location.origin}/account?github_linked=true`,
+          redirectTo: fullRedirectUrl,
           scopes: 'read:user repo user:email',
           queryParams: { prompt: 'consent' },
         },
       })
+      if (!error && data?.url) {
+        window.location.assign(data.url)
+        return data
+      }
       if (error) throw error
+    } catch (linkErr) {
+      console.warn('[linkGithub] linkIdentity error, falling back to standard OAuth authorize:', linkErr)
+      // Fallback to standard Supabase OAuth authorize
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'github',
+        options: {
+          redirectTo: fullRedirectUrl,
+          scopes: 'read:user repo user:email',
+          queryParams: { prompt: 'consent' },
+        },
+      })
+      if (error) {
+        throw new Error(
+          error.message || 'GitHub OAuth failed. Please ensure the GitHub provider is enabled in your Supabase Auth settings.'
+        )
+      }
       if (data?.url) {
         window.location.assign(data.url)
       }
       return data
-    } catch (err) {
-      // Real, actionable message instead of Supabase's raw error - the
-      // username-sync path (already on this same screen/modal) still works
-      // regardless of this project setting, so point there rather than
-      // leaving the learner stuck on a cryptic OAuth failure.
-      const msg = err?.message?.toLowerCase() || ''
-      if (msg.includes('manual linking is disabled') || msg.includes('404') || err?.status === 404) {
-        throw new Error(
-          'GitHub OAuth linking is currently disabled in this project\'s settings. Please use the username sync option above instead.'
-        )
-      }
-      throw err
     }
   }
 

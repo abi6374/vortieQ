@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import api from '../../lib/apiClient'
+import { supabase } from '../../lib/supabaseClient'
 import { useAuth } from '../../hooks/useAuth'
 
 /**
@@ -54,6 +55,57 @@ export default function ConnectGitHubModal({ isOpen, onClose, onConnected, onRem
     }
   }
 
+  const handleOAuthConnect = async () => {
+    setError('')
+    setLoading(true)
+    try {
+      await linkGithub('/roadmap?github_linked=true')
+    } catch (err) {
+      console.warn('[ConnectGitHubModal] OAuth error:', err)
+      setError(err?.message || 'Could not initiate GitHub connection.')
+      setLoading(false)
+    }
+  }
+
+  // Handle automatic sync when redirected back from GitHub OAuth
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('github_linked') !== 'true') return
+
+    // Clean up query param from URL
+    const newUrl = window.location.pathname
+    window.history.replaceState({}, '', newUrl)
+
+    ;(async () => {
+      setLoading(true)
+      try {
+        const { data: { user: currentUser } } = await supabase.auth.getUser()
+        const ghIdentity = currentUser?.identities?.find((i) => i.provider === 'github')
+        const detectedHandle =
+          currentUser?.user_metadata?.user_name ||
+          currentUser?.user_metadata?.preferred_username ||
+          ghIdentity?.identity_data?.user_name ||
+          ''
+
+        if (detectedHandle) {
+          const res = await api.post('/api/profile/github', { username: detectedHandle })
+          if (res?.data) {
+            setSyncedUser(detectedHandle)
+            setSyncedData(res.data)
+            onConnected?.(res.data)
+            localStorage.setItem(`pf_github_preference_${userId}`, 'connected')
+            setTimeout(() => { onClose?.() }, 4000)
+          }
+        }
+      } catch (err) {
+        console.warn('[ConnectGitHubModal] Post-OAuth sync note:', err)
+      } finally {
+        setLoading(false)
+      }
+    })()
+  }, [userId, onConnected, onClose])
+
   const handleRemindLater = () => {
     onRemindLater?.()
     onClose()
@@ -103,7 +155,7 @@ export default function ConnectGitHubModal({ isOpen, onClose, onConnected, onRem
           </div>
         </div>
 
-        {/* Right Side: Fast Inline Input OR Inline Green Tick Connected State */}
+        {/* Right Side: Fast Inline Input + 1-Click OAuth */}
         <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap justify-start xl:justify-end">
           {syncedUser ? (
             /* Inline Success Pill with Green Checkmark */
@@ -123,7 +175,7 @@ export default function ConnectGitHubModal({ isOpen, onClose, onConnected, onRem
               </div>
             </div>
           ) : (
-            /* Direct Username Sync Form */
+            /* Input Form + 1-Click OAuth */
             <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
               <form onSubmit={handleSyncUsername} className="flex items-center gap-2">
                 <div className="flex items-center bg-white dark:bg-[#0E0E12] border border-[#CBD5E1] dark:border-[#27272F] focus-within:border-[#0066CC] dark:focus-within:border-[#C9D0D6] focus-within:ring-2 focus-within:ring-[#0066CC]/15 dark:focus-within:ring-[#C9D0D6]/20 rounded-xl px-3 py-1.5 text-xs text-[#0F172A] dark:text-white transition-all shadow-2xs">
@@ -133,18 +185,32 @@ export default function ConnectGitHubModal({ isOpen, onClose, onConnected, onRem
                     value={username}
                     onChange={(e) => { setUsername(e.target.value); setError('') }}
                     placeholder="username"
-                    className="w-28 sm:w-40 bg-transparent text-[#0F172A] dark:text-white placeholder:text-[#94A3B8] dark:placeholder:text-[#71717A] outline-none font-medium"
+                    className="w-24 sm:w-32 bg-transparent text-[#0F172A] dark:text-white placeholder:text-[#94A3B8] dark:placeholder:text-[#71717A] outline-none font-medium"
                     disabled={loading}
                   />
                 </div>
                 <button
                   type="submit"
                   disabled={loading || !username.trim()}
-                  className="px-4 py-2 bg-[#0066cc] hover:bg-[#0052a3] text-white text-xs font-bold rounded-xl shadow-xs transition-colors cursor-pointer disabled:opacity-40 flex items-center gap-1.5"
+                  className="px-3.5 py-1.5 bg-[#0066cc] hover:bg-[#0052a3] text-white text-xs font-bold rounded-xl shadow-xs transition-colors cursor-pointer disabled:opacity-40 flex items-center gap-1"
                 >
-                  {loading ? 'Syncing…' : 'Sync Repos'}
+                  {loading ? 'Syncing…' : 'Sync'}
                 </button>
               </form>
+
+              <span className="text-[11px] text-[#64748B] font-bold text-center hidden sm:inline px-0.5">or</span>
+
+              <button
+                type="button"
+                onClick={handleOAuthConnect}
+                disabled={loading}
+                className="px-3 py-1.5 bg-white dark:bg-[#18181D] hover:bg-[#F8FAFC] dark:hover:bg-[#27272F] border border-[#CBD5E1] dark:border-[#27272F] hover:border-[#94A3B8] dark:hover:border-[#C9D0D6] text-[#1E293B] dark:text-[#F8FAFC] text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs flex-none"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                  <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+                </svg>
+                <span>1-Click OAuth</span>
+              </button>
             </div>
           )}
 
