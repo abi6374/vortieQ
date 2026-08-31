@@ -869,7 +869,7 @@ export default function AuthScreen({ initialMode = 'signin' }) {
                             required
                             value={fullName}
                             onChange={onField(setFullName)}
-                            placeholder="e.g. Alex Johnson"
+                            placeholder="HackerEarth Team ?"
                             autoComplete="off"
                           />
                         </div>
