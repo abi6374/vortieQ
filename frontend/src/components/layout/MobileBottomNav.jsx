@@ -36,7 +36,7 @@ export default function MobileBottomNav() {
           background: 'linear-gradient(135deg, #0071e3, #0066cc)',
           boxShadow: '0 2px 8px rgba(0,102,204,0.3)',
         }}
-        aria-label="PathFinder Home"
+        aria-label="Skilling Home"
       >
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="9" />

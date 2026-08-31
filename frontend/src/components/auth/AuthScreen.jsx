@@ -620,7 +620,7 @@ export default function AuthScreen({ initialMode = 'signin' }) {
               </div>
 
               <p className="text-sm text-[#555555] dark:text-[#94A3B8] leading-relaxed mb-5">
-                Enter the email address associated with your PathFinder account. We will send you a secure link to reset your password.
+                Enter the email address associated with your Skilling account. We will send you a secure link to reset your password.
               </p>
 
               {forgotSent ? (
@@ -721,7 +721,7 @@ export default function AuthScreen({ initialMode = 'signin' }) {
                   <polygon points="16 8 10.5 10.5 8 16 13.5 13.5" fill="#fff" className="dark:fill-black" stroke="none" />
                 </svg>
               </span>
-              <span className="logo-name">PathFinder</span>
+              <span className="logo-name">Skilling</span>
             </div>
 
             {/* Vertically centered Hero on left panel */}
@@ -916,7 +916,7 @@ export default function AuthScreen({ initialMode = 'signin' }) {
                     </button>
 
                     <p className="signup-foot">
-                      {isCreate ? 'Already have an account? ' : 'New to PathFinder? '}
+                      {isCreate ? 'Already have an account? ' : 'New to Skilling? '}
                       <button type="button" onClick={() => switchMode(isCreate ? 'signin' : 'create')}>
                         {isCreate ? 'Sign in' : 'Create account'}
                       </button>

@@ -1104,7 +1104,7 @@ export default function SkillInsightsScreen() {
                   <div>
                     <div className="flex items-center gap-1.5 text-[#0066cc] dark:text-[#C9D0D6] mb-1.5">
                       <Sparkles className="w-4 h-4" />
-                      <span className="text-xs font-bold font-['Manrope']">PathFinder insight</span>
+                      <span className="text-xs font-bold font-['Manrope']">Skilling insight</span>
                     </div>
                     <p className="text-[11px] text-[#333333] dark:text-[#CBD5E1] leading-relaxed">
                       {topStrength && biggestGap && topStrength.name !== biggestGap.name ? (
@@ -1125,7 +1125,7 @@ export default function SkillInsightsScreen() {
                     }}
                     className="mt-3 text-xs font-bold text-[#0066cc] dark:text-[#C9D0D6] hover:underline flex items-center gap-1 self-start cursor-pointer"
                   >
-                    <span>Ask PathFinder why</span>
+                    <span>Ask Skilling why</span>
                     <span>→</span>
                   </button>
                 </div>

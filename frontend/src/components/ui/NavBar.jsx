@@ -14,7 +14,7 @@ export default function NavBar({ children }) {
           <button
             onClick={() => navigate('/dashboard')}
             className="flex items-center gap-2.5 group focus:outline-none cursor-pointer"
-            aria-label="PathFinder Home"
+            aria-label="Skilling Home"
           >
             <span className="w-9 h-9 rounded-xl bg-[#dbeafc] dark:bg-[#0066cc] text-[#0066cc] dark:text-white flex items-center justify-center shadow-sm group-hover:bg-[#0066cc] group-hover:text-white dark:group-hover:bg-[#0052A3] dark:group-hover:text-white transition-all">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -23,7 +23,7 @@ export default function NavBar({ children }) {
               </svg>
             </span>
             <span className="font-['Manrope'] font-extrabold text-xl tracking-tight text-[#1d1d1f] dark:text-white">
-              PathFinder
+              Skilling
             </span>
           </button>
 

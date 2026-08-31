@@ -400,8 +400,8 @@ ${recommended_learning_topics.map(t => `- ${t}`).join('\n')}
               <h2 className="text-lg font-bold font-['Manrope'] mb-1 text-[#1d1d1f] dark:text-white">
                 Personalized Learning Recommendations
               </h2>
-              <p className="text-xs sm:text-sm text-[#7a7a7a] dark:text-[#9CA3AF]">
-                Based on the skill gaps identified in your interview, here are the most impactful modules to add to your PathFinder roadmap:
+              <p className="text-xs sm:text-sm text-[#7a7a7a] dark:text-[#94A3AF]">
+                Based on the skill gaps identified in your interview, here are the most impactful modules to add to your Skilling roadmap:
               </p>
             </div>
 

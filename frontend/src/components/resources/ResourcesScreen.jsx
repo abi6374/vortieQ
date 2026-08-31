@@ -685,7 +685,7 @@ export default function ResourcesScreen() {
               <h3 style={{margin:0,fontFamily:"Manrope,sans-serif",fontSize:17,fontWeight:800}} className="text-[#1d1d1f] dark:text-white">Why these resources?</h3>
             </div>
             <p style={{margin:0,fontSize:13.5,lineHeight:1.55}} className="text-[#6e6e73] dark:text-[#94A3B8]">
-              PathFinder ranks these against your active roadmap: your target role, current level, weekly hours, completed courses, and per-topic skill gaps. Courses you have already completed are excluded. The current week’s prerequisites push closest-fit resources to the top.
+              Skilling ranks these against your active roadmap: your target role, current level, weekly hours, completed courses, and per-topic skill gaps. Courses you have already completed are excluded. The current week’s prerequisites push closest-fit resources to the top.
             </p>
             <button onClick={() => setWhyOpen(false)} style={{marginTop:16,background:"var(--v)",border:"none",color:"#fff",padding:"9px 16px",borderRadius:10,fontWeight:700,fontSize:13,cursor:"pointer"}}>Got it</button>
           </div>
@@ -868,7 +868,7 @@ export default function ResourcesScreen() {
             </div>
 
             <div className="rx-panel rx-insight">
-              <h3>{I.spark} PathFinder recommends</h3>
+              <h3>{I.spark} Skilling recommends</h3>
               <p>
                 {activeSteps[0]
                   ? <>Complete <b>{stripEmojis(activeSteps[0].title)}</b> next to keep momentum on your <b>{stripEmojis(path?.goal_text?.split('.')[0]) || 'goal'}</b>.</>

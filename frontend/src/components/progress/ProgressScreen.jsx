@@ -898,7 +898,7 @@ export default function ProgressScreen() {
               <div className="flex items-center gap-2 text-[#0066cc] dark:text-[#38BDF8] mb-2">
                 <Sparkles className="w-4 h-4" />
                 <h3 className="font-['Manrope'] font-bold text-xs uppercase tracking-wider text-[#0066cc] dark:text-[#38BDF8]">
-                  PathFinder insight
+                  Skilling insight
                 </h3>
               </div>
               <p className="text-xs text-[#004fa3] dark:text-[#CBD5E1] leading-relaxed">

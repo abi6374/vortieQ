@@ -18,7 +18,7 @@ export default function LandingFooter() {
                 <Compass className="w-5 h-5 text-white dark:text-white" />
               </div>
               <span className="font-sans font-extrabold text-xl tracking-tight text-[#1D1D1F] dark:text-[#F8FAFC]">
-                PathFinder
+                Skilling
               </span>
             </Link>
             <p className="text-sm text-[#7A7A7A] dark:text-[#94A3B8] leading-relaxed max-w-sm">
@@ -102,7 +102,7 @@ export default function LandingFooter() {
 
         {/* Bottom Bar */}
         <div className="mt-12 pt-6 border-t border-[#E0E0E0] dark:border-[#27272F] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#7A7A7A] dark:text-[#64748B]">
-          <p>© {new Date().getFullYear()} PathFinder AI Inc. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Skilling AI Inc. All rights reserved.</p>
           <div className="flex items-center gap-6">
             <Link to="/auth" className="hover:text-[#0066CC] dark:hover:text-[#0066CC] transition-colors">
               Sign In

@@ -126,7 +126,7 @@ def start_interview_session(user_id: str, topic_override: str = "", question_cou
     total_q = min(10, max(3, question_count or DEFAULT_TOTAL_QUESTIONS))
     session_id = str(uuid.uuid4())
 
-    prompt = f"""You are the AI Technical Interviewer for PathFinder/VortieQ.
+    prompt = f"""You are the AI Technical Interviewer for Skilling/VortieQ.
 Generate the FIRST interview question for a real learner.
 
 The learner context below (their goal-derived target role and interests)

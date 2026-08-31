@@ -23,7 +23,7 @@ export default function TopBar({ children }) {
           type="button"
           onClick={() => navigate('/dashboard')}
           className="flex items-center gap-2.5 bg-transparent border-none cursor-pointer text-left pr-2 group transition-transform active:scale-95 flex-none"
-          aria-label="PathFinder Home"
+          aria-label="Skilling Home"
         >
           <span
             className="grid place-items-center rounded-xl flex-none bg-gradient-to-br from-[#0071e3] to-[#0066cc] shadow-[0_4px_12px_rgba(0,102,204,0.35)] group-hover:scale-105 transition-transform"
@@ -35,7 +35,7 @@ export default function TopBar({ children }) {
             </svg>
           </span>
           <span className="font-['Manrope'] font-extrabold text-[#1d1d1f] dark:text-white text-[17px] tracking-tight">
-            PathFinder
+            Skilling
           </span>
         </button>
 

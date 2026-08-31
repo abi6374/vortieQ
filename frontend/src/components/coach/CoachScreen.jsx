@@ -62,7 +62,7 @@ function ChatTab() {
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
               </svg>
             </div>
-            <b className="block text-[#1d1d1f] dark:text-white text-lg sm:text-xl mb-1.5 font-['Manrope'] font-bold">Ask PathFinder AI anything</b>
+            <b className="block text-[#1d1d1f] dark:text-white text-lg sm:text-xl mb-1.5 font-['Manrope'] font-bold">Ask Skilling AI anything</b>
             <p className="mb-6 text-xs sm:text-sm text-[#555555] dark:text-[#94A3B8] leading-relaxed max-w-lg">Why a course is in your path, what to learn next, how you're tracking against your goal — your AI Assistant is here to help you learn faster.</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
               {STARTER_PROMPTS.map((p) => (

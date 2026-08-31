@@ -221,7 +221,7 @@ export default function LandingPage() {
             FOUR PILLARS OF ADAPTIVE INTELLIGENCE
           </h2>
           <p className="mt-4 text-base sm:text-lg text-[#666666] dark:text-[#94A3B8]">
-            Traditional courses give everyone the same rigid, static video curriculum. PathFinder builds a live learning graph that reacts to every concept you master or struggle with.
+            Traditional courses give everyone the same rigid, static video curriculum. Skilling builds a live learning graph that reacts to every concept you master or struggle with.
           </p>
         </div>
 
@@ -239,7 +239,7 @@ export default function LandingPage() {
                 Intelligent Resume & GitHub Intake
               </h3>
               <p className="text-sm sm:text-base text-[#666666] dark:text-[#94A3B8] leading-relaxed">
-                Upload your resume or connect your GitHub handle. PathFinder extracts your verified languages, frameworks, and project seniority so you never waste time on topics you already know.
+                Upload your resume or connect your GitHub handle. Skilling extracts your verified languages, frameworks, and project seniority so you never waste time on topics you already know.
               </p>
             </div>
             <div className="mt-8 pt-6 border-t border-[#F0F0F0] dark:border-[#27272F] flex items-center gap-2 text-xs font-bold text-[#0066CC] dark:text-[#0066CC]">
@@ -326,7 +326,7 @@ export default function LandingPage() {
             INTERACTIVE ROADMAP SIMULATOR
           </h2>
           <p className="mt-4 text-base sm:text-lg text-[#666666] dark:text-[#94A3B8]">
-            Click the actionable milestone below to witness how PathFinder recalculates your learning velocity and dynamically unlocks downstream modules.
+            Click the actionable milestone below to witness how Skilling recalculates your learning velocity and dynamically unlocks downstream modules.
           </p>
         </div>
 
@@ -343,7 +343,7 @@ export default function LandingPage() {
             CONTEXT-AWARE REAL-TIME COACHING
           </h2>
           <p className="mt-4 text-base sm:text-lg text-[#666666] dark:text-[#94A3B8]">
-            Select any question below to see how PathFinder’s AI Coach provides grounded, milestone-specific guidance.
+            Select any question below to see how Skilling’s AI Coach provides grounded, milestone-specific guidance.
           </p>
         </div>
 
@@ -382,7 +382,7 @@ export default function LandingPage() {
             READY TO BUILD YOUR NEXT CAREER CHAPTER?
           </h2>
           <p className="mt-6 text-base sm:text-lg text-[#555555] dark:text-[#CBD5E1] max-w-2xl mx-auto">
-            Join thousands of ambitious developers accelerating their career trajectory with PathFinder’s AI-powered learning paths.
+            Join thousands of ambitious developers accelerating their career trajectory with Skilling’s AI-powered learning paths.
           </p>
 
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">

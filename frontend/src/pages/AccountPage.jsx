@@ -342,7 +342,7 @@ export default function AccountPage() {
                           Personal Details
                         </h3>
                         <p className="text-xs text-[#7a7a7a] dark:text-[#94A3B8]">
-                          Your identity across the PathFinder learning workspace
+                          Your identity across the Skilling learning workspace
                         </p>
                       </div>
                     </div>
@@ -556,7 +556,7 @@ export default function AccountPage() {
                       )}
 
                       <p className="text-[12px] text-[#7a7a7a] dark:text-[#94A3B8] leading-relaxed">
-                        Connecting GitHub enables PathFinder's recommendation engine to evaluate your real repository complexity and recommend advanced milestones instead of basic tutorials.
+                        Connecting GitHub enables Skilling's recommendation engine to evaluate your real repository complexity and recommend advanced milestones instead of basic tutorials.
                       </p>
                     </div>
                   </div>

@@ -53,7 +53,7 @@ export default function ComparisonMatrix() {
             <th className="pb-4 text-sm font-bold text-[#0066CC] dark:text-[#C9D0D6] w-1/3">
               <div className="flex items-center gap-1.5">
                 <Sparkles className="w-4 h-4" />
-                <span>PathFinder AI</span>
+                <span>Skilling AI</span>
               </div>
             </th>
           </tr>

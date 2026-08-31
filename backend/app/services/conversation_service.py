@@ -172,7 +172,7 @@ def ask(user_id: str, question: str, page_context: str = "") -> dict:
         answer = chat_completion(messages, max_tokens=1500, temperature=0.3)
     except Exception as e:
         print(f"[assistant] LLM call failed: {type(e).__name__}: {e}", flush=True)
-        raise RuntimeError("PathFinder is temporarily unavailable. Please try again.")
+        raise RuntimeError("Skilling is temporarily unavailable. Please try again.")
 
     if not answer:
         answer = "I couldn't generate a response just then. Could you rephrase the question?"

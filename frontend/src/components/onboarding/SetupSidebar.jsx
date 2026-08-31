@@ -32,7 +32,7 @@ export default function SetupSidebar({ current = 1 }) {
           </svg>
         </span>
         <span className="font-['Manrope'] font-extrabold text-[#1d1d1f] dark:text-white text-xl tracking-tight">
-          PathFinder
+          Skilling
         </span>
       </div>
 

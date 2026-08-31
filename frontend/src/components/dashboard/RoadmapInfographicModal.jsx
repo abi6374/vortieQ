@@ -780,7 +780,7 @@ export default function RoadmapInfographicModal({
         pdf.addImage(pageDataUrl, 'PNG', 0, 0, imgWidthMm, a4HeightMm, undefined, 'FAST')
       }
 
-      pdf.save(`${safeTitle}_Roadmap_PathFinder.pdf`)
+      pdf.save(`${safeTitle}_Roadmap_Skilling.pdf`)
 
       setDownloadSuccess(true)
       setTimeout(() => setDownloadSuccess(false), 4000)
@@ -1068,7 +1068,7 @@ export default function RoadmapInfographicModal({
                   color: '#64748B',
                 }}
               >
-                Structured {totalWeeks}-Week Curriculum & Learning Path · PathFinder AI
+                Structured {totalWeeks}-Week Curriculum & Learning Path · Skilling AI
               </p>
             </div>
 
@@ -1290,7 +1290,7 @@ export default function RoadmapInfographicModal({
                   color: '#64748B',
                 }}
               >
-                PathFinder AI · Personalized Learning Platform
+                Skilling AI · Personalized Learning Platform
               </span>
             </div>
           </div>

@@ -73,7 +73,7 @@ class ErrorBoundary extends Component {
               Update Available
             </h2>
             <p className="text-sm text-[#555555] dark:text-[#94A3B8] mb-6 leading-relaxed">
-              A newer version of PathFinder is available. Please refresh to load the latest improvements.
+              A newer version of Skilling is available. Please refresh to load the latest improvements.
             </p>
             <button
               type="button"
@@ -98,7 +98,7 @@ function PageFallback() {
     <div className="w-full h-screen flex items-center justify-center bg-[var(--bg-main)]">
       <div className="flex flex-col items-center gap-3">
         <div className="w-10 h-10 border-[3px] border-[#0066cc]/25 border-t-[#0066cc] dark:border-[#38BDF8]/25 dark:border-t-[#38BDF8] rounded-full animate-spin" />
-        <span className="text-xs font-bold text-[#7a7a7a] dark:text-[#94A3B8] tracking-wide animate-pulse">Loading PathFinder…</span>
+        <span className="text-xs font-bold text-[#7a7a7a] dark:text-[#94A3B8] tracking-wide animate-pulse">Loading Skilling…</span>
       </div>
     </div>
   )

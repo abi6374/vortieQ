@@ -396,7 +396,7 @@ export default function LearnerIntakeWorkspace({
       {/* Full-Width "What PathFinder will understand" Indicator Panel */}
       <div className="mx-6 sm:mx-10 bg-[#f9fcff]/90 dark:bg-[#18181D] border border-[#ddedfe] dark:border-[#27272F] rounded-2xl p-4 sm:p-5 my-2 shadow-xs">
         <h3 className="font-bold text-[#1d1d1f] dark:text-white text-[14.5px] mb-3">
-          What PathFinder will understand
+          What Skilling will understand
         </h3>
         
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5">

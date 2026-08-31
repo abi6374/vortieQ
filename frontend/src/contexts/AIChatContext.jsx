@@ -21,7 +21,7 @@ function pageContextFor(pathname) {
   if (pathname.startsWith('/resources')) return 'Resources'
   if (pathname.startsWith('/roadmap') || pathname.startsWith('/dashboard')) return 'My Roadmap'
   if (pathname.startsWith('/onboarding')) return 'Onboarding'
-  return 'PathFinder'
+  return 'Skilling'
 }
 
 export function AIChatProvider({ children }) {
@@ -81,7 +81,7 @@ export function AIChatProvider({ children }) {
       setMessages((m) => m.filter((x) => x.id !== optimistic.id))
       setError({
         text: err?.response?.status === 503
-          ? 'PathFinder is temporarily unavailable. Please try again.'
+          ? 'Skilling is temporarily unavailable. Please try again.'
           : 'Could not send your message. Please try again.',
         retry: content,
       })

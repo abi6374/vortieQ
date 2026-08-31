@@ -13,13 +13,13 @@ export default function InteractiveCoachTeaser() {
       tag: 'Architecture Deep-Dive',
     },
     {
-      q: 'How does PathFinder adapt if I fail a milestone?',
-      a: 'PathFinder doesn’t just repeat the failed task. The AI detects whether the gap is conceptual (e.g. Linear Algebra foundations) or implementation (e.g. CUDA memory management). It injects targeted prerequisite micro-labs and adjusts future weekly timelines automatically!',
+      q: 'How does Skilling adapt if I fail a milestone?',
+      a: 'Skilling doesn’t just repeat the failed task. The AI detects whether the gap is conceptual (e.g. Linear Algebra foundations) or implementation (e.g. CUDA memory management). It injects targeted prerequisite micro-labs and adjusts future weekly timelines automatically!',
       tag: 'Adaptive Engine',
     },
     {
       q: 'Can I connect my GitHub profile to skip basic tasks?',
-      a: 'Yes! PathFinder analyzes your public GitHub commits, stars, languages, and repo structures. If you’ve already built production FastAPI microservices or fine-tuned BERT models, those modules are validated and marked as mastered on day one.',
+      a: 'Yes! Skilling analyzes your public GitHub commits, stars, languages, and repo structures. If you’ve already built production FastAPI microservices or fine-tuned BERT models, those modules are validated and marked as mastered on day one.',
       tag: 'GitHub Sync',
     },
   ]
@@ -35,7 +35,7 @@ export default function InteractiveCoachTeaser() {
           </div>
           <div>
             <h3 className="font-sans font-bold text-lg text-[#1D1D1F] dark:text-[#F8FAFC] flex items-center gap-2">
-              PathFinder AI Coach
+              Skilling AI Coach
               <span className="flex h-2 w-2 relative">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>

@@ -49,7 +49,7 @@ export default function LandingNavbar() {
           </div>
           <div className="flex flex-col">
             <span className="font-sans font-extrabold text-xl tracking-tight text-[#1D1D1F] dark:text-[#F8FAFC]">
-              PathFinder
+              Skilling
             </span>
             <span className="text-[10px] font-bold text-[#0066CC] dark:text-[#0066CC] tracking-wider -mt-1 font-mono uppercase">
               Adaptive AI

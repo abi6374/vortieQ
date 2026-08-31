@@ -556,7 +556,7 @@ export default function GoalCompass({ topicRatings = [], detectedYears = 0, init
         state: 'ok',
         msg: `We'll build your path around "${effectiveRoleName}" using your goal description.`,
         bars: [],
-        insight: `Readiness scoring isn't available for a custom role yet — describe your goal below and PathFinder will still tailor real courses to it.`,
+        insight: `Readiness scoring isn't available for a custom role yet — describe your goal below and Skilling will still tailor real courses to it.`,
       }
     }
     const skills = Object.keys(req)

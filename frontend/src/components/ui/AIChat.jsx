@@ -218,11 +218,11 @@ export default function AIChat() {
     return (
       <>
         <style>{STYLES}</style>
-        <button className="pfchat-fab" onClick={() => setIsOpen(true)} aria-label="Ask PathFinder">
+        <button className="pfchat-fab" onClick={() => setIsOpen(true)} aria-label="Ask Skilling">
           <span className="b">
             <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a8 8 0 1 1-4.9-7.4L21 3l-1.4 4.9A7.9 7.9 0 0 1 21 12z"/></svg>
           </span>
-          <span>Ask PathFinder</span>
+          <span>Ask Skilling</span>
         </button>
       </>
     )
@@ -231,13 +231,13 @@ export default function AIChat() {
   return (
     <>
       <style>{STYLES}</style>
-      <div className="pfchat-panel" role="dialog" aria-label="PathFinder AI coach">
+      <div className="pfchat-panel" role="dialog" aria-label="Skilling AI coach">
         <div className="pfchat-head">
           <span className="av">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M6 6l2 2M16 16l2 2M18 6l-2 2M8 16l-2 2"/></svg>
           </span>
           <div className="t">
-            <div className="n">PathFinder</div>
+            <div className="n">Skilling</div>
             <div className="s"><i />Online</div>
           </div>
           <button onClick={() => setIsOpen(false)} aria-label="Close">
@@ -250,7 +250,7 @@ export default function AIChat() {
 
           {!hydrating && messages.length === 0 && (
             <div className="pfchat-empty">
-              <b>Ask PathFinder anything</b>
+              <b>Ask Skilling anything</b>
               I know your roadmap, your skills, and where you are right now.
               <div className="pfchat-sugg">
                 {SUGGESTIONS.map((s) => (
@@ -282,7 +282,7 @@ export default function AIChat() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={onKeyDown}
-              placeholder="Ask PathFinder anything..."
+              placeholder="Ask Skilling anything..."
               disabled={loading}
             />
             <button className="pfchat-send" onClick={submit} disabled={!input.trim() || loading} aria-label="Send">
