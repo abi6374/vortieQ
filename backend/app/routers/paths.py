@@ -71,6 +71,12 @@ def generate_path(
     except ValueError as e:
         idempotency_service.store_result(idempotency_key, 400, {"detail": str(e)})
         raise HTTPException(400, str(e))
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        err_msg = f"Path generation failed: {str(e)}"
+        idempotency_service.store_result(idempotency_key, 500, {"detail": err_msg})
+        raise HTTPException(500, err_msg)
 
 
 @router.get("/active")

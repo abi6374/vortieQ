@@ -17,7 +17,7 @@ def _load_prompt(name: str) -> str:
     return (Path(__file__).parent.parent / "prompts" / name).read_text(encoding="utf-8")
 
 
-def _call_groq(messages: list, max_tokens: int = 6000) -> str:
+def _call_groq(messages: list, max_tokens: int = 2000) -> str:
     # Name kept for minimal diff at call sites below; routes through
     # app.llm_client, which picks Groq or Bedrock per settings.LLM_PROVIDER.
     return chat_completion(messages, max_tokens=max_tokens, temperature=0.2)
@@ -98,14 +98,14 @@ def generate_explanations_batch(profile: dict, courses: list[dict]) -> dict[str,
         {"role": "user", "content": user_msg},
     ]
 
-    raw = _call_groq(messages, max_tokens=3500)
+    raw = _call_groq(messages, max_tokens=1500)
     try:
         result = json.loads(_strip_fences(raw))
     except Exception:
         messages.append({"role": "assistant", "content": raw})
         messages.append({"role": "user", "content": "Return ONLY the JSON object. No markdown fences."})
         try:
-            result = json.loads(_strip_fences(_call_groq(messages, max_tokens=3500)))
+            result = json.loads(_strip_fences(_call_groq(messages, max_tokens=1500)))
         except Exception:
             result = {}
 
@@ -208,16 +208,38 @@ Generate the learning path JSON now."""
         {"role": "user", "content": user_msg},
     ]
 
-    raw = _call_groq(messages)
     try:
+        raw = _call_groq(messages, max_tokens=1500)
         milestones = json.loads(_strip_fences(raw))["milestones"]
-    except Exception:
-        messages.append({"role": "assistant", "content": raw})
-        messages.append({
-            "role": "user",
-            "content": "Return ONLY the JSON object. No markdown fences.",
-        })
-        milestones = json.loads(_strip_fences(_call_groq(messages)))["milestones"]
+    except Exception as e1:
+        print(f"[generate_path] Initial milestone sequencing failed: {e1}; retrying with explicit prompt", flush=True)
+        try:
+            retry_msgs = list(messages)
+            if 'raw' in locals() and raw:
+                retry_msgs.append({"role": "assistant", "content": str(raw)})
+            retry_msgs.append({
+                "role": "user",
+                "content": "Return ONLY the JSON object with key 'milestones'. No markdown fences.",
+            })
+            milestones = json.loads(_strip_fences(_call_groq(retry_msgs, max_tokens=1500)))["milestones"]
+        except Exception as e2:
+            print(f"[generate_path] LLM milestone sequencing retry failed: {e2}; building deterministic fallback milestones", flush=True)
+            chunk_size = max(1, (len(courses) + 3) // 4)
+            labels = [
+                "1. Foundations & Core Concepts",
+                "2. Intermediate Frameworks & Tooling",
+                "3. Advanced Implementation & System Design",
+                "4. Practical Projects & Portfolio Capstone",
+            ]
+            milestones = []
+            for i in range(0, len(courses), chunk_size):
+                chunk = courses[i : i + chunk_size]
+                lbl_idx = min(len(milestones), len(labels) - 1)
+                milestones.append({
+                    "label": labels[lbl_idx],
+                    "course_ids": [c["id"] for c in chunk],
+                    "estimated_weeks": max(1, (target_weeks or 12) // 4),
+                })
 
     # Real invariant this enforces: "at most one active path per user."
     # Confirmed live during this session's own verification testing that

@@ -26,13 +26,19 @@ class Recommender:
     """
 
     def recommend(self, profile: dict) -> list[dict]:
-        goal_text = profile.get("goal_text", "")
-        target_role = profile.get("target_role", "")
-        interests = profile.get("interests", [])
+        goal_text = profile.get("goal_text") or ""
+        target_role = profile.get("target_role") or ""
+        raw_interests = profile.get("interests") or []
+        if isinstance(raw_interests, str):
+            interests = [raw_interests]
+        elif isinstance(raw_interests, (list, tuple, set)):
+            interests = [str(i) for i in raw_interests if i]
+        else:
+            interests = []
         completed = set(profile.get("completed_courses") or [])
         user_id = profile.get("id")
 
-        query = f"{goal_text} {target_role} {' '.join(interests)}"
+        query = f"{goal_text} {target_role} {' '.join(interests)}".strip() or "software engineering technology learning path"
         embedding = embed_text(query)
         candidates = retrieve_candidates(embedding, n=30)
 

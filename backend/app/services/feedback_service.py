@@ -43,7 +43,7 @@ def _load_prompt(name: str) -> str:
     return (_Path(__file__).parent.parent / "prompts" / name).read_text(encoding="utf-8")
 
 
-def _call_groq(messages: list, max_tokens: int = 6000) -> str:
+def _call_groq(messages: list, max_tokens: int = 2000) -> str:
     # Name kept for minimal diff at call sites below; routes through
     # app.llm_client, which picks Groq or Bedrock per settings.LLM_PROVIDER.
     return chat_completion(messages, max_tokens=max_tokens, temperature=0.2)

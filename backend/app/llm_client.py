@@ -48,17 +48,34 @@ def chat_completion(messages: list, max_tokens: int = 1500, temperature: float =
 
 
 def _groq_chat(messages: list, max_tokens: int, temperature: float) -> str:
-    # reasoning_effort is a Groq-specific knob (their gpt-oss reasoning models
-    # bill chain-of-thought against max_tokens before any answer - see the
-    # tracker note on this). Kept low and only ever passed to Groq.
-    response = groq_client.chat.completions.create(
-        model=settings.GROQ_MODEL,
-        messages=messages,
-        max_tokens=max_tokens,
-        temperature=temperature,
-        reasoning_effort="low",
-    )
-    return (response.choices[0].message.content or "").strip()
+    # Clamp max_tokens to prevent exceeding Groq on-demand TPM limits (8000 TPM)
+    safe_max_tokens = min(max_tokens, 2048)
+    models_to_try = [settings.GROQ_MODEL]
+    if settings.GROQ_MODEL != "openai/gpt-oss-20b":
+        models_to_try.append("openai/gpt-oss-20b")
+    if "qwen/qwen3.8-27b" not in models_to_try:
+        models_to_try.append("qwen/qwen3.8-27b")
+
+    last_err = None
+    for model_name in models_to_try:
+        try:
+            kwargs = {
+                "model": model_name,
+                "messages": messages,
+                "max_tokens": safe_max_tokens,
+                "temperature": temperature,
+            }
+            if "gpt-oss" in model_name:
+                kwargs["reasoning_effort"] = "low"
+
+            response = groq_client.chat.completions.create(**kwargs)
+            return (response.choices[0].message.content or "").strip()
+        except Exception as e:
+            last_err = e
+            print(f"[llm_client] Groq chat with {model_name} failed: {e}; trying next model", flush=True)
+            continue
+
+    raise last_err
 
 
 _bedrock_runtime = None
