@@ -230,8 +230,8 @@ export default function InterviewScreen() {
   // Stage 1: Calibration View (Centered inside AppShell)
   return (
     <AppShell
-      contentClassName="!overflow-y-auto flex flex-col items-center justify-center !p-3 sm:!p-5"
-      containerClassName="!pb-0 !h-full flex flex-col justify-center items-center my-auto min-h-0"
+      contentClassName="!overflow-y-auto flex flex-col items-center justify-center !p-3 sm:!p-6"
+      containerClassName="!pb-0 !h-full w-full max-w-[1440px] flex flex-col justify-center items-center my-auto min-h-0"
     >
       <CalibrationModal
         initialTrack="fullstack"

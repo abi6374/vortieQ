@@ -268,7 +268,7 @@ const STYLES = `
  --divider:#f0f0f0; --green:#22A06B; --green-surface:#ECFDF3; --green-bd:#B7E7C9; --green-text:#168052;
  --amber:#E0A100; --amber-surface:#FEF6E7; --amber-bd:#F3DB9B; --amber-text:#8A6100;
  --red:#DC2626; --red-surface:#FDECEC; --red-bd:#F3B9B9; --red-text:#B42318; --track:#e8eef4;
-  width:100%; max-width:1180px; margin:0 auto; padding:8px 0 20px; }
+  width:100%; max-width:1240px; margin:0 auto; padding:8px 0 20px; }
 .gc *{ box-sizing:border-box; }
 .gc .head{ display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:18px; }
 .gc .head-left{ display:flex; flex-direction:column; }
