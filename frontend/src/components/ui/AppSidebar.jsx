@@ -334,14 +334,14 @@ function ToggleSidebarButton({ isExpanded, onClick }) {
   const [hovered, setHovered] = useState(false)
 
   return (
-    <div className="relative flex items-center justify-center">
+    <div className="relative flex items-center justify-center flex-none">
       <button
         type="button"
         onClick={onClick}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         aria-label={isExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
-        className="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-150 cursor-pointer border-none outline-none text-[#7a7a7a] hover:text-[#0066cc] dark:hover:text-[#0066cc] hover:bg-[#0066cc]/10 dark:hover:bg-[#0066cc]/10"
+        className="w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-150 cursor-pointer border-none outline-none text-[#7a7a7a] hover:text-[#0066cc] dark:hover:text-[#0066cc] hover:bg-[#0066cc]/10 dark:hover:bg-[#0066cc]/10"
       >
         <SidebarIcon className="w-5 h-5" />
       </button>
@@ -380,7 +380,7 @@ function SignOutButton({ isExpanded, onClick }) {
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         aria-label="Sign Out"
-        className="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-150 cursor-pointer border-none outline-none text-[#7a7a7a] hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20"
+        className="w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-150 cursor-pointer border-none outline-none text-[#7a7a7a] hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20"
       >
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
@@ -415,23 +415,28 @@ export default function AppSidebar() {
       }`}
       aria-label="Primary Navigation"
     >
-      {/* ── Top Header Bar with Collapse Toggle ── */}
-      <div className={`flex items-center flex-none w-full ${isExpanded ? 'justify-between px-1 pb-2' : 'justify-center pb-2'}`}>
-        {isExpanded ? (
-          <div className="flex items-center gap-2">
-            <span className="w-7 h-7 rounded-lg bg-[#0066cc] text-white flex items-center justify-center font-black text-xs shadow-xs">
-              P
-            </span>
-            <span className="font-extrabold text-sm text-[#1d1d1f] dark:text-white tracking-tight font-['Manrope']">
-              PathFinder
-            </span>
-          </div>
-        ) : null}
-
+      {/* ── Top Header Bar: Toggle Button on Left (Consistent Position) + Brand on Right ── */}
+      <div className={`flex items-center flex-none w-full pb-2 ${isExpanded ? 'justify-start gap-2.5 px-0.5' : 'justify-center'}`}>
         <ToggleSidebarButton
           isExpanded={isExpanded}
           onClick={() => setCollapsed(isExpanded)}
         />
+
+        {isExpanded && (
+          <motion.div
+            initial={{ opacity: 0, x: -6 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.18, ease: 'easeOut' }}
+            className="flex items-center gap-2 overflow-hidden"
+          >
+            <span className="w-7 h-7 rounded-lg bg-[#0066cc] text-white flex items-center justify-center font-black text-xs shadow-xs flex-none">
+              P
+            </span>
+            <span className="font-extrabold text-sm text-[#1d1d1f] dark:text-white tracking-tight font-['Manrope'] truncate">
+              PathFinder
+            </span>
+          </motion.div>
+        )}
       </div>
 
       {/* ── Expanded Widgets: Active Goal & Daily Streak ── */}
