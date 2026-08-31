@@ -376,17 +376,22 @@ def set_task_completion(
         except Exception as e:
             print(f"[roadmap] feedback note write failed: {type(e).__name__}: {e}", flush=True)
 
-        # Real-time, not week-gated: this feedback is applied to the
-        # not-started tail of the path immediately, the moment it's left -
-        # it used to wait until every remaining step in the CURRENT week
-        # was also terminal, which meant feedback on the first task of a
-        # 5-task week sat unused until the other four were done too. See
-        # feedback_service.apply_recent_feedback.
+        # Real-time, asynchronous background adaptation: the feedback event is
+        # stored immediately and the task status is persisted. The heavy adaptive
+        # tail-reconsideration LLM & recommender pass is dispatched in a background
+        # worker thread so the UI feedback modal resolves in milliseconds instead of
+        # hanging for minutes.
         try:
+            import threading
             from app.services import feedback_service
-            feedback_service.apply_recent_feedback(path_id, user_id, combined_note)
+            t = threading.Thread(
+                target=feedback_service.apply_recent_feedback,
+                args=(path_id, user_id, combined_note),
+                daemon=True,
+            )
+            t.start()
         except Exception as e:
-            print(f"[roadmap] recent-feedback application failed: {type(e).__name__}: {e}", flush=True)
+            print(f"[roadmap] recent-feedback background dispatch failed: {type(e).__name__}: {e}", flush=True)
 
     # Keep profiles.completed_courses in step with the toggle, both directions,
     # so the recommender never re-suggests something the learner just finished.

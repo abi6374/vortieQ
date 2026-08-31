@@ -114,9 +114,21 @@ def generate_explanations_batch(profile: dict, courses: list[dict]) -> dict[str,
         for c in courses
         if isinstance(result.get(c["id"]), str) and result[c["id"]].strip()
     }
-    for c in courses:
-        if c["id"] not in explanations:
-            explanations[c["id"]] = generate_explanation(profile, c)
+    missing = [c for c in courses if c["id"] not in explanations]
+    if missing:
+        from concurrent.futures import ThreadPoolExecutor
+
+        def _fetch_missing(c):
+            try:
+                return c["id"], generate_explanation(profile, c)
+            except Exception:
+                skills_str = ", ".join(c.get("skill_tags") or []) or c.get("title", "")
+                role_str = profile.get("target_role") or "your target goal"
+                return c["id"], f"Calibrated for {role_str} to build foundational competence in {skills_str}."
+
+        with ThreadPoolExecutor(max_workers=min(len(missing), 5)) as pool:
+            for cid, exp in pool.map(_fetch_missing, missing):
+                explanations[cid] = exp
     return explanations
 
 
@@ -429,7 +441,7 @@ def get_path(path_id: str, user_id: str) -> dict:
         })
 
     milestones = list(milestones_dict.values())
-    web_search_service.enrich_with_web_resources(milestones)
+    web_search_service.enrich_with_web_resources(milestones[:3])
     return {"path_id": path_id, "milestones": milestones}
 
 

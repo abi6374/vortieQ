@@ -40,7 +40,7 @@ import httpx
 from app.config import settings
 
 API_BASE = "https://www.googleapis.com/youtube/v3"
-REQUEST_TIMEOUT_SECONDS = 5.0
+REQUEST_TIMEOUT_SECONDS = 2.0
 MAX_RETRIES = 1  # one retry on a transient network error only - a live user request is waiting
 CACHE_TTL_SECONDS = 3600  # search.list costs 100 quota units/call - "keep quota limits strict"
 MIN_DURATION_SECONDS = 90         # reject shorts-like clips - unlikely to be a real tutorial
