@@ -344,7 +344,7 @@ export default function OnboardingPage() {
     return (
       <div className="h-[100dvh] w-full flex overflow-hidden bg-[#D8E3FF] dark:bg-[#09090B]">
         <SetupSidebar current={1} />
-        <div className="flex-1 h-full min-h-0 flex flex-col items-center justify-start px-4 py-8 lg:py-10 overflow-y-auto">
+        <div className="flex-1 h-full min-h-0 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 overflow-y-auto">
           <LearnerIntakeWorkspace
             hasExistingPath={hasExistingPath}
             onExtracted={handleResumeExtracted}
@@ -361,7 +361,7 @@ export default function OnboardingPage() {
     return (
       <div className="h-[100dvh] w-full flex overflow-hidden bg-[#D8E3FF] dark:bg-[#09090B]">
         <SetupSidebar current={2} />
-        <div className="flex-1 h-full min-h-0 flex flex-col items-center justify-start px-4 py-8 lg:py-10 overflow-y-auto">
+        <div className="flex-1 h-full min-h-0 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 overflow-y-auto">
           <GitHubIntegrationStep
             githubData={githubData}
             hasExistingPath={hasExistingPath}
@@ -379,7 +379,7 @@ export default function OnboardingPage() {
     return (
       <div className="h-[100dvh] w-full flex overflow-hidden bg-[#D8E3FF] dark:bg-[#09090B]">
         <SetupSidebar current={3} />
-        <div className="flex-1 h-full min-h-0 flex flex-col items-center justify-center px-4 py-8 lg:py-10 overflow-y-auto">
+        <div className="flex-1 h-full min-h-0 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 overflow-hidden">
           <YourSkillsStep
             topics={resumeTopics}
             detectedYears={detectedYears}
@@ -396,7 +396,7 @@ export default function OnboardingPage() {
     return (
       <div className="h-[100dvh] w-full flex overflow-hidden bg-[#D8E3FF] dark:bg-[#09090B]">
         <SetupSidebar current={4} />
-        <div className="flex-1 h-full min-h-0 flex flex-col items-center justify-start px-4 py-8 lg:py-10 overflow-y-auto">
+        <div className="flex-1 h-full min-h-0 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 overflow-hidden">
           <SkillConfidenceStep
             topics={resumeTopics}
             detectedYears={detectedYears}
@@ -414,7 +414,7 @@ export default function OnboardingPage() {
       <>
         <div ref={bgRef} className="h-[100dvh] w-full flex overflow-hidden bg-[#D8E3FF] dark:bg-[#09090B]">
           <SetupSidebar current={phase === 'generating' ? 6 : 5} />
-          <div className="flex-1 h-full min-h-0 flex flex-col items-center justify-start px-4 py-8 lg:py-10 overflow-y-auto">
+          <div className="flex-1 h-full min-h-0 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 overflow-y-auto">
             <GoalCompass
               topicRatings={topicRatings.length > 0 ? topicRatings : resumeTopics}
               detectedYears={detectedYears}
@@ -445,7 +445,7 @@ export default function OnboardingPage() {
   return (
     <div className="h-[100dvh] w-full flex overflow-hidden bg-[#D8E3FF] dark:bg-[#09090B]">
       <SetupSidebar current={1} />
-      <div className="flex-1 h-full min-h-0 flex flex-col items-center justify-start px-4 py-8 lg:py-10 overflow-y-auto">
+      <div className="flex-1 h-full min-h-0 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 overflow-y-auto">
         <div className="w-full max-w-[1140px] flex justify-center">
           {phase === 'chat' && (
             <div className="bg-white dark:bg-[#121216] rounded-2xl border border-[#f0f0f0] dark:border-[#27272F] shadow-[0_14px_38px_rgba(0,0,0,0.4)] p-8 max-w-2xl w-full">

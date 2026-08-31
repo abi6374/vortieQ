@@ -197,61 +197,62 @@ export default function SkillConfidenceStep({
   }
 
   return (
-    <div className="w-full max-w-[1140px] bg-white dark:bg-[#121216] rounded-2xl border border-[#f0f0f0] dark:border-[#27272F] shadow-[0_14px_38px_rgba(25,49,75,0.08)] dark:shadow-[0_14px_38px_rgba(0,0,0,0.5)] p-6 sm:p-10 flex flex-col justify-between overflow-hidden transition-colors min-h-[580px]">
+    <div className="w-full max-w-[1140px] max-h-[calc(100dvh-3.5rem)] sm:max-h-[calc(100dvh-4.5rem)] bg-white dark:bg-[#121216] rounded-2xl border border-[#f0f0f0] dark:border-[#27272F] shadow-[0_14px_38px_rgba(25,49,75,0.08)] dark:shadow-[0_14px_38px_rgba(0,0,0,0.5)] p-5 sm:p-7 lg:p-8 flex flex-col justify-between overflow-hidden transition-colors flex-1 min-h-0">
       
-      <div>
+      {/* Fixed Card Header */}
+      <div className="flex-none">
         {/* Top Header Row with ThemeToggle only (No account option) */}
-        <div className="flex items-center justify-end mb-3">
+        <div className="flex items-center justify-end mb-2">
           <ThemeToggle />
         </div>
 
         <h1
           className="font-extrabold text-[#1d1d1f] dark:text-[#F8FAFC]"
-          style={{ fontSize: 'clamp(26px,3.4vw,38px)', letterSpacing: '-.025em', lineHeight: 1.1 }}
+          style={{ fontSize: 'clamp(22px,2.6vw,32px)', letterSpacing: '-.025em', lineHeight: 1.1 }}
         >
           Your Confidence Level
         </h1>
         <p
-          className="text-[#494949] dark:text-[#94A3B8] mt-2 mb-6 font-normal"
-          style={{ fontSize: 'clamp(15px,1.4vw,17px)' }}
+          className="text-[#494949] dark:text-[#94A3B8] mt-1.5 mb-3.5 font-normal"
+          style={{ fontSize: 'clamp(13.5px,1.2vw,15.5px)' }}
         >
           Review your detected skills or fine-tune your level per skill to set your exact starting point on your roadmap.
         </p>
-
-        {/* LIST OF SKILL LEVEL PANELS */}
-        <div className="space-y-4">
-          {topics.length === 0 ? (
-            <div className="py-12 px-4 text-center rounded-2xl border-2 border-dashed border-[#e6e6e6] dark:border-[#27272F] bg-[#fafbfc] dark:bg-[#0E0E12]">
-              <p className="font-bold text-[#1d1d1f] dark:text-[#F8FAFC] text-base">
-                No skills to calibrate yet
-              </p>
-              <p className="text-xs text-[#7a7a7a] dark:text-[#94A3B8] mt-1 max-w-md mx-auto">
-                Go back to add skills or continue directly to set your learning goal.
-              </p>
-            </div>
-          ) : (
-            topics.map((t) => (
-              <SkillLevelPanel
-                key={t.name}
-                topic={t}
-                level={levels[t.name] || normalizeLevel(t.suggested_level || t.level)}
-                onLevel={(lvl) => setLevels((prev) => ({ ...prev, [t.name]: lvl }))}
-              />
-            ))
-          )}
-        </div>
       </div>
 
-      {/* Action Buttons (Continue and Back) */}
-      <div className="mt-8 flex flex-col sm:flex-row items-center gap-3 justify-center">
+      {/* ONLY THIS PART IS SCROLLABLE: LIST OF SKILL LEVEL PANELS */}
+      <div className="space-y-3.5 overflow-y-auto flex-1 min-h-0 pr-2 my-2">
+        {topics.length === 0 ? (
+          <div className="py-10 px-4 text-center rounded-2xl border-2 border-dashed border-[#e6e6e6] dark:border-[#27272F] bg-[#fafbfc] dark:bg-[#0E0E12]">
+            <p className="font-bold text-[#1d1d1f] dark:text-[#F8FAFC] text-base">
+              No skills to calibrate yet
+            </p>
+            <p className="text-xs text-[#7a7a7a] dark:text-[#94A3B8] mt-1 max-w-md mx-auto">
+              Go back to add skills or continue directly to set your learning goal.
+            </p>
+          </div>
+        ) : (
+          topics.map((t) => (
+            <SkillLevelPanel
+              key={t.name}
+              topic={t}
+              level={levels[t.name] || normalizeLevel(t.suggested_level || t.level)}
+              onLevel={(lvl) => setLevels((prev) => ({ ...prev, [t.name]: lvl }))}
+            />
+          ))
+        )}
+      </div>
+
+      {/* Fixed Card Footer Action Buttons (Continue and Back) */}
+      <div className="pt-3.5 border-t border-[#f0f0f0] dark:border-[#27272F] flex flex-col sm:flex-row items-center gap-3 justify-center flex-none">
         <button
           type="button"
           onClick={submit}
           className="inline-flex items-center justify-center gap-2 bg-gradient-to-b from-[#0071e3] to-[#0066cc] dark:from-[#0066cc] dark:to-[#004fa3] dark:bg-[#0066cc] text-white dark:text-white font-bold rounded-xl cursor-pointer transition-all shadow-[0_8px_20px_rgba(0,102,204,.30)] dark:shadow-[0_8px_20px_rgba(0,102,204,.4)]"
           style={{
             minWidth: 200,
-            height: 52,
-            fontSize: 16,
+            height: 48,
+            fontSize: 15,
           }}
         >
           <span>Continue</span>
@@ -263,7 +264,7 @@ export default function SkillConfidenceStep({
         <button
           type="button"
           onClick={onBack}
-          className="px-6 py-3 rounded-xl text-[#86868b] dark:text-[#94A3B8] hover:text-[#494949] dark:hover:text-[#F8FAFC] cursor-pointer text-sm font-semibold transition-colors"
+          className="px-6 py-2.5 rounded-xl text-[#86868b] dark:text-[#94A3B8] hover:text-[#494949] dark:hover:text-[#F8FAFC] cursor-pointer text-sm font-semibold transition-colors"
         >
           ← Back
         </button>
