@@ -18,8 +18,18 @@ export default function CameraPiP({
   const canvasRef = useRef(null)
 
   useEffect(() => {
-    if (videoRef.current && mediaStream) {
-      videoRef.current.srcObject = mediaStream
+    const video = videoRef.current
+    if (video && mediaStream) {
+      video.srcObject = mediaStream
+      video.onloadedmetadata = () => {
+        video.play().catch(() => {})
+      }
+      video.play().catch(() => {})
+    }
+    if (mediaStream) {
+      mediaStream.getVideoTracks().forEach(track => {
+        track.enabled = Boolean(isCameraOn)
+      })
     }
   }, [mediaStream, isCameraOn])
 

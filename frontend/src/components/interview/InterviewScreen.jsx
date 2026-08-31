@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AppShell from '../layout/AppShell'
 import CalibrationModal from './CalibrationModal'
@@ -32,24 +32,26 @@ export default function InterviewScreen() {
   const [evaluation, setEvaluation] = useState(null)
   const [recordedBlob, setRecordedBlob] = useState(null)
   const [totalDurationSec, setTotalDurationSec] = useState(0)
-  const [loadingText, setLoadingText] = useState('AI Evaluator Analyzing Responses...')
+  const [loadingText, setLoadingText] = useState('Connecting to the Interviewer, Just a Moment...')
+  const streamRef = useRef(null)
 
-  // Ensure camera hardware stops when leaving InterviewScreen
+  // Ensure camera hardware stops ONLY when leaving InterviewScreen entirely
   useEffect(() => {
     return () => {
-      if (sessionConfig?.mediaStream) {
-        sessionConfig.mediaStream.getTracks().forEach(track => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => {
           try { track.stop() } catch {}
         })
       }
     }
-  }, [sessionConfig])
+  }, [])
 
   // Stage 1 -> Stage 2: Calibration Complete
   const handleStartSession = async (config) => {
     setSessionConfig(config)
+    streamRef.current = config?.mediaStream || null
     setStage('evaluating')
-    setLoadingText('Connecting to Amazon Bedrock & Generating Personalized First Question...')
+    setLoadingText('Connecting to the Interviewer, Just a Moment...')
 
     try {
       const initData = await startInterviewSession(
@@ -187,11 +189,11 @@ export default function InterviewScreen() {
   // Evaluating / Processing Interstitial
   if (stage === 'evaluating') {
     return (
-      <div className="fixed inset-0 z-50 bg-[#09090B] text-white flex flex-col items-center justify-center p-6 text-center select-none font-['Inter',sans-serif]">
+      <div className="fixed inset-0 z-50 bg-[#F8FAFC]/95 dark:bg-[#0B0F17]/95 backdrop-blur-2xl text-[#1D1D1F] dark:text-white flex flex-col items-center justify-center p-6 text-center select-none font-['Inter',sans-serif] transition-colors duration-300">
         <div className="relative mb-6">
-          <div className="w-20 h-20 rounded-full border-4 border-white/10 border-t-[#C9D0D6] animate-spin flex items-center justify-center shadow-xl shadow-white/10">
-            <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9D0D6" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="animate-pulse">
+          <div className="w-20 h-20 rounded-full border-4 border-[#0066cc]/20 dark:border-white/10 border-t-[#0066cc] dark:border-t-[#38BDF8] animate-spin flex items-center justify-center shadow-lg shadow-[#0066cc]/15 dark:shadow-cyan-500/10">
+            <div className="w-10 h-10 rounded-full bg-[#0066cc]/10 dark:bg-white/10 flex items-center justify-center">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="animate-pulse text-[#0066cc] dark:text-[#38BDF8]">
                 <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
                 <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
                 <line x1="12" y1="19" x2="12" y2="22" />
@@ -199,11 +201,11 @@ export default function InterviewScreen() {
             </div>
           </div>
         </div>
-        <h2 className="text-xl font-bold font-['Manrope'] mb-2 text-white">
+        <h2 className="text-xl sm:text-2xl font-extrabold font-['Manrope'] mb-2 text-[#1D1D1F] dark:text-white tracking-tight">
           {loadingText}
         </h2>
-        <p className="text-xs text-slate-400 max-w-sm leading-relaxed">
-          Evaluating technical depth, measuring filler words, diagnosing skill gaps, and mapping actionable next steps to your learning roadmap.
+        <p className="text-xs sm:text-sm text-[#7A7A7A] dark:text-slate-400 max-w-md leading-relaxed">
+          Calibrating live audio streams, configuring interview parameters, and preparing your session.
         </p>
       </div>
     )
