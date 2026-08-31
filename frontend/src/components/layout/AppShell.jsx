@@ -23,7 +23,7 @@ export default function AppShell({ topBar = null, children, contentClassName = '
 
         {/* Scrollable Content Container */}
         <main className={`pf-content flex-1 min-h-0 overflow-y-auto ${contentClassName}`}>
-          <div className="w-full min-h-full flex flex-col flex-1 pb-24 sm:pb-32 min-h-0 animate-fade-in">
+          <div className="w-full min-h-full flex flex-col flex-1 pb-12 sm:pb-16 min-h-0 animate-fade-in">
             {children}
           </div>
         </main>
