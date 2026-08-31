@@ -410,49 +410,30 @@ export default function AppSidebar() {
 
   return (
     <aside
-      className={`pf-sidebar-floating hidden md:flex flex-col select-none transition-all duration-300 ${
+      className={`pf-sidebar-floating hidden md:flex flex-col justify-between select-none transition-all duration-300 ${
         isExpanded ? 'w-[250px] px-3 py-3' : 'w-[68px] px-2 py-3'
       }`}
       aria-label="Primary Navigation"
     >
       {/* ── Top Header Bar: Stationary Toggle Button ── */}
-      <div className={`flex items-center flex-none w-full pb-2 ${isExpanded ? 'justify-start px-0.5' : 'justify-center'}`}>
-        <ToggleSidebarButton
-          isExpanded={isExpanded}
-          onClick={() => setCollapsed(isExpanded)}
-        />
+      <div className="flex flex-col flex-none w-full">
+        <div className={`flex items-center w-full pb-2 ${isExpanded ? 'justify-start px-0.5' : 'justify-center'}`}>
+          <ToggleSidebarButton
+            isExpanded={isExpanded}
+            onClick={() => setCollapsed(isExpanded)}
+          />
+        </div>
+        <div className="w-full flex justify-center py-1">
+          <div className="w-full h-px bg-black/[0.08] dark:bg-white/[0.1]" />
+        </div>
       </div>
 
-      {/* ── Expanded Widgets: Active Goal & Daily Streak ── */}
-      {isExpanded ? (
-        <div className="flex flex-col gap-2 pt-1 pb-2 flex-none">
-          <ActiveGoalCard roadmap={roadmap} onClick={() => navigate('/dashboard')} />
-          <DailyStreakWidget streak={streak} onClick={() => navigate('/progress')} />
-        </div>
-      ) : (
-        /* Collapsed Mini Streak Icon */
-        <div className="flex justify-center pb-2 flex-none">
-          <button
-            type="button"
-            onClick={() => navigate('/progress')}
-            title={`${streak?.current_streak || 1} Day Streak`}
-            className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs font-bold text-amber-600 dark:text-amber-400 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform"
-          >
-            🔥{streak?.current_streak || 1}
-          </button>
-        </div>
-      )}
-
-      <div className="w-full flex justify-center py-1 flex-none">
-        <div className="w-full h-px bg-black/[0.08] dark:bg-white/[0.1]" />
-      </div>
-
-      {/* ── Navigation Section: Cleanly Grouped & Flowing Naturally ── */}
-      <nav className="flex-1 flex flex-col gap-3 w-full pt-1 pb-2 overflow-y-auto no-scrollbar">
+      {/* ── Navigation Section: Grouped & Flowing from Top ── */}
+      <nav className="flex-1 flex flex-col gap-2.5 w-full pt-1 pb-1 overflow-y-auto no-scrollbar">
         {isExpanded ? (
           NAV_SECTIONS.map((section) => (
             <div key={section.title} className="flex flex-col gap-0.5">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[#86868b] dark:text-[#71717A] px-3 py-1">
+              <span className="text-[9.5px] font-bold uppercase tracking-wider text-[#86868b] dark:text-[#71717A] px-3 py-1">
                 {section.title}
               </span>
               <div className="flex flex-col gap-0.5">
@@ -481,8 +462,34 @@ export default function AppSidebar() {
         )}
       </nav>
 
+      {/* ── Below AI Coach: Active Goal & Daily Streak Cards ── */}
+      <div className="flex flex-col flex-none w-full pt-1">
+        <div className="w-full flex justify-center py-1">
+          <div className="w-full h-px bg-black/[0.08] dark:bg-white/[0.1]" />
+        </div>
+
+        {isExpanded ? (
+          <div className="flex flex-col gap-2 py-1.5 w-full">
+            <ActiveGoalCard roadmap={roadmap} onClick={() => navigate('/dashboard')} />
+            <DailyStreakWidget streak={streak} onClick={() => navigate('/progress')} />
+          </div>
+        ) : (
+          /* Collapsed Mini Streak Icon */
+          <div className="flex justify-center py-1 w-full">
+            <button
+              type="button"
+              onClick={() => navigate('/progress')}
+              title={`${streak?.current_streak || 1} Day Streak`}
+              className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs font-bold text-amber-600 dark:text-amber-400 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform"
+            >
+              🔥{streak?.current_streak || 1}
+            </button>
+          </div>
+        )}
+      </div>
+
       {/* ── Bottom Section: Separator + Sign Out ── */}
-      <div className="flex flex-col gap-1.5 pt-2 flex-none w-full">
+      <div className="flex flex-col gap-1 pt-1 flex-none w-full">
         <div className="w-full h-px bg-black/[0.08] dark:bg-white/[0.1]" />
         <SignOutButton isExpanded={isExpanded} onClick={handleSignOut} />
       </div>
