@@ -40,7 +40,15 @@ class Recommender:
 
         query = f"{goal_text} {target_role} {' '.join(interests)}".strip() or "software engineering technology learning path"
         embedding = embed_text(query)
-        candidates = retrieve_candidates(embedding, n=30)
+        raw_candidates = retrieve_candidates(embedding, n=50)
+
+        # Primary learning path curriculum must come from structured, accredited courses
+        # (Coursera, Udemy, edX, MIT OCW, freeCodeCamp, etc.) rather than 0-hour video links.
+        structured_candidates = [
+            c for c in raw_candidates
+            if c.get("provider") != "YouTube" and (c.get("duration_hrs") or 0) >= 2
+        ]
+        candidates = structured_candidates if len(structured_candidates) >= 8 else raw_candidates
 
         eligible, filter_reasons = ranking_engine.hard_filter(candidates, completed)
 

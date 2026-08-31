@@ -13,7 +13,12 @@ router = APIRouter()
 def get_roadmap(user_id: str = Depends(verify_jwt)):
     """The learner's active roadmap grouped into weeks, with current-week and
     lock state computed server-side."""
-    return roadmap_service.get_roadmap(user_id)
+    try:
+        return roadmap_service.get_roadmap(user_id)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(500, f"Failed to retrieve roadmap: {str(e)}")
 
 
 @router.get("/week/{week_number}")

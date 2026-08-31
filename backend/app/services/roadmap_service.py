@@ -230,8 +230,11 @@ def get_roadmap(user_id: str) -> dict:
     # search — that's what's actually relevant to the learner right now, and
     # it keeps the common case (loading your dashboard) fast even before the
     # cache warms up. Everything else gets an empty list, not a missing key.
-    relevant = [w for w in weeks if current is not None and current <= w["week_number"] <= current + 2]
-    web_search_service.enrich_with_web_resources(relevant, label_key="milestone_label", steps_key="steps")
+    try:
+        relevant = [w for w in weeks if current is not None and current <= w["week_number"] <= current + 2]
+        web_search_service.enrich_with_web_resources(relevant, label_key="milestone_label", steps_key="steps")
+    except Exception as e:
+        print(f"[roadmap_service] web enrichment note: {type(e).__name__}: {e}", flush=True)
     for w in weeks:
         w.setdefault("web_resources", [])
 
