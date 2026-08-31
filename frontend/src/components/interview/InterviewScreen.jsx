@@ -214,7 +214,7 @@ export default function InterviewScreen() {
   // Stage 3: Results Dashboard (Inside AppShell)
   if (stage === 'dashboard') {
     return (
-      <AppShell>
+      <AppShell contentClassName="!overflow-y-auto" containerClassName="!pb-6">
         <PostInterviewDashboard
           evaluation={evaluation}
           recordedBlob={recordedBlob}
@@ -227,9 +227,12 @@ export default function InterviewScreen() {
     )
   }
 
-  // Stage 1: Calibration View (Inside AppShell)
+  // Stage 1: Calibration View (Anchored inside AppShell without scrolling)
   return (
-    <AppShell>
+    <AppShell
+      contentClassName="!overflow-hidden !h-full flex flex-col no-scrollbar !pb-0"
+      containerClassName="!pb-0 !h-full flex flex-col min-h-0 overflow-hidden"
+    >
       <CalibrationModal
         initialTrack="fullstack"
         onStart={handleStartSession}

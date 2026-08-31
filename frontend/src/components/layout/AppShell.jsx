@@ -10,7 +10,7 @@ import MobileBottomNav from './MobileBottomNav'
  * - Centered, smooth-scrolling workspace content.
  * - Mobile bottom nav for small screens (<768px).
  */
-export default function AppShell({ topBar = null, children, contentClassName = '' }) {
+export default function AppShell({ topBar = null, children, contentClassName = '', containerClassName = '' }) {
   return (
     <div className="pf-shell flex flex-col h-[100dvh] w-full overflow-hidden bg-[var(--bg-main)]">
       {/* 1. Full-width TopBar extending from left to right */}
@@ -23,7 +23,7 @@ export default function AppShell({ topBar = null, children, contentClassName = '
 
         {/* Scrollable Content Container */}
         <main className={`pf-content flex-1 min-h-0 overflow-y-auto ${contentClassName}`}>
-          <div className="w-full min-h-full flex flex-col flex-1 pb-12 sm:pb-16 min-h-0 animate-fade-in">
+          <div className={`w-full min-h-full flex flex-col flex-1 pb-12 sm:pb-16 min-h-0 animate-fade-in ${containerClassName}`}>
             {children}
           </div>
         </main>

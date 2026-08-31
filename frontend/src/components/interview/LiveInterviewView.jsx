@@ -408,7 +408,7 @@ export default function LiveInterviewView({
   }
 
   return (
-    <div className="relative w-full h-[100dvh] min-h-[600px] bg-[#F5F5F7] dark:bg-[#090D16] text-[#1D1D1F] dark:text-[#F5F5F7] flex flex-col justify-between overflow-hidden select-none font-['Inter',sans-serif] transition-colors duration-300">
+    <div className="relative w-full h-[100dvh] min-h-[600px] bg-[#D8E3FF] dark:bg-[#090D16] text-[#1D1D1F] dark:text-[#F5F5F7] flex flex-col justify-between overflow-hidden select-none font-['Inter',sans-serif] transition-colors duration-300">
       {/* Dynamic Ambient Background Glow (Harmonious in Light & Dark Mode) */}
       <div
         className="absolute inset-0 pointer-events-none transition-all duration-700 opacity-60 dark:opacity-75"
