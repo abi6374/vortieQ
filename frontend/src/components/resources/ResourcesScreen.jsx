@@ -131,7 +131,22 @@ html.dark .rx-sort,
 html.dark .rx-search .s-in {
   background: #121216 !important;
   border-color: #27272F !important;
-  color: #F8FAFC !important;
+  color: #CBD5E1 !important;
+}
+html.dark .rx-chip.on {
+  background: #0066cc !important;
+  border-color: #0066cc !important;
+  color: #FFFFFF !important;
+}
+html.dark .rx-chip:hover,
+html.dark .rx-filter:hover {
+  background: #18181D !important;
+  border-color: #383844 !important;
+  color: #FFFFFF !important;
+}
+html.dark .rx-chip.on:hover {
+  background: #0052a3 !important;
+  border-color: #0052a3 !important;
 }
 
 /* Stat strip icon boxes in dark mode */
@@ -695,27 +710,74 @@ export default function ResourcesScreen() {
         </div>
 
         {showFilters && (
-          <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F]" style={{borderRadius:12,padding:'14px 16px',display:'flex',gap:22,flexWrap:'wrap',alignItems:'flex-end'}}>
+          <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-4 sm:p-5 flex gap-6 flex-wrap items-end shadow-sm animate-in fade-in duration-200">
             <div>
-              <div style={{fontSize:11.5,fontWeight:700,letterSpacing:.05,color:'var(--muted)',textTransform:'uppercase',marginBottom:6}}>Difficulty</div>
-              <div style={{display:'flex',gap:6}}>
-                {['all','beginner','intermediate','advanced'].map((d) => (
-                  <button key={d} onClick={() => setDifficultyFilter(d)}
-                    style={{padding:'6px 12px',borderRadius:999,border:'1px solid '+(difficultyFilter===d?'var(--v)':'var(--border)'),background:difficultyFilter===d?'var(--vsoft)':'#fff',color:difficultyFilter===d?'var(--v)':'#333333',fontSize:12.5,fontWeight:600,cursor:'pointer',textTransform:'capitalize'}}>{d}</button>
-                ))}
+              <div className="text-[11px] font-bold tracking-wider text-[#6e6e73] dark:text-[#94A3B8] uppercase mb-2">
+                Difficulty
+              </div>
+              <div className="flex gap-2 flex-wrap">
+                {['all', 'beginner', 'intermediate', 'advanced'].map((d) => {
+                  const isSelected = difficultyFilter === d
+                  return (
+                    <button
+                      key={d}
+                      type="button"
+                      onClick={() => setDifficultyFilter(d)}
+                      className={`px-3.5 py-1.5 rounded-full text-xs font-semibold capitalize transition-all cursor-pointer border ${
+                        isSelected
+                          ? 'bg-[#0066cc] dark:bg-[#0066cc] border-[#0066cc] dark:border-[#0066cc] text-white shadow-xs font-bold'
+                          : 'bg-white dark:bg-[#18181D] border-[#e0e0e0] dark:border-[#27272F] text-[#333333] dark:text-[#CBD5E1] hover:bg-gray-50 dark:hover:bg-[#202026] hover:border-gray-300 dark:hover:border-[#383844]'
+                      }`}
+                    >
+                      {d}
+                    </button>
+                  )
+                })}
               </div>
             </div>
+
             <div>
-              <div style={{fontSize:11.5,fontWeight:700,letterSpacing:.05,color:'var(--muted)',textTransform:'uppercase',marginBottom:6}}>Duration</div>
-              <div style={{display:'flex',gap:6}}>
-                {[['all','Any'],['short','< 5h'],['medium','5–15h'],['long','15h+']].map(([k,l]) => (
-                  <button key={k} onClick={() => setDurationFilter(k)}
-                    style={{padding:'6px 12px',borderRadius:999,border:'1px solid '+(durationFilter===k?'var(--v)':'var(--border)'),background:durationFilter===k?'var(--vsoft)':'#fff',color:durationFilter===k?'var(--v)':'#333333',fontSize:12.5,fontWeight:600,cursor:'pointer'}}>{l}</button>
-                ))}
+              <div className="text-[11px] font-bold tracking-wider text-[#6e6e73] dark:text-[#94A3B8] uppercase mb-2">
+                Duration
+              </div>
+              <div className="flex gap-2 flex-wrap">
+                {[
+                  ['all', 'Any'],
+                  ['short', '< 5h'],
+                  ['medium', '5–15h'],
+                  ['long', '15h+'],
+                ].map(([k, l]) => {
+                  const isSelected = durationFilter === k
+                  return (
+                    <button
+                      key={k}
+                      type="button"
+                      onClick={() => setDurationFilter(k)}
+                      className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer border ${
+                        isSelected
+                          ? 'bg-[#0066cc] dark:bg-[#0066cc] border-[#0066cc] dark:border-[#0066cc] text-white shadow-xs font-bold'
+                          : 'bg-white dark:bg-[#18181D] border-[#e0e0e0] dark:border-[#27272F] text-[#333333] dark:text-[#CBD5E1] hover:bg-gray-50 dark:hover:bg-[#202026] hover:border-gray-300 dark:hover:border-[#383844]'
+                      }`}
+                    >
+                      {l}
+                    </button>
+                  )
+                })}
               </div>
             </div>
-            <button onClick={() => { setDifficultyFilter('all'); setDurationFilter('all'); setChip('All'); setQuery('') }}
-                    style={{marginLeft:'auto',background:'none',border:'none',color:'var(--v)',fontWeight:600,fontSize:12.5,cursor:'pointer'}}>Reset filters</button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setDifficultyFilter('all')
+                setDurationFilter('all')
+                setChip('All')
+                setQuery('')
+              }}
+              className="ml-auto text-xs font-bold text-[#0066cc] dark:text-[#38BDF8] hover:underline cursor-pointer transition-colors pb-1"
+            >
+              Reset filters
+            </button>
           </div>
         )}
 
