@@ -641,6 +641,44 @@ export default function RoadmapInfographicModal({
 
   const isDark = posterTheme === 'dark'
 
+  const handleDownloadImage = async () => {
+    if (!posterRef.current || isExporting) return
+    setIsExporting(true)
+    setDownloadSuccess(false)
+    try {
+      const element = posterRef.current
+      const container = element.parentElement
+      const originalScrollTop = container ? container.scrollTop : 0
+      if (container) container.scrollTop = 0
+
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: isDark ? '#0D1117' : '#FFFFFF',
+        logging: false,
+        scrollX: 0,
+        scrollY: 0,
+        width: element.clientWidth,
+        height: element.scrollHeight,
+      })
+
+      if (container) container.scrollTop = originalScrollTop
+
+      const safeTitle = (cleanGoalTitle || targetRole || 'Career').replace(/[^a-zA-Z0-9_-]/g, '_')
+      const link = document.createElement('a')
+      link.download = `${safeTitle}_Roadmap_Flowchart_${posterTheme}.png`
+      link.href = canvas.toDataURL('image/png', 1.0)
+      link.click()
+
+      setDownloadSuccess(true)
+      setTimeout(() => setDownloadSuccess(false), 4000)
+    } catch (err) {
+      console.error('Error exporting PNG roadmap:', err)
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
   const handleDownloadPDF = async (mode = 'multipage') => {
     if (!posterRef.current || isExporting) return
     setIsExporting(true)
@@ -657,7 +695,7 @@ export default function RoadmapInfographicModal({
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
-        backgroundColor: isDark ? '#0D1117' : '#ffffff',
+        backgroundColor: isDark ? '#0D1117' : '#FFFFFF',
         logging: false,
         scrollX: 0,
         scrollY: 0,
@@ -678,7 +716,7 @@ export default function RoadmapInfographicModal({
         const pdf = new jsPDF('p', 'mm', [imgWidthMm, Math.ceil(totalHeightMm)])
         const imgData = canvas.toDataURL('image/png', 1.0)
         pdf.addImage(imgData, 'PNG', 0, 0, imgWidthMm, totalHeightMm, undefined, 'FAST')
-        pdf.save(`${safeTitle}_Roadmap_Poster.pdf`)
+        pdf.save(`${safeTitle}_Roadmap_Poster_${posterTheme}.pdf`)
       } else {
         // High-fidelity multi-page A4 document
         const pageCanvasHeightPx = (canvas.width * a4HeightMm) / imgWidthMm
@@ -695,7 +733,7 @@ export default function RoadmapInfographicModal({
           const ctx = pageCanvas.getContext('2d')
 
           // Matching background fill
-          ctx.fillStyle = isDark ? '#0D1117' : '#ffffff'
+          ctx.fillStyle = isDark ? '#0D1117' : '#FFFFFF'
           ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height)
 
           // Slice source canvas
@@ -712,7 +750,7 @@ export default function RoadmapInfographicModal({
           pdf.addImage(pageDataUrl, 'PNG', 0, 0, imgWidthMm, a4HeightMm, undefined, 'FAST')
         }
 
-        pdf.save(`${safeTitle}_Roadmap_PathFinder.pdf`)
+        pdf.save(`${safeTitle}_Roadmap_PathFinder_${posterTheme}.pdf`)
       }
 
       setDownloadSuccess(true)
@@ -731,15 +769,164 @@ export default function RoadmapInfographicModal({
       className="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
       onClick={onClose}
     >
+      <style>{`
+        /* ROADMAP POSTER ISOLATION: Protect Light & Dark themes from conflicting global CSS */
+        .rf-poster-light, .rf-poster-light * {
+          box-sizing: border-box;
+        }
+        .rf-poster-light {
+          background-color: #FFFFFF !important;
+          border-color: #E2E8F0 !important;
+          color: #1E293B !important;
+        }
+        .rf-poster-light h1,
+        .rf-poster-light h2,
+        .rf-poster-light h3,
+        .rf-poster-light h4,
+        .rf-poster-light .rf-title {
+          color: #1E293B !important;
+        }
+        .rf-poster-light p,
+        .rf-poster-light .rf-desc {
+          color: #475569 !important;
+        }
+        .rf-poster-light .rf-banner {
+          background-color: #E2EBE5 !important;
+          border-color: #CBD8CE !important;
+        }
+        .rf-poster-light .rf-month {
+          background-color: #FFFFFF !important;
+          border-color: #F59E0B !important;
+        }
+        .rf-poster-light .rf-month-label {
+          color: #D97706 !important;
+        }
+        .rf-poster-light .rf-month-title {
+          color: #1E293B !important;
+        }
+        .rf-poster-light .rf-card-odd {
+          background-color: #FFFBEB !important;
+          border-color: #FCD34D !important;
+        }
+        .rf-poster-light .rf-card-even {
+          background-color: #EFF6FF !important;
+          border-color: #BFDBFE !important;
+        }
+        .rf-poster-light .rf-week-odd {
+          background-color: #FEF3C7 !important;
+          border-color: #FDE68A !important;
+          color: #92400E !important;
+        }
+        .rf-poster-light .rf-week-even {
+          background-color: #DBEAFE !important;
+          border-color: #BFDBFE !important;
+          color: #1E40AF !important;
+        }
+        .rf-poster-light .rf-completed {
+          background-color: #D1FAE5 !important;
+          border-color: #A7F3D0 !important;
+          color: #059669 !important;
+        }
+        .rf-poster-light .rf-spine {
+          background-color: #334155 !important;
+          box-shadow: none !important;
+        }
+        .rf-poster-light .rf-diamond {
+          background-color: #0F172A !important;
+          box-shadow: none !important;
+        }
+        .rf-poster-light .rf-footer {
+          border-color: #E2E8F0 !important;
+          color: #94A3B8 !important;
+        }
+        .rf-poster-light .rf-footer-brand {
+          color: #64748B !important;
+        }
+
+        /* DARK THEME RULES */
+        .rf-poster-dark {
+          background-color: #0D1117 !important;
+          border-color: #232B3B !important;
+          color: #F0F6FC !important;
+        }
+        .rf-poster-dark h1,
+        .rf-poster-dark h2,
+        .rf-poster-dark h3,
+        .rf-poster-dark h4,
+        .rf-poster-dark .rf-title {
+          color: #FFFFFF !important;
+        }
+        .rf-poster-dark p,
+        .rf-poster-dark .rf-desc {
+          color: #CBD5E1 !important;
+        }
+        .rf-poster-dark .rf-banner {
+          background-color: #161F2E !important;
+          border-color: rgba(56, 189, 248, 0.4) !important;
+          box-shadow: 0 0 20px rgba(56, 189, 248, 0.12) !important;
+        }
+        .rf-poster-dark .rf-month {
+          background-color: #161B26 !important;
+          border-color: #F59E0B !important;
+          box-shadow: 0 0 15px rgba(245, 158, 11, 0.15) !important;
+        }
+        .rf-poster-dark .rf-month-label {
+          color: #F59E0B !important;
+        }
+        .rf-poster-dark .rf-month-title {
+          color: #FFFFFF !important;
+        }
+        .rf-poster-dark .rf-card-odd {
+          background-color: #141923 !important;
+          border-color: rgba(245, 158, 11, 0.6) !important;
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+        }
+        .rf-poster-dark .rf-card-even {
+          background-color: #141923 !important;
+          border-color: rgba(59, 130, 246, 0.6) !important;
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+        }
+        .rf-poster-dark .rf-week-odd {
+          background-color: #2A200B !important;
+          border-color: rgba(245, 158, 11, 0.5) !important;
+          color: #FDE68A !important;
+        }
+        .rf-poster-dark .rf-week-even {
+          background-color: #0E223D !important;
+          border-color: rgba(59, 130, 246, 0.5) !important;
+          color: #BFDBFE !important;
+        }
+        .rf-poster-dark .rf-completed {
+          background-color: #06321F !important;
+          border-color: rgba(16, 185, 129, 0.5) !important;
+          color: #6EE7B7 !important;
+        }
+        .rf-poster-dark .rf-spine {
+          background-color: rgba(56, 189, 248, 0.7) !important;
+          box-shadow: 0 0 8px rgba(56, 189, 248, 0.4) !important;
+        }
+        .rf-poster-dark .rf-diamond {
+          background-color: #38BDF8 !important;
+          box-shadow: 0 0 8px rgba(56, 189, 248, 0.6) !important;
+        }
+        .rf-poster-dark .rf-footer {
+          border-color: #232B3B !important;
+          color: #94A3B8 !important;
+        }
+        .rf-poster-dark .rf-footer-brand {
+          color: #CBD5E1 !important;
+        }
+      `}</style>
+
       <div 
         className="bg-white dark:bg-[#0E131E] w-full max-w-5xl h-[88vh] sm:h-[90vh] rounded-3xl border border-[#e0e0e0] dark:border-[#202B3C] shadow-2xl flex flex-col overflow-hidden relative z-10"
         onClick={(e) => e.stopPropagation()}
       >
         
         {/* MODAL CONTROLS HEADER */}
-        <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-[#f0f0f0] dark:border-[#1E2638] bg-white dark:bg-[#0E131E] flex-none z-20">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 border-b border-[#f0f0f0] dark:border-[#1E2638] bg-white dark:bg-[#0E131E] flex-none z-20 flex-wrap gap-2">
           <div className="flex items-center gap-3">
-            <span className="w-9 h-9 rounded-xl bg-[#eaf2fc] dark:bg-[#1A2840] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center font-bold text-sm shadow-xs">
+            <span className="w-9 h-9 rounded-xl bg-[#eaf2fc] dark:bg-[#1A2840] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center font-bold text-sm shadow-xs flex-none">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                 <polyline points="14 2 14 8 20 8" />
@@ -749,7 +936,7 @@ export default function RoadmapInfographicModal({
               </svg>
             </span>
             <div>
-              <h2 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">
+              <h2 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white leading-tight">
                 Roadmap Poster & PDF Export
               </h2>
               <p className="text-xs text-[#7a7a7a] dark:text-[#94A3B8]">
@@ -758,13 +945,13 @@ export default function RoadmapInfographicModal({
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 ml-auto flex-wrap">
             {/* Dark / Light Poster Theme Switcher */}
             <button
               type="button"
               onClick={() => setPosterTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
               className="inline-flex items-center gap-1.5 px-3 py-2 bg-[#f0f5fa] dark:bg-[#18181D] hover:bg-[#e1eefc] dark:hover:bg-[#27272F] text-[#0066cc] dark:text-[#CBD5E1] border border-[#cfe4fb] dark:border-[#27272F] text-xs font-bold rounded-xl transition-all cursor-pointer select-none"
-              title="Switch between Dark and Light flowchart themes"
+              title={`Switch flowchart to ${isDark ? 'Light' : 'Dark'} Mode`}
             >
               {isDark ? (
                 <>
@@ -791,6 +978,22 @@ export default function RoadmapInfographicModal({
               )}
             </button>
 
+            {/* PNG Image Download Button */}
+            <button
+              type="button"
+              onClick={handleDownloadImage}
+              disabled={isExporting}
+              className="inline-flex items-center gap-1.5 px-3 py-2 bg-[#f0f5fa] dark:bg-[#1A2840] hover:bg-[#e1eefc] dark:hover:bg-[#223656] text-[#0066cc] dark:text-[#38BDF8] border border-[#cfe4fb] dark:border-[#273B5B] text-xs font-bold rounded-xl transition-all disabled:opacity-50 cursor-pointer"
+              title="Download high-resolution image (.png)"
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+                <circle cx="9" cy="9" r="2" />
+                <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+              </svg>
+              <span>Image (PNG)</span>
+            </button>
+
             <button
               type="button"
               onClick={() => handleDownloadPDF('poster')}
@@ -815,7 +1018,7 @@ export default function RoadmapInfographicModal({
               {isExporting ? (
                 <>
                   <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Generating PDF...</span>
+                  <span>Generating...</span>
                 </>
               ) : downloadSuccess ? (
                 <>
@@ -831,7 +1034,7 @@ export default function RoadmapInfographicModal({
                     <polyline points="7 10 12 15 17 10" />
                     <line x1="12" y1="15" x2="12" y2="3" />
                   </svg>
-                  <span>Download Roadmap PDF</span>
+                  <span>Download PDF</span>
                 </>
               )}
             </button>
@@ -853,45 +1056,59 @@ export default function RoadmapInfographicModal({
         {/* SCROLLABLE POSTER CANVAS CONTAINER */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-8 bg-[#f1f3f6] dark:bg-[#080B10] flex justify-center pf-custom-scrollbar">
           
-          {/* THE INFOGRAPHIC POSTER ELEMENT (Exported to PDF via html2canvas) */}
+          {/* THE INFOGRAPHIC POSTER ELEMENT (Exported to PDF/PNG via html2canvas) */}
           <div
             ref={posterRef}
             className={`w-full max-w-[800px] mx-auto rounded-3xl p-6 sm:p-10 shadow-2xl flex flex-col items-center relative transition-colors ${
-              isDark
-                ? 'bg-[#0D1117] border border-[#232B3B] text-[#F0F6FC]'
-                : 'bg-white border border-[#e2e8f0] text-[#1d1d1f]'
+              isDark ? 'rf-poster-dark' : 'rf-poster-light'
             }`}
-            style={{ fontFamily: "'Inter', sans-serif" }}
+            style={{
+              fontFamily: "'Inter', sans-serif",
+              backgroundColor: isDark ? '#0D1117' : '#FFFFFF',
+              borderColor: isDark ? '#232B3B' : '#E2E8F0',
+              color: isDark ? '#F0F6FC' : '#1E293B',
+            }}
           >
             {/* Top Title Banner Header */}
             <div className="w-full flex flex-col items-center mb-8 relative">
               <div
-                className={`w-full max-w-lg rounded-2xl py-3.5 px-6 text-center shadow-xs border-2 ${
-                  isDark
-                    ? 'bg-[#161F2E] border-[#38BDF8]/40 shadow-[0_0_20px_rgba(56,189,248,0.12)]'
-                    : 'bg-[#E2EBE5] border-[#CBD8CE]'
-                }`}
+                className="rf-banner w-full max-w-lg rounded-2xl py-3.5 px-6 text-center shadow-xs border-2"
+                style={{
+                  backgroundColor: isDark ? '#161F2E' : '#E2EBE5',
+                  borderColor: isDark ? 'rgba(56, 189, 248, 0.4)' : '#CBD8CE',
+                }}
               >
                 <h1
-                  className={`font-['Manrope'] font-extrabold text-xl sm:text-2xl tracking-tight uppercase ${
-                    isDark ? 'text-[#FFFFFF]' : 'text-[#1E293B]'
-                  }`}
+                  className="rf-title font-['Manrope'] font-extrabold text-xl sm:text-2xl tracking-tight uppercase"
+                  style={{
+                    color: isDark ? '#FFFFFF' : '#1E293B',
+                  }}
                 >
                   {stripEmojis(curriculum.roleTitle)}
                 </h1>
               </div>
-              <p className={`text-xs font-semibold mt-2.5 text-center ${isDark ? 'text-[#94A3B8]' : 'text-[#64748B]'}`}>
+              <p
+                className="rf-desc text-xs font-semibold mt-2.5 text-center"
+                style={{
+                  color: isDark ? '#94A3B8' : '#64748B',
+                }}
+              >
                 Structured {totalWeeks}-Week Curriculum & Learning Path · PathFinder AI
               </p>
             </div>
 
             {/* START GREEN MARKER */}
             <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-[#10B981] text-white text-xs font-black tracking-wider uppercase shadow-md mb-2 z-10">
-              <span>START</span>
+              <span style={{ color: '#FFFFFF' }}>START</span>
             </div>
 
             {/* Top Central Spine Connector */}
-            <div className={`w-[3px] h-6 ${isDark ? 'bg-[#38BDF8]/70 shadow-[0_0_8px_rgba(56,189,248,0.4)]' : 'bg-[#334155]'}`} />
+            <div
+              className="rf-spine w-[3px] h-6"
+              style={{
+                backgroundColor: isDark ? 'rgba(56, 189, 248, 0.7)' : '#334155',
+              }}
+            />
 
             {/* FLOWCHART MONTHS & WEEKS TREE */}
             <div className="w-full space-y-6 relative flex flex-col items-center">
@@ -904,16 +1121,26 @@ export default function RoadmapInfographicModal({
                     
                     {/* CENTRAL MONTH BOX */}
                     <div
-                      className={`z-10 border-2 border-dashed rounded-2xl px-6 py-3 text-center max-w-[280px] w-full shadow-sm ${
-                        isDark
-                          ? 'bg-[#161B26] border-[#F59E0B] shadow-[0_0_15px_rgba(245,158,11,0.15)]'
-                          : 'bg-white border-[#F59E0B]'
-                      }`}
+                      className="rf-month z-10 border-2 border-dashed rounded-2xl px-6 py-3 text-center max-w-[280px] w-full shadow-sm"
+                      style={{
+                        backgroundColor: isDark ? '#161B26' : '#FFFFFF',
+                        borderColor: '#F59E0B',
+                      }}
                     >
-                      <span className="text-[11px] font-black text-[#F59E0B] uppercase tracking-wider block">
+                      <span
+                        className="rf-month-label text-[11px] font-black uppercase tracking-wider block"
+                        style={{
+                          color: isDark ? '#F59E0B' : '#D97706',
+                        }}
+                      >
                         MONTH {month.monthNumber}
                       </span>
-                      <span className={`font-bold text-xs sm:text-sm leading-tight block mt-0.5 ${isDark ? 'text-[#FFFFFF]' : 'text-[#1E293B]'}`}>
+                      <span
+                        className="rf-month-title font-bold text-xs sm:text-sm leading-tight block mt-0.5"
+                        style={{
+                          color: isDark ? '#FFFFFF' : '#1E293B',
+                        }}
+                      >
                         {stripEmojis(month.theme)}
                       </span>
                     </div>
@@ -926,38 +1153,50 @@ export default function RoadmapInfographicModal({
                         {oddWeeks.map((week) => (
                           <div
                             key={week.week_number}
-                            className={`relative border-2 border-dashed rounded-2xl p-4 sm:p-5 flex flex-col justify-between transition-all ${
-                              isDark
-                                ? 'bg-[#141923] border-[#F59E0B]/60 shadow-[0_4px_16px_rgba(0,0,0,0.4)] hover:border-[#F59E0B]'
-                                : 'bg-[#FFFBEB] border-[#FCD34D] shadow-xs hover:shadow-md'
-                            }`}
+                            className="rf-card-odd relative border-2 border-dashed rounded-2xl p-4 sm:p-5 flex flex-col justify-between transition-all"
+                            style={{
+                              backgroundColor: isDark ? '#141923' : '#FFFBEB',
+                              borderColor: isDark ? 'rgba(245, 158, 11, 0.6)' : '#FCD34D',
+                            }}
                           >
                             <div className="flex items-center justify-between mb-2.5">
                               <span
-                                className={`px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider rounded-md border ${
-                                  isDark
-                                    ? 'bg-[#2A200B] border-[#F59E0B]/50 text-[#FDE68A]'
-                                    : 'bg-[#FEF3C7] border-[#FDE68A] text-[#92400E]'
-                                }`}
+                                className="rf-week-odd px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider rounded-md border"
+                                style={{
+                                  backgroundColor: isDark ? '#2A200B' : '#FEF3C7',
+                                  borderColor: isDark ? 'rgba(245, 158, 11, 0.5)' : '#FDE68A',
+                                  color: isDark ? '#FDE68A' : '#92400E',
+                                }}
                               >
                                 WEEK {week.week_number}
                               </span>
                               {week.isComplete && (
                                 <span
-                                  className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${
-                                    isDark
-                                      ? 'text-[#6EE7B7] bg-[#06321F] border-[#10B981]/50'
-                                      : 'text-[#059669] bg-[#D1FAE5] border-[#A7F3D0]'
-                                  }`}
+                                  className="rf-completed text-[10px] font-bold px-2 py-0.5 rounded-md border"
+                                  style={{
+                                    backgroundColor: isDark ? '#06321F' : '#D1FAE5',
+                                    borderColor: isDark ? 'rgba(16, 185, 129, 0.5)' : '#A7F3D0',
+                                    color: isDark ? '#6EE7B7' : '#059669',
+                                  }}
                                 >
                                   COMPLETED
                                 </span>
                               )}
                             </div>
-                            <h3 className={`font-bold text-xs sm:text-sm leading-snug ${isDark ? 'text-[#FFFFFF]' : 'text-[#1E293B]'}`}>
+                            <h3
+                              className="rf-title font-bold text-xs sm:text-sm leading-snug"
+                              style={{
+                                color: isDark ? '#FFFFFF' : '#1E293B',
+                              }}
+                            >
                               {stripEmojis(week.title)}
                             </h3>
-                            <p className={`text-[11px] mt-1.5 leading-relaxed font-normal ${isDark ? 'text-[#CBD5E1]' : 'text-[#64748B]'}`}>
+                            <p
+                              className="rf-desc text-[11px] mt-1.5 leading-relaxed font-normal"
+                              style={{
+                                color: isDark ? '#CBD5E1' : '#475569',
+                              }}
+                            >
                               {stripEmojis(week.desc)}
                             </p>
                           </div>
@@ -969,38 +1208,50 @@ export default function RoadmapInfographicModal({
                         {evenWeeks.map((week) => (
                           <div
                             key={week.week_number}
-                            className={`relative border-2 border-dashed rounded-2xl p-4 sm:p-5 flex flex-col justify-between transition-all ${
-                              isDark
-                                ? 'bg-[#141923] border-[#3B82F6]/60 shadow-[0_4px_16px_rgba(0,0,0,0.4)] hover:border-[#3B82F6]'
-                                : 'bg-[#EFF6FF] border-[#BFDBFE] shadow-xs hover:shadow-md'
-                            }`}
+                            className="rf-card-even relative border-2 border-dashed rounded-2xl p-4 sm:p-5 flex flex-col justify-between transition-all"
+                            style={{
+                              backgroundColor: isDark ? '#141923' : '#EFF6FF',
+                              borderColor: isDark ? 'rgba(59, 130, 246, 0.6)' : '#BFDBFE',
+                            }}
                           >
                             <div className="flex items-center justify-between mb-2.5">
                               <span
-                                className={`px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider rounded-md border ${
-                                  isDark
-                                    ? 'bg-[#0E223D] border-[#3B82F6]/50 text-[#BFDBFE]'
-                                    : 'bg-[#DBEAFE] border-[#BFDBFE] text-[#1E40AF]'
-                                }`}
+                                className="rf-week-even px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider rounded-md border"
+                                style={{
+                                  backgroundColor: isDark ? '#0E223D' : '#DBEAFE',
+                                  borderColor: isDark ? 'rgba(59, 130, 246, 0.5)' : '#BFDBFE',
+                                  color: isDark ? '#BFDBFE' : '#1E40AF',
+                                }}
                               >
                                 WEEK {week.week_number}
                               </span>
                               {week.isComplete && (
                                 <span
-                                  className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${
-                                    isDark
-                                      ? 'text-[#6EE7B7] bg-[#06321F] border-[#10B981]/50'
-                                      : 'text-[#059669] bg-[#D1FAE5] border-[#A7F3D0]'
-                                  }`}
+                                  className="rf-completed text-[10px] font-bold px-2 py-0.5 rounded-md border"
+                                  style={{
+                                    backgroundColor: isDark ? '#06321F' : '#D1FAE5',
+                                    borderColor: isDark ? 'rgba(16, 185, 129, 0.5)' : '#A7F3D0',
+                                    color: isDark ? '#6EE7B7' : '#059669',
+                                  }}
                                 >
                                   COMPLETED
                                 </span>
                               )}
                             </div>
-                            <h3 className={`font-bold text-xs sm:text-sm leading-snug ${isDark ? 'text-[#FFFFFF]' : 'text-[#1E293B]'}`}>
+                            <h3
+                              className="rf-title font-bold text-xs sm:text-sm leading-snug"
+                              style={{
+                                color: isDark ? '#FFFFFF' : '#1E293B',
+                              }}
+                            >
                               {stripEmojis(week.title)}
                             </h3>
-                            <p className={`text-[11px] mt-1.5 leading-relaxed font-normal ${isDark ? 'text-[#CBD5E1]' : 'text-[#64748B]'}`}>
+                            <p
+                              className="rf-desc text-[11px] mt-1.5 leading-relaxed font-normal"
+                              style={{
+                                color: isDark ? '#CBD5E1' : '#475569',
+                              }}
+                            >
                               {stripEmojis(week.desc)}
                             </p>
                           </div>
@@ -1011,9 +1262,24 @@ export default function RoadmapInfographicModal({
                     {/* Central Spine Diamond Node & Vertical Line to Next Month */}
                     {mIdx < curriculum.months.length - 1 && (
                       <div className="flex flex-col items-center my-4">
-                        <div className={`w-[3px] h-5 ${isDark ? 'bg-[#38BDF8]/70' : 'bg-[#334155]'}`} />
-                        <div className={`w-3.5 h-3.5 transform rotate-45 my-1 ${isDark ? 'bg-[#38BDF8] shadow-[0_0_8px_rgba(56,189,248,0.6)]' : 'bg-[#0F172A]'}`} />
-                        <div className={`w-[3px] h-5 ${isDark ? 'bg-[#38BDF8]/70' : 'bg-[#334155]'}`} />
+                        <div
+                          className="rf-spine w-[3px] h-5"
+                          style={{
+                            backgroundColor: isDark ? 'rgba(56, 189, 248, 0.7)' : '#334155',
+                          }}
+                        />
+                        <div
+                          className="rf-diamond w-3.5 h-3.5 transform rotate-45 my-1"
+                          style={{
+                            backgroundColor: isDark ? '#38BDF8' : '#0F172A',
+                          }}
+                        />
+                        <div
+                          className="rf-spine w-[3px] h-5"
+                          style={{
+                            backgroundColor: isDark ? 'rgba(56, 189, 248, 0.7)' : '#334155',
+                          }}
+                        />
                       </div>
                     )}
                   </div>
@@ -1022,19 +1288,35 @@ export default function RoadmapInfographicModal({
             </div>
 
             {/* Bottom Vertical Spine Connector to Finish */}
-            <div className={`w-[3px] h-6 mt-4 ${isDark ? 'bg-[#38BDF8]/70 shadow-[0_0_8px_rgba(56,189,248,0.4)]' : 'bg-[#334155]'}`} />
+            <div
+              className="rf-spine w-[3px] h-6 mt-4"
+              style={{
+                backgroundColor: isDark ? 'rgba(56, 189, 248, 0.7)' : '#334155',
+              }}
+            />
 
             {/* FINISH RED MARKER */}
             <div className="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg bg-[#EF4444] text-white text-xs font-black tracking-wider uppercase shadow-md mt-1 z-10">
-              <span>FINISH</span>
+              <span style={{ color: '#FFFFFF' }}>FINISH</span>
             </div>
 
             {/* POSTER FOOTER */}
-            <div className={`w-full pt-8 mt-8 border-t flex flex-col sm:flex-row items-center justify-between gap-2 text-[10px] ${
-              isDark ? 'border-[#232B3B] text-[#94A3B8]' : 'border-[#e2e8f0] text-[#94A3B8]'
-            }`}>
+            <div
+              className="rf-footer w-full pt-8 mt-8 border-t flex flex-col sm:flex-row items-center justify-between gap-2 text-[10px]"
+              style={{
+                borderTopColor: isDark ? '#232B3B' : '#E2E8F0',
+                color: '#94A3B8',
+              }}
+            >
               <span>Generated on {new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</span>
-              <span className={`font-semibold ${isDark ? 'text-[#CBD5E1]' : 'text-[#64748B]'}`}>PathFinder AI · Personalized Learning Platform</span>
+              <span
+                className="rf-footer-brand font-semibold"
+                style={{
+                  color: isDark ? '#CBD5E1' : '#64748B',
+                }}
+              >
+                PathFinder AI · Personalized Learning Platform
+              </span>
             </div>
           </div>
         </div>
