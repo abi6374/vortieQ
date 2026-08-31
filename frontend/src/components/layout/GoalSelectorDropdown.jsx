@@ -32,7 +32,7 @@ export default function GoalSelectorDropdown({
       try {
         const { data, error } = await supabase
           .from('learning_paths')
-          .select('id, goal_text, status, generated_at, target_role, timeframe')
+          .select('id, goal_text, status, generated_at')
           .eq('user_id', activeUser.id)
           .order('generated_at', { ascending: false })
 
