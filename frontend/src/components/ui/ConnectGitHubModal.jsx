@@ -16,8 +16,6 @@ export default function ConnectGitHubModal({ isOpen, onClose, onConnected, onRem
   const [syncedUser, setSyncedUser] = useState(null)
   const [syncedData, setSyncedData] = useState(null)
 
-  if (!isOpen) return null
-
   const userId = user?.id || 'guest'
 
   const handleSyncUsername = async (e) => {
@@ -115,6 +113,8 @@ export default function ConnectGitHubModal({ isOpen, onClose, onConnected, onRem
     localStorage.setItem(`pf_github_preference_${userId}`, 'no_github')
     onClose()
   }
+
+  if (!isOpen) return null
 
   return (
     <div className="w-full mb-6 bg-gradient-to-r from-[#EFF6FF] via-[#F8FAFC] to-[#EFF6FF] dark:from-[#121216] dark:via-[#18181D] dark:to-[#121216] text-[#1D1D1F] dark:text-white rounded-2xl border border-[#BFDBFE] dark:border-[rgba(201,208,214,0.25)] shadow-md p-5 sm:p-6 relative z-10 block transition-all">
