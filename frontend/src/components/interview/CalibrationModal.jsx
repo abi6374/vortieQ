@@ -250,9 +250,9 @@ export default function CalibrationModal({
   const canProceed = permissionState === 'granted' && hasMic
 
   return (
-    <div className="w-full h-full flex flex-col min-h-0 overflow-hidden font-['Inter',sans-serif] text-[#1d1d1f] dark:text-white select-none">
+    <div className="w-full max-w-[1100px] mx-auto my-auto flex flex-col font-['Inter',sans-serif] text-[#1d1d1f] dark:text-white select-none py-2 sm:py-4">
       {/* Page Header */}
-      <header className="mb-2.5 sm:mb-3 flex flex-row items-center justify-between gap-3 flex-none">
+      <header className="mb-3 flex flex-row items-center justify-between gap-3 flex-none">
         <div>
           <div className="flex items-center gap-2 mb-0.5">
             <h1 className="font-['Manrope'] font-extrabold text-xl sm:text-2xl text-[#1d1d1f] dark:text-white tracking-tight">
@@ -280,14 +280,14 @@ export default function CalibrationModal({
         </button>
       </header>
 
-      {/* Main Container Card — Anchored Full-Height Container */}
-      <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-4 sm:p-5 shadow-sm flex-1 min-h-0 overflow-hidden flex flex-col justify-between">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch w-full flex-1 min-h-0 overflow-hidden">
+      {/* Main Container Card — Compact and Centered */}
+      <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-4 sm:p-6 shadow-sm flex flex-col justify-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start w-full">
 
           {/* ── Left Column: Camera Preview & Hardware Meters (7 cols) ── */}
-          <div className="lg:col-span-7 flex flex-col justify-between gap-3 h-full min-h-0 overflow-hidden">
+          <div className="lg:col-span-7 flex flex-col gap-3 justify-center">
             {/* Live Camera Viewport */}
-            <div className="relative flex-1 min-h-[170px] max-h-[300px] w-full rounded-xl bg-slate-900 overflow-hidden border border-slate-700/60 shadow-md flex items-center justify-center flex-none aspect-video">
+            <div className="relative w-full rounded-xl bg-slate-900 overflow-hidden border border-slate-700/60 shadow-md flex items-center justify-center aspect-video max-h-[260px]">
               {hasCamera && !voiceOnlyFallback ? (
                 <video
                   ref={videoPreviewRef}
@@ -298,11 +298,11 @@ export default function CalibrationModal({
                 />
               ) : (
                 <div className="flex flex-col items-center justify-center p-4 text-center text-slate-400">
-                  <div className="w-12 h-12 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center mb-2 shadow-inner">
+                  <div className="w-11 h-11 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center mb-1.5 shadow-inner">
                     {permissionState === 'checking' ? (
-                      <div className="w-6 h-6 rounded-full border-2 border-[#0066cc] dark:border-[#C9D0D6] border-t-transparent animate-spin" />
+                      <div className="w-5 h-5 rounded-full border-2 border-[#0066cc] dark:border-[#C9D0D6] border-t-transparent animate-spin" />
                     ) : (
-                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
                         <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
                       </svg>
@@ -328,7 +328,7 @@ export default function CalibrationModal({
                     <button
                       type="button"
                       onClick={() => requestMediaAccess(true)}
-                      className="mt-2.5 px-3 py-1.5 rounded-lg text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 hover:bg-amber-500/30 transition-colors cursor-pointer"
+                      className="mt-2 px-3 py-1.5 rounded-lg text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 hover:bg-amber-500/30 transition-colors cursor-pointer"
                     >
                       Continue in Voice-Only Mode
                     </button>
@@ -373,7 +373,7 @@ export default function CalibrationModal({
             </div>
 
             {/* Mic Meter & Noise Indicator */}
-            <div className="p-3 rounded-xl bg-[#f5f5f7] dark:bg-[#18181D] border border-[#e0e0e0] dark:border-[#27272F] flex flex-col gap-2 flex-none">
+            <div className="p-3 rounded-xl bg-[#f5f5f7] dark:bg-[#18181D] border border-[#e0e0e0] dark:border-[#27272F] flex flex-col gap-1.5 flex-none">
               <div className="flex items-center justify-between text-xs font-bold">
                 <div className="flex items-center gap-1.5 text-[#1d1d1f] dark:text-white">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0066cc" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -422,13 +422,13 @@ export default function CalibrationModal({
           </div>
 
           {/* ── Right Column: Track & Settings Selection (5 cols) ── */}
-          <div className="lg:col-span-5 flex flex-col justify-between gap-3 h-full min-h-0 overflow-hidden">
-            <div className="flex flex-col gap-2.5 min-h-0 flex-1 overflow-hidden">
-              <div className="flex flex-col min-h-0 flex-1">
+          <div className="lg:col-span-5 flex flex-col gap-3 justify-center">
+            <div className="flex flex-col gap-2.5">
+              <div className="flex flex-col">
                 <label className="block text-[11px] font-bold uppercase tracking-wider text-[#6e6e73] dark:text-[#94A3B8] mb-1.5 flex-none">
                   Select Interview Track
                 </label>
-                <div className="flex flex-col gap-1.5 overflow-y-auto no-scrollbar flex-1 min-h-0 pr-0.5">
+                <div className="flex flex-col gap-1.5">
                   {INTERVIEW_TRACKS.map((t) => {
                     const isSelected = selectedTrack === t.id
                     return (
