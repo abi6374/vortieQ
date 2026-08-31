@@ -159,7 +159,7 @@ def search_learning_resources(query: str, max_results: int = MAX_RESULTS, catego
     # fully guarantee away, but this meaningfully improves the odds.
     raw = []
     last_exc = None
-    backoffs = [1.5, 3.0]
+    backoffs = [0.1]
     for attempt in range(len(backoffs) + 1):
         try:
             with DDGS() as ddgs:
@@ -174,7 +174,7 @@ def search_learning_resources(query: str, max_results: int = MAX_RESULTS, catego
         if attempt < len(backoffs):
             time.sleep(backoffs[attempt])
     if last_exc is not None and not raw:
-        print(f"[web_search_service] DuckDuckGo search failed after retry: {last_exc}", flush=True)
+        print(f"[web_search_service] DuckDuckGo search note for '{search_query}': {last_exc}", flush=True)
         return []
 
     ranked = _rank(raw)
@@ -259,11 +259,15 @@ def enrich_with_web_resources(groups: list, label_key: str = "label", steps_key:
 
         return results[:4]
 
-    with ThreadPoolExecutor(max_workers=min(len(groups), 10)) as ex:
-        results = list(ex.map(_one, enumerate(groups)))
+    try:
+        with ThreadPoolExecutor(max_workers=min(len(groups), 10)) as ex:
+            results = list(ex.map(_one, enumerate(groups), timeout=1.5))
+    except Exception as e:
+        print(f"[web_search_service] Enrichment pool timeout or exception: {e}", flush=True)
+        results = [[] for _ in groups]
 
     for group, web_resources in zip(groups, results):
-        group["web_resources"] = web_resources
+        group["web_resources"] = web_resources or []
 
 
 

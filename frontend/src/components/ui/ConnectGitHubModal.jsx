@@ -79,17 +79,14 @@ export default function ConnectGitHubModal({ isOpen, onClose, onConnected, onRem
   }
 
   return (
-    <div className="w-full mb-6 bg-gradient-to-r from-[#EFF6FF] via-[#F8FAFC] to-[#EFF6FF] dark:from-[#121216] dark:via-[#18181D] dark:to-[#121216] text-[#1D1D1F] dark:text-white rounded-2xl border border-[#BFDBFE] dark:border-[rgba(201,208,214,0.25)] shadow-md shadow-blue-500/5 dark:shadow-lg p-5 sm:p-6 relative overflow-hidden animate-in fade-in slide-in-from-top-4 duration-200">
+    <div className="w-full mb-6 bg-gradient-to-r from-[#EFF6FF] via-[#F8FAFC] to-[#EFF6FF] dark:from-[#121216] dark:via-[#18181D] dark:to-[#121216] text-[#1D1D1F] dark:text-white rounded-2xl border border-[#BFDBFE] dark:border-[rgba(201,208,214,0.25)] shadow-md p-5 sm:p-6 relative z-10 block transition-all">
       
-      {/* Decorative ambient flares */}
-      <div className="absolute -top-12 -right-12 w-64 h-64 bg-[#0066CC]/5 dark:bg-[#C9D0D6]/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-[#0066CC]/10 dark:bg-[#C9D0D6]/5 rounded-full blur-2xl pointer-events-none" />
-
-      <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+      {/* Top Main Row */}
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
         
-        {/* Left Side: Logo, Pitch & Details */}
-        <div className="flex items-start gap-4 max-w-xl">
-          <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-none shadow-sm backdrop-blur-sm border transition-colors ${
+        {/* Left Side: Logo, Title & Description */}
+        <div className="flex items-start gap-3.5 max-w-2xl min-w-0">
+          <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-none shadow-sm border transition-colors mt-0.5 ${
             syncedUser
               ? 'bg-[#ECFDF3] dark:bg-emerald-950/60 border-[#A6F4C5] dark:border-emerald-700/50 text-[#12B76A] dark:text-emerald-400'
               : 'bg-[#0066CC]/10 dark:bg-white/10 border-[#0066CC]/20 dark:border-white/15 text-[#0066CC] dark:text-[#C9D0D6]'
@@ -104,12 +101,12 @@ export default function ConnectGitHubModal({ isOpen, onClose, onConnected, onRem
               </svg>
             )}
           </div>
-          <div>
-            <h3 className="font-['Manrope'] font-bold text-sm sm:text-base text-[#1D1D1F] dark:text-white">
+          <div className="min-w-0">
+            <h3 className="font-['Manrope'] font-bold text-sm sm:text-base text-[#1D1D1F] dark:text-white leading-tight">
               {syncedUser ? 'GitHub Account Successfully Connected!' : 'Connect GitHub for calibrated project recommendations'}
             </h3>
             {syncedUser ? (
-              <p className="text-xs text-[#027A48] dark:text-emerald-300 font-medium mt-1 leading-relaxed flex items-center gap-1.5 animate-in fade-in duration-150">
+              <p className="text-xs text-[#027A48] dark:text-emerald-300 font-medium mt-1 leading-relaxed flex items-center gap-1.5">
                 <span>✨ Analyzed public repositories & calibrated {syncedData?.topics?.length || 3} skills & portfolio depth for your roadmap.</span>
               </p>
             ) : (
@@ -121,10 +118,10 @@ export default function ConnectGitHubModal({ isOpen, onClose, onConnected, onRem
         </div>
 
         {/* Right Side: Fast Inline Input OR Inline Green Tick Connected State */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 flex-none">
+        <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap justify-start xl:justify-end">
           {syncedUser ? (
             /* Inline Success Pill with Green Checkmark */
-            <div className="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-[#ECFDF3] dark:bg-emerald-950/70 border border-[#6CE9A6] dark:border-emerald-600/60 text-[#027A48] dark:text-emerald-300 font-bold text-xs sm:text-sm shadow-xs animate-in zoom-in-95 duration-200">
+            <div className="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-[#ECFDF3] dark:bg-emerald-950/70 border border-[#6CE9A6] dark:border-emerald-600/60 text-[#027A48] dark:text-emerald-300 font-bold text-xs sm:text-sm shadow-xs">
               <span className="w-5 h-5 rounded-full bg-[#12B76A] dark:bg-emerald-500 text-white flex items-center justify-center flex-none shadow-2xs">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="20 6 9 17 4 12" />
@@ -141,7 +138,7 @@ export default function ConnectGitHubModal({ isOpen, onClose, onConnected, onRem
             </div>
           ) : (
             /* Input Form + OAuth */
-            <>
+            <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
               <form onSubmit={handleSyncUsername} className="flex items-center gap-2">
                 <div className="flex items-center bg-white dark:bg-[#0E0E12] border border-[#CBD5E1] dark:border-[#27272F] focus-within:border-[#0066CC] dark:focus-within:border-[#C9D0D6] focus-within:ring-2 focus-within:ring-[#0066CC]/15 dark:focus-within:ring-[#C9D0D6]/20 rounded-xl px-3 py-1.5 text-xs text-[#0F172A] dark:text-white transition-all shadow-2xs">
                   <span className="text-[#64748B] dark:text-[#71717A] font-mono mr-1 select-none">github.com/</span>
@@ -163,7 +160,7 @@ export default function ConnectGitHubModal({ isOpen, onClose, onConnected, onRem
                 </button>
               </form>
 
-              <span className="text-[11px] text-[#64748B] font-bold text-center hidden sm:inline px-1">or</span>
+              <span className="text-[11px] text-[#64748B] font-bold text-center hidden sm:inline px-0.5">or</span>
 
               <button
                 type="button"
@@ -176,7 +173,7 @@ export default function ConnectGitHubModal({ isOpen, onClose, onConnected, onRem
                 </svg>
                 <span>1-Click OAuth</span>
               </button>
-            </>
+            </div>
           )}
 
           {/* Dismiss button */}
@@ -196,13 +193,13 @@ export default function ConnectGitHubModal({ isOpen, onClose, onConnected, onRem
       </div>
 
       {/* Sub-actions line with Glass Buttons */}
-      <div className="mt-3.5 pt-3 border-t border-[#E2E8F0] dark:border-[#27272F] flex flex-wrap items-center justify-between gap-3 text-xs">
+      <div className="mt-4 pt-3.5 border-t border-[#CBD5E1]/60 dark:border-[#27272F] flex flex-wrap items-center justify-between gap-3 text-xs">
         {syncedUser ? (
           <span className="text-xs font-semibold text-[#027A48] dark:text-emerald-400">
             Connected as @{syncedUser}. Roadmap successfully recalibrated.
           </span>
         ) : (
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2.5 flex-wrap">
             <button
               type="button"
               onClick={handleRemindLater}
