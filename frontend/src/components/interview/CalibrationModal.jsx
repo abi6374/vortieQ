@@ -507,20 +507,20 @@ export default function CalibrationModal({
                 type="button"
                 disabled={!canProceed}
                 onClick={handleStartInterview}
-                className="w-full py-3.5 px-5 rounded-xl text-sm font-bold text-white bg-[#0066cc] hover:bg-[#0052a3] dark:bg-[#C9D0D6] dark:text-black dark:!text-black dark:hover:bg-[#CBD5E1] disabled:opacity-40 disabled:cursor-not-allowed shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-3.5 px-5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-[#0071e3] to-[#0066cc] hover:from-[#0077ed] hover:to-[#005bb5] disabled:opacity-40 disabled:cursor-not-allowed shadow-md shadow-[#0066cc]/25 transition-all flex items-center justify-center gap-2 cursor-pointer border-none"
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-white dark:text-black dark:!text-black">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-white">
                   <circle cx="12" cy="12" r="10" />
                   <polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none" />
                 </svg>
-                <span className="text-white dark:text-black dark:!text-black font-bold">Start Live AI Interview</span>
+                <span className="text-white font-bold">Start Live AI Interview</span>
               </button>
 
               <div className="flex items-center justify-between">
                 <button
                   type="button"
                   onClick={() => requestMediaAccess(true)}
-                  className="text-xs text-[#6e6e73] hover:text-[#0066cc] dark:hover:text-[#C9D0D6] underline cursor-pointer transition-colors"
+                  className="text-xs text-[#6e6e73] dark:text-[#94A3B8] hover:text-[#0066cc] dark:hover:text-[#38BDF8] underline cursor-pointer transition-colors"
                 >
                   Switch to Voice-Only Mode
                 </button>
