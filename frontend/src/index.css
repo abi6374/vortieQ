@@ -16,13 +16,14 @@
   --navy: #1d1d1f;
   --slate: #333333;
   --muted: #7a7a7a;
-  --lavender: #eaf2fc;
-  --lav-icon: #dbeafc;
-  --card-bd: #e0e0e0;
-  --divider: #f0f0f0;
-  --bg-main: #f5f5f7;
+  --lavender: #E6EEFF;
+  --lav-icon: #D0E0FF;
+  --card-bd: #C6D6FB;
+  --divider: #DCE7FD;
+  --bg-main: #D8E3FF;
+  --pale-sky: #D8E3FF;
   --canvas: #ffffff;
-  --pearl: #fafafc;
+  --pearl: #EAF0FF;
   --green: #22A06B;
   --green-surface: #ECFDF3;
   --amber: #D88700;
@@ -64,9 +65,9 @@ body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', 'Segoe UI', Roboto, sans-serif;
   background:
-    radial-gradient(1200px 700px at 12% -8%, rgba(225, 237, 255, 0.7) 0%, rgba(225, 237, 255, 0) 55%),
-    radial-gradient(1000px 600px at 92% 112%, rgba(234, 242, 255, 0.6) 0%, rgba(234, 242, 255, 0) 50%),
-    #F5F5F7;
+    radial-gradient(1200px 700px at 12% -8%, rgba(255, 255, 255, 0.75) 0%, rgba(216, 227, 255, 0) 55%),
+    radial-gradient(1000px 600px at 92% 112%, rgba(200, 218, 255, 0.6) 0%, rgba(216, 227, 255, 0) 50%),
+    #D8E3FF;
   color: var(--navy);
   line-height: 1.47;
   -webkit-font-smoothing: antialiased;
@@ -81,9 +82,9 @@ body {
   grid-template-columns: 240px minmax(0, 1fr);
   overflow: hidden;
   background:
-    radial-gradient(1100px 650px at 10% -5%, rgba(225, 237, 255, 0.65) 0%, rgba(225, 237, 255, 0) 55%),
-    radial-gradient(900px 550px at 95% 105%, rgba(234, 242, 255, 0.5) 0%, rgba(234, 242, 255, 0) 50%),
-    #F5F5F7;
+    radial-gradient(1100px 650px at 10% -5%, rgba(255, 255, 255, 0.7) 0%, rgba(216, 227, 255, 0) 55%),
+    radial-gradient(900px 550px at 95% 105%, rgba(200, 218, 255, 0.55) 0%, rgba(216, 227, 255, 0) 50%),
+    #D8E3FF;
   transition: grid-template-columns 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
