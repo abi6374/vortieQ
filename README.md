@@ -135,18 +135,6 @@ See [`docs/deployment_guide.md`](docs/deployment_guide.md) for the one-time manu
 
 ---
 
-## Team
-
-Built by a 5-member team for HCL Hackathon Round 2:
-
-| Member | Role |
-|---|---|
-| Member 1 | Backend |
-| Member 2 (Abinivas) | ML |
-| Member 3 | Frontend |
-| Member 4 | Dashboard |
-| Member 5 | Infrastructure |
-
 ## Guiding principle
 
 Every number shown to a learner — hours per week, mastery level, skill confidence, timeline — is either real, derived from real data, or explicitly flagged as an estimate. Nothing is fabricated to make a screen look complete. This is enforced in code review and in the test suite (see `PROGRESS_TRACKER.md` for the running list of fabrication bugs found and fixed this way).
