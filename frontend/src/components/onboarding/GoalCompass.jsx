@@ -531,7 +531,7 @@ export default function GoalCompass({ topicRatings = [], detectedYears = 0, init
   const [customRoleName, setCustomRoleName] = useState('')
   const suggestedRoleName = ROLES[defaultSuggestedRole].name
   const [goal, setGoal] = useState(
-    initialGoal || `I want to become a ${suggestedRoleName} within 6 months.`
+    initialGoal || `I want to become a ${suggestedRoleName}.`
   )
   const [weekly, setWeekly] = useState(8)
   const [target, setTarget] = useState(defaultTargetMonth())
@@ -789,16 +789,18 @@ export default function GoalCompass({ topicRatings = [], detectedYears = 0, init
               const hasRealRole = isCustomRole ? !!(customRoleName || '').trim() : true
               const trimmedGoal = (goal || '').trim()
 
-              // Extract target weeks from goal text or target month
+              // Determine target weeks: prefer explicit weeks from text, else match the exact Ambition-Readiness meter calculation
               let extractedWeeks = null
-              const match = trimmedGoal.match(/\b(\d{1,2})[\s-]*(?:weeks?|wks?)\b/i)
-              if (match) {
-                extractedWeeks = parseInt(match[1], 10)
+              const weekMatch = trimmedGoal.match(/\b(\d{1,2})[\s-]*(?:weeks?|wks?)\b/i)
+              const monthMatch = trimmedGoal.match(/\b(\d{1,2})[\s-]*(?:months?|mos?)\b/i)
+
+              if (weekMatch) {
+                extractedWeeks = parseInt(weekMatch[1], 10)
+              } else if (monthMatch && parseInt(monthMatch[1], 10) !== 6) {
+                extractedWeeks = Math.max(1, Math.round(parseInt(monthMatch[1], 10) * 4.33))
               } else {
-                const avail = weeksUntil(target)
-                if (isFinite(avail) && avail > 0) {
-                  extractedWeeks = Math.max(1, Math.round(avail))
-                }
+                // Exactly match the estimated path weeks showing on the Ambition–Readiness meter!
+                extractedWeeks = calc.weeksNeeded || 12
               }
 
               const timelineNote = extractedWeeks ? ` Target timeline: ${extractedWeeks} weeks.` : ''

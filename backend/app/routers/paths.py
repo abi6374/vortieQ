@@ -78,10 +78,10 @@ def get_active_path(user_id: str = Depends(verify_jwt)):
     """Returns the learner's active learning path ID and goal summary."""
     res = (
         supabase_client.table("learning_paths")
-        .select("id, goal_text, status, created_at")
+        .select("id, goal_text, status, generated_at")
         .eq("user_id", user_id)
         .eq("status", "active")
-        .order("created_at", desc=True)
+        .order("generated_at", desc=True)
         .limit(1)
         .execute()
     )
