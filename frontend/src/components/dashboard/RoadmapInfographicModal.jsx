@@ -1,7 +1,8 @@
-import React, { useRef, useState, useMemo } from 'react'
+import React, { useRef, useState, useMemo, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
+import { stripEmojis } from '../../utils/textUtils'
 
 /**
  * High-Fidelity Role-Specific Curriculums
@@ -621,6 +622,14 @@ export default function RoadmapInfographicModal({
   const posterRef = useRef(null)
   const [isExporting, setIsExporting] = useState(false)
   const [downloadSuccess, setDownloadSuccess] = useState(false)
+  const [posterTheme, setPosterTheme] = useState('dark')
+
+  useEffect(() => {
+    if (isOpen && typeof document !== 'undefined') {
+      const isAppDark = document.documentElement.classList.contains('dark')
+      setPosterTheme(isAppDark ? 'dark' : 'dark')
+    }
+  }, [isOpen])
 
   const curriculum = useMemo(() => {
     return resolveCurriculumForRole(cleanGoalTitle || targetRole, roadmap)
@@ -629,6 +638,8 @@ export default function RoadmapInfographicModal({
   const totalWeeks = useMemo(() => {
     return curriculum.months.reduce((acc, m) => acc + m.weeks.length, 0)
   }, [curriculum])
+
+  const isDark = posterTheme === 'dark'
 
   const handleDownloadPDF = async (mode = 'multipage') => {
     if (!posterRef.current || isExporting) return
@@ -646,7 +657,7 @@ export default function RoadmapInfographicModal({
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
-        backgroundColor: '#ffffff',
+        backgroundColor: isDark ? '#0D1117' : '#ffffff',
         logging: false,
         scrollX: 0,
         scrollY: 0,
@@ -683,8 +694,8 @@ export default function RoadmapInfographicModal({
           pageCanvas.height = pageCanvasHeightPx
           const ctx = pageCanvas.getContext('2d')
 
-          // Clean white background
-          ctx.fillStyle = '#ffffff'
+          // Matching background fill
+          ctx.fillStyle = isDark ? '#0D1117' : '#ffffff'
           ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height)
 
           // Slice source canvas
@@ -742,12 +753,44 @@ export default function RoadmapInfographicModal({
                 Roadmap Poster & PDF Export
               </h2>
               <p className="text-xs text-[#7a7a7a] dark:text-[#94A3B8]">
-                Infographic flowchart tailored for {curriculum.roleTitle} ({totalWeeks} weeks)
+                Infographic flowchart tailored for {stripEmojis(curriculum.roleTitle)} ({totalWeeks} weeks)
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Dark / Light Poster Theme Switcher */}
+            <button
+              type="button"
+              onClick={() => setPosterTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
+              className="inline-flex items-center gap-1.5 px-3 py-2 bg-[#f0f5fa] dark:bg-[#18181D] hover:bg-[#e1eefc] dark:hover:bg-[#27272F] text-[#0066cc] dark:text-[#CBD5E1] border border-[#cfe4fb] dark:border-[#27272F] text-xs font-bold rounded-xl transition-all cursor-pointer select-none"
+              title="Switch between Dark and Light flowchart themes"
+            >
+              {isDark ? (
+                <>
+                  <svg className="w-3.5 h-3.5 text-[#38BDF8]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="4" />
+                    <path d="M12 2v2" />
+                    <path d="M12 20v2" />
+                    <path d="m4.93 4.93 1.41 1.41" />
+                    <path d="m17.66 17.66 1.41 1.41" />
+                    <path d="M2 12h2" />
+                    <path d="M20 12h2" />
+                    <path d="m6.34 17.66-1.41 1.41" />
+                    <path d="m19.07 4.93-1.41 1.41" />
+                  </svg>
+                  <span>Dark Mode</span>
+                </>
+              ) : (
+                <>
+                  <svg className="w-3.5 h-3.5 text-[#F59E0B]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+                  </svg>
+                  <span>Light Mode</span>
+                </>
+              )}
+            </button>
+
             <button
               type="button"
               onClick={() => handleDownloadPDF('poster')}
@@ -813,28 +856,42 @@ export default function RoadmapInfographicModal({
           {/* THE INFOGRAPHIC POSTER ELEMENT (Exported to PDF via html2canvas) */}
           <div
             ref={posterRef}
-            className="w-full max-w-[800px] mx-auto bg-white border border-[#e2e8f0] rounded-3xl p-6 sm:p-10 shadow-lg text-[#1d1d1f] flex flex-col items-center relative"
+            className={`w-full max-w-[800px] mx-auto rounded-3xl p-6 sm:p-10 shadow-2xl flex flex-col items-center relative transition-colors ${
+              isDark
+                ? 'bg-[#0D1117] border border-[#232B3B] text-[#F0F6FC]'
+                : 'bg-white border border-[#e2e8f0] text-[#1d1d1f]'
+            }`}
             style={{ fontFamily: "'Inter', sans-serif" }}
           >
-            {/* Top Title Banner Header (Clean, professional, NO EMOJIS) */}
+            {/* Top Title Banner Header */}
             <div className="w-full flex flex-col items-center mb-8 relative">
-              <div className="w-full max-w-lg bg-[#E2EBE5] border-2 border-[#CBD8CE] rounded-2xl py-3.5 px-6 text-center shadow-xs">
-                <h1 className="font-['Manrope'] font-extrabold text-xl sm:text-2xl text-[#1E293B] tracking-tight uppercase">
-                  {curriculum.roleTitle}
+              <div
+                className={`w-full max-w-lg rounded-2xl py-3.5 px-6 text-center shadow-xs border-2 ${
+                  isDark
+                    ? 'bg-[#161F2E] border-[#38BDF8]/40 shadow-[0_0_20px_rgba(56,189,248,0.12)]'
+                    : 'bg-[#E2EBE5] border-[#CBD8CE]'
+                }`}
+              >
+                <h1
+                  className={`font-['Manrope'] font-extrabold text-xl sm:text-2xl tracking-tight uppercase ${
+                    isDark ? 'text-[#FFFFFF]' : 'text-[#1E293B]'
+                  }`}
+                >
+                  {stripEmojis(curriculum.roleTitle)}
                 </h1>
               </div>
-              <p className="text-xs text-[#64748B] font-semibold mt-2.5 text-center">
+              <p className={`text-xs font-semibold mt-2.5 text-center ${isDark ? 'text-[#94A3B8]' : 'text-[#64748B]'}`}>
                 Structured {totalWeeks}-Week Curriculum & Learning Path · PathFinder AI
               </p>
             </div>
 
             {/* START GREEN MARKER */}
-            <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-[#10B981] text-white text-xs font-black tracking-wider uppercase shadow-sm mb-2 z-10">
+            <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-[#10B981] text-white text-xs font-black tracking-wider uppercase shadow-md mb-2 z-10">
               <span>START</span>
             </div>
 
             {/* Top Central Spine Connector */}
-            <div className="w-[3px] h-6 bg-[#334155]" />
+            <div className={`w-[3px] h-6 ${isDark ? 'bg-[#38BDF8]/70 shadow-[0_0_8px_rgba(56,189,248,0.4)]' : 'bg-[#334155]'}`} />
 
             {/* FLOWCHART MONTHS & WEEKS TREE */}
             <div className="w-full space-y-6 relative flex flex-col items-center">
@@ -846,12 +903,18 @@ export default function RoadmapInfographicModal({
                   <div key={month.monthNumber} className="w-full flex flex-col items-center relative">
                     
                     {/* CENTRAL MONTH BOX */}
-                    <div className="z-10 bg-white border-2 border-dashed border-[#F59E0B] rounded-2xl px-6 py-3 text-center shadow-sm max-w-[280px] w-full">
-                      <span className="text-[11px] font-black text-[#D97706] uppercase tracking-wider block">
+                    <div
+                      className={`z-10 border-2 border-dashed rounded-2xl px-6 py-3 text-center max-w-[280px] w-full shadow-sm ${
+                        isDark
+                          ? 'bg-[#161B26] border-[#F59E0B] shadow-[0_0_15px_rgba(245,158,11,0.15)]'
+                          : 'bg-white border-[#F59E0B]'
+                      }`}
+                    >
+                      <span className="text-[11px] font-black text-[#F59E0B] uppercase tracking-wider block">
                         MONTH {month.monthNumber}
                       </span>
-                      <span className="font-bold text-xs sm:text-sm text-[#1E293B] leading-tight block mt-0.5">
-                        {month.theme}
+                      <span className={`font-bold text-xs sm:text-sm leading-tight block mt-0.5 ${isDark ? 'text-[#FFFFFF]' : 'text-[#1E293B]'}`}>
+                        {stripEmojis(month.theme)}
                       </span>
                     </div>
 
@@ -863,23 +926,39 @@ export default function RoadmapInfographicModal({
                         {oddWeeks.map((week) => (
                           <div
                             key={week.week_number}
-                            className="relative bg-[#FFFBEB] border-2 border-dashed border-[#FCD34D] rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col justify-between hover:shadow-md transition-shadow"
+                            className={`relative border-2 border-dashed rounded-2xl p-4 sm:p-5 flex flex-col justify-between transition-all ${
+                              isDark
+                                ? 'bg-[#141923] border-[#F59E0B]/60 shadow-[0_4px_16px_rgba(0,0,0,0.4)] hover:border-[#F59E0B]'
+                                : 'bg-[#FFFBEB] border-[#FCD34D] shadow-xs hover:shadow-md'
+                            }`}
                           >
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="px-2.5 py-0.5 bg-[#FEF3C7] border border-[#FDE68A] text-[#92400E] text-[10px] font-extrabold uppercase tracking-wider rounded-md">
+                            <div className="flex items-center justify-between mb-2.5">
+                              <span
+                                className={`px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider rounded-md border ${
+                                  isDark
+                                    ? 'bg-[#2A200B] border-[#F59E0B]/50 text-[#FDE68A]'
+                                    : 'bg-[#FEF3C7] border-[#FDE68A] text-[#92400E]'
+                                }`}
+                              >
                                 WEEK {week.week_number}
                               </span>
                               {week.isComplete && (
-                                <span className="text-[10px] font-bold text-[#059669] bg-[#D1FAE5] px-2 py-0.5 rounded-md border border-[#A7F3D0]">
+                                <span
+                                  className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${
+                                    isDark
+                                      ? 'text-[#6EE7B7] bg-[#06321F] border-[#10B981]/50'
+                                      : 'text-[#059669] bg-[#D1FAE5] border-[#A7F3D0]'
+                                  }`}
+                                >
                                   COMPLETED
                                 </span>
                               )}
                             </div>
-                            <h3 className="font-bold text-xs sm:text-sm text-[#1E293B] leading-snug">
-                              {week.title}
+                            <h3 className={`font-bold text-xs sm:text-sm leading-snug ${isDark ? 'text-[#FFFFFF]' : 'text-[#1E293B]'}`}>
+                              {stripEmojis(week.title)}
                             </h3>
-                            <p className="text-[11px] text-[#64748B] mt-1.5 leading-relaxed font-normal">
-                              {week.desc}
+                            <p className={`text-[11px] mt-1.5 leading-relaxed font-normal ${isDark ? 'text-[#CBD5E1]' : 'text-[#64748B]'}`}>
+                              {stripEmojis(week.desc)}
                             </p>
                           </div>
                         ))}
@@ -890,23 +969,39 @@ export default function RoadmapInfographicModal({
                         {evenWeeks.map((week) => (
                           <div
                             key={week.week_number}
-                            className="relative bg-[#EFF6FF] border-2 border-dashed border-[#BFDBFE] rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col justify-between hover:shadow-md transition-shadow"
+                            className={`relative border-2 border-dashed rounded-2xl p-4 sm:p-5 flex flex-col justify-between transition-all ${
+                              isDark
+                                ? 'bg-[#141923] border-[#3B82F6]/60 shadow-[0_4px_16px_rgba(0,0,0,0.4)] hover:border-[#3B82F6]'
+                                : 'bg-[#EFF6FF] border-[#BFDBFE] shadow-xs hover:shadow-md'
+                            }`}
                           >
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="px-2.5 py-0.5 bg-[#DBEAFE] border border-[#BFDBFE] text-[#1E40AF] text-[10px] font-extrabold uppercase tracking-wider rounded-md">
+                            <div className="flex items-center justify-between mb-2.5">
+                              <span
+                                className={`px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider rounded-md border ${
+                                  isDark
+                                    ? 'bg-[#0E223D] border-[#3B82F6]/50 text-[#BFDBFE]'
+                                    : 'bg-[#DBEAFE] border-[#BFDBFE] text-[#1E40AF]'
+                                }`}
+                              >
                                 WEEK {week.week_number}
                               </span>
                               {week.isComplete && (
-                                <span className="text-[10px] font-bold text-[#059669] bg-[#D1FAE5] px-2 py-0.5 rounded-md border border-[#A7F3D0]">
+                                <span
+                                  className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${
+                                    isDark
+                                      ? 'text-[#6EE7B7] bg-[#06321F] border-[#10B981]/50'
+                                      : 'text-[#059669] bg-[#D1FAE5] border-[#A7F3D0]'
+                                  }`}
+                                >
                                   COMPLETED
                                 </span>
                               )}
                             </div>
-                            <h3 className="font-bold text-xs sm:text-sm text-[#1E293B] leading-snug">
-                              {week.title}
+                            <h3 className={`font-bold text-xs sm:text-sm leading-snug ${isDark ? 'text-[#FFFFFF]' : 'text-[#1E293B]'}`}>
+                              {stripEmojis(week.title)}
                             </h3>
-                            <p className="text-[11px] text-[#64748B] mt-1.5 leading-relaxed font-normal">
-                              {week.desc}
+                            <p className={`text-[11px] mt-1.5 leading-relaxed font-normal ${isDark ? 'text-[#CBD5E1]' : 'text-[#64748B]'}`}>
+                              {stripEmojis(week.desc)}
                             </p>
                           </div>
                         ))}
@@ -916,9 +1011,9 @@ export default function RoadmapInfographicModal({
                     {/* Central Spine Diamond Node & Vertical Line to Next Month */}
                     {mIdx < curriculum.months.length - 1 && (
                       <div className="flex flex-col items-center my-4">
-                        <div className="w-[3px] h-5 bg-[#334155]" />
-                        <div className="w-3.5 h-3.5 bg-[#0F172A] transform rotate-45 my-1" />
-                        <div className="w-[3px] h-5 bg-[#334155]" />
+                        <div className={`w-[3px] h-5 ${isDark ? 'bg-[#38BDF8]/70' : 'bg-[#334155]'}`} />
+                        <div className={`w-3.5 h-3.5 transform rotate-45 my-1 ${isDark ? 'bg-[#38BDF8] shadow-[0_0_8px_rgba(56,189,248,0.6)]' : 'bg-[#0F172A]'}`} />
+                        <div className={`w-[3px] h-5 ${isDark ? 'bg-[#38BDF8]/70' : 'bg-[#334155]'}`} />
                       </div>
                     )}
                   </div>
@@ -927,17 +1022,19 @@ export default function RoadmapInfographicModal({
             </div>
 
             {/* Bottom Vertical Spine Connector to Finish */}
-            <div className="w-[3px] h-6 bg-[#334155] mt-4" />
+            <div className={`w-[3px] h-6 mt-4 ${isDark ? 'bg-[#38BDF8]/70 shadow-[0_0_8px_rgba(56,189,248,0.4)]' : 'bg-[#334155]'}`} />
 
             {/* FINISH RED MARKER */}
-            <div className="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg bg-[#EF4444] text-white text-xs font-black tracking-wider uppercase shadow-sm mt-1 z-10">
+            <div className="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg bg-[#EF4444] text-white text-xs font-black tracking-wider uppercase shadow-md mt-1 z-10">
               <span>FINISH</span>
             </div>
 
             {/* POSTER FOOTER */}
-            <div className="w-full pt-8 mt-8 border-t border-[#e2e8f0] flex flex-col sm:flex-row items-center justify-between gap-2 text-[10px] text-[#94A3B8]">
+            <div className={`w-full pt-8 mt-8 border-t flex flex-col sm:flex-row items-center justify-between gap-2 text-[10px] ${
+              isDark ? 'border-[#232B3B] text-[#94A3B8]' : 'border-[#e2e8f0] text-[#94A3B8]'
+            }`}>
               <span>Generated on {new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</span>
-              <span className="font-semibold text-[#64748B]">PathFinder AI · Personalized Learning Platform</span>
+              <span className={`font-semibold ${isDark ? 'text-[#CBD5E1]' : 'text-[#64748B]'}`}>PathFinder AI · Personalized Learning Platform</span>
             </div>
           </div>
         </div>
