@@ -100,7 +100,7 @@ export default function LandingNavbar() {
         </nav>
 
         {/* Action Controls & Auth */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           {/* Theme Toggle Button */}
           <button
             type="button"
@@ -112,27 +112,35 @@ export default function LandingNavbar() {
           </button>
 
           {isAuthed ? (
-            <SpecularButton
-              size="sm"
-              radius={12}
-              lineColor={isDark ? '#0066CC' : '#000000'}
-              baseColor={isDark ? '#18181D' : '#000000'}
-              intensity={1.25}
-              thickness={1.5}
-              speed={0.35}
-              followMouse
-              proximity={200}
-              onClick={() => navigate('/dashboard')}
-              className="!py-2 !px-4 !rounded-xl !bg-[#0066CC] dark:!bg-[#0066CC] hover:!bg-[#0052A3] dark:hover:!bg-[#0052A3] !text-white dark:!text-white font-semibold text-sm shadow-md shadow-[#0066CC]/25 dark:shadow-[0_4px_16px_rgba(0,102,204,0.35)] hover:shadow-lg transition-all group inline-flex items-center gap-2"
-            >
-              <span>Dashboard</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-            </SpecularButton>
-          ) : (
-            <>
+            <div className="flex items-center gap-2">
               <Link
-                to="/auth"
-                className="hidden sm:inline-flex items-center px-4 py-2 rounded-xl text-sm font-semibold text-[#1D1D1F] dark:text-[#E2E8F0] hover:text-[#0066CC] dark:hover:text-[#0066CC] transition-colors"
+                to="/auth?mode=create"
+                className="hidden sm:inline-flex items-center px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold text-[#1D1D1F] dark:text-[#E2E8F0] hover:text-[#0066CC] dark:hover:text-[#0066CC] transition-colors"
+              >
+                Sign Up
+              </Link>
+              <SpecularButton
+                size="sm"
+                radius={12}
+                lineColor={isDark ? '#0066CC' : '#000000'}
+                baseColor={isDark ? '#18181D' : '#000000'}
+                intensity={1.25}
+                thickness={1.5}
+                speed={0.35}
+                followMouse
+                proximity={200}
+                onClick={() => navigate('/dashboard')}
+                className="!py-2 !px-4 !rounded-xl !bg-[#0066CC] dark:!bg-[#0066CC] hover:!bg-[#0052A3] dark:hover:!bg-[#0052A3] !text-white dark:!text-white font-semibold text-sm shadow-md shadow-[#0066CC]/25 dark:shadow-[0_4px_16px_rgba(0,102,204,0.35)] hover:shadow-lg transition-all group inline-flex items-center gap-2"
+              >
+                <span>Dashboard</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              </SpecularButton>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Link
+                to="/auth?mode=signin"
+                className="inline-flex items-center px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold text-[#1D1D1F] dark:text-[#E2E8F0] hover:text-[#0066CC] dark:hover:text-[#0066CC] transition-colors"
               >
                 Sign In
               </Link>
@@ -146,13 +154,13 @@ export default function LandingNavbar() {
                 speed={0.35}
                 followMouse
                 proximity={200}
-                onClick={() => navigate('/auth')}
+                onClick={() => navigate('/auth?mode=create')}
                 className="!py-2 !px-4 !rounded-xl !bg-[#0066CC] dark:!bg-[#0066CC] hover:!bg-[#0052A3] dark:hover:!bg-[#0052A3] !text-white dark:!text-white font-semibold text-sm shadow-md shadow-[#0066CC]/25 dark:shadow-[0_4px_16px_rgba(0,102,204,0.35)] hover:shadow-lg transition-all group inline-flex items-center gap-2"
               >
-                <span>Get Started</span>
+                <span>Sign Up</span>
                 <Sparkles className="w-4 h-4 group-hover:rotate-12 transition-transform" />
               </SpecularButton>
-            </>
+            </div>
           )}
         </div>
       </div>
