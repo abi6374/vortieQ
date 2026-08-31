@@ -2,17 +2,21 @@ import React, { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useSidebar } from '../../contexts/SidebarContext'
+import { useStreak } from '../../hooks/useStreak'
+import { useRoadmap } from '../../hooks/useRoadmap'
 
 /**
  * PathFinder Floating Glassmorphic Sidebar
  * - Collapsed State (68px width):
- *   - Top Expand button (symmetrically positioned matching the Logout button at the bottom)
+ *   - Top Expand button + Compact Streak Icon
  *   - Vertically centered 8 feature icons with smooth hover tooltips
- *   - Bottom Sign Out button + live green health indicator
- * - Expanded State (240px width):
+ *   - Bottom Sign Out button
+ * - Expanded State (250px width):
  *   - Top Header with brand and Collapse button
- *   - Full-width feature items with Icon + Text Label + Badge
- *   - Bottom Sign Out with text + System Operational status
+ *   - Active Goal & Milestone Card
+ *   - Daily Streak & Weekly Focus Widget
+ *   - Grouped feature navigation (Learning, Opportunities, AI Studio)
+ *   - Bottom Sign Out + System Operational status
  */
 
 export const SidebarIcon = ({ className = 'w-4 h-4' }) => (
@@ -24,27 +28,27 @@ export const SidebarIcon = ({ className = 'w-4 h-4' }) => (
 
 export const ICONS = {
   roadmap: (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
       <path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z" /><path d="M9 3v15M15 6v15" />
     </svg>
   ),
   progress: (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
       <path d="M3 3v18h18" /><path d="m7 14 3-3 3 3 5-6" />
     </svg>
   ),
   skills: (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
       <path d="M12 5a3 3 0 0 0-3 3 3 3 0 0 0-1 5.8V17a3 3 0 0 0 4 2.8A3 3 0 0 0 16 17v-3.2A3 3 0 0 0 15 8a3 3 0 0 0-3-3z" />
     </svg>
   ),
   resources: (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
       <path d="M4 5a2 2 0 0 1 2-2h13v18H6a2 2 0 0 0-2 2z" /><path d="M4 5v14" />
     </svg>
   ),
   hackathons: (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
       <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
       <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
       <path d="M4 22h16" />
@@ -54,13 +58,13 @@ export const ICONS = {
     </svg>
   ),
   internships: (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
       <rect width="20" height="14" x="2" y="7" rx="2" ry="2" />
       <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
     </svg>
   ),
   interview: (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
       <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
       <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
       <line x1="12" x2="12" y1="19" y2="22" />
@@ -68,31 +72,49 @@ export const ICONS = {
     </svg>
   ),
   coach: (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
       <path d="M21 12a8 8 0 1 1-4.9-7.4L21 3l-1.4 4.9A7.9 7.9 0 0 1 21 12z" />
     </svg>
   ),
 }
 
-export const NAV = [
-  { key: 'roadmap',     label: 'My Roadmap',    path: '/dashboard' },
-  { key: 'progress',   label: 'Progress',       path: '/progress' },
-  { key: 'skills',     label: 'Skill Insights', path: '/skills' },
-  { key: 'resources',  label: 'Resources',      path: '/resources' },
-  { key: 'hackathons', label: 'Hackathons',     path: '/hackathons' },
-  { key: 'internships',label: 'Internships',    path: '/internships' },
-  { key: 'interview',  label: 'AI Interview',   path: '/interview', badge: 'Beta' },
-  { key: 'coach',      label: 'AI Coach',       path: '/coach' },
+export const NAV_SECTIONS = [
+  {
+    title: 'Learning',
+    items: [
+      { key: 'roadmap', label: 'My Roadmap', path: '/dashboard' },
+      { key: 'progress', label: 'Progress', path: '/progress' },
+      { key: 'skills', label: 'Skill Insights', path: '/skills' },
+    ]
+  },
+  {
+    title: 'Explore',
+    items: [
+      { key: 'resources', label: 'Resources', path: '/resources' },
+      { key: 'hackathons', label: 'Hackathons', path: '/hackathons' },
+      { key: 'internships', label: 'Internships', path: '/internships' },
+    ]
+  },
+  {
+    title: 'AI Studio',
+    items: [
+      { key: 'interview', label: 'AI Interview', path: '/interview', badge: 'Beta' },
+      { key: 'coach', label: 'AI Coach', path: '/coach' },
+    ]
+  }
 ]
 
+export const ALL_NAV_ITEMS = NAV_SECTIONS.flatMap(s => s.items)
+export const NAV = ALL_NAV_ITEMS
+
 export function activeKeyFor(pathname) {
-  if (pathname.startsWith('/hackathons'))  return 'hackathons'
+  if (pathname.startsWith('/hackathons')) return 'hackathons'
   if (pathname.startsWith('/internships')) return 'internships'
-  if (pathname.startsWith('/interview'))   return 'interview'
-  if (pathname.startsWith('/progress'))    return 'progress'
-  if (pathname.startsWith('/skill'))       return 'skills'
-  if (pathname.startsWith('/resources'))   return 'resources'
-  if (pathname.startsWith('/coach'))       return 'coach'
+  if (pathname.startsWith('/interview')) return 'interview'
+  if (pathname.startsWith('/progress')) return 'progress'
+  if (pathname.startsWith('/skill')) return 'skills'
+  if (pathname.startsWith('/resources')) return 'resources'
+  if (pathname.startsWith('/coach')) return 'coach'
   if (pathname.startsWith('/roadmap') || pathname.startsWith('/dashboard') || pathname.startsWith('/workspace')) return 'roadmap'
   return ''
 }
@@ -111,7 +133,6 @@ function Tooltip({ label, badge, visible }) {
           transition={{ duration: 0.14, ease: [0.16, 1, 0.3, 1] }}
         >
           <div className="relative flex items-center gap-2 bg-[#0c0d12]/95 dark:bg-[#18181D]/95 text-white text-[12px] font-semibold px-3 py-2 rounded-xl shadow-[0_12px_28px_rgba(0,0,0,0.5)] border border-white/10 dark:border-white/15 backdrop-blur-md whitespace-nowrap">
-            {/* Arrow point */}
             <span
               className="absolute right-full top-1/2 -translate-y-1/2 border-[5px] border-transparent"
               style={{ borderRightColor: 'rgba(12,13,18,0.95)' }}
@@ -143,9 +164,8 @@ function CollapsedNavItem({ item, isActive, onClick }) {
         onMouseLeave={() => setHovered(false)}
         aria-label={item.label}
         aria-current={isActive ? 'page' : undefined}
-        className="relative w-12 h-12 flex items-center justify-center rounded-2xl transition-all duration-150 cursor-pointer border-none outline-none bg-transparent"
+        className="relative w-11 h-11 flex items-center justify-center rounded-2xl transition-all duration-150 cursor-pointer border-none outline-none bg-transparent"
       >
-        {/* Spring-animated active capsule pill */}
         {isActive ? (
           <motion.span
             layoutId="sidebar-active-pill-collapsed"
@@ -156,7 +176,6 @@ function CollapsedNavItem({ item, isActive, onClick }) {
           <div className="absolute inset-0 rounded-2xl transition-colors duration-150 hover:bg-black/[0.05] dark:hover:bg-white/[0.07]" />
         )}
 
-        {/* Icon */}
         <span
           className={`relative z-10 transition-all duration-150 flex items-center justify-center ${
             isActive
@@ -169,13 +188,11 @@ function CollapsedNavItem({ item, isActive, onClick }) {
           })}
         </span>
 
-        {/* Micro badge dot for Beta */}
         {item.badge && !isActive && (
-          <span className="absolute top-2.5 right-2.5 w-1.5 h-1.5 rounded-full bg-[#0066cc] dark:bg-[#0066cc]" />
+          <span className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-[#0066cc] dark:bg-[#0066cc]" />
         )}
       </button>
 
-      {/* Flyout tooltip on hover */}
       <Tooltip label={item.label} badge={item.badge} visible={hovered} />
     </div>
   )
@@ -190,22 +207,20 @@ function ExpandedNavItem({ item, isActive, onClick }) {
       onClick={() => onClick(item.path)}
       aria-label={item.label}
       aria-current={isActive ? 'page' : undefined}
-      className={`relative w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition-all duration-150 cursor-pointer border-none outline-none text-left ${
+      className={`relative w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-150 cursor-pointer border-none outline-none text-left ${
         isActive
           ? 'text-white dark:text-white font-bold'
           : 'text-[#333333] dark:text-[#E2E8F0] hover:bg-black/[0.04] dark:hover:bg-white/[0.06]'
       }`}
     >
-      {/* Spring active background */}
       {isActive && (
         <motion.span
           layoutId="sidebar-active-pill-expanded"
-          className="absolute inset-0 rounded-2xl z-0 bg-gradient-to-br from-[#0066cc] to-[#004fa3] dark:from-[#0066cc] dark:to-[#004fa3] shadow-[0_4px_16px_rgba(0,102,204,0.38)] dark:shadow-[0_4px_16px_rgba(0,102,204,0.4)]"
+          className="absolute inset-0 rounded-xl z-0 bg-gradient-to-br from-[#0066cc] to-[#004fa3] dark:from-[#0066cc] dark:to-[#004fa3] shadow-[0_4px_16px_rgba(0,102,204,0.38)] dark:shadow-[0_4px_16px_rgba(0,102,204,0.4)]"
           transition={{ type: 'spring', stiffness: 420, damping: 32 }}
         />
       )}
 
-      {/* Icon */}
       <span
         className={`relative z-10 flex-none flex items-center justify-center ${
           isActive ? 'text-white dark:text-white' : 'text-[#7a7a7a] dark:text-[#A1A1AA]'
@@ -216,15 +231,13 @@ function ExpandedNavItem({ item, isActive, onClick }) {
         })}
       </span>
 
-      {/* Label Text */}
-      <span className="relative z-10 font-semibold text-sm truncate flex-1">
+      <span className="relative z-10 font-semibold text-xs sm:text-[13px] truncate flex-1">
         {item.label}
       </span>
 
-      {/* Badge */}
       {item.badge && (
         <span
-          className={`relative z-10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md ${
+          className={`relative z-10 px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-wider rounded-md ${
             isActive
               ? 'bg-white/20 text-white dark:bg-white/20 dark:text-white'
               : 'bg-[#0066cc]/10 dark:bg-[#0066cc]/20 text-[#0066cc] dark:text-[#0066cc]'
@@ -233,6 +246,84 @@ function ExpandedNavItem({ item, isActive, onClick }) {
           {item.badge}
         </span>
       )}
+    </button>
+  )
+}
+
+// ─── Active Goal Card ─────────────────────────────────────────────────────────
+
+function ActiveGoalCard({ roadmap, onClick }) {
+  const roleName = roadmap?.path?.target_role || 'Full-Stack Developer'
+  const percent = Math.round(roadmap?.percent || 0)
+  const totalWeeks = roadmap?.weeks?.length || 8
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="w-full text-left p-3 rounded-2xl bg-gradient-to-b from-[#eaf2fc] to-[#f4f8fe] dark:from-[#18181D] dark:to-[#121216] border border-[#d2e4f8] dark:border-[#27272F] shadow-2xs hover:border-[#0066cc]/50 dark:hover:border-[#0066cc]/50 transition-all cursor-pointer group flex flex-col gap-1.5"
+    >
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#0066cc] dark:text-[#38BDF8] flex items-center gap-1">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#0066cc] dark:bg-[#38BDF8] animate-pulse" />
+          Active Goal
+        </span>
+        <span className="text-[11px] font-bold text-[#1d1d1f] dark:text-white font-mono">
+          {percent}%
+        </span>
+      </div>
+
+      <p className="text-xs font-bold text-[#1d1d1f] dark:text-white truncate group-hover:text-[#0066cc] dark:group-hover:text-[#38BDF8] transition-colors">
+        {roleName}
+      </p>
+
+      {/* Progress Track */}
+      <div className="w-full h-1.5 rounded-full bg-black/10 dark:bg-white/10 overflow-hidden flex items-center">
+        <div
+          className="h-full rounded-full bg-gradient-to-r from-[#0071e3] to-[#0066cc] dark:from-[#0066cc] dark:to-[#38BDF8] transition-all duration-500"
+          style={{ width: `${Math.max(6, percent)}%` }}
+        />
+      </div>
+
+      <div className="flex items-center justify-between text-[10px] text-[#7a7a7a] dark:text-[#94A3B8]">
+        <span>{totalWeeks} Week Plan</span>
+        <span className="group-hover:translate-x-0.5 transition-transform text-[#0066cc] dark:text-[#38BDF8] font-bold">
+          View Path →
+        </span>
+      </div>
+    </button>
+  )
+}
+
+// ─── Daily Streak Widget ──────────────────────────────────────────────────────
+
+function DailyStreakWidget({ streak, onClick }) {
+  const count = streak?.current_streak ?? 1
+  const hoursThisWeek = streak?.minutes_this_week ? Math.round(streak.minutes_this_week / 60 * 10) / 10 : 2.5
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="w-full text-left px-3 py-2 rounded-xl bg-white/70 dark:bg-[#18181D]/80 border border-[#e6edf5] dark:border-[#27272F] shadow-2xs hover:border-amber-400/60 dark:hover:border-amber-400/60 transition-all cursor-pointer group flex items-center justify-between"
+    >
+      <div className="flex items-center gap-2">
+        <span className="text-base flex-none group-hover:scale-110 transition-transform">
+          🔥
+        </span>
+        <div className="flex flex-col">
+          <span className="text-xs font-bold text-[#1d1d1f] dark:text-white leading-tight">
+            {count} Day Streak
+          </span>
+          <span className="text-[10px] text-[#7a7a7a] dark:text-[#94A3B8] leading-tight">
+            {hoursThisWeek}h studied this week
+          </span>
+        </div>
+      </div>
+
+      <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded-md flex-none">
+        Active
+      </span>
     </button>
   )
 }
@@ -250,7 +341,7 @@ function ToggleSidebarButton({ isExpanded, onClick }) {
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         aria-label={isExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
-        className="w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-150 cursor-pointer border-none outline-none text-[#7a7a7a] hover:text-[#0066cc] dark:hover:text-[#0066cc] hover:bg-[#0066cc]/10 dark:hover:bg-[#0066cc]/10"
+        className="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-150 cursor-pointer border-none outline-none text-[#7a7a7a] hover:text-[#0066cc] dark:hover:text-[#0066cc] hover:bg-[#0066cc]/10 dark:hover:bg-[#0066cc]/10"
       >
         <SidebarIcon className="w-5 h-5" />
       </button>
@@ -269,14 +360,14 @@ function SignOutButton({ isExpanded, onClick }) {
       <button
         type="button"
         onClick={onClick}
-        className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition-all duration-150 cursor-pointer border-none outline-none text-[#7a7a7a] hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20"
+        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all duration-150 cursor-pointer border-none outline-none text-[#7a7a7a] hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20"
       >
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
           <polyline points="16 17 21 12 16 7" />
           <line x1="21" y1="12" x2="9" y2="12" />
         </svg>
-        <span className="font-semibold text-sm">Sign Out</span>
+        <span className="font-semibold text-xs sm:text-[13px]">Sign Out</span>
       </button>
     )
   }
@@ -289,9 +380,9 @@ function SignOutButton({ isExpanded, onClick }) {
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         aria-label="Sign Out"
-        className="w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-150 cursor-pointer border-none outline-none text-[#7a7a7a] hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20"
+        className="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-150 cursor-pointer border-none outline-none text-[#7a7a7a] hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20"
       >
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
           <polyline points="16 17 21 12 16 7" />
           <line x1="21" y1="12" x2="9" y2="12" />
@@ -310,6 +401,8 @@ export default function AppSidebar() {
   const active = activeKeyFor(location.pathname)
   const { isCollapsed, setCollapsed } = useSidebar()
   const isExpanded = !isCollapsed
+  const streak = useStreak()
+  const roadmap = useRoadmap()
 
   const handleSignOut = () => {
     navigate('/login')
@@ -318,50 +411,93 @@ export default function AppSidebar() {
   return (
     <aside
       className={`pf-sidebar-floating hidden md:flex flex-col select-none transition-all duration-300 ${
-        isExpanded ? 'w-[240px] px-3' : 'w-[68px] px-2'
+        isExpanded ? 'w-[250px] px-3 py-3' : 'w-[68px] px-2 py-3'
       }`}
       aria-label="Primary Navigation"
     >
-      {/* ── Top Section: Fixed-Position Expand/Collapse Button ── */}
-      <div className={`flex items-center flex-none w-full ${isExpanded ? 'justify-start px-0.5 pb-1' : 'justify-center pb-1'}`}>
+      {/* ── Top Header Bar with Collapse Toggle ── */}
+      <div className={`flex items-center flex-none w-full ${isExpanded ? 'justify-between px-1 pb-2' : 'justify-center pb-2'}`}>
+        {isExpanded ? (
+          <div className="flex items-center gap-2">
+            <span className="w-7 h-7 rounded-lg bg-[#0066cc] text-white flex items-center justify-center font-black text-xs shadow-xs">
+              P
+            </span>
+            <span className="font-extrabold text-sm text-[#1d1d1f] dark:text-white tracking-tight font-['Manrope']">
+              PathFinder
+            </span>
+          </div>
+        ) : null}
+
         <ToggleSidebarButton
           isExpanded={isExpanded}
           onClick={() => setCollapsed(isExpanded)}
         />
       </div>
 
-      <div className={`w-full flex justify-center py-1 flex-none`}>
+      {/* ── Expanded Widgets: Active Goal & Daily Streak ── */}
+      {isExpanded ? (
+        <div className="flex flex-col gap-2 pt-1 pb-2 flex-none">
+          <ActiveGoalCard roadmap={roadmap} onClick={() => navigate('/dashboard')} />
+          <DailyStreakWidget streak={streak} onClick={() => navigate('/progress')} />
+        </div>
+      ) : (
+        /* Collapsed Mini Streak Icon */
+        <div className="flex justify-center pb-2 flex-none">
+          <button
+            type="button"
+            onClick={() => navigate('/progress')}
+            title={`${streak?.current_streak || 1} Day Streak`}
+            className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs font-bold text-amber-600 dark:text-amber-400 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform"
+          >
+            🔥{streak?.current_streak || 1}
+          </button>
+        </div>
+      )}
+
+      <div className="w-full flex justify-center py-1 flex-none">
         <div className="w-full h-px bg-black/[0.08] dark:bg-white/[0.1]" />
       </div>
 
-      {/* ── Center Section: Vertically Centered 8 Features ── */}
-      <nav className={`my-auto flex flex-col items-center gap-1.5 w-full ${isExpanded ? 'py-2' : 'py-1'}`}>
-        {NAV.map((item) =>
-          isExpanded ? (
-            <ExpandedNavItem
-              key={item.key}
-              item={item}
-              isActive={active === item.key}
-              onClick={navigate}
-            />
-          ) : (
-            <CollapsedNavItem
-              key={item.key}
-              item={item}
-              isActive={active === item.key}
-              onClick={navigate}
-            />
-          )
+      {/* ── Navigation Section: Cleanly Grouped & Flowing Naturally ── */}
+      <nav className="flex-1 flex flex-col gap-3 w-full pt-1 pb-2 overflow-y-auto no-scrollbar">
+        {isExpanded ? (
+          NAV_SECTIONS.map((section) => (
+            <div key={section.title} className="flex flex-col gap-0.5">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#86868b] dark:text-[#71717A] px-3 py-1">
+                {section.title}
+              </span>
+              <div className="flex flex-col gap-0.5">
+                {section.items.map((item) => (
+                  <ExpandedNavItem
+                    key={item.key}
+                    item={item}
+                    isActive={active === item.key}
+                    onClick={navigate}
+                  />
+                ))}
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="flex flex-col items-center gap-1.5 w-full">
+            {ALL_NAV_ITEMS.map((item) => (
+              <CollapsedNavItem
+                key={item.key}
+                item={item}
+                isActive={active === item.key}
+                onClick={navigate}
+              />
+            ))}
+          </div>
         )}
       </nav>
 
       {/* ── Bottom Section: Separator + Sign Out ── */}
-      <div className="flex flex-col gap-2 pt-2 flex-none w-full">
+      <div className="flex flex-col gap-1.5 pt-2 flex-none w-full">
         <div className="w-full h-px bg-black/[0.08] dark:bg-white/[0.1]" />
-
-        {/* Sign Out */}
         <SignOutButton isExpanded={isExpanded} onClick={handleSignOut} />
       </div>
     </aside>
   )
 }
+
