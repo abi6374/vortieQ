@@ -221,7 +221,7 @@ export default function SkillConfidenceStep({
       </div>
 
       {/* ONLY THIS PART IS SCROLLABLE: LIST OF SKILL LEVEL PANELS */}
-      <div className="space-y-3.5 overflow-y-auto flex-1 min-h-0 pr-2 my-2">
+      <div className="space-y-3.5 overflow-y-auto overscroll-y-contain flex-1 min-h-0 pr-2 my-2 select-text">
         {topics.length === 0 ? (
           <div className="py-10 px-4 text-center rounded-2xl border-2 border-dashed border-[#e6e6e6] dark:border-[#27272F] bg-[#fafbfc] dark:bg-[#0E0E12]">
             <p className="font-bold text-[#1d1d1f] dark:text-[#F8FAFC] text-base">

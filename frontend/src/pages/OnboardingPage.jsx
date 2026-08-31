@@ -336,151 +336,142 @@ export default function OnboardingPage() {
   }
 
   // =========================================================================
-  // VIEW RENDERING PER PHASE
+  // VIEW RENDERING (Single Persistent Shell Matching Dashboard Architecture)
   // =========================================================================
 
-  // Step 1: Learner Intake (Resume Upload + Background Description)
-  if (phase === 'intake' || phase === 'resume') {
-    return (
-      <div className="h-[100dvh] w-full flex overflow-hidden bg-[#D8E3FF] dark:bg-[#09090B]">
-        <SetupSidebar current={1} />
-        <div className="flex-1 h-full min-h-0 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 overflow-y-auto">
-          <LearnerIntakeWorkspace
-            hasExistingPath={hasExistingPath}
-            onExtracted={handleResumeExtracted}
-            onChatSubmit={handleChatIntake}
-            onSkip={() => setPhase('github')}
-          />
-        </div>
-      </div>
-    )
-  }
+  const stepNumber =
+    phase === 'intake' || phase === 'resume' ? 1 :
+    phase === 'github' ? 2 :
+    phase === 'skills' || phase === 'topics' ? 3 :
+    phase === 'confidence' ? 4 :
+    phase === 'goalcompass' ? 5 :
+    phase === 'generating' ? 6 : 1
 
-  // Step 2: Dedicated GitHub Integration Step (Optional)
-  if (phase === 'github') {
-    return (
-      <div className="h-[100dvh] w-full flex overflow-hidden bg-[#D8E3FF] dark:bg-[#09090B]">
-        <SetupSidebar current={2} />
-        <div className="flex-1 h-full min-h-0 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 overflow-y-auto">
-          <GitHubIntegrationStep
-            githubData={githubData}
-            hasExistingPath={hasExistingPath}
-            onGithubSynced={handleGithubSynced}
-            onContinue={() => setPhase('skills')}
-            onSkip={() => setPhase('skills')}
-          />
-        </div>
-      </div>
-    )
-  }
+  const renderPhaseContent = () => {
+    // Step 1: Learner Intake
+    if (phase === 'intake' || phase === 'resume') {
+      return (
+        <LearnerIntakeWorkspace
+          hasExistingPath={hasExistingPath}
+          onExtracted={handleResumeExtracted}
+          onChatSubmit={handleChatIntake}
+          onSkip={() => setPhase('github')}
+        />
+      )
+    }
 
-  // Step 3: Your Skill (Review & manage detected skills & stacks)
-  if (phase === 'skills' || phase === 'topics') {
-    return (
-      <div className="h-[100dvh] w-full flex overflow-hidden bg-[#D8E3FF] dark:bg-[#09090B]">
-        <SetupSidebar current={3} />
-        <div className="flex-1 h-full min-h-0 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 overflow-hidden">
-          <YourSkillsStep
-            topics={resumeTopics}
-            detectedYears={detectedYears}
-            onContinue={handleSkillsContinue}
-            onBack={() => setPhase(githubData ? 'github' : 'intake')}
-          />
-        </div>
-      </div>
-    )
-  }
+    // Step 2: Dedicated GitHub Integration Step
+    if (phase === 'github') {
+      return (
+        <GitHubIntegrationStep
+          githubData={githubData}
+          hasExistingPath={hasExistingPath}
+          onGithubSynced={handleGithubSynced}
+          onContinue={() => setPhase('skills')}
+          onSkip={() => setPhase('skills')}
+        />
+      )
+    }
 
-  // Step 4: Your Confidence Level (Fine-tune level per skill)
-  if (phase === 'confidence') {
-    return (
-      <div className="h-[100dvh] w-full flex overflow-hidden bg-[#D8E3FF] dark:bg-[#09090B]">
-        <SetupSidebar current={4} />
-        <div className="flex-1 h-full min-h-0 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 overflow-hidden">
-          <SkillConfidenceStep
-            topics={resumeTopics}
-            detectedYears={detectedYears}
-            onContinue={handleConfidenceContinue}
-            onBack={() => setPhase('skills')}
-          />
-        </div>
-      </div>
-    )
-  }
+    // Step 3: Your Skill
+    if (phase === 'skills' || phase === 'topics') {
+      return (
+        <YourSkillsStep
+          topics={resumeTopics}
+          detectedYears={detectedYears}
+          onContinue={handleSkillsContinue}
+          onBack={() => setPhase(githubData ? 'github' : 'intake')}
+        />
+      )
+    }
 
-  // Step 5 & 6: Goal Compass & Generating Overlay
-  if (phase === 'goalcompass' || phase === 'generating') {
+    // Step 4: Your Confidence Level
+    if (phase === 'confidence') {
+      return (
+        <SkillConfidenceStep
+          topics={resumeTopics}
+          detectedYears={detectedYears}
+          onContinue={handleConfidenceContinue}
+          onBack={() => setPhase('skills')}
+        />
+      )
+    }
+
+    // Step 5: Goal Compass
+    if (phase === 'goalcompass' || phase === 'generating') {
+      return (
+        <GoalCompass
+          topicRatings={topicRatings.length > 0 ? topicRatings : resumeTopics}
+          detectedYears={detectedYears}
+          initialGoal={goalText}
+          onCreate={handleCreatePlan}
+          onBack={() => setPhase('confidence')}
+        />
+      )
+    }
+
+    // Fallback Chat/Confirm Lanes
     return (
-      <>
-        <div ref={bgRef} className="h-[100dvh] w-full flex overflow-hidden bg-[#D8E3FF] dark:bg-[#09090B]">
-          <SetupSidebar current={phase === 'generating' ? 6 : 5} />
-          <div className="flex-1 h-full min-h-0 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 overflow-y-auto">
-            <GoalCompass
-              topicRatings={topicRatings.length > 0 ? topicRatings : resumeTopics}
-              detectedYears={detectedYears}
-              initialGoal={goalText}
-              onCreate={handleCreatePlan}
-              onBack={() => setPhase('confidence')}
-            />
-            {error && phase !== 'generating' && (
-              <p className="mt-4 text-center text-sm text-red-700 bg-red-100 rounded-lg py-2 px-4 max-w-md">
-                {error}
+      <div className="w-full max-w-[1140px] flex justify-center">
+        {phase === 'chat' && (
+          <div className="bg-white dark:bg-[#121216] rounded-2xl border border-[#f0f0f0] dark:border-[#27272F] shadow-[0_14px_38px_rgba(0,0,0,0.4)] p-8 max-w-2xl w-full">
+            <h1 className="text-2xl font-bold text-[#1d1d1f] dark:text-white">Let's map your path</h1>
+            <p className="mt-2 text-sm text-[#555555] dark:text-[#94A3B8]">
+              Describe your learning goal in your own words. Our AI will turn it into a personalized roadmap.
+            </p>
+            {topicRatings.length > 0 && (
+              <p className="mt-3 text-xs text-[#0066cc] dark:text-[#C9D0D6] bg-[#eaf2fc] dark:bg-[#18181D] rounded-lg px-3 py-2 border border-[#cfe4fb] dark:border-[#27272F]">
+                Using {topicRatings.length} skill{topicRatings.length === 1 ? '' : 's'} from your profile to personalize recommendations.
               </p>
             )}
+            <div className="mt-6">
+              <ChatInput onSubmit={handleGoalSubmit} isLoading={isLoading} />
+            </div>
           </div>
-        </div>
-        {phase === 'generating' && (
-          <GeneratingOverlay
-            status={genStatus}
-            onFinished={finishToRoadmap}
-            onRetry={retryPlan}
-            onBack={backToGoal}
-          />
         )}
-      </>
+
+        {phase === 'confirm' && (
+          <div className="w-full max-w-[1140px] flex justify-center">
+            <GoalConfirm
+              profile={extractedProfile}
+              onConfirm={handleConfirm}
+              onEdit={handleEditGoal}
+            />
+          </div>
+        )}
+      </div>
     )
   }
 
-  // Fallback Chat/Confirm Lanes
   return (
-    <div className="h-[100dvh] w-full flex overflow-hidden bg-[#D8E3FF] dark:bg-[#09090B]">
-      <SetupSidebar current={1} />
-      <div className="flex-1 h-full min-h-0 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 overflow-y-auto">
-        <div className="w-full max-w-[1140px] flex justify-center">
-          {phase === 'chat' && (
-            <div className="bg-white dark:bg-[#121216] rounded-2xl border border-[#f0f0f0] dark:border-[#27272F] shadow-[0_14px_38px_rgba(0,0,0,0.4)] p-8 max-w-2xl w-full">
-              <h1 className="text-2xl font-bold text-[#1d1d1f] dark:text-white">Let's map your path</h1>
-              <p className="mt-2 text-sm text-[#555555] dark:text-[#94A3B8]">
-                Describe your learning goal in your own words. Our AI will turn it into a personalized roadmap.
-              </p>
-              {topicRatings.length > 0 && (
-                <p className="mt-3 text-xs text-[#0066cc] dark:text-[#C9D0D6] bg-[#eaf2fc] dark:bg-[#18181D] rounded-lg px-3 py-2 border border-[#cfe4fb] dark:border-[#27272F]">
-                  Using {topicRatings.length} skill{topicRatings.length === 1 ? '' : 's'} from your profile to personalize recommendations.
-                </p>
-              )}
-              <div className="mt-6">
-                <ChatInput onSubmit={handleGoalSubmit} isLoading={isLoading} />
-              </div>
-            </div>
-          )}
+    <div className="pf-onboarding-shell flex h-[100dvh] w-full overflow-hidden bg-[#D8E3FF] dark:bg-[#09090B] font-['Inter',sans-serif]">
+      {/* 1. Permanent, Static, Unmoving SetupSidebar */}
+      <SetupSidebar current={stepNumber} />
 
-          {phase === 'confirm' && (
-            <div className="w-full max-w-[1140px] flex justify-center">
-              <GoalConfirm
-                profile={extractedProfile}
-                onConfirm={handleConfirm}
-                onEdit={handleEditGoal}
-              />
-            </div>
-          )}
-        </div>
-
-        {error && (
-          <p className="mt-4 text-center text-sm text-red-700 bg-red-100 rounded-lg py-2 px-4 max-w-md">
+      {/* 2. Step Content Area */}
+      <main
+        ref={bgRef}
+        className={`flex-1 h-full min-h-0 flex flex-col items-center justify-center p-3 sm:p-5 lg:p-7 ${
+          phase === 'confidence' || phase === 'skills' ? 'overflow-hidden' : 'overflow-y-auto'
+        }`}
+      >
+        {renderPhaseContent()}
+        {error && phase !== 'generating' && (
+          <p className="mt-4 text-center text-sm text-red-700 bg-red-100 rounded-lg py-2 px-4 max-w-md flex-none">
             {error}
           </p>
         )}
-      </div>
+      </main>
+
+      {/* 3. Generating Overlay Modal */}
+      {phase === 'generating' && (
+        <GeneratingOverlay
+          status={genStatus}
+          onFinished={finishToRoadmap}
+          onRetry={retryPlan}
+          onBack={backToGoal}
+        />
+      )}
     </div>
   )
 }
