@@ -22,8 +22,8 @@ export default function AppShell({ topBar = null, children, contentClassName = '
         <AppSidebar />
 
         {/* Scrollable Content Container */}
-        <main className={`pf-content flex-1 overflow-y-auto ${contentClassName}`}>
-          <div className="w-full animate-fade-in">
+        <main className={`pf-content flex-1 min-h-0 overflow-y-auto ${contentClassName}`}>
+          <div className="w-full h-full min-h-full flex flex-col flex-1 min-h-0 animate-fade-in">
             {children}
           </div>
         </main>

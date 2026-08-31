@@ -333,8 +333,8 @@ export default function CoachScreen() {
   const [tab, setTab] = useState('chat')
 
   return (
-    <AppShell contentClassName="h-full overflow-hidden flex flex-col !p-4 sm:!p-6 lg:!p-7">
-      <div className="w-full h-full flex flex-col min-h-0 font-['Inter',sans-serif] text-[#1d1d1f] dark:text-white">
+    <AppShell contentClassName="!h-full !overflow-hidden flex flex-col !p-4 sm:!p-6 lg:!p-7">
+      <div className="w-full h-full flex flex-col flex-1 min-h-0 font-['Inter',sans-serif] text-[#1d1d1f] dark:text-white">
         <header className="mb-3.5 flex-none flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <h1 className="font-['Manrope'] font-extrabold text-2xl sm:text-[26px] text-[#1d1d1f] dark:text-white tracking-tight">AI Coach</h1>
