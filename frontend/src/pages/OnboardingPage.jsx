@@ -227,6 +227,7 @@ export default function OnboardingPage() {
         target_role: effectiveTargetRole || 'Software Engineer',
         target_role_override: effectiveTargetRole || 'Software Engineer',
         weekly_hours: weeklyHours || 10,
+        target_weeks: targetWeeksInput || null,
         detected_years_experience: detectedYears || 0,
         years_experience: detectedYears || 0,
         topic_ratings: ratingsPayload,
@@ -242,6 +243,7 @@ export default function OnboardingPage() {
         goal_text: composed,
         target_role: effectiveTargetRole || 'Software Engineer',
         weekly_hours: weeklyHours || 10,
+        target_weeks: targetWeeksInput || null,
         resume_topics: ratingsPayload,
       }
 
@@ -265,14 +267,14 @@ export default function OnboardingPage() {
     }
   }
 
-  const handleCreatePlan = (goalTextInput, weeklyHours, targetRoleOverrideInput) => {
-    runPlan(goalTextInput, weeklyHours, targetRoleOverrideInput)
+  const handleCreatePlan = (goalTextInput, weeklyHours, targetRoleOverrideInput, targetWeeksInput) => {
+    runPlan(goalTextInput, weeklyHours, targetRoleOverrideInput, targetWeeksInput)
   }
 
   const retryPlan = () => {
     if (lastPlanArgs.current) {
-      const { goalTextInput, weeklyHours, targetRoleOverrideInput } = lastPlanArgs.current
-      runPlan(goalTextInput, weeklyHours, targetRoleOverrideInput)
+      const { goalTextInput, weeklyHours, targetRoleOverrideInput, targetWeeksInput } = lastPlanArgs.current
+      runPlan(goalTextInput, weeklyHours, targetRoleOverrideInput, targetWeeksInput)
     } else {
       setPhase('goalcompass')
     }

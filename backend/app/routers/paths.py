@@ -14,6 +14,7 @@ class GeneratePathPayload(BaseModel):
     goal: str | None = None
     target_role: str | None = None
     weekly_hours: int | None = None
+    target_weeks: int | None = None
     resume_topics: list[dict] | None = None
 
     class Config:
@@ -52,8 +53,19 @@ def generate_path(
         idempotency_service.store_result(idempotency_key, 404, {"detail": "Profile not found. Create a profile first."})
         raise HTTPException(404, "Profile not found. Create a profile first.")
 
+    profile_data = dict(profile_result.data[0])
+    if payload:
+        if payload.target_weeks is not None:
+            profile_data["target_weeks"] = payload.target_weeks
+        if payload.weekly_hours is not None:
+            profile_data["weekly_hours"] = payload.weekly_hours
+        if payload.goal_text:
+            profile_data["goal_text"] = payload.goal_text
+        if payload.target_role:
+            profile_data["target_role"] = payload.target_role
+
     try:
-        result = path_service.generate_path(user_id, profile_result.data[0])
+        result = path_service.generate_path(user_id, profile_data)
         idempotency_service.store_result(idempotency_key, 200, result)
         return result
     except ValueError as e:

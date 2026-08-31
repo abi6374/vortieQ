@@ -22,6 +22,8 @@ class ProfileCreateSchema(BaseModel):
     resume_education: str | None = Field(default=None, max_length=4000)
     resume_projects: str | None = Field(default=None, max_length=4000)
     target_role_override: str | None = Field(default=None, max_length=200)
+    weekly_hours: int | None = None
+    target_weeks: int | None = None
 
 
 class ProfileSchema(BaseModel):

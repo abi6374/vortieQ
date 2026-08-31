@@ -788,10 +788,24 @@ export default function GoalCompass({ topicRatings = [], detectedYears = 0, init
             onClick={() => {
               const hasRealRole = isCustomRole ? !!(customRoleName || '').trim() : true
               const trimmedGoal = (goal || '').trim()
+
+              // Extract target weeks from goal text or target month
+              let extractedWeeks = null
+              const match = trimmedGoal.match(/\b(\d{1,2})[\s-]*(?:weeks?|wks?)\b/i)
+              if (match) {
+                extractedWeeks = parseInt(match[1], 10)
+              } else {
+                const avail = weeksUntil(target)
+                if (isFinite(avail) && avail > 0) {
+                  extractedWeeks = Math.max(1, Math.round(avail))
+                }
+              }
+
+              const timelineNote = extractedWeeks ? ` Target timeline: ${extractedWeeks} weeks.` : ''
               const composedGoal = trimmedGoal
-                ? `${trimmedGoal} (Target role: ${effectiveRoleName}.)`
-                : `I want to become a ${effectiveRoleName}.`
-              onCreate(composedGoal, weekly, hasRealRole ? effectiveRoleName : '')
+                ? `${trimmedGoal} (Target role: ${effectiveRoleName}.${timelineNote})`
+                : `I want to become a ${effectiveRoleName} in ${extractedWeeks || 12} weeks.`
+              onCreate(composedGoal, weekly, hasRealRole ? effectiveRoleName : '', extractedWeeks)
             }}
           >
             Create my learning plan

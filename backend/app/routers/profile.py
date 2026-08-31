@@ -82,6 +82,12 @@ def create_or_update_profile(
     if payload.target_role_override and payload.target_role_override.strip():
         extracted["target_role"] = payload.target_role_override.strip()
 
+    if payload.weekly_hours is not None:
+        extracted["weekly_hours"] = payload.weekly_hours
+
+    if payload.target_weeks is not None:
+        extracted["target_weeks"] = payload.target_weeks
+
     return profile_service.upsert_profile(user_id, extracted)
 
 
