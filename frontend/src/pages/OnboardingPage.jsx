@@ -51,19 +51,29 @@ export default function OnboardingPage() {
     let isMounted = true
     const checkExistingPath = async () => {
       if (!user) return
+      const searchParams = new URLSearchParams(window.location.search)
+      const isReplanMode = searchParams.get('replan') === 'true' ||
+                           searchParams.get('recalibrate') === 'true' ||
+                           searchParams.get('mode') === 'replan'
       try {
         const res = await api.get('/api/paths/active')
         if (isMounted && res?.data?.path_id) {
           setHasExistingPath(true)
-          return
+          if (!isReplanMode) {
+            navigate('/dashboard', { replace: true })
+            return
+          }
         }
       } catch {
         // Fallback check
         try {
           const res2 = await api.get('/api/roadmap')
-          if (isMounted && res2?.data?.path_id) {
+          if (isMounted && (res2?.data?.path_id || (res2?.data?.weeks && res2.data.weeks.length > 0))) {
             setHasExistingPath(true)
-            return
+            if (!isReplanMode) {
+              navigate('/dashboard', { replace: true })
+              return
+            }
           }
         } catch {
           if (isMounted) setHasExistingPath(false)
@@ -74,7 +84,7 @@ export default function OnboardingPage() {
     return () => {
       isMounted = false
     }
-  }, [user])
+  }, [user, navigate])
 
   // Ingest GitHub data automatically if the user authenticated directly via GitHub OAuth
   useEffect(() => {

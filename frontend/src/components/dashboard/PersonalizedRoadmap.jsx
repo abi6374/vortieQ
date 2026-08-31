@@ -505,7 +505,7 @@ export default function PersonalizedRoadmap({
           <div className="flex items-center gap-2 flex-none ml-auto">
             <button
               type="button"
-              onClick={() => navigate('/onboarding')}
+              onClick={() => navigate('/onboarding?replan=true')}
               className="px-2.5 py-1 rounded-lg border border-[#e0e0e0] dark:border-[#27272F] hover:border-[#0066cc] hover:bg-[#eaf2fc] dark:hover:bg-[#18181D] text-[#0066cc] dark:text-[#38BDF8] text-xs font-bold transition-colors cursor-pointer"
             >
               Replan

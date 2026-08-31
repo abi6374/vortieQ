@@ -3,6 +3,7 @@ import { useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { useAuth } from '../../hooks/useAuth'
 import { supabase } from '../../lib/supabaseClient'
+import api from '../../lib/apiClient'
 import ThemeToggle from '../ui/ThemeToggle'
 
 /**
@@ -495,22 +496,29 @@ export default function AuthScreen({ initialMode = 'signin' }) {
 
         // Check active learning path after successful sign-in
         try {
-          const { data: { user } } = await supabase.auth.getUser()
-          if (user) {
-            const { data: paths } = await supabase
-              .from('learning_paths')
-              .select('id')
-              .eq('user_id', user.id)
-              .eq('status', 'active')
-              .limit(1)
-
-            if (paths && paths.length > 0) {
-              navigate('/dashboard')
-              return
-            }
+          const pathRes = await api.get('/api/paths/active')
+          if (pathRes?.data?.path_id) {
+            navigate('/dashboard')
+            return
           }
         } catch {
-          // fallback to onboarding if path check fails
+          // fallback check via direct supabase
+          try {
+            const { data: { user } } = await supabase.auth.getUser()
+            if (user) {
+              const { data: paths } = await supabase
+                .from('learning_paths')
+                .select('id')
+                .eq('user_id', user.id)
+                .eq('status', 'active')
+                .limit(1)
+
+              if (paths && paths.length > 0) {
+                navigate('/dashboard')
+                return
+              }
+            }
+          } catch {}
         }
         navigate('/onboarding')
       }
