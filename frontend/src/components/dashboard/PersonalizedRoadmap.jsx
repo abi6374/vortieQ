@@ -539,6 +539,29 @@ export default function PersonalizedRoadmap({
         </button>
       </div>
 
+      {/* Honest pacing note - real weeks needed at the learner's REAL stated
+          weekly_hours vs. their requested target timeline. Only shows when
+          the honest math genuinely runs longer than what was asked for -
+          never a fabricated "it fits!" when it doesn't (see
+          roadmap_service.assign_week_numbers's docstring for the real bug
+          this replaces: it used to silently pretend the learner had far
+          more weekly hours than they actually said, just to force a fit). */}
+      {roadmap.pacing?.over_target && (
+        <div className="mb-5 flex items-start gap-3 rounded-2xl border border-amber-300/60 bg-amber-50 dark:bg-amber-500/10 dark:border-amber-500/30 px-4 py-3.5">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-600 dark:text-amber-400 flex-none mt-0.5">
+            <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+            <line x1="12" y1="9" x2="12" y2="13" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
+          <p className="text-xs sm:text-[13px] text-amber-900 dark:text-amber-200 leading-relaxed">
+            <span className="font-bold">Realistic pacing: </span>
+            at your actual weekly hours, this path needs <span className="font-bold">{roadmap.pacing.weeks_used} weeks</span> to
+            complete - longer than the {roadmap.pacing.target_weeks}-week timeline you asked for. Increase your weekly study
+            hours in Account settings, or ask for a shorter/lighter path, to bring it closer to your target.
+          </p>
+        </div>
+      )}
+
       {/* GitHub Recommendation Booster Top Banner (Non-blocking, zero screen blackout) */}
       <ConnectGitHubModal
         isOpen={showGitHubModal}

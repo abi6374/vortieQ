@@ -13,7 +13,6 @@ mirror of this, so a crafted request can't complete week 5 first.
 """
 
 from datetime import datetime, timezone
-import math
 
 from app.config import supabase_client
 from app.services import web_search_service
@@ -242,6 +241,24 @@ def get_roadmap(user_id: str) -> dict:
     prof = supabase_client.table("profiles").select("target_role").eq("id", user_id).execute()
     target_role = (prof.data[0].get("target_role") if prof.data else "") or ""
 
+    # Honest pacing: real week count actually needed vs. what the learner
+    # asked for, computed fresh every time (not just right after generation)
+    # so this stays visible whenever the roadmap is viewed later too. Never
+    # fabricated - if extract_target_weeks finds nothing in the goal text,
+    # `over_target` is simply False rather than guessing a target.
+    weeks_used = max((w["week_number"] for w in weeks), default=0)
+    target_weeks = None
+    try:
+        from app.services.profile_service import extract_target_weeks
+        target_weeks = extract_target_weeks(path.get("goal_text"))
+    except Exception:
+        pass
+    pacing = {
+        "weeks_used": weeks_used,
+        "target_weeks": target_weeks,
+        "over_target": bool(target_weeks and weeks_used > target_weeks),
+    }
+
     return {
         "path": {
             "id": path["id"], "goal_text": path.get("goal_text"), "status": path.get("status"),
@@ -257,6 +274,7 @@ def get_roadmap(user_id: str) -> dict:
         "total_steps": len(steps),
         "completed_steps": done,
         "percent": round((done / len(steps)) * 100) if steps else 0,
+        "pacing": pacing,
     }
 
 
@@ -438,11 +456,33 @@ def rerecommend_task(
     return roadmap
 
 
-def assign_week_numbers(path_id: str, weekly_hours: int = 10, target_weeks: int | None = None) -> None:
+def assign_week_numbers(path_id: str, weekly_hours: int = 10, target_weeks: int | None = None) -> dict:
     """(Re)plan week numbers for a path's NOT-YET-STARTED steps, splitting a
     course across multiple weeks (multiple path_steps rows sharing one
     course_id, "Part 1 of 2" etc.) if its real duration doesn't fit the
     learner's weekly hour budget in one week.
+
+    Real, confirmed bug this fixes: an earlier version of this function
+    tried to force the plan to fit inside `target_weeks` by (a) silently
+    INFLATING the hours used for packing far past what the learner actually
+    said they have (a real 5h/week learner with ~150h of real course
+    content and a 12-week target was packed as if they had 13h/week - 2.6x
+    their stated capacity), and (b) clamping any week number past
+    target_weeks down to target_weeks, which could pile multiple weeks'
+    worth of real content onto one single displayed week. Both are the
+    "internal recommendation-engine" version of exactly the kind of
+    fabricated number this whole app has otherwise gone out of its way to
+    never show a learner. Every week now always reflects real hours at the
+    learner's REAL stated weekly_hours - never inflated, never squashed.
+    If that honestly takes longer than target_weeks, the plan is honest
+    about it (see the returned dict below) rather than lying about it.
+
+    Returns {"weeks_used": int, "target_weeks": int|None, "over_target": bool}
+    - `weeks_used` is the real, final week count after packing; `over_target`
+    is True only when target_weeks is known and the honest plan needs more
+    weeks than it. Callers (generate_path, get_roadmap) can surface this so
+    the learner sees a real "this will take N weeks at your pace" instead of
+    a silently-fabricated instant fit.
 
     Completed/skipped steps are never touched - their week already happened
     for them - which is what makes this safe to call again later when
@@ -461,9 +501,11 @@ def assign_week_numbers(path_id: str, weekly_hours: int = 10, target_weeks: int 
         .eq("path_id", path_id).order("sequence_order").execute()
     ).data or []
     if not rows:
-        return
+        return {"weeks_used": 0, "target_weeks": target_weeks, "over_target": False}
 
-    # Extract target_weeks from path goal_text if not explicitly passed
+    # Extract target_weeks from path goal_text if not explicitly passed -
+    # informational only now (see result.over_target below); never used to
+    # distort the actual hour math.
     if target_weeks is None:
         path_info = (
             supabase_client.table("learning_paths").select("goal_text").eq("id", path_id).limit(1).execute()
@@ -472,25 +514,39 @@ def assign_week_numbers(path_id: str, weekly_hours: int = 10, target_weeks: int 
             from app.services.profile_service import extract_target_weeks
             target_weeks = extract_target_weeks(path_info[0].get("goal_text"))
 
-    # Career roadmap bounds: respect learner's target_weeks or cap at a realistic max 24 weeks
-    max_allowed_weeks = target_weeks or 24
+    # Pure safety bound against a runaway week count from bad/anomalous data
+    # (e.g. a corrupted duration_hrs) - NOT a target-fitting mechanism. A
+    # genuinely long honest plan (say 40 weeks at 3h/week) is real and
+    # should be shown as-is, not silently rewritten; this only guards
+    # against something absurd like 300+ weeks.
+    _SAFETY_MAX_WEEKS = 104  # 2 years
 
     if not has_parts:
-        # Pre-migration fallback: identical to the original behavior.
+        # Pre-migration fallback: identical to the original behavior, minus
+        # the target_weeks clamp (same reasoning as the real path below).
         durations = [((s.get("courses") or {}).get("duration_hrs") or 5) for s in rows]
         avg = sum(durations) / len(durations) if durations else 5
         per_week = max(1, round((weekly_hours or 10) / avg)) if avg else 1
+        weeks_used = 0
         for idx, s in enumerate(rows):
-            w = min((idx // per_week) + 1, max_allowed_weeks)
+            w = min((idx // per_week) + 1, _SAFETY_MAX_WEEKS)
+            weeks_used = max(weeks_used, w)
             supabase_client.table("path_steps").update(
                 {"week_number": w}
             ).eq("id", s["id"]).execute()
-        return
+        return {
+            "weeks_used": weeks_used, "target_weeks": target_weeks,
+            "over_target": bool(target_weeks and weeks_used > target_weeks),
+        }
 
     done_rows = [r for r in rows if r.get("status") in TERMINAL]
     pending_rows = [r for r in rows if r.get("status") not in TERMINAL]
     if not pending_rows:
-        return  # nothing left to (re)plan
+        weeks_used = max((r.get("week_number") or 1) for r in done_rows) if done_rows else 0
+        return {
+            "weeks_used": weeks_used, "target_weeks": target_weeks,
+            "over_target": bool(target_weeks and weeks_used > target_weeks),
+        }
 
     start_week = (max((r.get("week_number") or 1) for r in done_rows) + 1) if done_rows else 1
 
@@ -507,18 +563,17 @@ def assign_week_numbers(path_id: str, weekly_hours: int = 10, target_weeks: int 
             duration = (row.get("courses") or {}).get("duration_hrs") or 3
             course_specs.append({"course_id": cid, "duration_hrs": duration})
 
-    # Pace the curriculum to fit within max_allowed_weeks so it doesn't balloon to 66/69 weeks
-    total_pending_duration = sum(spec.get("duration_hrs") or 0 for spec in course_specs)
-    available_weeks = max(1, max_allowed_weeks - start_week + 1)
-    if total_pending_duration > 0 and available_weeks > 0:
-        effective_weekly_hours = max(float(weekly_hours or 10), math.ceil(total_pending_duration / available_weeks))
-    else:
-        effective_weekly_hours = float(weekly_hours or 10)
-
-    split_plan = plan_weeks_with_splits(course_specs, effective_weekly_hours)
+    # Always the learner's REAL stated weekly_hours - never inflated to
+    # force-fit a target timeline (see this function's docstring for the
+    # real bug that used to live here). If the honest math needs more weeks
+    # than target_weeks, that's real information for the learner, not
+    # something to hide by lying about their own stated capacity.
+    split_plan = plan_weeks_with_splits(course_specs, float(weekly_hours or 10))
+    weeks_used = start_week - 1
     for parts in split_plan:  # plan_weeks_with_splits always starts at week 1
         for p in parts:
-            p["week_number"] = min(p["week_number"] + start_week - 1, max_allowed_weeks)
+            p["week_number"] = min(p["week_number"] + start_week - 1, _SAFETY_MAX_WEEKS)
+            weeks_used = max(weeks_used, p["week_number"])
 
     next_seq = max((r.get("sequence_order") or 0) for r in rows) + 1
     for spec, parts in zip(course_specs, split_plan):
@@ -554,3 +609,9 @@ def assign_week_numbers(path_id: str, weekly_hours: int = 10, target_weeks: int 
         if len(parts) < len(existing):
             for extra in existing[len(parts):]:
                 supabase_client.table("path_steps").delete().eq("id", extra["id"]).execute()
+
+    return {
+        "weeks_used": weeks_used,
+        "target_weeks": target_weeks,
+        "over_target": bool(target_weeks and weeks_used > target_weeks),
+    }

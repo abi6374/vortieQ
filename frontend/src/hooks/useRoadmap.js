@@ -211,6 +211,11 @@ export function useRoadmap() {
     totalSteps: data?.total_steps ?? 0,
     completedSteps: data?.completed_steps ?? 0,
     path: data?.path || null,
+    // Honest real-vs-target pacing (roadmap_service.assign_week_numbers) -
+    // {weeks_used, target_weeks, over_target}. Never fabricated: the
+    // backend computes this from the learner's REAL stated weekly_hours,
+    // never an inflated number quietly used to force-fit a target timeline.
+    pacing: data?.pacing || null,
     loading, error, lockMessage, setLockMessage, savingId,
     reload: load, toggleTask, rerecommendTask,
   }

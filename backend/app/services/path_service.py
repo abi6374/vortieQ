@@ -355,13 +355,21 @@ Generate the learning path JSON now."""
     # from the rows as originally inserted, is now stale relative to the DB.
     try:
         from app.services import roadmap_service
-        roadmap_service.assign_week_numbers(path_id, weekly_hours, target_weeks=target_weeks)
+        pacing = roadmap_service.assign_week_numbers(path_id, weekly_hours, target_weeks=target_weeks)
         # Re-fetch so the response actually matches the DB (real split parts,
         # if any) instead of returning the pre-split in-memory structure. The
         # frontend only ever reads path_id off this response today (it
         # navigates and re-fetches fresh anyway), but the API contract should
         # still be accurate for any other consumer.
-        return get_path(path_id, user_id)
+        result = get_path(path_id, user_id)
+        # Real, honest pacing info instead of ever silently inflating the
+        # learner's stated weekly_hours to force-fit their target timeline
+        # (see roadmap_service.assign_week_numbers's docstring for the bug
+        # this replaces) - the frontend can show "this will take N weeks at
+        # your pace" when the honest plan runs past what was asked for.
+        if pacing:
+            result["pacing"] = pacing
+        return result
     except Exception as e:
         print(f"[generate_path] week assignment/re-fetch failed: {type(e).__name__}: {e}", flush=True)
 
