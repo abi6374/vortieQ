@@ -298,23 +298,46 @@ Generate the learning path JSON now."""
                 flush=True,
             )
 
-    # Budget alignment: if learner specified a target timeline, ensure total course hours
-    # match their stated target_weeks * weekly_hours budget (with 15% tolerance).
-    if target_weeks and target_weeks > 0 and milestones:
-        total_budget = target_weeks * weekly_hours
+    # Budget alignment: ensure total course hours closely match learner's target_weeks * weekly_hours
+    # (or default ~12-16 week horizon), trimming excess or supplementing candidates as needed.
+    effective_target_weeks = target_weeks or (12 if weekly_hours >= 10 else 16)
+    if effective_target_weeks and effective_target_weeks > 0 and milestones:
+        total_budget = effective_target_weeks * weekly_hours
         current_hours = sum(
             course_lookup.get(cid, {}).get("duration_hrs", 10)
             for m in milestones
             for cid in m.get("course_ids", [])
             if cid in course_lookup
         )
-        if current_hours > total_budget * 1.15:
+
+        # 1. Trimming if over budget by more than 10%
+        if current_hours > total_budget * 1.10:
             for m in reversed(milestones):
                 cids = [cid for cid in m.get("course_ids", []) if cid in course_lookup]
-                while len(cids) > 1 and current_hours > total_budget * 1.15:
+                while len(cids) > 1 and current_hours > total_budget * 1.10:
                     removed_cid = cids.pop()
                     current_hours -= course_lookup.get(removed_cid, {}).get("duration_hrs", 10)
                 m["course_ids"] = cids
+
+        # 2. Supplementing if under budget by more than 15%
+        elif current_hours < total_budget * 0.85:
+            selected_ids = {cid for m in milestones for cid in m.get("course_ids", [])}
+            available_candidates = [c for c in courses if c["id"] not in selected_ids]
+            for cand in available_candidates:
+                if current_hours >= total_budget * 0.90:
+                    break
+                cand_hrs = cand.get("duration_hrs", 10)
+                # Append candidate to the milestone with highest skill overlap or the last milestone
+                cand_tags = set(cand.get("skill_tags") or [])
+                def _m_overlap(m):
+                    m_tags = set()
+                    for cid in m.get("course_ids", []):
+                        m_tags.update(course_lookup.get(cid, {}).get("skill_tags") or [])
+                    return len(m_tags & cand_tags)
+                target_m = max(milestones, key=_m_overlap) if cand_tags else milestones[-1]
+                target_m.setdefault("course_ids", []).append(cand["id"])
+                selected_ids.add(cand["id"])
+                current_hours += cand_hrs
 
     # First pass: resolve every real (non-hallucinated) course id across all
     # milestones, in order, WITHOUT calling the LLM yet - collecting them all

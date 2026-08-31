@@ -136,7 +136,7 @@ export default function UserProfileDropdown({ light = false }) {
               type="button"
               onClick={() => {
                 setIsOpen(false)
-                navigate('/onboarding')
+                navigate('/onboarding?replan=true')
               }}
               className="w-full text-left px-4 py-2.5 text-xs sm:text-sm font-semibold text-[#333333] dark:text-[#E2E8F0] hover:text-[#0066cc] dark:hover:text-[#C9D0D6] hover:bg-[#eaf2fc] dark:hover:bg-[#18181D] flex items-center gap-3 transition-colors cursor-pointer"
             >

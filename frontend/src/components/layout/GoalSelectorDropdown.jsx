@@ -215,7 +215,7 @@ function formatGoalTitle(targetRole, rawGoalText) {
                 type="button"
                 onClick={() => {
                   setIsOpen(false)
-                  navigate('/onboarding')
+                  navigate('/onboarding?replan=true')
                 }}
                 className="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-[#0066cc] dark:text-[#C9D0D6] hover:bg-[#eaf2fc] dark:hover:bg-[#18181D] flex items-center gap-2 transition-colors cursor-pointer"
               >
