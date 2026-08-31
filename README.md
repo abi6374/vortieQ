@@ -53,49 +53,57 @@ See [`docs/deployment_guide.md`](docs/deployment_guide.md) for the full infra wa
 
 ---
 
-## Getting started
+## Run locally
 
-### Prerequisites
-- Node.js 18+
-- **Python 3.11** (not 3.14 — the `scipy`/sentence-transformers chain breaks under a Windows WDAC policy on newer Pythons; 3.11 also matches the Docker/EC2 runtime)
-- A Supabase project (or the team's shared one)
+**Prerequisites:** Node.js 18+, **Python 3.11** (not 3.14 — the `scipy`/sentence-transformers chain breaks under a Windows WDAC policy on newer Pythons; 3.11 also matches the Docker/EC2 runtime), and a Supabase project (or the team's shared one).
 
-### Backend
+You need two terminals — the API and the web app run side by side.
+
+**Terminal 1 — backend** (http://localhost:8000, Swagger UI at `/docs`)
 
 ```bash
 cd backend
 python -m venv venv
 source venv/Scripts/activate      # Windows Git Bash; venv\Scripts\activate.bat for cmd.exe
 pip install -r requirements.txt
-cp .env.example .env              # fill in the keys below
+cp .env.example .env              # fill in SUPABASE_URL / SUPABASE_ANON_KEY /
+                                   # SUPABASE_SERVICE_ROLE_KEY / SUPABASE_JWT_SECRET / GROQ_API_KEY
 uvicorn app.main:app --reload --port 8000
 ```
 
-Required environment variables (`backend/.env`):
-
-| Variable | Purpose |
-|---|---|
-| `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_JWT_SECRET` | Database, auth, JWT verification |
-| `GROQ_API_KEY` | Default LLM provider |
-| `LLM_PROVIDER` | `groq` (default) or `bedrock` |
-| `AWS_REGION`, `BEDROCK_MODEL_ID` | Only used when `LLM_PROVIDER=bedrock`; AWS credentials come from the EC2 instance role, never from `.env` |
-| `YOUTUBE_API_KEY` | Optional — free-resource lookups degrade gracefully (never fabricated) if unset |
-
-### Frontend
+**Terminal 2 — frontend** (http://localhost:5173)
 
 ```bash
 cd frontend
 npm install
-cp .env.example .env               # VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, VITE_API_URL
+cp .env.example .env              # VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY,
+                                   # VITE_API_URL=http://localhost:8000
 npm run dev
 ```
 
-### Seed the course catalog
+**First run only — seed the course catalog** (needs `SUPABASE_SERVICE_ROLE_KEY` set in `backend/.env`):
 
 ```bash
 cd data
 python seed_courses.py   # embeds and upserts the 80-course dataset into Supabase
 ```
+
+Then open http://localhost:5173, sign up, and go through onboarding — the frontend talks to your local backend, which talks to your real Supabase project.
+
+<details>
+<summary>Full env var reference</summary>
+
+| Variable | Where | Purpose |
+|---|---|---|
+| `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_JWT_SECRET` | `backend/.env` | Database, auth, JWT verification |
+| `GROQ_API_KEY` | `backend/.env` | Default LLM provider |
+| `LLM_PROVIDER` | `backend/.env` | `groq` (default) or `bedrock` |
+| `AWS_REGION`, `BEDROCK_MODEL_ID` | `backend/.env` | Only used when `LLM_PROVIDER=bedrock`; AWS credentials come from the EC2 instance role, never from `.env` |
+| `YOUTUBE_API_KEY` | `backend/.env` | Optional — free-resource lookups degrade gracefully (never fabricated) if unset |
+| `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` | `frontend/.env` | Same Supabase project as the backend |
+| `VITE_API_URL` | `frontend/.env` | Where the frontend sends API calls — `http://localhost:8000` for local dev |
+
+</details>
 
 ---
 
