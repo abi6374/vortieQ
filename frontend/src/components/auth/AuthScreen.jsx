@@ -72,8 +72,6 @@ const STYLES = `
 .pfa .tab.active{ color:var(--violet); }
 .pfa .tab.active::after{ content:""; position:absolute; left:50%; transform:translateX(-50%); bottom:0;
   height:3px; width:100%; max-width:180px; border-radius:999px; background:var(--violet); }
-.pfa .tab-help{ text-align:center; font-size:12px; color:var(--muted); line-height:1.3; margin:2px 0 0; min-height:1.8em; }
-.pfa .tab-help.left{ visibility:hidden; }
 .pfa .welcome{ text-align:center; margin:12px 0 16px; min-height:58px; display:flex; flex-direction:column; justify-content:center; }
 .pfa .welcome h2{ font-family:"Manrope",sans-serif; font-weight:800; font-size:24px; line-height:1.2; letter-spacing:-.02em; margin:0 0 4px; }
 .pfa .welcome p{ font-size:13.5px; line-height:1.4; color:var(--slate); margin:0; }
@@ -104,8 +102,10 @@ const STYLES = `
 .pfa .remember{ display:flex; align-items:center; gap:8px; cursor:pointer; user-select:none; font-size:13px; color:var(--slate); position:relative; }
 .pfa .checkbox{ width:17px; height:17px; border-radius:5px; border:1.5px solid var(--input-bd); background:#fff;
   display:grid; place-items:center; color:#fff; transition:background .15s,border-color .15s; }
+.pfa .checkbox svg{ opacity:0; transform:scale(0.6); transition:opacity .15s ease,transform .15s ease; color:#fff; }
 .pfa .remember input{ position:absolute; opacity:0; pointer-events:none; }
 .pfa .remember input:checked + .checkbox{ background:var(--violet); border-color:var(--violet); }
+.pfa .remember input:checked + .checkbox svg{ opacity:1; transform:scale(1); }
 .pfa .forgot{ color:var(--violet); font-size:13px; font-weight:600; text-decoration:none; background:none; border:none; cursor:pointer; }
 .pfa .forgot:hover{ color:var(--violet-dark); text-decoration:underline; }
 .pfa .btn{ width:100%; height:46px; border-radius:10px; border:none; cursor:pointer;
@@ -195,10 +195,17 @@ html.dark .pfa .checkbox {
   background: #0E0E12;
   border-color: #27272F;
 }
+html.dark .pfa .checkbox svg {
+  opacity: 0;
+  color: #ffffff;
+}
 html.dark .pfa .remember input:checked + .checkbox {
   background: #0066cc !important;
   border-color: #0066cc !important;
   color: #ffffff !important;
+}
+html.dark .pfa .remember input:checked + .checkbox svg {
+  opacity: 1 !important;
 }
 html.dark .pfa .logo-name {
   color: #F8FAFC;
@@ -285,13 +292,36 @@ export default function AuthScreen({ initialMode = 'signin' }) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
   const [notice, setNotice] = useState(null) // { type: 'success' | 'error', title: '', message: '' }
+
+  // Forgot password & Recovery state
+  const [showForgotModal, setShowForgotModal] = useState(false)
+  const [forgotEmail, setForgotEmail] = useState('')
+  const [forgotLoading, setForgotLoading] = useState(false)
+  const [forgotSent, setForgotSent] = useState(false)
+  const [forgotError, setForgotError] = useState(null)
+
+  // Password Recovery mode (when user clicks password reset email link)
+  const [recoveryMode, setRecoveryMode] = useState(false)
+  const [newPassword, setNewPassword] = useState('')
+  const [recoveryLoading, setRecoveryLoading] = useState(false)
+  const [recoveryError, setRecoveryError] = useState(null)
+
   const { signIn, signUp, signInWithGoogle, signInWithGithub, oauthError } = useAuth()
   const navigate = useNavigate()
   const reduce = useReducedMotion()
 
   const isCreate = mode === 'create'
 
-  // Requirement 1: When clicking Create Account (or switching tabs), all fields must always be empty
+  // Detect recovery link in URL params or hash
+  useEffect(() => {
+    const hash = typeof window !== 'undefined' ? window.location.hash : ''
+    const search = typeof window !== 'undefined' ? window.location.search : ''
+    if (hash.includes('type=recovery') || search.includes('mode=recovery')) {
+      setRecoveryMode(true)
+    }
+  }, [])
+
+  // When clicking Create Account (or switching tabs), all fields must always be empty
   const switchMode = (m) => {
     setMode(m)
     setError(null)
@@ -304,6 +334,65 @@ export default function AuthScreen({ initialMode = 'signin' }) {
   const onField = (setter) => (e) => {
     setter(e.target.value)
     if (error) setError(null)
+  }
+
+  // Handle sending password reset email via Supabase
+  const handleSendReset = async (e) => {
+    e.preventDefault()
+    const targetEmail = forgotEmail.trim()
+    if (!targetEmail) return
+    setForgotLoading(true)
+    setForgotError(null)
+
+    try {
+      const { error: resetErr } = await supabase.auth.resetPasswordForEmail(targetEmail, {
+        redirectTo: `${window.location.origin}/auth?mode=recovery`,
+      })
+      if (resetErr) throw resetErr
+      setForgotSent(true)
+      setNotice({
+        type: 'success',
+        title: 'Reset link sent',
+        message: `A password reset link has been sent to ${targetEmail}. Please check your inbox.`,
+      })
+      setTimeout(() => {
+        setShowForgotModal(false)
+        setForgotSent(false)
+        setForgotEmail('')
+      }, 3500)
+    } catch (err) {
+      setForgotError(err?.message || 'Could not send password reset email. Please verify the address and try again.')
+    } finally {
+      setForgotLoading(false)
+    }
+  }
+
+  // Handle setting a new password in recovery mode
+  const handleUpdatePassword = async (e) => {
+    e.preventDefault()
+    if (!newPassword || newPassword.length < 6) {
+      setRecoveryError('Password must be at least 6 characters.')
+      return
+    }
+    setRecoveryLoading(true)
+    setRecoveryError(null)
+
+    try {
+      const { error: updateErr } = await supabase.auth.updateUser({ password: newPassword })
+      if (updateErr) throw updateErr
+      setNotice({
+        type: 'success',
+        title: 'Password updated',
+        message: 'Your password has been successfully updated. You can now sign in with your new password.',
+      })
+      setRecoveryMode(false)
+      setNewPassword('')
+      setMode('signin')
+    } catch (err) {
+      setRecoveryError(err?.message || 'Could not update password. Please try requesting a new reset link.')
+    } finally {
+      setRecoveryLoading(false)
+    }
   }
 
   const handleSubmit = async (e) => {
@@ -363,6 +452,7 @@ export default function AuthScreen({ initialMode = 'signin' }) {
               .from('learning_paths')
               .select('id')
               .eq('user_id', user.id)
+              .eq('status', 'active')
               .limit(1)
 
             if (paths && paths.length > 0) {
@@ -439,7 +529,7 @@ export default function AuthScreen({ initialMode = 'signin' }) {
         <ThemeToggle />
       </div>
 
-      {/* Top Pop-Up Notice Banner (Dead-center horizontally at the top of the webpage above the container) */}
+      {/* Top Pop-Up Notice Banner */}
       <AnimatePresence>
         {notice && (
           <motion.div
@@ -495,6 +585,99 @@ export default function AuthScreen({ initialMode = 'signin' }) {
               </svg>
             </button>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Forgot Password Modal */}
+      <AnimatePresence>
+        {showForgotModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              transition={{ duration: 0.2 }}
+              className="w-full max-w-md bg-white dark:bg-[#18181D] rounded-2xl p-6 sm:p-7 border border-[#e0e0e0] dark:border-[#27272F] shadow-2xl relative"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-['Manrope'] font-extrabold text-[#1d1d1f] dark:text-[#F8FAFC]">
+                  Reset password
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowForgotModal(false)
+                    setForgotError(null)
+                    setForgotSent(false)
+                  }}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-[#7a7a7a] hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              </div>
+
+              <p className="text-sm text-[#555555] dark:text-[#94A3B8] leading-relaxed mb-5">
+                Enter the email address associated with your PathFinder account. We will send you a secure link to reset your password.
+              </p>
+
+              {forgotSent ? (
+                <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 p-4 rounded-xl text-sm font-medium text-center">
+                  Check your inbox! If an account exists for {forgotEmail}, a password reset link has been dispatched.
+                </div>
+              ) : (
+                <form onSubmit={handleSendReset} className="space-y-4">
+                  <div className="field">
+                    <label htmlFor="pfa-forgot-email" className="block text-[13.5px] font-semibold text-[#1d1d1f] dark:text-[#F8FAFC] mb-1.5">
+                      Email address
+                    </label>
+                    <div className="input">
+                      <span className="lead" aria-hidden="true">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="3" /><path d="m3 6 9 7 9-7" /></svg>
+                      </span>
+                      <input
+                        id="pfa-forgot-email"
+                        type="email"
+                        required
+                        value={forgotEmail}
+                        onChange={(e) => {
+                          setForgotEmail(e.target.value)
+                          if (forgotError) setForgotError(null)
+                        }}
+                        placeholder="you@example.com"
+                        autoFocus
+                      />
+                    </div>
+                  </div>
+
+                  {forgotError && (
+                    <p className="text-xs font-semibold text-red-600 dark:text-red-400 text-center">
+                      {forgotError}
+                    </p>
+                  )}
+
+                  <div className="flex items-center gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowForgotModal(false)}
+                      className="flex-1 h-11 rounded-xl border border-[#d3d4d5] dark:border-[#27272F] text-sm font-semibold text-[#1d1d1f] dark:text-[#CBD5E1] hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={forgotLoading || !forgotEmail.trim()}
+                      className="flex-1 h-11 rounded-xl bg-[#0066cc] hover:bg-[#004fa3] text-white text-sm font-bold shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                    >
+                      {forgotLoading ? <span className="spin" /> : 'Send link'}
+                    </button>
+                  </div>
+                </form>
+              )}
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
 
@@ -564,108 +747,186 @@ export default function AuthScreen({ initialMode = 'signin' }) {
         {/* RIGHT: Interactive Authentication Form */}
         <section className="form-panel">
           <div className="form">
-            <div className="form-tabs-header">
-              <div className="tabs">
-                <button type="button" className={`tab ${!isCreate ? 'active' : ''}`} onClick={() => switchMode('signin')}>Sign in</button>
-                <button type="button" className={`tab ${isCreate ? 'active' : ''}`} onClick={() => switchMode('create')}>Create account</button>
-              </div>
-              <div className="tabs" style={{ marginBottom: 0 }}>
-                <p className="tab-help left">&nbsp;</p>
-                <p className="tab-help">New here? Set up your learner profile in minutes.</p>
-              </div>
-            </div>
+            {recoveryMode ? (
+              /* Password Reset / Recovery Form */
+              <div className="form-body">
+                <div className="welcome">
+                  <h2>Set new password</h2>
+                  <p>Choose a secure new password for your account.</p>
+                </div>
 
-            <div className="form-body">
-              <div className="welcome">
-                <h2>{isCreate ? 'Create your account' : 'Welcome back'}</h2>
-                <p>{isCreate ? 'Set up your learner profile in minutes.' : 'Sign in to continue your learning journey.'}</p>
-              </div>
-
-              <form onSubmit={handleSubmit}>
-                {isCreate && (
+                <form onSubmit={handleUpdatePassword} autoComplete="off">
                   <div className="field">
-                    <label htmlFor="pfa-name">Full name</label>
+                    <label htmlFor="pfa-new-pw">New password</label>
                     <div className="input">
-                      <span className="lead" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg></span>
-                      <input id="pfa-name" type="text" required value={fullName} onChange={onField(setFullName)} placeholder="HackerEarth Team ?" autoComplete="name" />
+                      <span className="lead" aria-hidden="true">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
+                      </span>
+                      <input
+                        id="pfa-new-pw"
+                        type="password"
+                        required
+                        minLength={6}
+                        value={newPassword}
+                        onChange={(e) => {
+                          setNewPassword(e.target.value)
+                          if (recoveryError) setRecoveryError(null)
+                        }}
+                        placeholder="Enter your new password"
+                        autoComplete="new-password"
+                      />
                     </div>
                   </div>
-                )}
 
-                <div className="field">
-                  <label htmlFor="pfa-email">Email address</label>
-                  <div className="input">
-                    <span className="lead" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="3" /><path d="m3 6 9 7 9-7" /></svg></span>
-                    <input id="pfa-email" type="email" required value={email} onChange={onField(setEmail)} placeholder="you@example.com" autoComplete="email" />
-                  </div>
-                </div>
+                  {recoveryError && <p className="err">{recoveryError}</p>}
 
-                <div className="field">
-                  <label htmlFor="pfa-pw">Password</label>
-                  <div className="input">
-                    <span className="lead" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg></span>
-                    <input id="pfa-pw" type={showPw ? 'text' : 'password'} required minLength={6} value={password} onChange={onField(setPassword)} placeholder="Enter your password" autoComplete={isCreate ? 'new-password' : 'current-password'} />
-                    <button type="button" className="toggle" onClick={() => setShowPw((s) => !s)} aria-label={showPw ? 'Hide password' : 'Show password'}>
-                      {showPw ? (
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
-                          <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
-                          <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
-                          <line x1="2" x2="22" y1="2" y2="22" />
-                        </svg>
-                      ) : (
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-                          <circle cx="12" cy="12" r="3" />
-                        </svg>
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="utility">
-                  <label className="remember">
-                    <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
-                    <span className="checkbox" aria-hidden="true"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg></span>
-                    Remember me
-                  </label>
-                  <button type="button" className="forgot">Forgot password?</button>
-                </div>
-
-                <button type="submit" className="btn btn-primary" disabled={isLoading}>
-                  {isLoading && <span className="spin" />}
-                  {isCreate ? 'Create account' : 'Sign in'}
-                </button>
-
-                <div className="divider-row"><span className="line" /><span className="or">OR</span><span className="line" /></div>
-
-                <button type="button" className="btn btn-github" onClick={handleGithubSignIn} disabled={isLoading}>
-                  <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                    <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
-                  </svg>
-                  Continue with GitHub
-                </button>
-
-                <button type="button" className="btn btn-google" onClick={handleGoogleSignIn} disabled={isLoading}>
-                  <svg width="17" height="17" viewBox="0 0 48 48" aria-hidden="true">
-                    <path fill="#4285F4" d="M45.1 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h11.8c-.5 2.7-2 5-4.4 6.6v5.5h7.1c4.2-3.8 6.6-9.5 6.6-16.1z" />
-                    <path fill="#34A853" d="M24 46c6 0 11-2 14.6-5.4l-7.1-5.5c-2 1.3-4.5 2.1-7.5 2.1-5.8 0-10.6-3.9-12.4-9.1H4.3v5.7C7.9 41.1 15.4 46 24 46z" />
-                    <path fill="#FBBC05" d="M11.6 28.1c-.5-1.3-.7-2.7-.7-4.1s.3-2.8.7-4.1v-5.7H4.3C2.8 17.1 2 20.4 2 24s.8 6.9 2.3 9.8l7.3-5.7z" />
-                    <path fill="#EA4335" d="M24 10.8c3.3 0 6.2 1.1 8.5 3.3l6.3-6.3C35 4.1 30 2 24 2 15.4 2 7.9 6.9 4.3 14.2l7.3 5.7C13.4 14.7 18.2 10.8 24 10.8z" />
-                  </svg>
-                  Continue with Google
-                </button>
-
-                <p className="signup-foot">
-                  {isCreate ? 'Already have an account? ' : 'New to PathFinder? '}
-                  <button type="button" onClick={() => switchMode(isCreate ? 'signin' : 'create')}>
-                    {isCreate ? 'Sign in' : 'Create account'}
+                  <button type="submit" className="btn btn-primary mt-3" disabled={recoveryLoading}>
+                    {recoveryLoading && <span className="spin" />}
+                    Update password
                   </button>
-                </p>
 
-                {(oauthError || error) && <p className="err">{oauthError || error}</p>}
-              </form>
-            </div>
+                  <p className="signup-foot">
+                    <button type="button" onClick={() => setRecoveryMode(false)}>
+                      ← Back to sign in
+                    </button>
+                  </p>
+                </form>
+              </div>
+            ) : (
+              <>
+                <div className="form-tabs-header">
+                  <div className="tabs">
+                    <button type="button" className={`tab ${!isCreate ? 'active' : ''}`} onClick={() => switchMode('signin')}>Sign in</button>
+                    <button type="button" className={`tab ${isCreate ? 'active' : ''}`} onClick={() => switchMode('create')}>Create account</button>
+                  </div>
+                </div>
+
+                <div className="form-body">
+                  <div className="welcome">
+                    <h2>{isCreate ? 'Create your account' : 'Welcome back'}</h2>
+                    <p>{isCreate ? 'Set up your learner profile in minutes.' : 'Sign in to continue your learning journey.'}</p>
+                  </div>
+
+                  <form onSubmit={handleSubmit} autoComplete="off">
+                    {isCreate && (
+                      <div className="field">
+                        <label htmlFor="pfa-name">Full name</label>
+                        <div className="input">
+                          <span className="lead" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg></span>
+                          <input
+                            id="pfa-name"
+                            name="pf_create_fullname"
+                            type="text"
+                            required
+                            value={fullName}
+                            onChange={onField(setFullName)}
+                            placeholder="e.g. Alex Johnson"
+                            autoComplete="off"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="field">
+                      <label htmlFor="pfa-email">Email address</label>
+                      <div className="input">
+                        <span className="lead" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="3" /><path d="m3 6 9 7 9-7" /></svg></span>
+                        <input
+                          id="pfa-email"
+                          name={isCreate ? "pf_create_email" : "email"}
+                          type="email"
+                          required
+                          value={email}
+                          onChange={onField(setEmail)}
+                          placeholder="you@example.com"
+                          autoComplete={isCreate ? "off" : "email"}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="field">
+                      <label htmlFor="pfa-pw">Password</label>
+                      <div className="input">
+                        <span className="lead" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg></span>
+                        <input
+                          id="pfa-pw"
+                          name={isCreate ? "pf_create_password" : "password"}
+                          type={showPw ? 'text' : 'password'}
+                          required
+                          minLength={6}
+                          value={password}
+                          onChange={onField(setPassword)}
+                          placeholder="Enter your password"
+                          autoComplete={isCreate ? 'new-password' : 'current-password'}
+                        />
+                        <button type="button" className="toggle" onClick={() => setShowPw((s) => !s)} aria-label={showPw ? 'Hide password' : 'Show password'}>
+                          {showPw ? (
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
+                              <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
+                              <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
+                              <line x1="2" x2="22" y1="2" y2="22" />
+                            </svg>
+                          ) : (
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                              <circle cx="12" cy="12" r="3" />
+                            </svg>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Utility row: Remember Me & Forgot Password ONLY on Sign In */}
+                    {!isCreate && (
+                      <div className="utility">
+                        <label className="remember">
+                          <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
+                          <span className="checkbox" aria-hidden="true"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg></span>
+                          Remember me
+                        </label>
+                        <button type="button" className="forgot" onClick={() => setShowForgotModal(true)}>
+                          Forgot password?
+                        </button>
+                      </div>
+                    )}
+
+                    <button type="submit" className="btn btn-primary" disabled={isLoading} style={{ marginTop: isCreate ? '6px' : '0' }}>
+                      {isLoading && <span className="spin" />}
+                      {isCreate ? 'Create account' : 'Sign in'}
+                    </button>
+
+                    <div className="divider-row"><span className="line" /><span className="or">OR</span><span className="line" /></div>
+
+                    <button type="button" className="btn btn-github" onClick={handleGithubSignIn} disabled={isLoading}>
+                      <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+                      </svg>
+                      Continue with GitHub
+                    </button>
+
+                    <button type="button" className="btn btn-google" onClick={handleGoogleSignIn} disabled={isLoading}>
+                      <svg width="17" height="17" viewBox="0 0 48 48" aria-hidden="true">
+                        <path fill="#4285F4" d="M45.1 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h11.8c-.5 2.7-2 5-4.4 6.6v5.5h7.1c4.2-3.8 6.6-9.5 6.6-16.1z" />
+                        <path fill="#34A853" d="M24 46c6 0 11-2 14.6-5.4l-7.1-5.5c-2 1.3-4.5 2.1-7.5 2.1-5.8 0-10.6-3.9-12.4-9.1H4.3v5.7C7.9 41.1 15.4 46 24 46z" />
+                        <path fill="#FBBC05" d="M11.6 28.1c-.5-1.3-.7-2.7-.7-4.1s.3-2.8.7-4.1v-5.7H4.3C2.8 17.1 2 20.4 2 24s.8 6.9 2.3 9.8l7.3-5.7z" />
+                        <path fill="#EA4335" d="M24 10.8c3.3 0 6.2 1.1 8.5 3.3l6.3-6.3C35 4.1 30 2 24 2 15.4 2 7.9 6.9 4.3 14.2l7.3 5.7C13.4 14.7 18.2 10.8 24 10.8z" />
+                      </svg>
+                      Continue with Google
+                    </button>
+
+                    <p className="signup-foot">
+                      {isCreate ? 'Already have an account? ' : 'New to PathFinder? '}
+                      <button type="button" onClick={() => switchMode(isCreate ? 'signin' : 'create')}>
+                        {isCreate ? 'Sign in' : 'Create account'}
+                      </button>
+                    </p>
+
+                    {(oauthError || error) && <p className="err">{oauthError || error}</p>}
+                  </form>
+                </div>
+              </>
+            )}
           </div>
         </section>
       </motion.div>

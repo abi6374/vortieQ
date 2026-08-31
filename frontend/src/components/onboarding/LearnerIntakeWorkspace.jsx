@@ -60,9 +60,9 @@ export default function LearnerIntakeWorkspace({
   const handleContinue = async () => {
     const trimmedDesc = singleDescription.trim()
 
-    // Filling the single text description is strictly REQUIRED
-    if (!trimmedDesc) {
-      setContinueError('Describing your background in a single text is required before continuing.')
+    // Must provide either natural language description or resume file
+    if (!trimmedDesc && !file) {
+      setContinueError('Please describe your skills in natural language or upload a resume to continue.')
       setSelectedMethod('text')
       descInputRef.current?.focus()
       return
@@ -71,67 +71,69 @@ export default function LearnerIntakeWorkspace({
     setUploading(true)
     setContinueError('')
 
+    let finalTopics = []
+    let finalYears = 0
+    let finalEducation = ''
+    let finalProjects = ''
+    let finalGoal = trimmedDesc
+
+    // 1. If natural language description is provided, extract topics via AI
+    if (trimmedDesc) {
+      try {
+        const { data: textData } = await apiClient.post('/api/profile/extract-text', { text: trimmedDesc })
+        if (textData?.topics && textData.topics.length > 0) {
+          finalTopics = textData.topics
+          finalYears = textData.detected_years_experience || 0
+          if (textData.education) finalEducation = textData.education
+          if (textData.projects) finalProjects = textData.projects
+          if (textData.suggested_goal) finalGoal = textData.suggested_goal
+        }
+      } catch (e) {
+        console.warn('Natural language text extraction fallback:', e)
+      }
+    }
+
+    // 2. If resume file is also provided, parse resume and merge topics
     if (file) {
       setUploadError('')
       try {
         const form = new FormData()
         form.append('file', file)
-        const { data } = await apiClient.post('/api/profile/resume', form, {
+        const { data: resumeData } = await apiClient.post('/api/profile/resume', form, {
           headers: { 'Content-Type': 'multipart/form-data' },
         })
-        const resumeTopics = data.topics || []
-        onExtracted(
-          resumeTopics,
-          data.detected_years_experience || 0,
-          data.education || '',
-          data.projects || '',
-          trimmedDesc || data.suggested_goal || ''
-        )
-      } catch (err) {
-        console.error('Resume extraction failed:', err)
-        setUploadError(
-          err?.response?.data?.detail ||
-            'Could not analyze this resume. Continuing with your background description.'
-        )
-        onExtracted([], 0, '', '', trimmedDesc)
-      } finally {
-        setUploading(false)
-      }
-    } else {
-      // Natural Language background description flow
-      try {
-        let topicsToPass = parsedTopicsRef.current || []
-        let detectedYears = 0
-        let educationStr = ''
-        let projectsStr = ''
-        let goalStr = trimmedDesc
-
-        if (topicsToPass.length === 0 && trimmedDesc.length >= 15) {
-          try {
-            const { data } = await apiClient.post('/api/profile/extract-text', { text: trimmedDesc })
-            if (data?.topics && data.topics.length > 0) {
-              topicsToPass = data.topics
-              detectedYears = data.detected_years_experience || 0
-              if (data.education) educationStr = data.education
-              if (data.projects) projectsStr = data.projects
-              if (data.suggested_goal) goalStr = data.suggested_goal
-            }
-          } catch (e) {
-            console.warn('Inline text extraction fallback:', e)
+        const resumeTopics = resumeData.topics || []
+        const existingNames = new Set(finalTopics.map((t) => t.name.toLowerCase()))
+        for (const rt of resumeTopics) {
+          if (!existingNames.has(rt.name.toLowerCase())) {
+            finalTopics.push(rt)
           }
         }
-
-        onExtracted(
-          topicsToPass,
-          detectedYears,
-          educationStr,
-          projectsStr,
-          goalStr
-        )
-      } finally {
-        setUploading(false)
+        finalYears = Math.max(finalYears, resumeData.detected_years_experience || 0)
+        if (resumeData.education && !finalEducation) finalEducation = resumeData.education
+        if (resumeData.projects && !finalProjects) finalProjects = resumeData.projects
+        if (resumeData.suggested_goal && !finalGoal) finalGoal = resumeData.suggested_goal
+      } catch (err) {
+        console.error('Resume extraction failed:', err)
+        if (!trimmedDesc) {
+          setUploadError(
+            err?.response?.data?.detail ||
+              'Could not analyze this resume. Please describe your skills in the text box.'
+          )
+          setUploading(false)
+          return
+        }
       }
     }
+
+    setUploading(false)
+    onExtracted(
+      finalTopics,
+      finalYears,
+      finalEducation,
+      finalProjects,
+      finalGoal
+    )
   }
 
   return (
@@ -333,11 +335,14 @@ export default function LearnerIntakeWorkspace({
               </svg>
             </div>
 
-            <h2 className="text-[20px] sm:text-[22px] font-bold text-[#1d1d1f] dark:text-[#F8FAFC] mb-1">
-              Describe your background <span className="text-xs font-bold text-[#0066cc] dark:text-[#C9D0D6]">(Required)</span>
+            <h2 className="text-[20px] sm:text-[22px] font-bold text-[#1d1d1f] dark:text-[#F8FAFC] mb-1 flex items-center gap-2 flex-wrap">
+              <span>Describe your skills</span>
+              <span className="text-xs font-bold text-[#0066cc] dark:text-[#C9D0D6] bg-[#eaf2fc] dark:bg-[#1e293b] px-2.5 py-0.5 rounded-full">
+                Natural Language AI
+              </span>
             </h2>
-            <p className="text-[14px] text-[#555555] dark:text-[#94A3B8] leading-snug mb-4">
-              Share your current skills, experience, and target career goal.
+            <p className="text-[14px] text-[#555555] dark:text-[#94A3B8] leading-snug mb-3">
+              Type or paste what technologies, frameworks, and tools you know in your own words.
             </p>
           </div>
 
@@ -347,13 +352,40 @@ export default function LearnerIntakeWorkspace({
               value={singleDescription}
               onChange={handleDescriptionChange}
               maxLength={1500}
-              placeholder="e.g. I have 2 years of Python experience building APIs with FastAPI and Flask. I understand descriptive statistics and basic Pandas for data analysis. I have built 1 data visualization project with Matplotlib. I want to learn Machine Learning from scratch..."
+              placeholder="e.g. I know Python, pandas, and basic SQL. I have built 2 API projects with FastAPI and want to learn Machine Learning from scratch..."
               className="w-full resize-none rounded-xl border border-[#D8DFEB] dark:border-[#27272F] bg-[#fbfbfb] dark:bg-[#0E0E12] p-3.5 text-[14px] text-[#1d1d1f] dark:text-[#F8FAFC] placeholder-[#7a7a7a] dark:placeholder-[#64748B] leading-relaxed focus:outline-none focus:border-[#0066cc] dark:focus:border-[#C9D0D6] focus:bg-white dark:focus:bg-[#141C2B] focus:ring-2 focus:ring-[#0066cc]/15 transition-all shadow-inner"
-              style={{ minHeight: 175 }}
+              style={{ minHeight: 140 }}
             />
-            <div className="flex items-center justify-between mt-1 text-[11.5px] font-semibold text-[#7a7a7a] dark:text-[#64748B]">
-              <span className={singleDescription.trim() ? "text-emerald-600 dark:text-emerald-400 font-bold" : "text-amber-600 dark:text-amber-400"}>
-                {singleDescription.trim() ? "✓ Background entered" : "* Required to continue"}
+
+            {/* Quick Starter Chips */}
+            <div className="mt-2 flex flex-wrap gap-1.5 items-center">
+              <span className="text-[11px] font-semibold text-[#7a7a7a] dark:text-[#64748B]">Quick examples:</span>
+              <button
+                type="button"
+                onClick={() => setSingleDescription('I have 2 years of Python experience, building APIs with FastAPI and PostgreSQL. I want to learn Machine Learning.')}
+                className="text-[11px] px-2 py-0.5 rounded-lg bg-[#f0f4f9] dark:bg-[#1e293b] text-[#0066cc] dark:text-[#93c5fd] hover:bg-[#e2edfa] transition-colors cursor-pointer"
+              >
+                Python & FastAPI backend
+              </button>
+              <button
+                type="button"
+                onClick={() => setSingleDescription('I know JavaScript, React, HTML/CSS and basic Node.js. I want to become a full-stack engineer.')}
+                className="text-[11px] px-2 py-0.5 rounded-lg bg-[#f0f4f9] dark:bg-[#1e293b] text-[#0066cc] dark:text-[#93c5fd] hover:bg-[#e2edfa] transition-colors cursor-pointer"
+              >
+                React & JavaScript
+              </button>
+              <button
+                type="button"
+                onClick={() => setSingleDescription('I have experience with SQL, Excel, and Pandas for data analysis. I want to learn Data Science.')}
+                className="text-[11px] px-2 py-0.5 rounded-lg bg-[#f0f4f9] dark:bg-[#1e293b] text-[#0066cc] dark:text-[#93c5fd] hover:bg-[#e2edfa] transition-colors cursor-pointer"
+              >
+                SQL & Data Analysis
+              </button>
+            </div>
+
+            <div className="flex items-center justify-between mt-2 text-[11.5px] font-semibold text-[#7a7a7a] dark:text-[#64748B]">
+              <span className={singleDescription.trim() ? "text-emerald-600 dark:text-emerald-400 font-bold" : "text-slate-500 dark:text-slate-400"}>
+                {singleDescription.trim() ? "✓ Skills described" : "Enter skills in natural language"}
               </span>
               <span className="tabular-nums">{singleDescription.length}/1500</span>
             </div>
@@ -450,10 +482,10 @@ export default function LearnerIntakeWorkspace({
         <button
           type="button"
           onClick={handleContinue}
-          disabled={uploading || !singleDescription.trim()}
+          disabled={uploading || (!singleDescription.trim() && !file)}
           title={
-            !singleDescription.trim()
-              ? 'Please describe your background in the text box (Required) before continuing'
+            !singleDescription.trim() && !file
+              ? 'Please describe your skills in natural language or upload a resume to continue'
               : undefined
           }
           className="w-[160px] h-[48px] bg-[#0066cc] dark:bg-[#0066cc] hover:bg-[#0052a3] dark:hover:bg-[#004fa3] active:scale-[0.99] text-white dark:text-white font-bold rounded-xl shadow-[0_4px_14px_rgba(0,102,204,0.35)] dark:shadow-[0_4px_14px_rgba(0,102,204,0.4)] transition-all flex items-center justify-center text-[15px] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"

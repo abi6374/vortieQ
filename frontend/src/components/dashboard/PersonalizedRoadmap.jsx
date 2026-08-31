@@ -73,9 +73,19 @@ export default function PersonalizedRoadmap({
     }
   }, [user, profile])
 
-
-
-  // ---------------------------------------------------------------------------
+  // If the user has no active roadmap / path, redirect them directly to onboarding
+  useEffect(() => {
+    if (!roadmap.loading && !roadmap.path && (!roadmap.weeks || roadmap.weeks.length === 0)) {
+      const isDevBypass =
+        import.meta.env.DEV &&
+        typeof window !== 'undefined' &&
+        (window.localStorage.getItem('pf_dev_bypass') === 'true' ||
+          window.localStorage.getItem('e2e_mock_auth') === 'true')
+      if (!isDevBypass) {
+        navigate('/onboarding', { replace: true })
+      }
+    }
+  }, [roadmap.loading, roadmap.path, roadmap.weeks, navigate])
   // Dynamic Week Grouping & Tabs
   // ---------------------------------------------------------------------------
   const weekTabs = useMemo(
