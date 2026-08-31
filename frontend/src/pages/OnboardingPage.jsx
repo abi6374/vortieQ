@@ -238,8 +238,6 @@ export default function OnboardingPage() {
         projects: resumeProjects || '',
       }
 
-      await api.post('/api/profile/', profilePayload)
-
       const generatePayload = {
         goal_text: composed,
         target_role: effectiveTargetRole || 'Software Engineer',
@@ -248,11 +246,14 @@ export default function OnboardingPage() {
         resume_topics: ratingsPayload,
       }
 
-      const genRes = await api.post('/api/paths/generate', generatePayload, {
-        headers: { 'Idempotency-Key': planIdempotencyKey.current },
-      })
+      const [_, genRes] = await Promise.all([
+        api.post('/api/profile/', profilePayload).catch((err) => console.warn('Profile background sync:', err)),
+        api.post('/api/paths/generate', generatePayload, {
+          headers: { 'Idempotency-Key': planIdempotencyKey.current },
+        }),
+      ])
 
-      if (genRes.data && genRes.data.path_id) {
+      if (genRes?.data && genRes.data.path_id) {
         setPendingPathId(genRes.data.path_id)
         planIdempotencyKey.current = null
         setGenStatus('success')

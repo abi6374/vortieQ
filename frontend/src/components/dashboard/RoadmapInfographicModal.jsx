@@ -564,12 +564,71 @@ const ROLE_CURRICULUM_DATABASE = {
 }
 
 /**
- * Returns a high-fidelity, deterministic 24-week curriculum tailored for the specific target role.
+ * Returns a high-fidelity, dynamic curriculum derived directly from the learner's active roadmap.
+ * Dynamically groups the real roadmap weeks into clean month blocks with real course titles & explanations.
  */
 function resolveCurriculumForRole(targetRole, roadmap) {
-  const roleStr = (targetRole || roadmap?.path?.goal_text || 'Full-Stack Developer').toLowerCase()
-  
-  // Find closest matching role template
+  const effectiveRole =
+    targetRole ||
+    roadmap?.path?.target_role ||
+    roadmap?.path?.goal_text ||
+    'Custom Career Track'
+
+  // If real dynamic weeks exist on the roadmap, build the curriculum directly from them
+  if (roadmap?.weeks && Array.isArray(roadmap.weeks) && roadmap.weeks.length > 0) {
+    const realWeeks = roadmap.weeks
+    const WEEKS_PER_MONTH = 4
+    const months = []
+
+    for (let i = 0; i < realWeeks.length; i += WEEKS_PER_MONTH) {
+      const chunk = realWeeks.slice(i, i + WEEKS_PER_MONTH)
+      const monthNumber = Math.floor(i / WEEKS_PER_MONTH) + 1
+      
+      // Determine a cohesive theme for the month based on milestone labels
+      const themes = chunk
+        .map((w) => w.milestone_label || w.steps?.[0]?.milestone_label)
+        .filter(Boolean)
+      const distinctThemes = [...new Set(themes)]
+      const monthTheme = distinctThemes.length > 0 ? distinctThemes[0] : `Core Foundations & Milestones Part ${monthNumber}`
+
+      months.push({
+        monthNumber,
+        theme: monthTheme,
+        weeks: chunk.map((w) => {
+          const firstStep = w.steps?.[0] || {}
+          const weekTitle = firstStep.title || w.milestone_label || `Week ${w.week_number} Plan`
+          
+          let weekDesc = firstStep.explanation || ''
+          if (!weekDesc && firstStep.skill_tags?.length) {
+            weekDesc = `Focus skills: ${firstStep.skill_tags.join(', ')} (${firstStep.provider || 'Verified Course'}).`
+          } else if (!weekDesc) {
+            weekDesc = w.milestone_label || 'Comprehensive project milestones and skill progression.'
+          }
+
+          const isComplete = Boolean(
+            w.is_complete ||
+            (w.completed_steps && w.completed_steps === w.total_steps) ||
+            (w.steps && w.steps.length > 0 && w.steps.every((s) => s.status === 'completed'))
+          )
+
+          return {
+            week_number: w.week_number,
+            title: weekTitle,
+            desc: weekDesc,
+            isComplete,
+          }
+        }),
+      })
+    }
+
+    return {
+      roleTitle: effectiveRole,
+      months,
+    }
+  }
+
+  // Fallback if no roadmap is loaded yet: match closest template
+  const roleStr = effectiveRole.toLowerCase()
   let matchedTemplate = ROLE_CURRICULUM_DATABASE.fullstack
   if (ROLE_CURRICULUM_DATABASE.ai_engineer.matchRegex.test(roleStr)) {
     matchedTemplate = ROLE_CURRICULUM_DATABASE.ai_engineer
@@ -579,17 +638,6 @@ function resolveCurriculumForRole(targetRole, roadmap) {
     matchedTemplate = ROLE_CURRICULUM_DATABASE.cybersecurity
   }
 
-  // Calculate completed weeks from real roadmap state
-  const completedWeekNumbers = new Set()
-  if (roadmap?.weeks && Array.isArray(roadmap.weeks)) {
-    roadmap.weeks.forEach((w) => {
-      if (w.is_complete || (w.completed_steps && w.completed_steps === w.total_steps)) {
-        completedWeekNumbers.add(w.week_number)
-      }
-    })
-  }
-
-  // Build clean months and weeks
   const months = matchedTemplate.months.map((month) => ({
     monthNumber: month.monthNumber,
     theme: month.theme,
@@ -597,12 +645,12 @@ function resolveCurriculumForRole(targetRole, roadmap) {
       week_number: wk.week_number,
       title: wk.title,
       desc: wk.desc,
-      isComplete: completedWeekNumbers.has(wk.week_number),
+      isComplete: false,
     })),
   }))
 
   return {
-    roleTitle: targetRole || matchedTemplate.title,
+    roleTitle: effectiveRole,
     months,
   }
 }

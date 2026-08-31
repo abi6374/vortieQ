@@ -148,48 +148,34 @@ export default function GeneratingOverlay({ status = 'loading', onFinished, onRe
     }
 
     if (status === 'success') {
-      // Rapidly but smoothly glide from current pct to 99% -> 100%
-      const interval = setInterval(() => {
-        setPct((p) => {
-          if (p >= 100) {
-            clearInterval(interval)
-            return 100
-          }
-          const next = p + Math.max(0.5, (100 - p) * 0.28)
-          return next >= 99.8 ? 100 : next
-        })
-      }, 25)
-      return () => clearInterval(interval)
+      setPct(100)
+      return
     }
 
-    // Steady, constant forward progress animation starting strictly from 0% and advancing up to 99%
+    // Steady, swift forward progress animation starting from 0% and advancing up to 99%
     setPct(0)
     const startTime = Date.now()
     const interval = setInterval(() => {
       const elapsed = (Date.now() - startTime) / 1000 // in seconds
       
-      // Constant, smooth pace reaching 99%
       let target = 0
-      if (elapsed <= 2.5) {
-        target = (elapsed / 2.5) * 32
-      } else if (elapsed <= 5.5) {
-        target = 32 + ((elapsed - 2.5) / 3.0) * 34 // to 66%
-      } else if (elapsed <= 8.5) {
-        target = 66 + ((elapsed - 5.5) / 3.0) * 22 // to 88%
-      } else if (elapsed <= 12.0) {
-        target = 88 + ((elapsed - 8.5) / 3.5) * 8 // to 96%
+      if (elapsed <= 0.8) {
+        target = (elapsed / 0.8) * 35
+      } else if (elapsed <= 1.8) {
+        target = 35 + ((elapsed - 0.8) / 1.0) * 35 // to 70%
+      } else if (elapsed <= 3.0) {
+        target = 70 + ((elapsed - 1.8) / 1.2) * 22 // to 92%
+      } else if (elapsed <= 4.5) {
+        target = 92 + ((elapsed - 3.0) / 1.5) * 6 // to 98%
       } else {
-        const extra = elapsed - 12.0
-        // Steadily climbs from 96% to 99%
-        target = 96 + Math.min(3.0, extra * 0.5)
+        target = 98 + Math.min(1.0, (elapsed - 4.5) * 0.2)
       }
 
       setPct((current) => {
-        // Monotonically increase only, perfectly constant motion
         const next = Math.max(current, target)
         return Math.min(99.0, next)
       })
-    }, 40)
+    }, 30)
 
     return () => clearInterval(interval)
   }, [status, reduce])
@@ -200,20 +186,20 @@ export default function GeneratingOverlay({ status = 'loading', onFinished, onRe
 
   const activeStep = isSuccess
     ? 5
-    : pct < 22
+    : pct < 25
     ? 0
-    : pct < 48
+    : pct < 50
     ? 1
-    : pct < 72
+    : pct < 75
     ? 2
-    : pct < 88
+    : pct < 90
     ? 3
     : 4
 
-  // After the success fill completes, hand off to parent
+  // After the success fill completes, swiftly hand off to parent
   useEffect(() => {
     if (status !== 'success') return
-    const t = setTimeout(() => onFinished && onFinished(), 800)
+    const t = setTimeout(() => onFinished && onFinished(), 350)
     return () => clearTimeout(t)
   }, [status, onFinished])
 
