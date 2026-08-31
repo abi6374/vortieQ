@@ -53,24 +53,27 @@ function ChatTab() {
 
   return (
     <div className="coach-chat-card flex-1 min-h-0 h-full bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl overflow-hidden shadow-xs flex flex-col">
-      <div ref={bodyRef} className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-5 space-y-3 bg-[#fafcfe] dark:bg-[#0E0E12] pf-custom-scrollbar">
+      <div ref={bodyRef} className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-4 bg-[#fafcfe] dark:bg-[#0E0E12] pf-custom-scrollbar">
         {hydrating && <p className="text-xs text-[#7a7a7a] dark:text-[#94A3B8] text-center">Loading your conversation…</p>}
         {!hydrating && messages.length === 0 && (
-          <div className="h-full flex flex-col items-center justify-center text-center text-[#7a7a7a] dark:text-[#94A3B8] text-sm max-w-lg mx-auto py-4 sm:py-6">
-            <b className="block text-[#1d1d1f] dark:text-white text-base sm:text-lg mb-1.5 font-['Manrope'] font-bold">Ask PathFinder anything</b>
-            <p className="mb-4 sm:mb-6 text-xs sm:text-sm text-[#555555] dark:text-[#94A3B8] leading-relaxed max-w-md">Why a course is in your path, what to learn next, how you're tracking against your goal — this is the same real assistant everywhere in the app, just full-page here.</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full">
+          <div className="h-full flex flex-col items-center justify-center text-center text-[#7a7a7a] dark:text-[#94A3B8] text-sm max-w-2xl mx-auto py-8">
+            <div className="w-12 h-12 rounded-2xl bg-[#eaf2fc] dark:bg-[#1A2840] text-[#0066cc] dark:text-[#38BDF8] flex items-center justify-center mb-3 shadow-xs">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+              </svg>
+            </div>
+            <b className="block text-[#1d1d1f] dark:text-white text-lg sm:text-xl mb-1.5 font-['Manrope'] font-bold">Ask PathFinder AI anything</b>
+            <p className="mb-6 text-xs sm:text-sm text-[#555555] dark:text-[#94A3B8] leading-relaxed max-w-lg">Why a course is in your path, what to learn next, how you're tracking against your goal — your AI Assistant is here to help you learn faster.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
               {STARTER_PROMPTS.map((p) => (
                 <button
                   key={p}
                   type="button"
                   onClick={() => send(p)}
-                  className="text-left p-3.5 bg-white dark:bg-[#18181D] border-[1.5px] border-[#D0D7E2] dark:border-[#27272F] hover:border-black/50 dark:hover:border-[#C9D0D6] hover:bg-[#fafafc] dark:hover:bg-[#202026] rounded-xl text-xs sm:text-[13px] font-semibold text-[#1d1d1f] dark:text-white transition-all hover:-translate-y-0.5 shadow-sm cursor-pointer"
+                  className="text-left p-4 bg-white dark:bg-[#18181D] border-[1.5px] border-[#D0D7E2] dark:border-[#27272F] hover:border-black/50 dark:hover:border-[#C9D0D6] hover:bg-[#fafafc] dark:hover:bg-[#202026] rounded-xl text-xs sm:text-sm font-semibold text-[#1d1d1f] dark:text-white transition-all hover:-translate-y-0.5 shadow-sm cursor-pointer flex items-center justify-between gap-3 group"
                 >
-                  <div className="flex items-center justify-between gap-2">
-                    <span>{p}</span>
-                    <span className="text-[#86868b] dark:text-[#94A3B8] text-xs sm:text-sm font-bold flex-none">→</span>
-                  </div>
+                  <span>{p}</span>
+                  <span className="w-6 h-6 rounded-lg bg-[#F5F5F7] dark:bg-[#121216] group-hover:bg-[#0066cc] text-[#86868b] dark:text-[#94A3B8] group-hover:text-white flex items-center justify-center transition-all text-xs font-bold flex-none">→</span>
                 </button>
               ))}
             </div>
@@ -79,10 +82,10 @@ function ChatTab() {
         {messages.map((m) => (
           <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div
-              className={`max-w-[75%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap break-words ${
+              className={`max-w-[85%] sm:max-w-[75%] px-4 sm:px-5 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap break-words ${
                 m.role === 'user'
-                  ? 'bg-[#0066cc] text-white rounded-br-sm'
-                  : 'bg-white dark:bg-[#18181D] text-[#1d1d1f] dark:text-white border border-[#e0e0e0] dark:border-[#27272F] rounded-bl-sm'
+                  ? 'bg-[#0066cc] text-white rounded-br-sm shadow-xs'
+                  : 'bg-white dark:bg-[#18181D] text-[#1d1d1f] dark:text-white border border-[#e0e0e0] dark:border-[#27272F] rounded-bl-sm shadow-xs'
               }`}
             >
               {m.content}
@@ -91,37 +94,41 @@ function ChatTab() {
         ))}
         {loading && (
           <div className="flex justify-start">
-            <div className="px-4 py-3 bg-white dark:bg-[#18181D] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl rounded-bl-sm flex gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#c6c6c7] dark:bg-[#71717A] animate-bounce" style={{ animationDelay: '0ms' }} />
-              <span className="w-1.5 h-1.5 rounded-full bg-[#c6c6c7] dark:bg-[#71717A] animate-bounce" style={{ animationDelay: '150ms' }} />
-              <span className="w-1.5 h-1.5 rounded-full bg-[#c6c6c7] dark:bg-[#71717A] animate-bounce" style={{ animationDelay: '300ms' }} />
+            <div className="px-4 py-3 bg-white dark:bg-[#18181D] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl rounded-bl-sm flex gap-1.5 shadow-xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#0066cc] dark:bg-[#38BDF8] animate-bounce" style={{ animationDelay: '0ms' }} />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#0066cc] dark:bg-[#38BDF8] animate-bounce" style={{ animationDelay: '150ms' }} />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#0066cc] dark:bg-[#38BDF8] animate-bounce" style={{ animationDelay: '300ms' }} />
             </div>
           </div>
         )}
       </div>
 
       {error && (
-        <div className="mx-4 mb-2 text-xs text-[#B42318] dark:text-red-400 bg-[#FDECEC] dark:bg-red-950/40 border border-[#F3B9B9] dark:border-red-800/60 rounded-lg px-3 py-2 flex items-center justify-between flex-none">
+        <div className="mx-4 mb-2 text-xs text-[#B42318] dark:text-red-400 bg-[#FDECEC] dark:bg-red-950/40 border border-[#F3B9B9] dark:border-red-800/60 rounded-xl px-4 py-2.5 flex items-center justify-between flex-none">
           <span>{error.text}</span>
-          <button type="button" className="font-bold underline" onClick={() => { setError(null); send(error.retry) }}>Retry</button>
+          <button type="button" className="font-bold underline cursor-pointer" onClick={() => { setError(null); send(error.retry) }}>Retry</button>
         </div>
       )}
 
-      <form onSubmit={submit} className="p-3 border-t border-[#f5f5f7] dark:border-[#27272F] flex items-end gap-2 bg-white dark:bg-[#121216] flex-none">
+      <form onSubmit={submit} className="p-3 sm:p-4 border-t border-[#e0e0e0] dark:border-[#27272F] flex items-center gap-3 bg-white dark:bg-[#121216] flex-none">
         <textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) submit(e) }}
           placeholder="Ask about your path, a skill gap, or what to do next…"
           rows={1}
-          className="flex-1 resize-none border border-[#e0e0e0] dark:border-[#27272F] bg-white dark:bg-[#0E0E12] rounded-xl px-3.5 py-2.5 text-sm text-[#1d1d1f] dark:text-white focus:outline-none focus:border-[#0066cc] dark:focus:border-[#C9D0D6] focus:ring-2 focus:ring-[#0066cc]/15 max-h-24"
+          className="flex-1 resize-none border border-[#e0e0e0] dark:border-[#27272F] bg-white dark:bg-[#0E0E12] rounded-xl px-4 py-3 text-sm text-[#1d1d1f] dark:text-white placeholder-[#7a7a7a] dark:placeholder-[#94A3B8] focus:outline-none focus:border-[#0066cc] dark:focus:border-[#38BDF8] focus:ring-2 focus:ring-[#0066cc]/15 max-h-28 pf-custom-scrollbar"
         />
         <button
           type="submit"
           disabled={!input.trim() || loading}
-          className="w-10 h-10 rounded-xl bg-[#0066cc] hover:bg-[#004fa3] disabled:opacity-40 text-white flex items-center justify-center flex-none cursor-pointer"
+          className="w-11 h-11 rounded-xl bg-[#0066cc] hover:bg-[#004fa3] disabled:opacity-40 text-white flex items-center justify-center flex-none cursor-pointer transition-all shadow-sm active:scale-95"
+          aria-label="Send message"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13" />
+            <polygon points="22 2 15 22 11 13 2 9 22 2" />
+          </svg>
         </button>
       </form>
     </div>
@@ -324,98 +331,37 @@ function ProjectsTab() {
 
 export default function CoachScreen() {
   const [tab, setTab] = useState('chat')
-  const { send } = useAIChat()
-
-  const handleQuickPrompt = (prompt) => {
-    setTab('chat')
-    send(prompt)
-  }
 
   return (
     <AppShell contentClassName="h-full overflow-hidden flex flex-col !p-4 sm:!p-6 lg:!p-7">
       <div className="w-full h-full flex flex-col min-h-0 font-['Inter',sans-serif] text-[#1d1d1f] dark:text-white">
-        <header className="mb-3.5 flex-none">
-          <h1 className="font-['Manrope'] font-extrabold text-2xl sm:text-[26px] text-[#1d1d1f] dark:text-white tracking-tight">AI Coach</h1>
-          <p className="mt-0.5 text-xs sm:text-sm text-[#333333] dark:text-[#94A3B8]">Chat, practice questions, and project ideas — all grounded in your real progress.</p>
+        <header className="mb-3.5 flex-none flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h1 className="font-['Manrope'] font-extrabold text-2xl sm:text-[26px] text-[#1d1d1f] dark:text-white tracking-tight">AI Coach</h1>
+            <p className="mt-0.5 text-xs sm:text-sm text-[#333333] dark:text-[#94A3B8]">Chat, practice questions, and project ideas — all grounded in your real progress.</p>
+          </div>
+
+          <div className="flex gap-1.5 bg-[#f5f5f7] dark:bg-[#121216] border border-transparent dark:border-[#27272F] rounded-xl p-1 w-fit flex-none">
+            {TABS.map((t) => (
+              <button
+                key={t.key}
+                type="button"
+                onClick={() => setTab(t.key)}
+                className={`px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-colors cursor-pointer ${
+                  tab === t.key ? 'bg-white dark:bg-[#18181D] text-[#0066cc] dark:text-[#C9D0D6] shadow-sm' : 'text-[#6e6e73] dark:text-[#94A3B8] hover:text-[#1d1d1f] dark:hover:text-white'
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6 items-stretch w-full flex-1 min-h-0">
-          {/* Main Coach Column */}
-          <div className="lg:col-span-7 flex flex-col min-h-0 h-full">
-            <div className="flex gap-1.5 bg-[#f5f5f7] dark:bg-[#121216] border border-transparent dark:border-[#27272F] rounded-xl p-1 w-fit mb-2.5 flex-none">
-              {TABS.map((t) => (
-                <button
-                  key={t.key}
-                  type="button"
-                  onClick={() => setTab(t.key)}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-colors cursor-pointer ${
-                    tab === t.key ? 'bg-white dark:bg-[#18181D] text-[#0066cc] dark:text-[#C9D0D6] shadow-sm' : 'text-[#6e6e73] dark:text-[#94A3B8] hover:text-[#1d1d1f] dark:hover:text-white'
-                  }`}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
-
-            <div className="flex-1 min-h-0 h-full flex flex-col overflow-hidden">
-              {tab === 'chat' && <ChatTab />}
-              {tab === 'practice' && <div className="h-full overflow-y-auto pf-custom-scrollbar pr-1.5"><PracticeTab /></div>}
-              {tab === 'projects' && <div className="h-full overflow-y-auto pf-custom-scrollbar pr-1.5"><ProjectsTab /></div>}
-            </div>
-          </div>
-
-          {/* Right Rail: Quick Actions & Coach Context */}
-          <div className="lg:col-span-5 flex flex-col gap-3.5 min-h-0 h-full overflow-y-auto pr-1.5 pf-custom-scrollbar">
-            {/* Quick Prompts */}
-            <div className="bg-white dark:bg-[#121216] border-[1.5px] border-[#D0D7E2] dark:border-[#27272F] rounded-2xl p-4 sm:p-5 shadow-sm flex-none">
-              <h3 className="font-['Manrope'] font-bold text-sm sm:text-base text-[#1d1d1f] dark:text-white mb-3">
-                Suggested Questions
-              </h3>
-              <div className="space-y-2">
-                {STARTER_PROMPTS.map((p) => (
-                  <button
-                    key={p}
-                    type="button"
-                    onClick={() => handleQuickPrompt(p)}
-                    className="w-full text-left px-4 py-3 bg-white dark:bg-[#0E0E12] hover:bg-[#fafafc] dark:hover:bg-[#18181D] border-[1.5px] border-[#D0D7E2] dark:border-[#27272F] hover:border-black/50 dark:hover:border-[#C9D0D6] text-xs sm:text-[13px] font-semibold text-[#1d1d1f] dark:text-white rounded-xl transition-all hover:-translate-y-0.5 shadow-2xs cursor-pointer flex items-center justify-between group"
-                  >
-                    <span>{p}</span>
-                    <span className="w-6 h-6 rounded-lg bg-[#F5F5F7] dark:bg-[#18181D] group-hover:bg-[#0066cc] text-[#86868b] dark:text-[#94A3B8] group-hover:text-white flex items-center justify-center transition-all text-xs font-bold flex-none ml-2 shadow-2xs">
-                      →
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Context Awareness Notice */}
-            <div className="bg-gradient-to-br from-[#fafbfc] to-[#eaf2fc] dark:from-[#121216] dark:to-[#18181D] border-[1.5px] border-[#BFDBFE] dark:border-[#27272F] rounded-2xl p-4 sm:p-5 shadow-sm flex-none">
-              <h4 className="font-['Manrope'] font-bold text-xs sm:text-sm text-[#1d1d1f] dark:text-[#F9FAFB] mb-1.5 flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#22A06B] shadow-[0_0_8px_rgba(34,160,107,0.6)]" />
-                Roadmap-Grounded
-              </h4>
-              <p className="text-xs text-[#444444] dark:text-[#CBD5E1] leading-relaxed">
-                Your AI Coach continuously inspects your completed lessons, quiz outcomes, and target roles to provide accurate, tailored answers.
-              </p>
-            </div>
-
-            {/* Study Mode Tips */}
-            <div className="bg-white dark:bg-[#121216] border-[1.5px] border-[#D0D7E2] dark:border-[#27272F] rounded-2xl p-4 sm:p-5 shadow-sm flex-none">
-              <h4 className="font-['Manrope'] font-bold text-[11px] uppercase tracking-wider text-[#7a7a7a] dark:text-[#94A3B8] mb-2">
-                Coaching Modes
-              </h4>
-              <ul className="text-xs text-[#333333] dark:text-[#CBD5E1] space-y-2">
-                <li className="flex items-start gap-2">
-                  <span className="text-[#0066cc] dark:text-[#C9D0D6] font-bold text-sm leading-none mt-0.5">•</span>
-                  <span><strong>Practice:</strong> Generate multiple-choice questions tailored to your active skills.</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#0066cc] dark:text-[#C9D0D6] font-bold text-sm leading-none mt-0.5">•</span>
-                  <span><strong>Project Ideas:</strong> Get portfolio-ready project concepts with step-by-step guidance.</span>
-                </li>
-              </ul>
-            </div>
-          </div>
+        {/* Full-Page AI Assistant & Tools View */}
+        <div className="flex-1 min-h-0 h-full flex flex-col w-full overflow-hidden">
+          {tab === 'chat' && <ChatTab />}
+          {tab === 'practice' && <div className="h-full overflow-y-auto pf-custom-scrollbar pr-1.5"><PracticeTab /></div>}
+          {tab === 'projects' && <div className="h-full overflow-y-auto pf-custom-scrollbar pr-1.5"><ProjectsTab /></div>}
         </div>
       </div>
     </AppShell>
