@@ -32,6 +32,8 @@ import {
   FileText,
   Activity,
   FileDown,
+  Trophy,
+  Calendar,
 } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import AppShell from '../layout/AppShell'
@@ -39,6 +41,7 @@ import GoalSelectorDropdown from '../layout/GoalSelectorDropdown'
 import { useRoadmap } from '../../hooks/useRoadmap'
 import { useStreak } from '../../hooks/useStreak'
 import RoadmapInfographicModal from '../dashboard/RoadmapInfographicModal'
+import { stripEmojis } from '../../utils/textUtils'
 
 /**
  * PathFinder High-Fidelity Progress Page
@@ -172,33 +175,100 @@ export default function ProgressScreen() {
   })
 
   // ---------------------------------------------------------------------------
-  // 4. 5-Week Activity Heatmap
+  // 4. LeetCode-Style Activity Heatmap Calendar (14 Weeks / 98 Days)
   // ---------------------------------------------------------------------------
-  const minutesToIntensity = (mins) => {
-    if (mins <= 0) return 0
-    if (mins < 30) return 1
-    if (mins < 60) return 2
-    if (mins < 120) return 3
-    return 4
-  }
-  const heatmapDays = streak.daily_minutes_35d || []
-  const heatmapWeeks = []
-  for (let i = 0; i < heatmapDays.length; i += 7) {
-    heatmapWeeks.push(heatmapDays.slice(i, i + 7).map((d) => minutesToIntensity(d.minutes)))
-  }
+  const [hoveredTile, setHoveredTile] = useState(null)
 
-  const getHeatmapColor = (intensity) => {
-    switch (intensity) {
+  const leetCodeHeatmap = useMemo(() => {
+    const totalWeeks = 14
+    const totalDays = totalWeeks * 7
+    const today = new Date()
+    const days = []
+
+    const minutesMap = new Map()
+    if (streak.daily_minutes_35d && Array.isArray(streak.daily_minutes_35d)) {
+      streak.daily_minutes_35d.forEach((d) => {
+        if (d.date) minutesMap.set(d.date, d.minutes || 0)
+      })
+    }
+    if (streak.daily_minutes_this_week && Array.isArray(streak.daily_minutes_this_week)) {
+      streak.daily_minutes_this_week.forEach((d) => {
+        if (d.date) minutesMap.set(d.date, d.minutes || 0)
+      })
+    }
+
+    // Generate days in chronological order ending today
+    for (let i = totalDays - 1; i >= 0; i--) {
+      const d = new Date(today)
+      d.setDate(today.getDate() - i)
+      const dateStr = d.toISOString().split('T')[0]
+      const formattedDate = d.toLocaleDateString('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      })
+      const dayOfWeek = d.getDay() // 0 = Sun, 1 = Mon ...
+      const isToday = i === 0
+
+      let minutes = minutesMap.get(dateStr) || 0
+      if (isToday && streak.active_today && minutes === 0) {
+        minutes = streak.minutes_this_week || 30
+      }
+
+      let level = 0
+      if (minutes > 0) {
+        if (minutes < 30) level = 1
+        else if (minutes < 60) level = 2
+        else if (minutes < 120) level = 3
+        else level = 4
+      }
+
+      days.push({
+        date: dateStr,
+        formattedDate,
+        dayOfWeek,
+        minutes,
+        level,
+        isToday,
+        monthName: d.toLocaleDateString('en-US', { month: 'short' }),
+      })
+    }
+
+    // Split into columns of 7 days (weeks)
+    const weeks = []
+    for (let i = 0; i < days.length; i += 7) {
+      weeks.push(days.slice(i, i + 7))
+    }
+
+    // Determine month headers position
+    const monthHeaders = []
+    let currentMonth = ''
+    weeks.forEach((w, wIdx) => {
+      const firstDay = w[0]
+      if (firstDay && firstDay.monthName !== currentMonth) {
+        currentMonth = firstDay.monthName
+        monthHeaders.push({ month: currentMonth, colIndex: wIdx })
+      }
+    })
+
+    const totalActiveDays = days.filter((d) => d.minutes > 0).length
+
+    return { weeks, monthHeaders, totalActiveDays }
+  }, [streak])
+
+  const getLeetCodeTileColor = (level) => {
+    switch (level) {
       case 4:
-        return 'bg-[#0066cc] dark:bg-[#38BDF8]'
+        return 'bg-[#216e39] dark:bg-[#39d353] border-[#1b4b27]/80 dark:border-[#56f06f]/90 shadow-[0_0_8px_rgba(57,211,83,0.35)]'
       case 3:
-        return 'bg-[#61a9f5] dark:bg-[#38BDF8]/75'
+        return 'bg-[#30a14e] dark:bg-[#26a641] border-[#216e39]/80 dark:border-[#39d353]/70'
       case 2:
-        return 'bg-[#a1ccfb] dark:bg-[#38BDF8]/50'
+        return 'bg-[#40c463] dark:bg-[#006d32] border-[#30a14e]/80 dark:border-[#26a641]/70'
       case 1:
-        return 'bg-[#dcecfe] dark:bg-[#38BDF8]/25'
+        return 'bg-[#9be9a8] dark:bg-[#0e4429] border-[#7bc96f]/80 dark:border-[#006d32]/70'
       default:
-        return 'bg-[#f5f5f7] dark:bg-[#18181D]'
+        return 'bg-[#ebedf0] dark:bg-[#161b22] border-[#d0d7de]/60 dark:border-[#27272F]'
     }
   }
 
@@ -400,21 +470,31 @@ export default function ProgressScreen() {
           </div>
 
           {/* Card 4: Learning Streak */}
-          <div className="pf-glass-card p-5 shadow-sm flex flex-col justify-between cursor-pointer">
+          <div className="pf-glass-card p-5 shadow-sm flex flex-col justify-between cursor-pointer group hover:border-black/40 dark:hover:border-[#C9D0D6]/40 transition-all">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-[#6e6e73] dark:text-[#94A3B8]">Learning streak</span>
-              <span className="w-8 h-8 rounded-xl bg-[#FFF5EB] dark:bg-orange-950/70 text-[#F97316] dark:text-orange-400 border border-[#FED7AA] dark:border-orange-800/60 flex items-center justify-center shadow-xs">
+              <span className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-500/15 to-orange-500/15 text-orange-500 border border-orange-500/30 flex items-center justify-center shadow-xs">
                 <Flame className="w-4 h-4" />
               </span>
             </div>
-            <div className="my-2.5">
+            <div className="my-2.5 flex items-baseline gap-2">
               <span className="font-['Manrope'] font-extrabold text-3xl text-[#1d1d1f] dark:text-white tracking-tight">
-                {streak.current_streak} days
+                {streak.current_streak}
+              </span>
+              <span className="text-xs font-bold text-orange-500 dark:text-orange-400 font-['Manrope']">
+                {streak.current_streak === 1 ? 'day' : 'days'}
               </span>
             </div>
-            <span className="text-xs font-semibold text-[#6e6e73] dark:text-[#CBD5E1]">
-              Personal best: {streak.best_streak} days
-            </span>
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-medium text-[#6e6e73] dark:text-[#CBD5E1]">
+                Max streak: <strong className="text-[#1d1d1f] dark:text-white font-bold">{streak.best_streak} days</strong>
+              </span>
+              {streak.active_today && (
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60">
+                  Active
+                </span>
+              )}
+            </div>
           </div>
 
         </section>
@@ -600,58 +680,144 @@ export default function ProgressScreen() {
               </div>
             </section>
 
-            {/* CARD C: Learning Streak & Mini Heatmap */}
+            {/* CARD C: LeetCode-Style Learning Activity & Streak Matrix */}
             <section className="pf-glass-card p-6 shadow-sm">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-[#f5f5f7] dark:border-[#202026] gap-3">
-                <div className="flex items-center gap-3">
-                  <span className="w-10 h-10 rounded-xl bg-[#FFF7E6] dark:bg-amber-950/70 text-[#F59E0B] dark:text-amber-400 border border-[#FEE4B2] dark:border-amber-800/60 flex items-center justify-center flex-none shadow-xs">
+              {/* LeetCode-Style Header & Summary Stats */}
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between pb-5 border-b border-[#f5f5f7] dark:border-[#202026] gap-4">
+                <div className="flex items-center gap-3.5">
+                  <span className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500/15 to-orange-500/15 text-orange-500 border border-orange-500/30 flex items-center justify-center flex-none shadow-xs">
                     <Flame className="w-5 h-5" />
                   </span>
                   <div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <h2 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white">
-                        Learning streak
+                        Learning activity & streak
                       </h2>
-                      <span className="font-extrabold text-sm text-[#0066cc] dark:text-[#38BDF8] font-['Manrope']">{streak.current_streak} days</span>
+                      <span className="font-extrabold text-xs text-orange-500 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/50 border border-orange-200 dark:border-orange-800/60 px-2.5 py-0.5 rounded-full font-['Manrope']">
+                        {streak.current_streak} {streak.current_streak === 1 ? 'day' : 'days'} streak
+                      </span>
                     </div>
-                    <p className="text-xs text-[#6e6e73] dark:text-[#94A3B8]">
+                    <p className="text-xs text-[#6e6e73] dark:text-[#94A3B8] mt-0.5">
                       {streak.current_streak > 0
-                        ? "You're building a consistent learning habit."
-                        : 'Complete a roadmap task to start your streak.'}
+                        ? "Consistent daily study powers faster mastery."
+                        : "Complete a roadmap task to start your streak."}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-4 text-xs font-semibold text-[#6e6e73] dark:text-[#CBD5E1]">
-                  <span>{streak.current_streak} day current streak</span>
-                  <span className="text-[#0066cc] dark:text-[#38BDF8]">{streak.best_streak} day best streak</span>
+                {/* LeetCode Metric Pills */}
+                <div className="flex items-center gap-2.5 flex-wrap text-xs">
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#f5f5f7] dark:bg-[#18181D] border border-[#e0e0e0] dark:border-[#27272F]">
+                    <Calendar className="w-3.5 h-3.5 text-[#0066cc] dark:text-[#38BDF8]" />
+                    <span className="text-[#6e6e73] dark:text-[#94A3B8]">Active:</span>
+                    <strong className="text-[#1d1d1f] dark:text-white font-bold">{leetCodeHeatmap.totalActiveDays} days</strong>
+                  </div>
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#f5f5f7] dark:bg-[#18181D] border border-[#e0e0e0] dark:border-[#27272F]">
+                    <Flame className="w-3.5 h-3.5 text-orange-500" />
+                    <span className="text-[#6e6e73] dark:text-[#94A3B8]">Current:</span>
+                    <strong className="text-[#1d1d1f] dark:text-white font-bold">{streak.current_streak} days</strong>
+                  </div>
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#f5f5f7] dark:bg-[#18181D] border border-[#e0e0e0] dark:border-[#27272F]">
+                    <Trophy className="w-3.5 h-3.5 text-amber-500" />
+                    <span className="text-[#6e6e73] dark:text-[#94A3B8]">Max:</span>
+                    <strong className="text-[#1d1d1f] dark:text-white font-bold">{streak.best_streak} days</strong>
+                  </div>
                 </div>
               </div>
 
-              {/* 5-Week Mini Heatmap Matrix */}
-              <div className="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="flex gap-2 overflow-x-auto pb-1 pf-custom-scrollbar">
-                  {heatmapWeeks.map((week, wIdx) => (
-                    <div key={wIdx} className="flex flex-col gap-1.5">
-                      {week.map((intensity, dIdx) => (
-                        <div
-                          key={dIdx}
-                          title={`Activity level: ${intensity}/4`}
-                          className={`w-5 h-5 rounded-md ${getHeatmapColor(intensity)} transition-transform hover:scale-110 cursor-pointer border border-transparent dark:border-[#27272F]/40`}
-                        />
-                      ))}
+              {/* LeetCode Heatmap Calendar Grid */}
+              <div className="mt-5 relative">
+                <div className="overflow-x-auto pb-2 pf-custom-scrollbar">
+                  <div className="inline-block min-w-full">
+                    {/* Month Labels on Top */}
+                    <div className="flex items-center mb-2 pl-7 text-[11px] font-semibold text-[#86868b] dark:text-[#71717A]">
+                      <div className="flex gap-[6px] w-full">
+                        {leetCodeHeatmap.weeks.map((week, wIdx) => {
+                          const matchingHeader = leetCodeHeatmap.monthHeaders.find((h) => h.colIndex === wIdx)
+                          return (
+                            <div key={wIdx} className="w-[18px] sm:w-[20px] text-left flex-none">
+                              {matchingHeader ? (
+                                <span className="font-bold text-[#1d1d1f] dark:text-[#CBD5E1]">
+                                  {matchingHeader.month}
+                                </span>
+                              ) : null}
+                            </div>
+                          )
+                        })}
+                      </div>
                     </div>
-                  ))}
+
+                    {/* Weekday Row Labels + Heatmap Tile Columns */}
+                    <div className="flex items-start gap-2">
+                      {/* Left Weekday Indicators */}
+                      <div className="flex flex-col justify-between h-[146px] sm:h-[160px] text-[10px] font-semibold text-[#86868b] dark:text-[#71717A] pr-1 select-none">
+                        <span>Sun</span>
+                        <span>Tue</span>
+                        <span>Thu</span>
+                        <span>Sat</span>
+                      </div>
+
+                      {/* 14 Calendar Weeks (Columns) */}
+                      <div className="flex gap-[6px]">
+                        {leetCodeHeatmap.weeks.map((week, wIdx) => (
+                          <div key={wIdx} className="flex flex-col gap-[6px]">
+                            {week.map((day, dIdx) => (
+                              <div
+                                key={dIdx}
+                                onMouseEnter={() => setHoveredTile(day)}
+                                onMouseLeave={() => setHoveredTile(null)}
+                                className={`w-[18px] h-[18px] sm:w-[20px] sm:h-[20px] rounded-[4px] ${getLeetCodeTileColor(
+                                  day.level
+                                )} transition-all hover:scale-125 cursor-pointer relative z-0 hover:z-20`}
+                              />
+                            ))}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="p-3.5 bg-[#f5faff] dark:bg-[#18181D] border border-[#cfe4fb] dark:border-[#27272F] rounded-xl text-xs text-[#004fa3] dark:text-[#CBD5E1] font-medium leading-relaxed max-w-xs shadow-xs">
-                  {streak.current_streak > 0 && streak.current_streak >= streak.best_streak ? (
-                    <>🔥 You're on your <strong>best streak yet</strong> — keep it going!</>
-                  ) : streak.current_streak > 0 ? (
-                    <>🔥 <strong>{streak.best_streak - streak.current_streak} more day{streak.best_streak - streak.current_streak === 1 ? '' : 's'}</strong> to beat your personal best of {streak.best_streak} days!</>
-                  ) : (
-                    <>🔥 Complete a task today to start a new streak.</>
-                  )}
+                {/* Hover Tooltip Box */}
+                {hoveredTile && (
+                  <div className="mt-3 p-2.5 bg-[#1d1d1f] dark:bg-black text-white text-xs rounded-xl shadow-lg border border-white/10 flex items-center justify-between gap-3 animate-in fade-in duration-100 max-w-sm">
+                    <div className="flex items-center gap-2">
+                      <span className={`w-2.5 h-2.5 rounded-full ${hoveredTile.minutes > 0 ? 'bg-[#39d353]' : 'bg-gray-500'}`} />
+                      <span className="font-bold">
+                        {hoveredTile.minutes > 0 ? `${hoveredTile.minutes} mins studied` : 'No activity logged'}
+                      </span>
+                    </div>
+                    <span className="text-[#86868b] dark:text-[#94A3B8] text-[11px] font-medium">
+                      {hoveredTile.formattedDate}
+                    </span>
+                  </div>
+                )}
+
+                {/* Bottom Bar: Habit Insight + LeetCode Legend */}
+                <div className="mt-4 pt-4 border-t border-[#f5f5f7] dark:border-[#202026] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-2 text-xs text-[#0066cc] dark:text-[#38BDF8] font-medium bg-[#eaf2fc] dark:bg-[#18181D] px-3 py-1.5 rounded-xl border border-[#cfe4fb] dark:border-[#27272F] w-fit">
+                    <Sparkles className="w-3.5 h-3.5 flex-none" />
+                    <span>
+                      {streak.current_streak > 0 && streak.current_streak >= streak.best_streak
+                        ? "You're on your best streak yet — keep it going!"
+                        : streak.current_streak > 0
+                        ? `${streak.best_streak - streak.current_streak} more day${
+                            streak.best_streak - streak.current_streak === 1 ? '' : 's'
+                          } to beat your personal best of ${streak.best_streak} days!`
+                        : 'Complete a roadmap task today to build your streak.'}
+                    </span>
+                  </div>
+
+                  {/* LeetCode Intensity Legend */}
+                  <div className="flex items-center gap-1.5 text-xs text-[#86868b] dark:text-[#71717A] self-end sm:self-center font-medium">
+                    <span>Less</span>
+                    <span className="w-3.5 h-3.5 rounded-[3px] bg-[#ebedf0] dark:bg-[#161b22] border border-[#d0d7de]/50 dark:border-[#27272F]" />
+                    <span className="w-3.5 h-3.5 rounded-[3px] bg-[#9be9a8] dark:bg-[#0e4429] border border-[#7bc96f]/70 dark:border-[#006d32]/70" />
+                    <span className="w-3.5 h-3.5 rounded-[3px] bg-[#40c463] dark:bg-[#006d32] border border-[#30a14e]/70 dark:border-[#26a641]/70" />
+                    <span className="w-3.5 h-3.5 rounded-[3px] bg-[#30a14e] dark:bg-[#26a641] border border-[#216e39]/70 dark:border-[#39d353]/70" />
+                    <span className="w-3.5 h-3.5 rounded-[3px] bg-[#216e39] dark:bg-[#39d353] border border-[#1b4b27]/70 dark:border-[#56f06f]/90" />
+                    <span>More</span>
+                  </div>
                 </div>
               </div>
             </section>

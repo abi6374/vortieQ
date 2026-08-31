@@ -7,6 +7,7 @@ import { supabase } from '../../lib/supabaseClient'
 import api from '../../lib/apiClient'
 import AppShell from '../layout/AppShell'
 import GoalSelectorDropdown from '../layout/GoalSelectorDropdown'
+import { stripEmojis } from '../../utils/textUtils'
 
 /**
  * ResourcesScreen — the "Resources" page from the PathFinder reference.
@@ -752,11 +753,11 @@ export default function ResourcesScreen() {
                       <span className={`r-ic ic-${t.kind.toLowerCase()}`}>{I[meta.icon]}</span>
                       <div className="r-body">
                         <div className="r-type">{t.kind}</div>
-                        <h4 className="r-title" title={s.title}>{s.title}</h4>
-                        <p className="r-desc" title={s.description}>{s.description}</p>
+                        <h4 className="r-title" title={stripEmojis(s.title)}>{stripEmojis(s.title)}</h4>
+                        <p className="r-desc" title={stripEmojis(s.description)}>{stripEmojis(s.description)}</p>
                         <div className="r-tags">
-                          {(s.skill_tags || []).slice(0, 3).map((tg) => (<span key={tg} className="r-tag">{tg}</span>))}
-                          {s.provider && <span className="r-tag">{s.provider}</span>}
+                          {(s.skill_tags || []).slice(0, 3).map((tg) => (<span key={tg} className="r-tag">{stripEmojis(tg)}</span>))}
+                          {s.provider && <span className="r-tag">{stripEmojis(s.provider)}</span>}
                           <span className="r-tag">{s.duration_hrs}h</span>
                         </div>
                       </div>
@@ -794,7 +795,7 @@ export default function ResourcesScreen() {
                 {nextThree.map((s) => (
                   <div key={s.id} className={`rx-plan-item ${s.status === 'completed' ? 'done' : ''}`}>
                     <span className="chk">{s.status === 'completed' && I.check}</span>
-                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.title}</span>
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{stripEmojis(s.title)}</span>
                     <span className="time">{s.duration_hrs || 15} {s.duration_hrs ? 'h' : 'min'}</span>
                   </div>
                 ))}
@@ -808,7 +809,7 @@ export default function ResourcesScreen() {
               <h3>{I.spark} PathFinder recommends</h3>
               <p>
                 {activeSteps[0]
-                  ? <>Complete <b>{activeSteps[0].title}</b> next to keep momentum on your <b>{path?.goal_text?.split('.')[0] || 'goal'}</b>.</>
+                  ? <>Complete <b>{stripEmojis(activeSteps[0].title)}</b> next to keep momentum on your <b>{stripEmojis(path?.goal_text?.split('.')[0]) || 'goal'}</b>.</>
                   : path
                     ? "You've cleared your active plan. Generate a new path to keep growing."
                     : "Kick things off with onboarding to get your personalized plan."}
@@ -847,7 +848,7 @@ export default function ResourcesScreen() {
                         >
                           <span className="s-ic">{I.grad}</span>
                           <div className="s-body">
-                            <div className="s-t">{r.title || r.url}</div>
+                            <div className="s-t">{stripEmojis(r.title || r.url)}</div>
                             <div className="s-m" style={{ whiteSpace: 'normal' }}>
                               {(() => { try { return new URL(r.url).hostname.replace('www.', '') } catch { return r.url } })()}
                             </div>

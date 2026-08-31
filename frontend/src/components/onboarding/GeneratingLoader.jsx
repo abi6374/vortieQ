@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react'
 
 const STAGES = [
-  '🔍 Understanding your goals',
-  '📚 Finding relevant courses',
-  '🧠 Sequencing your learning path',
-  '✨ Preparing your roadmap',
+  'Understanding your goals',
+  'Finding relevant courses',
+  'Sequencing your learning path',
+  'Preparing your roadmap',
 ]
 
 export default function GeneratingLoader() {

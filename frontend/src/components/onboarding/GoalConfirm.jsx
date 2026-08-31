@@ -81,7 +81,7 @@ export default function GoalConfirm({ profile, onConfirm, onEdit }) {
           onClick={onConfirm}
           className="flex-1 bg-[#0066cc] dark:bg-[#0066cc] hover:bg-[#004fa3] dark:hover:bg-[#004fa3] text-white dark:text-white font-bold py-3.5 px-6 rounded-xl shadow-[0_4px_14px_rgba(0,102,204,0.35)] dark:shadow-[0_4px_14px_rgba(0,102,204,0.4)] transition-all cursor-pointer flex items-center justify-center gap-2"
         >
-          <span>✨ Generate My Learning Path</span>
+          <span>Generate My Learning Path</span>
         </button>
         <button
           onClick={onEdit}

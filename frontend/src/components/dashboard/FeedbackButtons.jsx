@@ -24,29 +24,49 @@ const ACTIONS = [
   {
     type: 'completed',
     label: 'Mark Done',
-    icon: '✅',
-    idle: 'bg-green-100 text-green-700 hover:bg-green-200 focus-visible:ring-green-400',
+    icon: (
+      <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="20 6 9 17 4 12" />
+      </svg>
+    ),
+    idle: 'bg-green-100 dark:bg-green-950/50 text-green-700 dark:text-green-300 hover:bg-green-200 focus-visible:ring-green-400',
     spinner: 'text-green-700',
   },
   {
     type: 'too_easy',
     label: 'Too Easy',
-    icon: '⚡',
-    idle: 'bg-amber-100 text-amber-700 hover:bg-amber-200 focus-visible:ring-amber-400',
+    icon: (
+      <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+      </svg>
+    ),
+    idle: 'bg-amber-100 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 hover:bg-amber-200 focus-visible:ring-amber-400',
     spinner: 'text-amber-700',
   },
   {
     type: 'too_hard',
     label: 'Too Hard',
-    icon: '🧗',
-    idle: 'bg-rose-100 text-rose-700 hover:bg-rose-200 focus-visible:ring-rose-400',
+    icon: (
+      <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="m18 15-6-6-6 6" />
+      </svg>
+    ),
+    idle: 'bg-rose-100 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 hover:bg-rose-200 focus-visible:ring-rose-400',
     spinner: 'text-rose-700',
   },
   {
     type: 'not_interested',
     label: 'Swap',
-    icon: '🔀',
-    idle: 'bg-blue-100 text-blue-700 hover:bg-blue-200 focus-visible:ring-blue-400',
+    icon: (
+      <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M16 3h5v5" />
+        <path d="M4 20L21 3" />
+        <path d="M21 16v5h-5" />
+        <path d="M15 15l6 6" />
+        <path d="M4 4l5 5" />
+      </svg>
+    ),
+    idle: 'bg-blue-100 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 hover:bg-blue-200 focus-visible:ring-blue-400',
     spinner: 'text-blue-700',
   },
 ]
@@ -152,10 +172,10 @@ export default function FeedbackButtons({ stepId, stepStatus, onFeedbackGiven })
         <span
           className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold
             ${stepStatus === 'completed'
-              ? 'bg-green-100 text-green-700'
-              : 'bg-gray-100 text-gray-600'}`}
+              ? 'bg-green-100 dark:bg-green-950/60 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800'
+              : 'bg-gray-100 dark:bg-[#18181D] text-gray-600 dark:text-[#94A3B8] border border-gray-200 dark:border-[#27272F]'}`}
         >
-          {stepStatus === 'completed' ? '✅ Completed' : '⏭ Skipped'}
+          {stepStatus === 'completed' ? 'Completed' : 'Skipped'}
         </span>
       </div>
     )

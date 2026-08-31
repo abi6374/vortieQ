@@ -8,6 +8,7 @@ import { supabase } from '../../lib/supabaseClient'
 import AppShell from '../layout/AppShell'
 import ConnectGitHubModal from '../ui/ConnectGitHubModal'
 import RoadmapInfographicModal from './RoadmapInfographicModal'
+import { stripEmojis } from '../../utils/textUtils'
 
 /**
  * PersonalizedRoadmap
@@ -88,16 +89,16 @@ export default function PersonalizedRoadmap({
       const tasks = (w.steps || []).map((st) => ({
         id: st.step_id,
         sequence_order: st.sequence_order,
-        title: st.title,
-        subtitle: (st.skill_tags || []).join(', ') || st.provider,
-        provider: st.provider,
+        title: stripEmojis(st.title),
+        subtitle: stripEmojis((st.skill_tags || []).join(', ') || st.provider),
+        provider: stripEmojis(st.provider),
         duration_hrs: st.duration_hrs,
         difficulty: st.difficulty,
-        skill_tags: st.skill_tags,
+        skill_tags: (st.skill_tags || []).map(stripEmojis),
         resource_url: st.resource_url,
-        explanation: st.explanation,
+        explanation: stripEmojis(st.explanation),
         status: st.status,
-        milestone_label: st.milestone_label,
+        milestone_label: stripEmojis(st.milestone_label),
         partNumber: st.part_number || 1,
         partTotal: st.part_total || 1,
         fullDurationHrs: st.full_duration_hrs ?? st.duration_hrs,
@@ -105,9 +106,9 @@ export default function PersonalizedRoadmap({
       groups[`Week ${w.week_number}`] = {
         tasks,
         totalHrs: tasks.reduce((sum, t) => sum + (t.duration_hrs || 0), 0),
-        themeTitle: w.milestone_label || `Week ${w.week_number}`,
+        themeTitle: stripEmojis(w.milestone_label || `Week ${w.week_number}`),
         isLocked: w.is_locked,
-        lockedReason: w.locked_reason,
+        lockedReason: stripEmojis(w.locked_reason),
         isComplete: w.is_complete,
         percent: w.percent,
         weekNumber: w.week_number,
@@ -358,7 +359,7 @@ export default function PersonalizedRoadmap({
     setCompleteNote('')
     setCompleteRating(0)
     setCompleteTag('')
-    showToast(`🎉 Completed "${task.title}"! Progress updated.`)
+    showToast(`Completed "${task.title}"! Progress updated.`)
   }
 
   const handleOpenRerecommend = (task) => {
@@ -380,7 +381,7 @@ export default function PersonalizedRoadmap({
         // Prefer the real, specific reason (mastery-adjusted / prerequisite
         // gap) when the backend produced one; otherwise the generic
         // confirmation for format/style preferences that don't touch mastery.
-        showToast(res.reasonForChange || `✨ Re-recommended alternative for "${rerecommendTaskTarget.title}"!`)
+        showToast(res.reasonForChange || `Re-recommended alternative for "${rerecommendTaskTarget.title}"!`)
         setRerecommendTaskTarget(null)
       } else {
         showToast(res.reason || 'Could not re-recommend course.')
@@ -412,9 +413,9 @@ export default function PersonalizedRoadmap({
         window.open(pendingTask.resource_url, '_blank')
       }
       toggleTask(pendingTask)
-      showToast(`🚀 Started task: "${pendingTask.title}"`)
+      showToast(`Started task: "${pendingTask.title}"`)
     } else {
-      showToast(`🌟 All tasks for ${selectedWeek} are already completed! Great job!`)
+      showToast(`All tasks for ${selectedWeek} are already completed!`)
     }
   }
 
@@ -1003,7 +1004,7 @@ export default function PersonalizedRoadmap({
                   <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
-                  <span>Completed {selectedWeek} 🎉</span>
+                  <span>Completed {selectedWeek}</span>
                 </span>
               ) : (
                 <span className="inline-flex items-center justify-center gap-2">

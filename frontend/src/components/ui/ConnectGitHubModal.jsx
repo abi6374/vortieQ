@@ -186,7 +186,10 @@ export default function ConnectGitHubModal({ isOpen, onClose, onConnected, onRem
             aria-label="Dismiss banner"
             className="w-7 h-7 rounded-lg flex items-center justify-center text-[#64748B] hover:text-[#0F172A] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer flex-none ml-1"
           >
-            ✕
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
           </button>
         </div>
 
@@ -196,7 +199,7 @@ export default function ConnectGitHubModal({ isOpen, onClose, onConnected, onRem
       <div className="mt-3.5 pt-3 border-t border-[#E2E8F0] dark:border-[#27272F] flex flex-wrap items-center justify-between gap-3 text-xs">
         {syncedUser ? (
           <span className="text-xs font-semibold text-[#027A48] dark:text-emerald-400">
-            ✓ Connected as @{syncedUser}. Roadmap successfully recalibrated.
+            Connected as @{syncedUser}. Roadmap successfully recalibrated.
           </span>
         ) : (
           <div className="flex items-center gap-2.5">
@@ -205,7 +208,10 @@ export default function ConnectGitHubModal({ isOpen, onClose, onConnected, onRem
               onClick={handleRemindLater}
               className="px-3 py-1.5 rounded-xl bg-white/80 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 active:scale-95 border border-[#CBD5E1] dark:border-white/10 hover:border-[#94A3B8] dark:hover:border-white/20 text-[#475569] dark:text-[#CBD5E1] hover:text-[#0F172A] dark:hover:text-white text-xs font-semibold backdrop-blur-md transition-all duration-150 cursor-pointer flex items-center gap-1.5 shadow-2xs group"
             >
-              <span className="text-xs group-hover:rotate-12 transition-transform">⏰</span>
+              <svg className="w-3.5 h-3.5 text-[#0066cc] dark:text-[#38BDF8]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
               <span>Remind me later</span>
             </button>
 

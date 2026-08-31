@@ -1249,7 +1249,7 @@ export default function SkillInsightsScreen() {
                   }}
                   className="px-4 py-2.5 border border-[#0066cc] dark:border-[#27272F] text-[#0066cc] dark:text-[#C9D0D6] hover:bg-[#eaf2fc] dark:hover:bg-[#18181D] font-bold text-xs rounded-xl transition-all cursor-pointer"
                 >
-                  Ask Coach ✨
+                  Ask Coach
                 </button>
               </div>
             </div>

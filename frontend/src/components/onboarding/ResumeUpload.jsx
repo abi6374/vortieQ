@@ -86,10 +86,18 @@ export default function ResumeUpload({ onExtracted, onSkip }) {
             >Choose a different file</button>
           </div>
         ) : (
-          <div>
-            <div className="text-4xl mb-2">📄</div>
-            <p className="text-gray-700 font-medium">Drop your resume here, or click to choose</p>
-            <p className="text-xs text-gray-500 mt-1">PDF or DOCX · max 5MB</p>
+          <div className="flex flex-col items-center">
+            <div className="w-12 h-12 rounded-2xl bg-[#eaf2fc] dark:bg-[#18181D] text-[#0066cc] flex items-center justify-center mb-3">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <path d="M14 2v6h6" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+                <line x1="16" y1="17" x2="8" y2="17" />
+                <polyline points="10 9 9 9 8 9" />
+              </svg>
+            </div>
+            <p className="text-gray-700 dark:text-gray-200 font-medium">Drop your resume here, or click to choose</p>
+            <p className="text-xs text-gray-500 dark:text-[#94A3B8] mt-1">PDF or DOCX · max 5MB</p>
           </div>
         )}
       </label>

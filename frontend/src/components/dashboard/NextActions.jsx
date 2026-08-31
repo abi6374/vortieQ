@@ -44,7 +44,7 @@ export default function NextActions({ steps = [], pathId, onRefresh }) {
       {visibleSteps.length === 0 ? (
         <div className="bg-white dark:bg-[#121216] border border-gray-100 dark:border-[#27272F] rounded-2xl shadow p-8 text-center">
           <p className="text-base font-medium text-gray-600 dark:text-[#CBD5E1]">
-            🎉 You're all caught up! View your full roadmap for more.
+            You're all caught up! View your full roadmap for more.
           </p>
         </div>
       ) : (

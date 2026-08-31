@@ -69,11 +69,11 @@ export default function CameraPiP({
         const vertRatio = bottomLum / (topLum || 1)
 
         if (avgBrightness < 20) {
-          setPostureNotice('⚠️ Low Light')
+          setPostureNotice('Low Light')
         } else if (horizDiff > 0.28) {
-          setPostureNotice('⚠️ Off-Center')
+          setPostureNotice('Off-Center')
         } else if (vertRatio > 1.95) {
-          setPostureNotice('⚠️ Face Low')
+          setPostureNotice('Face Low')
         } else {
           setPostureNotice(null)
         }

@@ -187,11 +187,11 @@ export default function CalibrationModal({
         const vertImbalance = bottomLum / (topLum || 1)
 
         if (avgBrightness < 25) {
-          setPostureNotice('⚠️ Low lighting detected — please face a light source')
+          setPostureNotice('Low lighting detected — please face a light source')
         } else if (horizImbalance > 0.25) {
-          setPostureNotice('⚠️ Posture Notice: Center your face in the camera frame')
+          setPostureNotice('Posture Notice: Center your face in the camera frame')
         } else if (vertImbalance > 1.8) {
-          setPostureNotice('⚠️ Posture Notice: Sit upright — your face is too low in the frame')
+          setPostureNotice('Posture Notice: Sit upright — your face is too low in the frame')
         } else {
           setPostureNotice(null)
         }
@@ -377,7 +377,7 @@ export default function CalibrationModal({
                   <span>Microphone Input Level</span>
                 </div>
                 <span className="text-[#0066cc] dark:text-[#C9D0D6] font-mono">
-                  {hasMic ? (micLevel > 0.05 ? '🎙 Speaking...' : '✓ Ready') : 'Mic Required'}
+                  {hasMic ? (micLevel > 0.05 ? 'Speaking...' : 'Ready') : 'Mic Required'}
                 </span>
               </div>
 
