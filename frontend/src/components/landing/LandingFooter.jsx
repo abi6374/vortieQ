@@ -15,8 +15,8 @@ export default function LandingFooter() {
           {/* Brand & Mission */}
           <div className="md:col-span-2 space-y-4">
             <Link to="/" className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#0066CC] to-[#004FA3] dark:from-[#0066CC] dark:to-[#004FA3] dark:bg-[#0066CC] flex items-center justify-center text-white dark:text-white shadow-md shadow-[#0066CC]/25 dark:shadow-[0_4px_16px_rgba(0,102,204,0.35)] p-1.5">
-                <SkillingLogo size={18} color="#ffffff" />
+              <div className="w-9 h-9 rounded-xl bg-white dark:bg-[#18181D] border border-[#E0E0E0] dark:border-[#27272F] shadow-xs flex items-center justify-center">
+                <SkillingLogo size={24} color="#0066CC" />
               </div>
               <span className="font-sans font-extrabold text-xl tracking-tight text-[#1D1D1F] dark:text-[#F8FAFC]">
                 Skilling

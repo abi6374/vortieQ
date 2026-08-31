@@ -6,17 +6,22 @@ import React from 'react'
  * Used consistently across Navbar, TopBar, Sidebar, Footer, Auth, and Onboarding screens.
  */
 export default function SkillingLogo({
-  size = 20,
+  size = 24,
+  width,
+  height,
   className = '',
-  color = 'currentColor',
+  color = '#0066CC',
   style = {},
   ...props
 }) {
+  const w = width || size
+  const h = height || size
+
   return (
     <svg
-      width={size}
-      height={Math.round(size * 1.25)}
-      viewBox="0 0 100 135"
+      width={w}
+      height={h}
+      viewBox="10 5 88 130"
       fill="none"
       stroke={color}
       strokeLinecap="round"

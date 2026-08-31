@@ -45,8 +45,8 @@ export default function LandingNavbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
         {/* Brand Logo */}
         <Link to="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0066CC] to-[#004FA3] dark:from-[#0066CC] dark:to-[#004FA3] dark:bg-[#0066CC] flex items-center justify-center text-white dark:text-white shadow-md shadow-[#0066CC]/25 dark:shadow-[0_4px_16px_rgba(0,102,204,0.35)] group-hover:scale-105 transition-transform duration-200">
-            <SkillingLogo size={20} color="#ffffff" />
+          <div className="w-10 h-10 rounded-xl bg-white dark:bg-[#18181D] border border-[#E0E0E0] dark:border-[#27272F] shadow-xs flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
+            <SkillingLogo size={26} color="#0066CC" />
           </div>
           <div className="flex flex-col">
             <span className="font-sans font-extrabold text-xl tracking-tight text-[#1D1D1F] dark:text-[#F8FAFC]">

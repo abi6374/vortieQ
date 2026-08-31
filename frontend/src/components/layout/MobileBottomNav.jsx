@@ -32,14 +32,10 @@ export default function MobileBottomNav() {
       <button
         type="button"
         onClick={() => navigate('/dashboard')}
-        className="w-9 h-9 rounded-full flex items-center justify-center mr-0.5 flex-none cursor-pointer border-none p-1.5"
-        style={{
-          background: 'linear-gradient(135deg, #0071e3, #0066cc)',
-          boxShadow: '0 2px 8px rgba(0,102,204,0.3)',
-        }}
+        className="w-9 h-9 rounded-full flex items-center justify-center mr-0.5 flex-none cursor-pointer bg-white dark:bg-[#18181D] border border-[#E0E0E0] dark:border-[#27272F] shadow-xs"
         aria-label="Skilling Home"
       >
-        <SkillingLogo size={16} color="#ffffff" />
+        <SkillingLogo size={22} color="#0066CC" />
       </button>
 
       {NAV.map((item) => {

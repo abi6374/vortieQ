@@ -17,8 +17,8 @@ export default function NavBar({ children }) {
             className="flex items-center gap-2.5 group focus:outline-none cursor-pointer"
             aria-label="Skilling Home"
           >
-            <span className="w-9 h-9 rounded-xl bg-[#dbeafc] dark:bg-[#0066cc] text-[#0066cc] dark:text-white flex items-center justify-center shadow-sm group-hover:bg-[#0066cc] group-hover:text-white dark:group-hover:bg-[#0052A3] dark:group-hover:text-white transition-all p-1.5">
-              <SkillingLogo size={18} />
+            <span className="w-9 h-9 rounded-xl bg-white dark:bg-[#18181D] border border-[#E0E0E0] dark:border-[#27272F] shadow-xs flex items-center justify-center group-hover:scale-105 transition-all">
+              <SkillingLogo size={24} color="#0066CC" />
             </span>
             <span className="font-['Manrope'] font-extrabold text-xl tracking-tight text-[#1d1d1f] dark:text-white">
               Skilling
