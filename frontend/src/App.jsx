@@ -116,8 +116,9 @@ export default function App() {
                   <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/auth" element={<AuthScreen />} />
-              <Route path="/login" element={<AuthScreen />} />
-              <Route path="/register" element={<AuthScreen />} />
+              <Route path="/login" element={<AuthScreen initialMode="signin" />} />
+              <Route path="/register" element={<AuthScreen initialMode="create" />} />
+              <Route path="/signup" element={<AuthScreen initialMode="create" />} />
               <Route
                 path="/onboarding"
                 element={

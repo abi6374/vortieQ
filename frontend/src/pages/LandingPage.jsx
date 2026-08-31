@@ -46,7 +46,7 @@ export default function LandingPage() {
   const isAuthed = Boolean(user || session)
 
   const handleStartRoadmap = () => {
-    navigate(isAuthed ? '/onboarding' : '/auth')
+    navigate(isAuthed ? '/onboarding' : '/auth?mode=create')
   }
 
   const techStackRow1 = [

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { useAuth } from '../../hooks/useAuth'
 import { supabase } from '../../lib/supabaseClient'
@@ -278,12 +278,38 @@ html.dark .pfa .path-deco .node-dest-inner {
   fill: #0066cc;
 }
 
+/* Password validation styles */
+.pfa .pw-meter-bar { width:100%; height:4px; border-radius:999px; background:rgba(0,0,0,0.06); margin-top:8px; overflow:hidden; display:flex; }
+.pfa .pw-meter-fill { height:100%; border-radius:999px; transition:width .25s ease, background-color .25s ease; }
+.pfa .pw-rules { display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:7px; }
+.pfa .pw-rule { display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:600; color:var(--muted); transition:color .15s ease; }
+.pfa .pw-rule.valid { color:#168052; }
+.pfa .pw-rule-dot { width:14px; height:14px; border-radius:50%; display:grid; place-items:center; background:rgba(0,0,0,0.05); color:var(--muted); font-size:9.5px; font-weight:800; transition:all .15s ease; flex-none; }
+.pfa .pw-rule.valid .pw-rule-dot { background:#ECFDF3; color:#168052; border:1px solid #B7E7C9; }
+
+html.dark .pfa .pw-meter-bar { background:rgba(255,255,255,0.08); }
+html.dark .pfa .pw-rule { color:#94A3B8; }
+html.dark .pfa .pw-rule.valid { color:#4ADE80; }
+html.dark .pfa .pw-rule-dot { background:rgba(255,255,255,0.08); color:#94A3B8; }
+html.dark .pfa .pw-rule.valid .pw-rule-dot { background:rgba(34,197,94,0.15); color:#4ADE80; border:1px solid rgba(74,222,128,0.3); }
+
 @media (max-width:900px){ .pfa .app{ grid-template-columns:1fr; min-height:0; height:auto; max-height:none; } .pfa .brand-panel{ border-right:none; border-bottom:1px solid var(--divider); padding:28px 24px; min-height:220px; } .pfa .hero{ padding:16px 0; } .pfa .form-panel{ padding:28px 20px; height:auto; } }
 @media (prefers-reduced-motion:reduce){ .pfa *{ transition:none !important; } .pfa .spin{ animation:none; } }
 `
 
 export default function AuthScreen({ initialMode = 'signin' }) {
-  const [mode, setMode] = useState(initialMode)
+  const location = useLocation()
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  const getModeFromLocation = () => {
+    const param = searchParams.get('mode')
+    if (param === 'create' || param === 'signup' || param === 'register') return 'create'
+    if (param === 'signin' || param === 'login') return 'signin'
+    if (location.pathname === '/register' || location.pathname === '/signup') return 'create'
+    return initialMode
+  }
+
+  const [mode, setMode] = useState(getModeFromLocation)
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -292,6 +318,12 @@ export default function AuthScreen({ initialMode = 'signin' }) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
   const [notice, setNotice] = useState(null) // { type: 'success' | 'error', title: '', message: '' }
+
+  // Sync mode whenever URL search param or pathname changes
+  useEffect(() => {
+    const targetMode = getModeFromLocation()
+    setMode(targetMode)
+  }, [location.search, location.pathname])
 
   // Forgot password & Recovery state
   const [showForgotModal, setShowForgotModal] = useState(false)
@@ -312,6 +344,11 @@ export default function AuthScreen({ initialMode = 'signin' }) {
 
   const isCreate = mode === 'create'
 
+  // Simple password validation checks for Create Account
+  const pwHasMinLength = password.length >= 6
+  const pwHasNumberOrSymbol = /[0-9!@#$%^&*(),.?":{}|<>]/.test(password)
+  const pwStrengthScore = (pwHasMinLength ? 1 : 0) + (pwHasNumberOrSymbol ? 1 : 0)
+
   // Detect recovery link in URL params or hash
   useEffect(() => {
     const hash = typeof window !== 'undefined' ? window.location.hash : ''
@@ -329,6 +366,7 @@ export default function AuthScreen({ initialMode = 'signin' }) {
     setFullName('')
     setEmail('')
     setPassword('')
+    setSearchParams({ mode: m }, { replace: true })
   }
 
   const onField = (setter) => (e) => {
@@ -403,6 +441,17 @@ export default function AuthScreen({ initialMode = 'signin' }) {
 
     try {
       if (isCreate) {
+        if (!pwHasMinLength) {
+          setError('Password must be at least 6 characters long.')
+          setIsLoading(false)
+          return
+        }
+        if (!pwHasNumberOrSymbol) {
+          setError('Password must include at least one number or special character.')
+          setIsLoading(false)
+          return
+        }
+
         // Email auth registration -> show top verification notice, redirect to Sign In with all fields empty
         const targetEmail = email.trim()
         await signUp(targetEmail, password, fullName.trim())
@@ -875,6 +924,38 @@ export default function AuthScreen({ initialMode = 'signin' }) {
                           )}
                         </button>
                       </div>
+
+                      {/* Password Requirements for Create Account */}
+                      {isCreate && (
+                        <div className="pw-validation-box">
+                          {/* Mini Strength Meter Bar */}
+                          <div className="pw-meter-bar">
+                            <div
+                              className="pw-meter-fill"
+                              style={{
+                                width: `${pwStrengthScore === 2 ? 100 : pwStrengthScore === 1 ? 50 : 0}%`,
+                                backgroundColor: pwStrengthScore === 2 ? '#168052' : pwStrengthScore === 1 ? '#E0A100' : 'transparent',
+                              }}
+                            />
+                          </div>
+
+                          {/* Requirements Checklist */}
+                          <div className="pw-rules">
+                            <span className={`pw-rule ${pwHasMinLength ? 'valid' : ''}`}>
+                              <span className="pw-rule-dot">
+                                {pwHasMinLength ? '✓' : '•'}
+                              </span>
+                              At least 6 characters
+                            </span>
+                            <span className={`pw-rule ${pwHasNumberOrSymbol ? 'valid' : ''}`}>
+                              <span className="pw-rule-dot">
+                                {pwHasNumberOrSymbol ? '✓' : '•'}
+                              </span>
+                              Number or symbol
+                            </span>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     {/* Utility row: Remember Me & Forgot Password ONLY on Sign In */}
