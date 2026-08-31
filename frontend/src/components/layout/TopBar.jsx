@@ -2,7 +2,6 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import UserProfileDropdown from '../ui/UserProfileDropdown'
 import ThemeToggle from '../ui/ThemeToggle'
-import SkillingLogo from '../ui/SkillingLogo'
 
 /**
  * TopBar: Full-width Edge-to-Edge Top Application Header (72px)
@@ -27,10 +26,13 @@ export default function TopBar({ children }) {
           aria-label="Skilling Home"
         >
           <span
-            className="grid place-items-center rounded-xl flex-none bg-white dark:bg-[#18181D] border border-[#E0E0E0] dark:border-[#27272F] shadow-xs group-hover:scale-105 transition-transform"
-            style={{ width: 36, height: 36 }}
+            className="grid place-items-center rounded-xl flex-none bg-gradient-to-br from-[#0071e3] to-[#0066cc] shadow-[0_4px_12px_rgba(0,102,204,0.35)] group-hover:scale-105 transition-transform"
+            style={{ width: 34, height: 34 }}
           >
-            <SkillingLogo size={24} color="#0066CC" />
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="9" />
+              <polygon points="16 8 10.5 10.5 8 16 13.5 13.5" fill="#fff" stroke="none" />
+            </svg>
           </span>
           <span className="font-['Manrope'] font-extrabold text-[#1d1d1f] dark:text-white text-[17px] tracking-tight">
             Skilling

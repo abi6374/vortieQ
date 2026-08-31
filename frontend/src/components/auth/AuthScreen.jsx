@@ -4,7 +4,6 @@ import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { useAuth } from '../../hooks/useAuth'
 import { supabase } from '../../lib/supabaseClient'
 import ThemeToggle from '../ui/ThemeToggle'
-import SkillingLogo from '../ui/SkillingLogo'
 
 /**
  * PathFinder sign-in / create-account screen. Split-panel design.
@@ -49,9 +48,10 @@ const STYLES = `
 .pfa .path-deco .node-dest-inner{ fill:#bcd8f6; }
 
 .pfa .brand-inner{ position:relative; z-index:1; display:flex; flex-direction:column; justify-content:space-between; height:100%; }
+.pfa .logo-row{ display:flex; align-items:center; gap:14px; margin-bottom:0; flex:none; }
 .pfa .logo-mark{ width:48px; height:48px; border-radius:14px; flex:none;
-  background:#ffffff; border:1px solid #e0e0e0; display:grid; place-items:center;
-  box-shadow:0 4px 14px rgba(0,102,204,.10); }
+  background:linear-gradient(160deg,var(--violet-2),var(--violet)); display:grid; place-items:center;
+  box-shadow:0 6px 18px rgba(0,102,204,.28); }
 .pfa .logo-name{ font-family:"Manrope",sans-serif; font-weight:800; font-size:clamp(24px,2.2vw,30px); letter-spacing:-.02em; }
 .pfa .hero{ margin:0; padding:16px 0; display:flex; flex-direction:column; justify-content:center; }
 .pfa .hero h1{ font-family:"Manrope",sans-serif; font-weight:800; font-size:clamp(26px,2.6vw,36px);
@@ -716,7 +716,10 @@ export default function AuthScreen({ initialMode = 'signin' }) {
           <div className="brand-inner">
             <div className="logo-row">
               <span className="logo-mark" aria-hidden="true">
-                <SkillingLogo size={30} color="#0066CC" />
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" className="dark:stroke-black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="9" />
+                  <polygon points="16 8 10.5 10.5 8 16 13.5 13.5" fill="#fff" className="dark:fill-black" stroke="none" />
+                </svg>
               </span>
               <span className="logo-name">Skilling</span>
             </div>
