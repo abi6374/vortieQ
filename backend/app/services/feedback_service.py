@@ -257,6 +257,12 @@ Generate the learning path JSON now."""
         "p_new_steps": rpc_steps,
     }).execute().data or []
 
+    try:
+        from app.services import roadmap_service
+        roadmap_service.assign_week_numbers(path_id, weekly_hours=int(profile.get("weekly_hours") or 10))
+    except Exception as e:
+        print(f"[feedback_service] assign_week_numbers after adapt_path failed: {type(e).__name__}: {e}", flush=True)
+
     inserted = []
     for row, (course, milestone_label, explanation) in zip(new_rows, course_by_position):
         inserted.append({

@@ -568,11 +568,6 @@ def assign_week_numbers(path_id: str, weekly_hours: int = 10, target_weeks: int 
             duration = (row.get("courses") or {}).get("duration_hrs") or 3
             course_specs.append({"course_id": cid, "duration_hrs": duration})
 
-    # Always the learner's REAL stated weekly_hours - never inflated to
-    # force-fit a target timeline (see this function's docstring for the
-    # real bug that used to live here). If the honest math needs more weeks
-    # than target_weeks, that's real information for the learner, not
-    # something to hide by lying about their own stated capacity.
     split_plan = plan_weeks_with_splits(course_specs, float(weekly_hours or 10))
     weeks_used = start_week - 1
     for parts in split_plan:  # plan_weeks_with_splits always starts at week 1

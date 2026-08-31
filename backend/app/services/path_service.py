@@ -298,6 +298,24 @@ Generate the learning path JSON now."""
                 flush=True,
             )
 
+    # Budget alignment: if learner specified a target timeline, ensure total course hours
+    # match their stated target_weeks * weekly_hours budget (with 15% tolerance).
+    if target_weeks and target_weeks > 0 and milestones:
+        total_budget = target_weeks * weekly_hours
+        current_hours = sum(
+            course_lookup.get(cid, {}).get("duration_hrs", 10)
+            for m in milestones
+            for cid in m.get("course_ids", [])
+            if cid in course_lookup
+        )
+        if current_hours > total_budget * 1.15:
+            for m in reversed(milestones):
+                cids = [cid for cid in m.get("course_ids", []) if cid in course_lookup]
+                while len(cids) > 1 and current_hours > total_budget * 1.15:
+                    removed_cid = cids.pop()
+                    current_hours -= course_lookup.get(removed_cid, {}).get("duration_hrs", 10)
+                m["course_ids"] = cids
+
     # First pass: resolve every real (non-hallucinated) course id across all
     # milestones, in order, WITHOUT calling the LLM yet - collecting them all
     # first is what lets the next step batch every explanation into one call.
@@ -643,8 +661,13 @@ def swap_step(step_id: str, user_id: str, level_hint: int = 0) -> dict:
         user_id, path["id"], step_id,
         note=f"swapped for {replacement.get('title')} (level_hint={level_hint})",
     )
-    from app.services.roadmap_service import bump_path_version
-    version_info = bump_path_version(path["id"])
+    try:
+        from app.services import roadmap_service
+        roadmap_service.assign_week_numbers(path["id"], weekly_hours=int(profile.get("weekly_hours") or 10))
+        version_info = roadmap_service.bump_path_version(path["id"])
+    except Exception as e:
+        print(f"[path_service] assign_week_numbers/bump after swap failed: {type(e).__name__}: {e}", flush=True)
+        version_info = None
 
     return {
         "swapped": True,
