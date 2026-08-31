@@ -216,7 +216,7 @@ def _assemble_weeks(steps: list) -> tuple[list, int]:
     return weeks, current
 
 
-def get_roadmap(user_id: str) -> dict:
+def get_roadmap(user_id: str, enrich_web: bool = True) -> dict:
     path = _active_path(user_id)
     if not path:
         return {"path": None, "weeks": [], "current_week": None,
@@ -227,14 +227,14 @@ def get_roadmap(user_id: str) -> dict:
     done = sum(1 for s in steps if s["status"] in TERMINAL)
 
     # Only enrich the current week + the next 2 upcoming ones with live web
-    # search — that's what's actually relevant to the learner right now, and
-    # it keeps the common case (loading your dashboard) fast even before the
-    # cache warms up. Everything else gets an empty list, not a missing key.
-    try:
-        relevant = [w for w in weeks if current is not None and current <= w["week_number"] <= current + 2]
-        web_search_service.enrich_with_web_resources(relevant, label_key="milestone_label", steps_key="steps")
-    except Exception as e:
-        print(f"[roadmap_service] web enrichment note: {type(e).__name__}: {e}", flush=True)
+    # search when requested — keeps mutation responses (like task completion)
+    # fast and avoids gateway timeouts on hosted reverse proxies.
+    if enrich_web:
+        try:
+            relevant = [w for w in weeks if current is not None and current <= w["week_number"] <= current + 2]
+            web_search_service.enrich_with_web_resources(relevant, label_key="milestone_label", steps_key="steps")
+        except Exception as e:
+            print(f"[roadmap_service] web enrichment note: {type(e).__name__}: {e}", flush=True)
     for w in weeks:
         w.setdefault("web_resources", [])
 
@@ -437,8 +437,8 @@ def set_task_completion(
     bump_path_version(path_id)
 
     # Return the whole recomputed roadmap so every dependent view can refresh
-    # from one response instead of firing extra requests.
-    return get_roadmap(user_id)
+    # from one response without waiting for duplicate external web searches.
+    return get_roadmap(user_id, enrich_web=False)
 
 
 def rerecommend_task(

@@ -72,6 +72,12 @@ def set_task(
     except ValueError as e:
         idempotency_service.store_result(idempotency_key, 404, {"detail": str(e)})
         raise HTTPException(404, str(e))
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        err_msg = f"Task update failed: {str(e)}"
+        idempotency_service.store_result(idempotency_key, 500, {"detail": err_msg})
+        raise HTTPException(500, err_msg)
 
 
 @router.post("/rerecommend")

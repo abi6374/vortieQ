@@ -42,7 +42,17 @@ const api = axios.create({ baseURL: resolveBaseURL() })
 
 api.interceptors.request.use(async (config) => {
   try {
-    const { data: { session } } = await supabase.auth.getSession()
+    let { data: { session } } = await supabase.auth.getSession()
+    if (session && session.expires_at && (session.expires_at * 1000) < (Date.now() + 30000)) {
+      try {
+        const refreshed = await supabase.auth.refreshSession()
+        if (refreshed?.data?.session) {
+          session = refreshed.data.session
+        }
+      } catch (refreshErr) {
+        console.warn('Session refresh attempt failed:', refreshErr)
+      }
+    }
     if (session?.access_token) {
       config.headers.Authorization = `Bearer ${session.access_token}`
     }
