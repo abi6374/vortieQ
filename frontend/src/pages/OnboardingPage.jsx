@@ -451,8 +451,10 @@ export default function OnboardingPage() {
       {/* 2. Step Content Area */}
       <main
         ref={bgRef}
-        className={`flex-1 h-full min-h-0 flex flex-col items-center justify-center p-3 sm:p-5 lg:p-7 ${
-          phase === 'confidence' || phase === 'skills' ? 'overflow-hidden' : 'overflow-y-auto'
+        className={`flex-1 h-full min-h-0 flex flex-col items-center p-3 sm:p-5 lg:p-7 ${
+          phase === 'confidence' || phase === 'skills'
+            ? 'justify-center overflow-hidden'
+            : 'justify-start overflow-y-auto'
         }`}
       >
         {renderPhaseContent()}
