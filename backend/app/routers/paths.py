@@ -73,6 +73,27 @@ def generate_path(
         raise HTTPException(400, str(e))
 
 
+@router.get("/active")
+def get_active_path(user_id: str = Depends(verify_jwt)):
+    """Returns the learner's active learning path ID and goal summary."""
+    res = (
+        supabase_client.table("learning_paths")
+        .select("id, goal_text, status, created_at")
+        .eq("user_id", user_id)
+        .eq("status", "active")
+        .order("created_at", desc=True)
+        .limit(1)
+        .execute()
+    )
+    if not res.data:
+        return {"path_id": None, "active": False}
+    return {
+        "path_id": res.data[0]["id"],
+        "active": True,
+        "goal_text": res.data[0].get("goal_text"),
+    }
+
+
 @router.get("/{path_id}")
 def get_path(path_id: str, user_id: str = Depends(verify_jwt)):
     try:

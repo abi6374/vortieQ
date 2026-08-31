@@ -185,19 +185,20 @@ export default function OnboardingPage() {
   }
 
   // ------------- Step 4: Goal Compass "Create my learning plan"
-  const runPlan = async (goalTextInput, weeklyHours, targetRoleOverrideInput = '') => {
+  const runPlan = async (goalTextInput, weeklyHours, targetRoleOverrideInput = '', targetWeeksInput = null) => {
     const prev = lastPlanArgs.current
     const isSameSubmission = prev
       && prev.goalTextInput === goalTextInput
       && prev.weeklyHours === weeklyHours
       && prev.targetRoleOverrideInput === targetRoleOverrideInput
+      && prev.targetWeeksInput === targetWeeksInput
     if (!isSameSubmission) {
       planIdempotencyKey.current = null
     }
     if (!planIdempotencyKey.current) {
       planIdempotencyKey.current = genIdempotencyKey()
     }
-    lastPlanArgs.current = { goalTextInput, weeklyHours, targetRoleOverrideInput }
+    lastPlanArgs.current = { goalTextInput, weeklyHours, targetRoleOverrideInput, targetWeeksInput }
     if (targetRoleOverrideInput) setTargetRoleOverride(targetRoleOverrideInput)
 
     setGenStatus('loading')
