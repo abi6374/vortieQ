@@ -250,9 +250,9 @@ export default function CalibrationModal({
   const canProceed = permissionState === 'granted' && hasMic
 
   return (
-    <div className="w-full max-w-[1100px] mx-auto my-auto flex flex-col font-['Inter',sans-serif] text-[#1d1d1f] dark:text-white select-none py-2 sm:py-4">
+    <div className="w-full max-w-[1180px] mx-auto my-auto flex flex-col font-['Inter',sans-serif] text-[#1d1d1f] dark:text-white select-none py-3 sm:py-6">
       {/* Page Header */}
-      <header className="mb-3 flex flex-row items-center justify-between gap-3 flex-none">
+      <header className="mb-3.5 flex flex-row items-center justify-between gap-3 flex-none">
         <div>
           <div className="flex items-center gap-2 mb-0.5">
             <h1 className="font-['Manrope'] font-extrabold text-xl sm:text-2xl text-[#1d1d1f] dark:text-white tracking-tight">
@@ -270,7 +270,7 @@ export default function CalibrationModal({
         <button
           type="button"
           onClick={handleExit}
-          className="px-3.5 py-1.5 rounded-xl text-xs font-bold text-[#6e6e73] dark:text-[#94A3B8] hover:text-[#1d1d1f] dark:hover:text-white border border-[#e0e0e0] dark:border-[#27272F] bg-white dark:bg-[#121216] shadow-xs hover:border-[#0066cc]/30 dark:hover:border-[#C9D0D6]/30 transition-colors cursor-pointer flex items-center gap-1.5 flex-none"
+          className="px-4 py-2 rounded-xl text-xs font-bold text-[#6e6e73] dark:text-[#94A3B8] hover:text-[#1d1d1f] dark:hover:text-white border border-[#e0e0e0] dark:border-[#27272F] bg-white dark:bg-[#121216] shadow-xs hover:border-[#0066cc]/30 dark:hover:border-[#C9D0D6]/30 transition-colors cursor-pointer flex items-center gap-1.5 flex-none"
         >
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <line x1="18" y1="6" x2="6" y2="18" />
@@ -280,14 +280,14 @@ export default function CalibrationModal({
         </button>
       </header>
 
-      {/* Main Container Card — Compact and Centered */}
-      <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-4 sm:p-6 shadow-sm flex flex-col justify-center">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start w-full">
+      {/* Main Container Card — Spacious and Centered */}
+      <div className="bg-white dark:bg-[#121216] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-5 sm:p-7 shadow-sm flex flex-col justify-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-7 items-start w-full">
 
           {/* ── Left Column: Camera Preview & Hardware Meters (7 cols) ── */}
-          <div className="lg:col-span-7 flex flex-col gap-3 justify-center">
+          <div className="lg:col-span-7 flex flex-col gap-3.5 justify-center">
             {/* Live Camera Viewport */}
-            <div className="relative w-full rounded-xl bg-slate-900 overflow-hidden border border-slate-700/60 shadow-md flex items-center justify-center aspect-video max-h-[260px]">
+            <div className="relative w-full rounded-2xl bg-slate-900 overflow-hidden border border-slate-700/60 shadow-md flex items-center justify-center aspect-video max-h-[290px]">
               {hasCamera && !voiceOnlyFallback ? (
                 <video
                   ref={videoPreviewRef}
@@ -297,12 +297,12 @@ export default function CalibrationModal({
                   className="w-full h-full object-cover transform -scale-x-100"
                 />
               ) : (
-                <div className="flex flex-col items-center justify-center p-4 text-center text-slate-400">
-                  <div className="w-11 h-11 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center mb-1.5 shadow-inner">
+                <div className="flex flex-col items-center justify-center p-5 text-center text-slate-400">
+                  <div className="w-12 h-12 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center mb-2 shadow-inner">
                     {permissionState === 'checking' ? (
-                      <div className="w-5 h-5 rounded-full border-2 border-[#0066cc] dark:border-[#C9D0D6] border-t-transparent animate-spin" />
+                      <div className="w-6 h-6 rounded-full border-2 border-[#0066cc] dark:border-[#C9D0D6] border-t-transparent animate-spin" />
                     ) : (
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
                         <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
                       </svg>
@@ -317,7 +317,7 @@ export default function CalibrationModal({
                           ? 'Camera/Mic Permission Denied'
                           : 'Waiting for camera permission'}
                   </span>
-                  <span className="text-[11px] text-slate-400 mt-1 max-w-xs leading-tight">
+                  <span className="text-[11.5px] text-slate-400 mt-1 max-w-xs leading-tight">
                     {permissionState === 'denied'
                       ? 'Please allow camera and microphone access in your browser settings.'
                       : voiceOnlyFallback
@@ -328,7 +328,7 @@ export default function CalibrationModal({
                     <button
                       type="button"
                       onClick={() => requestMediaAccess(true)}
-                      className="mt-2 px-3 py-1.5 rounded-lg text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 hover:bg-amber-500/30 transition-colors cursor-pointer"
+                      className="mt-2.5 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 hover:bg-amber-500/30 transition-colors cursor-pointer"
                     >
                       Continue in Voice-Only Mode
                     </button>
@@ -373,7 +373,7 @@ export default function CalibrationModal({
             </div>
 
             {/* Mic Meter & Noise Indicator */}
-            <div className="p-3 rounded-xl bg-[#f5f5f7] dark:bg-[#18181D] border border-[#e0e0e0] dark:border-[#27272F] flex flex-col gap-1.5 flex-none">
+            <div className="p-3.5 rounded-xl bg-[#f5f5f7] dark:bg-[#18181D] border border-[#e0e0e0] dark:border-[#27272F] flex flex-col gap-2 flex-none">
               <div className="flex items-center justify-between text-xs font-bold">
                 <div className="flex items-center gap-1.5 text-[#1d1d1f] dark:text-white">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0066cc" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -416,14 +416,14 @@ export default function CalibrationModal({
             </div>
 
             {/* Privacy Note */}
-            <div className="text-[11px] text-[#6e6e73] dark:text-[#94A3B8] leading-tight bg-[#eaf2fc]/60 dark:bg-[#18181D]/60 p-2.5 rounded-xl border border-[#0066cc]/10 dark:border-[#27272F] flex-none">
+            <div className="text-[11.5px] text-[#6e6e73] dark:text-[#94A3B8] leading-tight bg-[#eaf2fc]/60 dark:bg-[#18181D]/60 p-3 rounded-xl border border-[#0066cc]/10 dark:border-[#27272F] flex-none">
               <span className="font-bold text-[#1d1d1f] dark:text-slate-200">Privacy & Consent:</span> Camera and microphone feeds are processed locally in your browser. Video is never uploaded to any external server.
             </div>
           </div>
 
           {/* ── Right Column: Track & Settings Selection (5 cols) ── */}
-          <div className="lg:col-span-5 flex flex-col gap-3 justify-center">
-            <div className="flex flex-col gap-2.5">
+          <div className="lg:col-span-5 flex flex-col gap-3.5 justify-center">
+            <div className="flex flex-col gap-3">
               <div className="flex flex-col">
                 <label className="block text-[11px] font-bold uppercase tracking-wider text-[#6e6e73] dark:text-[#94A3B8] mb-1.5 flex-none">
                   Select Interview Track
@@ -436,7 +436,7 @@ export default function CalibrationModal({
                         key={t.id}
                         type="button"
                         onClick={() => setSelectedTrack(t.id)}
-                        className={`p-2.5 rounded-xl text-left border transition-all cursor-pointer flex flex-col gap-0.5 flex-none ${isSelected
+                        className={`p-3 rounded-xl text-left border transition-all cursor-pointer flex flex-col gap-0.5 flex-none ${isSelected
                           ? 'bg-[#eaf2fc] dark:bg-[rgba(201,208,214,0.15)] border-[#0066cc] dark:border-[#C9D0D6] shadow-2xs'
                           : 'bg-white dark:bg-[#121216] border-[#e0e0e0] dark:border-[#27272F] hover:border-[#0066cc]/40 dark:hover:border-[#C9D0D6]/40'
                           }`}
@@ -445,11 +445,11 @@ export default function CalibrationModal({
                           <span className={`text-xs font-bold leading-tight ${isSelected ? 'text-[#0066cc] dark:text-[#C9D0D6]' : 'text-[#1d1d1f] dark:text-white'}`}>
                             {t.name}
                           </span>
-                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#f5f5f7] dark:bg-white/10 text-[#64748b] dark:text-slate-300">
+                          <span className="text-[9.5px] font-bold px-2 py-0.5 rounded bg-[#f5f5f7] dark:bg-white/10 text-[#64748b] dark:text-slate-300">
                             {t.badge}
                           </span>
                         </div>
-                        <p className="text-[10px] text-[#6e6e73] dark:text-[#94A3B8] line-clamp-1 leading-snug">
+                        <p className="text-[10.5px] text-[#6e6e73] dark:text-[#94A3B8] line-clamp-1 leading-snug">
                           {t.description}
                         </p>
                       </button>
@@ -468,7 +468,7 @@ export default function CalibrationModal({
                   placeholder="e.g. Next.js 14, Kafka Streams, GraphQL, PyTorch"
                   value={customTopic}
                   onChange={(e) => setCustomTopic(e.target.value)}
-                  className="w-full px-3 py-1.5 rounded-lg border border-[#d2d2d7] dark:border-[#27272F] bg-white dark:bg-[#0E0E12] text-xs text-[#1d1d1f] dark:text-white placeholder:text-[#999999] focus:border-[#0066cc] dark:focus:border-[#C9D0D6] focus:outline-hidden transition-colors"
+                  className="w-full px-3.5 py-2 rounded-xl border border-[#d2d2d7] dark:border-[#27272F] bg-white dark:bg-[#0E0E12] text-xs text-[#1d1d1f] dark:text-white placeholder:text-[#999999] focus:border-[#0066cc] dark:focus:border-[#C9D0D6] focus:outline-hidden transition-colors"
                 />
               </div>
 
@@ -477,13 +477,13 @@ export default function CalibrationModal({
                 <label className="block text-[11px] font-bold uppercase tracking-wider text-[#6e6e73] dark:text-[#94A3B8] mb-1">
                   Interview Length
                 </label>
-                <div className="flex gap-1.5">
+                <div className="flex gap-2">
                   {[3, 4, 5].map((cnt) => (
                     <button
                       key={cnt}
                       type="button"
                       onClick={() => setQuestionCount(cnt)}
-                      className={`flex-1 py-1.5 rounded-lg text-xs font-bold border transition-all cursor-pointer ${questionCount === cnt
+                      className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${questionCount === cnt
                         ? 'bg-[#0066cc] text-white border-[#0066cc] shadow-2xs'
                         : 'bg-white dark:bg-[#121216] border-[#e0e0e0] dark:border-[#27272F] text-[#1d1d1f] dark:text-white hover:bg-[#f5f5f7] dark:hover:bg-[#18181D]'
                         }`}
@@ -496,7 +496,7 @@ export default function CalibrationModal({
             </div>
 
             {/* Actions & Start CTA */}
-            <div className="flex flex-col gap-2 pt-2.5 border-t border-[#f0f0f0] dark:border-[#27272F] flex-none">
+            <div className="flex flex-col gap-2.5 pt-3 border-t border-[#f0f0f0] dark:border-[#27272F] flex-none">
               {!hasCamera && permissionState === 'granted' && (
                 <div className="text-[11px] text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 border border-amber-500/20 p-1.5 rounded-lg text-center font-medium">
                   Camera not detected — continuing in Voice-Only mode
@@ -507,7 +507,7 @@ export default function CalibrationModal({
                 type="button"
                 disabled={!canProceed}
                 onClick={handleStartInterview}
-                className="w-full py-2.5 sm:py-3 px-4 rounded-xl text-xs sm:text-sm font-bold text-white bg-gradient-to-r from-[#0071e3] to-[#0066cc] hover:from-[#0077ed] hover:to-[#005bb5] disabled:opacity-40 disabled:cursor-not-allowed shadow-md shadow-[#0066cc]/25 transition-all flex items-center justify-center gap-2 cursor-pointer border-none"
+                className="w-full py-3 sm:py-3.5 px-4 rounded-xl text-xs sm:text-sm font-bold text-white bg-gradient-to-r from-[#0071e3] to-[#0066cc] hover:from-[#0077ed] hover:to-[#005bb5] disabled:opacity-40 disabled:cursor-not-allowed shadow-md shadow-[#0066cc]/25 transition-all flex items-center justify-center gap-2 cursor-pointer border-none"
               >
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-white">
                   <circle cx="12" cy="12" r="10" />
@@ -520,7 +520,7 @@ export default function CalibrationModal({
                 <button
                   type="button"
                   onClick={() => requestMediaAccess(true)}
-                  className="text-[11px] text-[#6e6e73] dark:text-[#94A3B8] hover:text-[#0066cc] dark:hover:text-[#38BDF8] underline cursor-pointer transition-colors"
+                  className="text-[11.5px] text-[#6e6e73] dark:text-[#94A3B8] hover:text-[#0066cc] dark:hover:text-[#38BDF8] underline cursor-pointer transition-colors"
                 >
                   Switch to Voice-Only Mode
                 </button>
