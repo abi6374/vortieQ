@@ -113,12 +113,6 @@ export default function UserProfileDropdown({ light = false }) {
                 <p className="text-xs text-[#7a7a7a] dark:text-[#A1A1AA] truncate">{email}</p>
               </div>
             </div>
-            <div className="mt-2.5 flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-[#22A06B] shadow-[0_0_8px_rgba(34,160,107,0.6)]" />
-              <span className="text-[11px] font-semibold text-[#333333] dark:text-[#E2E8F0]">
-                Active Learner
-              </span>
-            </div>
           </div>
 
           {/* Core Profile & Navigation Options */}

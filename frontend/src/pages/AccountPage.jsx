@@ -6,46 +6,22 @@ import api from '../lib/apiClient'
 import { supabase } from '../lib/supabaseClient'
 
 /**
- * Account & Settings — Unified Account, Profile, and Preferences screen.
+ * Account & Settings — Unified Account and Settings screen.
  * Contains:
- * 1. "Account & Profile" section: Personal details, Career goals, GitHub integration, and danger zone.
- * 2. "Preferences & Settings" section: Study schedule pacing, content formats, notifications, and AI rules.
+ * 1. "Account" section: Personal details, Career goals, and GitHub integration.
+ * 2. "Settings" section: Study schedule pacing and preferred content formats.
  */
 
 const V = '#0066cc'
 const FIELD = 'w-full rounded-xl border border-[#e0e0e0] dark:border-[#27272F] bg-white dark:bg-[#0E0E12] px-3.5 py-2.5 text-[14.5px] text-[#1d1d1f] dark:text-white outline-none focus:border-[#0066cc] dark:focus:border-[#C9D0D6] focus:ring-[3px] focus:ring-[#0066cc]/20 dark:focus:ring-[#C9D0D6]/20 transition-colors'
 const LABEL = 'block text-[13.5px] font-semibold text-[#1d1d1f] dark:text-[#CBD5E1] mb-1.5'
 
-function Toggle({ checked, onChange, label, hint }) {
-  return (
-    <label className="flex items-start gap-3.5 cursor-pointer py-2.5">
-      <button
-        type="button"
-        role="switch"
-        aria-checked={checked}
-        onClick={() => onChange(!checked)}
-        className="relative rounded-full flex-none transition-colors mt-0.5 cursor-pointer"
-        style={{ width: 42, height: 24, background: checked ? V : '#94A3B8' }}
-      >
-        <span
-          className="absolute rounded-full bg-white transition-all shadow-xs"
-          style={{ width: 18, height: 18, top: 3, left: checked ? 21 : 3 }}
-        />
-      </button>
-      <span>
-        <span className="block text-[14px] font-semibold text-[#1d1d1f] dark:text-white">{label}</span>
-        {hint && <span className="block text-[12.5px] text-[#7a7a7a] dark:text-[#94A3B8] mt-0.5">{hint}</span>}
-      </span>
-    </label>
-  )
-}
-
 const FORMATS = ['course', 'video', 'article', 'practice', 'project', 'documentation']
 
 export default function AccountPage() {
   const { user, profile, updateProfile, linkGithub, refreshProfile } = useAuth()
   
-  // ─── Account & Profile State ───
+  // ─── Account State ───
   const [me, setMe] = useState(null)
   const [form, setForm] = useState({})
   const [loading, setLoading] = useState(true)
@@ -53,7 +29,7 @@ export default function AccountPage() {
   const [toast, setToast] = useState(null)
   const [error, setError] = useState(null)
 
-  // ─── Preferences & Settings State ───
+  // ─── Settings State ───
   const [s, setS] = useState(null)
   const [settingsSaving, setSettingsSaving] = useState(false)
   const [settingsToast, setSettingsToast] = useState(null)
@@ -89,9 +65,6 @@ export default function AccountPage() {
           target_date: '2026-08-14',
           difficulty_preference: 'adaptive',
           preferred_formats: ['course', 'video', 'article', 'practice'],
-          email_notifications: true,
-          reminder_notifications: true,
-          ai_suggestions: true,
         })
       }
     } catch {
@@ -138,10 +111,10 @@ export default function AccountPage() {
     setSettingsError(null)
     try {
       await api.patch('/api/settings', delta)
-      setSettingsToast('Saved preferences')
+      setSettingsToast('Saved settings')
       setTimeout(() => setSettingsToast(null), 2400)
     } catch {
-      setSettingsError('Could not save preference. Check connection.')
+      setSettingsError('Could not save setting. Check connection.')
     } finally {
       setSettingsSaving(false)
     }
@@ -303,6 +276,13 @@ export default function AccountPage() {
       .join('')
       .toUpperCase() || 'P'
 
+  const scrollToSection = (id) => {
+    const el = document.getElementById(id)
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
+
   return (
     <AppShell activePage="account">
       <div className="w-full font-['Inter',sans-serif] text-[#1d1d1f] dark:text-white pb-12">
@@ -312,13 +292,13 @@ export default function AccountPage() {
             Account & Settings
           </h1>
           <p className="text-sm sm:text-base text-[#333333] dark:text-[#94A3B8] mt-1">
-            Manage your personal profile, career ambition, study schedule, and platform preferences in one place.
+            Manage your personal profile, career ambition, study schedule, and platform settings in one place.
           </p>
         </header>
 
         {loading ? (
           <div className="p-8 text-center text-[#7a7a7a] dark:text-[#94A3B8] text-sm bg-white dark:bg-[#121216] rounded-2xl border border-[#e0e0e0] dark:border-[#27272F]">
-            Loading account & preferences…
+            Loading account & settings…
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-7 items-start w-full">
@@ -326,9 +306,9 @@ export default function AccountPage() {
             <div className="lg:col-span-8 space-y-9">
               
               {/* =========================================================================
-                  SECTION 1: ACCOUNT & PROFILE
+                  SECTION 1: ACCOUNT
                  ========================================================================= */}
-              <section className="space-y-6" aria-labelledby="section-account-profile">
+              <section id="section-account" className="space-y-6 scroll-mt-24" aria-labelledby="section-account-title">
                 <div className="flex items-center gap-2.5 pb-2 border-b border-[#e0e0e0] dark:border-[#27272F]">
                   <span className="w-8 h-8 rounded-xl bg-[#eaf2fc] dark:bg-[#18181D] text-[#0066cc] dark:text-[#C9D0D6] flex items-center justify-center flex-none">
                     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -337,8 +317,8 @@ export default function AccountPage() {
                     </svg>
                   </span>
                   <div>
-                    <h2 id="section-account-profile" className="font-['Manrope'] font-extrabold text-xl text-[#1d1d1f] dark:text-white">
-                      Account & Profile
+                    <h2 id="section-account-title" className="font-['Manrope'] font-extrabold text-xl text-[#1d1d1f] dark:text-white">
+                      Account
                     </h2>
                     <p className="text-xs text-[#7a7a7a] dark:text-[#94A3B8]">
                       Your identity, career direction, and developer connections
@@ -609,9 +589,9 @@ export default function AccountPage() {
               </section>
 
               {/* =========================================================================
-                  SECTION 2: PREFERENCES & SETTINGS
+                  SECTION 2: SETTINGS
                  ========================================================================= */}
-              <section className="space-y-6 pt-6 border-t border-[#e0e0e0] dark:border-[#27272F]" aria-labelledby="section-preferences-settings">
+              <section id="section-settings" className="space-y-6 pt-6 border-t border-[#e0e0e0] dark:border-[#27272F] scroll-mt-24" aria-labelledby="section-settings-title">
                 <div className="flex items-center gap-2.5 pb-2 border-b border-[#e0e0e0] dark:border-[#27272F]">
                   <span className="w-8 h-8 rounded-xl bg-[#eaf2fc] dark:bg-[#18181D] text-[#0066cc] dark:text-[#C9D0D6] flex items-center justify-center flex-none">
                     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -620,11 +600,11 @@ export default function AccountPage() {
                     </svg>
                   </span>
                   <div>
-                    <h2 id="section-preferences-settings" className="font-['Manrope'] font-extrabold text-xl text-[#1d1d1f] dark:text-white">
-                      Preferences & Settings
+                    <h2 id="section-settings-title" className="font-['Manrope'] font-extrabold text-xl text-[#1d1d1f] dark:text-white">
+                      Settings
                     </h2>
                     <p className="text-xs text-[#7a7a7a] dark:text-[#94A3B8]">
-                      Study pacing, resource formats, proactive AI rules, and notifications
+                      Study schedule pacing and preferred learning formats
                     </p>
                   </div>
                 </div>
@@ -741,47 +721,6 @@ export default function AccountPage() {
                       </div>
                     </div>
 
-                    {/* Notifications & Proactive AI */}
-                    <div className="pf-glass-card p-6 shadow-2xs">
-                      <div className="flex items-center gap-3 mb-4">
-                        <span className="w-9 h-9 rounded-xl bg-[#eaf2fc] dark:bg-[#18181D] text-[#0066cc] dark:text-[#C9D0D6] border border-transparent dark:border-[rgba(201,208,214,0.15)] flex items-center justify-center flex-none">
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-                          </svg>
-                        </span>
-                        <div>
-                          <h3 className="font-['Manrope'] font-bold text-[16px] text-[#1d1d1f] dark:text-white">
-                            Notifications & Proactive AI
-                          </h3>
-                          <p className="text-xs text-[#7a7a7a] dark:text-[#94A3B8]">
-                            Control how PathFinder keeps you accountable and engaged
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="divide-y divide-[#f5f5f7] dark:divide-[#202026]">
-                        <Toggle
-                          checked={!!s.email_notifications}
-                          label="Email Progress Summaries"
-                          hint="Weekly recap of completed modules, skill progress, and milestone achievements."
-                          onChange={(v) => patchSettings({ email_notifications: v })}
-                        />
-                        <Toggle
-                          checked={!!s.reminder_notifications}
-                          label="Daily Study Reminders"
-                          hint="Contextual prompts aligned with your target completion date."
-                          onChange={(v) => patchSettings({ reminder_notifications: v })}
-                        />
-                        <Toggle
-                          checked={!!s.ai_suggestions}
-                          label="Real-time AI Recommendation Tuning"
-                          hint="Allow AI Coach to suggest next steps based on quiz performance and GitHub commits."
-                          onChange={(v) => patchSettings({ ai_suggestions: v })}
-                        />
-                      </div>
-                    </div>
-
                     {settingsError && (
                       <p className="text-[13.5px] text-[#B42318] dark:text-red-400 bg-[#FDECEC] dark:bg-red-950/40 border border-[#F3B9B9] dark:border-red-800/60 rounded-xl px-4 py-2.5">
                         {settingsError}
@@ -802,7 +741,7 @@ export default function AccountPage() {
             </div>
 
             {/* Right Rail Context & Quick Insights: 4 cols on desktop */}
-            <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-4">
+            <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-6">
               {/* Learner Identity Summary Card */}
               <div className="pf-glass-card p-6 shadow-2xs">
                 <div className="flex items-center gap-4 mb-4">
@@ -814,12 +753,6 @@ export default function AccountPage() {
                       {fullName}
                     </h3>
                     <p className="text-xs text-[#7a7a7a] dark:text-[#94A3B8] truncate">{email}</p>
-                    <div className="mt-1.5 flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-[#22A06B]" />
-                      <span className="text-[11px] font-semibold text-[#22A06B] dark:text-emerald-400">
-                        Active Learner
-                      </span>
-                    </div>
                   </div>
                 </div>
 
@@ -850,21 +783,23 @@ export default function AccountPage() {
                 <h4 className="font-['Manrope'] font-bold text-xs uppercase tracking-wider text-[#7a7a7a] dark:text-[#94A3B8]">
                   Quick Navigation
                 </h4>
-                <div className="space-y-1 pt-1">
-                  <a
-                    href="#section-account-profile"
-                    className="flex items-center justify-between p-2.5 rounded-xl hover:bg-[#eaf2fc] dark:hover:bg-[#18181D] text-xs font-semibold text-[#333333] dark:text-[#CBD5E1] hover:text-[#0066cc] dark:hover:text-[#C9D0D6] transition-colors"
+                <div className="space-y-1.5 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => scrollToSection('section-account')}
+                    className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-[#eaf2fc] dark:hover:bg-[#18181D] text-xs font-bold text-[#333333] dark:text-[#CBD5E1] hover:text-[#0066cc] dark:hover:text-[#C9D0D6] transition-colors cursor-pointer text-left"
                   >
-                    <span>1. Account & Profile</span>
+                    <span>1. Account</span>
                     <span>→</span>
-                  </a>
-                  <a
-                    href="#section-preferences-settings"
-                    className="flex items-center justify-between p-2.5 rounded-xl hover:bg-[#eaf2fc] dark:hover:bg-[#18181D] text-xs font-semibold text-[#333333] dark:text-[#CBD5E1] hover:text-[#0066cc] dark:hover:text-[#C9D0D6] transition-colors"
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => scrollToSection('section-settings')}
+                    className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-[#eaf2fc] dark:hover:bg-[#18181D] text-xs font-bold text-[#333333] dark:text-[#CBD5E1] hover:text-[#0066cc] dark:hover:text-[#C9D0D6] transition-colors cursor-pointer text-left"
                   >
-                    <span>2. Preferences & Settings</span>
+                    <span>2. Settings</span>
                     <span>→</span>
-                  </a>
+                  </button>
                 </div>
               </div>
 
