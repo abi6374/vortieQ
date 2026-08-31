@@ -13,6 +13,7 @@ mirror of this, so a crafted request can't complete week 5 first.
 """
 
 from datetime import datetime, timezone
+import math
 
 from app.config import supabase_client
 from app.services import web_search_service
@@ -437,7 +438,7 @@ def rerecommend_task(
     return roadmap
 
 
-def assign_week_numbers(path_id: str, weekly_hours: int = 10) -> None:
+def assign_week_numbers(path_id: str, weekly_hours: int = 10, target_weeks: int | None = None) -> None:
     """(Re)plan week numbers for a path's NOT-YET-STARTED steps, splitting a
     course across multiple weeks (multiple path_steps rows sharing one
     course_id, "Part 1 of 2" etc.) if its real duration doesn't fit the
@@ -462,14 +463,27 @@ def assign_week_numbers(path_id: str, weekly_hours: int = 10) -> None:
     if not rows:
         return
 
+    # Extract target_weeks from path goal_text if not explicitly passed
+    if target_weeks is None:
+        path_info = (
+            supabase_client.table("learning_paths").select("goal_text").eq("id", path_id).limit(1).execute()
+        ).data or []
+        if path_info:
+            from app.services.profile_service import extract_target_weeks
+            target_weeks = extract_target_weeks(path_info[0].get("goal_text"))
+
+    # Career roadmap bounds: respect learner's target_weeks or cap at a realistic max 24 weeks
+    max_allowed_weeks = target_weeks or 24
+
     if not has_parts:
         # Pre-migration fallback: identical to the original behavior.
         durations = [((s.get("courses") or {}).get("duration_hrs") or 5) for s in rows]
         avg = sum(durations) / len(durations) if durations else 5
         per_week = max(1, round((weekly_hours or 10) / avg)) if avg else 1
         for idx, s in enumerate(rows):
+            w = min((idx // per_week) + 1, max_allowed_weeks)
             supabase_client.table("path_steps").update(
-                {"week_number": (idx // per_week) + 1}
+                {"week_number": w}
             ).eq("id", s["id"]).execute()
         return
 
@@ -493,10 +507,18 @@ def assign_week_numbers(path_id: str, weekly_hours: int = 10) -> None:
             duration = (row.get("courses") or {}).get("duration_hrs") or 3
             course_specs.append({"course_id": cid, "duration_hrs": duration})
 
-    split_plan = plan_weeks_with_splits(course_specs, weekly_hours)
+    # Pace the curriculum to fit within max_allowed_weeks so it doesn't balloon to 66/69 weeks
+    total_pending_duration = sum(spec.get("duration_hrs") or 0 for spec in course_specs)
+    available_weeks = max(1, max_allowed_weeks - start_week + 1)
+    if total_pending_duration > 0 and available_weeks > 0:
+        effective_weekly_hours = max(float(weekly_hours or 10), math.ceil(total_pending_duration / available_weeks))
+    else:
+        effective_weekly_hours = float(weekly_hours or 10)
+
+    split_plan = plan_weeks_with_splits(course_specs, effective_weekly_hours)
     for parts in split_plan:  # plan_weeks_with_splits always starts at week 1
         for p in parts:
-            p["week_number"] += start_week - 1
+            p["week_number"] = min(p["week_number"] + start_week - 1, max_allowed_weeks)
 
     next_seq = max((r.get("sequence_order") or 0) for r in rows) + 1
     for spec, parts in zip(course_specs, split_plan):

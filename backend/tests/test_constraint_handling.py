@@ -116,3 +116,36 @@ class TestIdempotencyRequestHashConstraintLike:
                 "key-1", "user-1", "steps.swap", request_payload={"step_id": "DIFFERENT_STEP"},
             )
         assert result["status"] == 409
+
+
+class TestTargetTimelineConstraints:
+    """Verifies that requested timelines (e.g. 13 weeks) are correctly parsed
+    and that roadmap week assignment never balloons to 66 or 69 weeks."""
+
+    def test_extract_target_weeks(self):
+        from app.services.profile_service import extract_target_weeks
+
+        assert extract_target_weeks("I want to become a full stack developer in 13 weeks") == 13
+        assert extract_target_weeks("13 weeks") == 13
+        assert extract_target_weeks("12-week roadmap") == 12
+        assert extract_target_weeks("within 3 months") == 13
+        assert extract_target_weeks("within 6 months") == 26
+        assert extract_target_weeks("General Software Engineer") is None
+
+    def test_week_packing_bounds_within_target_weeks(self):
+        from app.services.roadmap_service import plan_weeks_with_splits
+        import math
+
+        sample_courses = [
+            {"course_id": f"c{i}", "duration_hrs": 20}
+            for i in range(7)  # 140 total hours
+        ]
+        target_weeks = 13
+        user_weekly_hours = 2  # Low weekly hours that previously blew up to 70 weeks
+
+        # Effective pacing formula
+        effective_hours = max(user_weekly_hours, math.ceil(140 / target_weeks))
+        plan = plan_weeks_with_splits(sample_courses, effective_hours)
+
+        max_week = max(p["week_number"] for parts in plan for p in parts)
+        assert max_week <= target_weeks  # Must strictly finish within 13 weeks!

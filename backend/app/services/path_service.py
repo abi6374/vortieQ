@@ -172,8 +172,18 @@ def generate_path(user_id: str, profile: dict) -> dict:
     ]
 
 
+    from app.services.profile_service import extract_target_weeks
+    target_weeks = profile.get("target_weeks") or extract_target_weeks(profile.get("goal_text"), profile)
+    weekly_hours = int(profile.get("weekly_hours") or 10)
+    enriched_profile_for_llm = {
+        **profile,
+        "target_timeline_weeks": target_weeks or (12 if weekly_hours >= 10 else 16),
+        "weekly_hours": weekly_hours,
+        "total_hours_budget": (target_weeks or (12 if weekly_hours >= 10 else 16)) * weekly_hours,
+    }
+
     user_msg = f"""<<<LEARNER_TEXT>>>
-{json.dumps(profile, indent=2, default=str)}
+{json.dumps(enriched_profile_for_llm, indent=2, default=str)}
 <<<END_LEARNER_TEXT>>>
 
 CANDIDATE COURSES (use ONLY these course IDs):
@@ -345,7 +355,7 @@ Generate the learning path JSON now."""
     # from the rows as originally inserted, is now stale relative to the DB.
     try:
         from app.services import roadmap_service
-        roadmap_service.assign_week_numbers(path_id, int(profile.get("weekly_hours") or 10))
+        roadmap_service.assign_week_numbers(path_id, weekly_hours, target_weeks=target_weeks)
         # Re-fetch so the response actually matches the DB (real split parts,
         # if any) instead of returning the pre-split in-memory structure. The
         # frontend only ever reads path_id off this response today (it

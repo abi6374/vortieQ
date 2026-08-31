@@ -14,12 +14,13 @@ Return ONLY a valid JSON object with exactly these keys:
 - "current_level": string — must be exactly one of: "beginner", "intermediate", "advanced"
 - "interests": array of strings — 2 to 6 specific skill keywords (e.g. "python", "machine learning", "react")
 - "weekly_hours": integer — hours per week they can study (between 5 and 40)
+- "target_weeks": integer or null — target timeline in weeks if specified by the learner (e.g. 13 for "13 weeks", 12 for "3 months", 24 for "6 months", null if unspecified)
 
 Do NOT include any text, explanation, or markdown formatting outside the JSON object.
 Do NOT use code fences. Return raw JSON only.
 
 Example output:
-{"target_role": "Data Scientist", "current_level": "beginner", "interests": ["python", "statistics", "machine learning"], "weekly_hours": 10}
+{"target_role": "Data Scientist", "current_level": "beginner", "interests": ["python", "statistics", "machine learning"], "weekly_hours": 10, "target_weeks": 13}
 
 <<<LEARNER_TEXT>>>
 (the learner's text follows in the next message)
