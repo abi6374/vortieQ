@@ -1,4 +1,5 @@
 import React from 'react'
+import SkillingLogo from '../ui/SkillingLogo'
 
 /**
  * SetupSidebar
@@ -25,11 +26,8 @@ export default function SetupSidebar({ current = 1 }) {
     <aside className="hidden md:flex flex-col flex-none w-[270px] h-full overflow-hidden border-r border-[#C6D6FB] dark:border-[#27272F] p-7 bg-white/85 dark:bg-[#121216]/90 backdrop-blur-md transition-colors select-none">
       {/* Brand Header */}
       <div className="flex items-center gap-3 mb-10 flex-none">
-        <span className="grid place-items-center rounded-xl text-white flex-shrink-0 w-[38px] h-[38px] bg-gradient-to-br from-[#0071e3] to-[#0066cc] dark:from-[#0066cc] dark:to-[#004fa3] dark:bg-[#0066cc] shadow-[0_4px_14px_rgba(0,102,204,0.35)] p-2">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" className="dark:stroke-white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="9" />
-            <polygon points="16 8 10.5 10.5 8 16 13.5 13.5" fill="#fff" className="dark:fill-white" stroke="none" />
-          </svg>
+        <span className="grid place-items-center rounded-xl text-white flex-shrink-0 w-[38px] h-[38px] bg-gradient-to-br from-[#0071e3] to-[#0066cc] dark:from-[#0066cc] dark:to-[#004fa3] dark:bg-[#0066cc] shadow-[0_4px_14px_rgba(0,102,204,0.35)] p-1.5">
+          <SkillingLogo size={20} color="#ffffff" />
         </span>
         <span className="font-['Manrope'] font-extrabold text-[#1d1d1f] dark:text-white text-xl tracking-tight">
           Skilling

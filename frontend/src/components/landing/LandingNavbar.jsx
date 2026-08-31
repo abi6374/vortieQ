@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Compass, Moon, Sun, ArrowRight, User, Sparkles } from 'lucide-react'
+import { Moon, Sun, ArrowRight, User, Sparkles } from 'lucide-react'
 import { useTheme } from '../../contexts/ThemeContext'
 import { useAuth } from '../../hooks/useAuth'
 import SpecularButton from './SpecularButton'
+import SkillingLogo from '../ui/SkillingLogo'
 
 /**
  * LandingNavbar
@@ -45,7 +46,7 @@ export default function LandingNavbar() {
         {/* Brand Logo */}
         <Link to="/" className="flex items-center gap-3 group">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0066CC] to-[#004FA3] dark:from-[#0066CC] dark:to-[#004FA3] dark:bg-[#0066CC] flex items-center justify-center text-white dark:text-white shadow-md shadow-[#0066CC]/25 dark:shadow-[0_4px_16px_rgba(0,102,204,0.35)] group-hover:scale-105 transition-transform duration-200">
-            <Compass className="w-5 h-5 animate-spin-slow text-white dark:text-white" />
+            <SkillingLogo size={20} color="#ffffff" />
           </div>
           <div className="flex flex-col">
             <span className="font-sans font-extrabold text-xl tracking-tight text-[#1D1D1F] dark:text-[#F8FAFC]">

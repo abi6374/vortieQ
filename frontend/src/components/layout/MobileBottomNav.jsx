@@ -2,6 +2,7 @@ import React from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ICONS, NAV, activeKeyFor } from '../ui/AppSidebar'
+import SkillingLogo from '../ui/SkillingLogo'
 
 /**
  * Mobile Floating Bottom Nav Pill
@@ -31,17 +32,14 @@ export default function MobileBottomNav() {
       <button
         type="button"
         onClick={() => navigate('/dashboard')}
-        className="w-9 h-9 rounded-full flex items-center justify-center mr-0.5 flex-none cursor-pointer border-none"
+        className="w-9 h-9 rounded-full flex items-center justify-center mr-0.5 flex-none cursor-pointer border-none p-1.5"
         style={{
           background: 'linear-gradient(135deg, #0071e3, #0066cc)',
           boxShadow: '0 2px 8px rgba(0,102,204,0.3)',
         }}
         aria-label="Skilling Home"
       >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="9" />
-          <polygon points="16 8 10.5 10.5 8 16 13.5 13.5" fill="#fff" stroke="none" />
-        </svg>
+        <SkillingLogo size={16} color="#ffffff" />
       </button>
 
       {NAV.map((item) => {

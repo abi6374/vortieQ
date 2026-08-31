@@ -4,6 +4,7 @@ import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { useAuth } from '../../hooks/useAuth'
 import { supabase } from '../../lib/supabaseClient'
 import ThemeToggle from '../ui/ThemeToggle'
+import SkillingLogo from '../ui/SkillingLogo'
 
 /**
  * PathFinder sign-in / create-account screen. Split-panel design.
@@ -716,10 +717,7 @@ export default function AuthScreen({ initialMode = 'signin' }) {
           <div className="brand-inner">
             <div className="logo-row">
               <span className="logo-mark" aria-hidden="true">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" className="dark:stroke-black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="9" />
-                  <polygon points="16 8 10.5 10.5 8 16 13.5 13.5" fill="#fff" className="dark:fill-black" stroke="none" />
-                </svg>
+                <SkillingLogo size={20} color="#ffffff" className="dark:text-black" />
               </span>
               <span className="logo-name">Skilling</span>
             </div>
