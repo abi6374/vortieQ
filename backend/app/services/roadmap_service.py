@@ -344,7 +344,11 @@ def set_task_completion(
             )
 
     new_status = "completed" if completed else "not_started"
-    supabase_client.table("path_steps").update({"status": new_status}).eq("id", step_id).execute()
+    update_payload = {
+        "status": new_status,
+        "completed_at": datetime.now(timezone.utc).isoformat() if completed else None,
+    }
+    supabase_client.table("path_steps").update(update_payload).eq("id", step_id).execute()
 
     if completed:
         # Real (weak) positive mastery evidence - this is the actual
