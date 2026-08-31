@@ -22,7 +22,7 @@ const STEPS = [
 
 export default function SetupSidebar({ current = 1 }) {
   return (
-    <aside className="hidden md:block flex-none w-[270px] border-r border-[#C6D6FB] dark:border-[#27272F] p-7 bg-white/85 dark:bg-[#121216]/90 backdrop-blur-md transition-colors">
+    <aside className="hidden md:block flex-none w-[270px] h-[100dvh] overflow-y-auto border-r border-[#C6D6FB] dark:border-[#27272F] p-7 bg-white/85 dark:bg-[#121216]/90 backdrop-blur-md transition-colors sticky top-0 left-0 z-30 select-none no-scrollbar">
       {/* Brand Header */}
       <div className="flex items-center gap-3 mb-10">
         <span className="grid place-items-center rounded-xl text-white flex-shrink-0 w-[38px] h-[38px] bg-gradient-to-br from-[#0071e3] to-[#0066cc] dark:from-[#0066cc] dark:to-[#004fa3] dark:bg-[#0066cc] shadow-[0_4px_14px_rgba(0,102,204,0.35)] p-2">
