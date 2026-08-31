@@ -622,14 +622,6 @@ export default function RoadmapInfographicModal({
   const posterRef = useRef(null)
   const [isExporting, setIsExporting] = useState(false)
   const [downloadSuccess, setDownloadSuccess] = useState(false)
-  const [posterTheme, setPosterTheme] = useState('dark')
-
-  useEffect(() => {
-    if (isOpen && typeof document !== 'undefined') {
-      const isAppDark = document.documentElement.classList.contains('dark')
-      setPosterTheme(isAppDark ? 'dark' : 'dark')
-    }
-  }, [isOpen])
 
   const curriculum = useMemo(() => {
     return resolveCurriculumForRole(cleanGoalTitle || targetRole, roadmap)
@@ -638,8 +630,6 @@ export default function RoadmapInfographicModal({
   const totalWeeks = useMemo(() => {
     return curriculum.months.reduce((acc, m) => acc + m.weeks.length, 0)
   }, [curriculum])
-
-  const isDark = posterTheme === 'dark'
 
   const handleDownloadImage = async () => {
     if (!posterRef.current || isExporting) return
@@ -654,7 +644,7 @@ export default function RoadmapInfographicModal({
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
-        backgroundColor: isDark ? '#0D1117' : '#FFFFFF',
+        backgroundColor: '#FFFFFF',
         logging: false,
         scrollX: 0,
         scrollY: 0,
@@ -666,7 +656,7 @@ export default function RoadmapInfographicModal({
 
       const safeTitle = (cleanGoalTitle || targetRole || 'Career').replace(/[^a-zA-Z0-9_-]/g, '_')
       const link = document.createElement('a')
-      link.download = `${safeTitle}_Roadmap_Flowchart_${posterTheme}.png`
+      link.download = `${safeTitle}_Roadmap_Flowchart.png`
       link.href = canvas.toDataURL('image/png', 1.0)
       link.click()
 
@@ -679,7 +669,7 @@ export default function RoadmapInfographicModal({
     }
   }
 
-  const handleDownloadPDF = async (mode = 'multipage') => {
+  const handleDownloadPDF = async () => {
     if (!posterRef.current || isExporting) return
     setIsExporting(true)
     setDownloadSuccess(false)
@@ -695,7 +685,7 @@ export default function RoadmapInfographicModal({
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
-        backgroundColor: isDark ? '#0D1117' : '#FFFFFF',
+        backgroundColor: '#FFFFFF',
         logging: false,
         scrollX: 0,
         scrollY: 0,
@@ -710,48 +700,39 @@ export default function RoadmapInfographicModal({
       const imgWidthMm = 210 // A4 width in mm
       const a4HeightMm = 297 // A4 height in mm
 
-      if (mode === 'poster') {
-        // Continuous single-page long infographic poster
-        const totalHeightMm = (canvas.height * imgWidthMm) / canvas.width
-        const pdf = new jsPDF('p', 'mm', [imgWidthMm, Math.ceil(totalHeightMm)])
-        const imgData = canvas.toDataURL('image/png', 1.0)
-        pdf.addImage(imgData, 'PNG', 0, 0, imgWidthMm, totalHeightMm, undefined, 'FAST')
-        pdf.save(`${safeTitle}_Roadmap_Poster_${posterTheme}.pdf`)
-      } else {
-        // High-fidelity multi-page A4 document
-        const pageCanvasHeightPx = (canvas.width * a4HeightMm) / imgWidthMm
-        const totalPages = Math.ceil(canvas.height / pageCanvasHeightPx)
-        const pdf = new jsPDF('p', 'mm', 'a4')
+      // High-fidelity multi-page A4 document
+      const pageCanvasHeightPx = (canvas.width * a4HeightMm) / imgWidthMm
+      const totalPages = Math.ceil(canvas.height / pageCanvasHeightPx)
+      const pdf = new jsPDF('p', 'mm', 'a4')
 
-        for (let page = 0; page < totalPages; page++) {
-          const srcY = page * pageCanvasHeightPx
-          const srcHeight = Math.min(pageCanvasHeightPx, canvas.height - srcY)
+      for (let page = 0; page < totalPages; page++) {
+        const srcY = page * pageCanvasHeightPx
+        const srcHeight = Math.min(pageCanvasHeightPx, canvas.height - srcY)
 
-          const pageCanvas = document.createElement('canvas')
-          pageCanvas.width = canvas.width
-          pageCanvas.height = pageCanvasHeightPx
-          const ctx = pageCanvas.getContext('2d')
+        const pageCanvas = document.createElement('canvas')
+        pageCanvas.width = canvas.width
+        pageCanvas.height = pageCanvasHeightPx
+        const ctx = pageCanvas.getContext('2d')
 
-          // Matching background fill
-          ctx.fillStyle = isDark ? '#0D1117' : '#FFFFFF'
-          ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height)
+        // Clean white background fill
+        ctx.fillStyle = '#FFFFFF'
+        ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height)
 
-          // Slice source canvas
-          ctx.drawImage(
-            canvas,
-            0, srcY, canvas.width, srcHeight,
-            0, 0, canvas.width, srcHeight
-          )
+        // Slice source canvas
+        ctx.drawImage(
+          canvas,
+          0, srcY, canvas.width, srcHeight,
+          0, 0, canvas.width, srcHeight
+        )
 
-          const pageDataUrl = pageCanvas.toDataURL('image/png', 1.0)
-          if (page > 0) {
-            pdf.addPage('a4', 'p')
-          }
-          pdf.addImage(pageDataUrl, 'PNG', 0, 0, imgWidthMm, a4HeightMm, undefined, 'FAST')
+        const pageDataUrl = pageCanvas.toDataURL('image/png', 1.0)
+        if (page > 0) {
+          pdf.addPage('a4', 'p')
         }
-
-        pdf.save(`${safeTitle}_Roadmap_PathFinder_${posterTheme}.pdf`)
+        pdf.addImage(pageDataUrl, 'PNG', 0, 0, imgWidthMm, a4HeightMm, undefined, 'FAST')
       }
+
+      pdf.save(`${safeTitle}_Roadmap_PathFinder.pdf`)
 
       setDownloadSuccess(true)
       setTimeout(() => setDownloadSuccess(false), 4000)
@@ -770,7 +751,7 @@ export default function RoadmapInfographicModal({
       onClick={onClose}
     >
       <style>{`
-        /* ROADMAP POSTER ISOLATION: Protect Light & Dark themes from conflicting global CSS */
+        /* ROADMAP POSTER LIGHT THEME ISOLATION: Immune to any html.dark !important rules */
         .rf-poster-light, .rf-poster-light * {
           box-sizing: border-box;
         }
@@ -842,80 +823,6 @@ export default function RoadmapInfographicModal({
         .rf-poster-light .rf-footer-brand {
           color: #64748B !important;
         }
-
-        /* DARK THEME RULES */
-        .rf-poster-dark {
-          background-color: #0D1117 !important;
-          border-color: #232B3B !important;
-          color: #F0F6FC !important;
-        }
-        .rf-poster-dark h1,
-        .rf-poster-dark h2,
-        .rf-poster-dark h3,
-        .rf-poster-dark h4,
-        .rf-poster-dark .rf-title {
-          color: #FFFFFF !important;
-        }
-        .rf-poster-dark p,
-        .rf-poster-dark .rf-desc {
-          color: #CBD5E1 !important;
-        }
-        .rf-poster-dark .rf-banner {
-          background-color: #161F2E !important;
-          border-color: rgba(56, 189, 248, 0.4) !important;
-          box-shadow: 0 0 20px rgba(56, 189, 248, 0.12) !important;
-        }
-        .rf-poster-dark .rf-month {
-          background-color: #161B26 !important;
-          border-color: #F59E0B !important;
-          box-shadow: 0 0 15px rgba(245, 158, 11, 0.15) !important;
-        }
-        .rf-poster-dark .rf-month-label {
-          color: #F59E0B !important;
-        }
-        .rf-poster-dark .rf-month-title {
-          color: #FFFFFF !important;
-        }
-        .rf-poster-dark .rf-card-odd {
-          background-color: #141923 !important;
-          border-color: rgba(245, 158, 11, 0.6) !important;
-          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
-        }
-        .rf-poster-dark .rf-card-even {
-          background-color: #141923 !important;
-          border-color: rgba(59, 130, 246, 0.6) !important;
-          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
-        }
-        .rf-poster-dark .rf-week-odd {
-          background-color: #2A200B !important;
-          border-color: rgba(245, 158, 11, 0.5) !important;
-          color: #FDE68A !important;
-        }
-        .rf-poster-dark .rf-week-even {
-          background-color: #0E223D !important;
-          border-color: rgba(59, 130, 246, 0.5) !important;
-          color: #BFDBFE !important;
-        }
-        .rf-poster-dark .rf-completed {
-          background-color: #06321F !important;
-          border-color: rgba(16, 185, 129, 0.5) !important;
-          color: #6EE7B7 !important;
-        }
-        .rf-poster-dark .rf-spine {
-          background-color: rgba(56, 189, 248, 0.7) !important;
-          box-shadow: 0 0 8px rgba(56, 189, 248, 0.4) !important;
-        }
-        .rf-poster-dark .rf-diamond {
-          background-color: #38BDF8 !important;
-          box-shadow: 0 0 8px rgba(56, 189, 248, 0.6) !important;
-        }
-        .rf-poster-dark .rf-footer {
-          border-color: #232B3B !important;
-          color: #94A3B8 !important;
-        }
-        .rf-poster-dark .rf-footer-brand {
-          color: #CBD5E1 !important;
-        }
       `}</style>
 
       <div 
@@ -946,47 +853,15 @@ export default function RoadmapInfographicModal({
           </div>
 
           <div className="flex items-center gap-2 ml-auto flex-wrap">
-            {/* Dark / Light Poster Theme Switcher */}
-            <button
-              type="button"
-              onClick={() => setPosterTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
-              className="inline-flex items-center gap-1.5 px-3 py-2 bg-[#f0f5fa] dark:bg-[#18181D] hover:bg-[#e1eefc] dark:hover:bg-[#27272F] text-[#0066cc] dark:text-[#CBD5E1] border border-[#cfe4fb] dark:border-[#27272F] text-xs font-bold rounded-xl transition-all cursor-pointer select-none"
-              title={`Switch flowchart to ${isDark ? 'Light' : 'Dark'} Mode`}
-            >
-              {isDark ? (
-                <>
-                  <svg className="w-3.5 h-3.5 text-[#38BDF8]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="4" />
-                    <path d="M12 2v2" />
-                    <path d="M12 20v2" />
-                    <path d="m4.93 4.93 1.41 1.41" />
-                    <path d="m17.66 17.66 1.41 1.41" />
-                    <path d="M2 12h2" />
-                    <path d="M20 12h2" />
-                    <path d="m6.34 17.66-1.41 1.41" />
-                    <path d="m19.07 4.93-1.41 1.41" />
-                  </svg>
-                  <span>Dark Mode</span>
-                </>
-              ) : (
-                <>
-                  <svg className="w-3.5 h-3.5 text-[#F59E0B]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
-                  </svg>
-                  <span>Light Mode</span>
-                </>
-              )}
-            </button>
-
             {/* PNG Image Download Button */}
             <button
               type="button"
               onClick={handleDownloadImage}
               disabled={isExporting}
-              className="inline-flex items-center gap-1.5 px-3 py-2 bg-[#f0f5fa] dark:bg-[#1A2840] hover:bg-[#e1eefc] dark:hover:bg-[#223656] text-[#0066cc] dark:text-[#38BDF8] border border-[#cfe4fb] dark:border-[#273B5B] text-xs font-bold rounded-xl transition-all disabled:opacity-50 cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#f0f5fa] dark:bg-[#18181D] hover:bg-[#e1eefc] dark:hover:bg-[#27272F] text-[#0066cc] dark:text-[#CBD5E1] border border-[#cfe4fb] dark:border-[#27272F] text-xs font-bold rounded-xl transition-all cursor-pointer disabled:opacity-50"
               title="Download high-resolution image (.png)"
             >
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
                 <circle cx="9" cy="9" r="2" />
                 <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
@@ -994,31 +869,17 @@ export default function RoadmapInfographicModal({
               <span>Image (PNG)</span>
             </button>
 
+            {/* Download PDF Button */}
             <button
               type="button"
-              onClick={() => handleDownloadPDF('poster')}
-              disabled={isExporting}
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 bg-[#f0f5fa] dark:bg-[#1A2840] hover:bg-[#e1eefc] dark:hover:bg-[#223656] text-[#0066cc] dark:text-[#38BDF8] border border-[#cfe4fb] dark:border-[#273B5B] text-xs font-bold rounded-xl transition-all disabled:opacity-50 cursor-pointer"
-              title="Download as a continuous single-page infographic poster"
-            >
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                <line x1="12" y1="8" x2="12" y2="16" />
-                <line x1="8" y1="12" x2="16" y2="12" />
-              </svg>
-              <span>1-Page Poster</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleDownloadPDF('multipage')}
+              onClick={handleDownloadPDF}
               disabled={isExporting}
               className="inline-flex items-center gap-2 px-4 py-2 bg-[#0066cc] hover:bg-[#004fa3] text-white text-xs font-bold rounded-xl transition-all shadow-md active:scale-[0.98] disabled:opacity-50 cursor-pointer"
             >
               {isExporting ? (
                 <>
                   <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Generating...</span>
+                  <span>Generating PDF...</span>
                 </>
               ) : downloadSuccess ? (
                 <>
@@ -1056,17 +917,15 @@ export default function RoadmapInfographicModal({
         {/* SCROLLABLE POSTER CANVAS CONTAINER */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-8 bg-[#f1f3f6] dark:bg-[#080B10] flex justify-center pf-custom-scrollbar">
           
-          {/* THE INFOGRAPHIC POSTER ELEMENT (Exported to PDF/PNG via html2canvas) */}
+          {/* THE INFOGRAPHIC POSTER ELEMENT (Always rendered in clean Light Theme) */}
           <div
             ref={posterRef}
-            className={`w-full max-w-[800px] mx-auto rounded-3xl p-6 sm:p-10 shadow-2xl flex flex-col items-center relative transition-colors ${
-              isDark ? 'rf-poster-dark' : 'rf-poster-light'
-            }`}
+            className="rf-poster-light w-full max-w-[800px] mx-auto rounded-3xl p-6 sm:p-10 shadow-2xl flex flex-col items-center relative"
             style={{
               fontFamily: "'Inter', sans-serif",
-              backgroundColor: isDark ? '#0D1117' : '#FFFFFF',
-              borderColor: isDark ? '#232B3B' : '#E2E8F0',
-              color: isDark ? '#F0F6FC' : '#1E293B',
+              backgroundColor: '#FFFFFF',
+              borderColor: '#E2E8F0',
+              color: '#1E293B',
             }}
           >
             {/* Top Title Banner Header */}
@@ -1074,14 +933,14 @@ export default function RoadmapInfographicModal({
               <div
                 className="rf-banner w-full max-w-lg rounded-2xl py-3.5 px-6 text-center shadow-xs border-2"
                 style={{
-                  backgroundColor: isDark ? '#161F2E' : '#E2EBE5',
-                  borderColor: isDark ? 'rgba(56, 189, 248, 0.4)' : '#CBD8CE',
+                  backgroundColor: '#E2EBE5',
+                  borderColor: '#CBD8CE',
                 }}
               >
                 <h1
                   className="rf-title font-['Manrope'] font-extrabold text-xl sm:text-2xl tracking-tight uppercase"
                   style={{
-                    color: isDark ? '#FFFFFF' : '#1E293B',
+                    color: '#1E293B',
                   }}
                 >
                   {stripEmojis(curriculum.roleTitle)}
@@ -1090,7 +949,7 @@ export default function RoadmapInfographicModal({
               <p
                 className="rf-desc text-xs font-semibold mt-2.5 text-center"
                 style={{
-                  color: isDark ? '#94A3B8' : '#64748B',
+                  color: '#64748B',
                 }}
               >
                 Structured {totalWeeks}-Week Curriculum & Learning Path · PathFinder AI
@@ -1106,7 +965,7 @@ export default function RoadmapInfographicModal({
             <div
               className="rf-spine w-[3px] h-6"
               style={{
-                backgroundColor: isDark ? 'rgba(56, 189, 248, 0.7)' : '#334155',
+                backgroundColor: '#334155',
               }}
             />
 
@@ -1123,14 +982,14 @@ export default function RoadmapInfographicModal({
                     <div
                       className="rf-month z-10 border-2 border-dashed rounded-2xl px-6 py-3 text-center max-w-[280px] w-full shadow-sm"
                       style={{
-                        backgroundColor: isDark ? '#161B26' : '#FFFFFF',
+                        backgroundColor: '#FFFFFF',
                         borderColor: '#F59E0B',
                       }}
                     >
                       <span
                         className="rf-month-label text-[11px] font-black uppercase tracking-wider block"
                         style={{
-                          color: isDark ? '#F59E0B' : '#D97706',
+                          color: '#D97706',
                         }}
                       >
                         MONTH {month.monthNumber}
@@ -1138,7 +997,7 @@ export default function RoadmapInfographicModal({
                       <span
                         className="rf-month-title font-bold text-xs sm:text-sm leading-tight block mt-0.5"
                         style={{
-                          color: isDark ? '#FFFFFF' : '#1E293B',
+                          color: '#1E293B',
                         }}
                       >
                         {stripEmojis(month.theme)}
@@ -1155,17 +1014,17 @@ export default function RoadmapInfographicModal({
                             key={week.week_number}
                             className="rf-card-odd relative border-2 border-dashed rounded-2xl p-4 sm:p-5 flex flex-col justify-between transition-all"
                             style={{
-                              backgroundColor: isDark ? '#141923' : '#FFFBEB',
-                              borderColor: isDark ? 'rgba(245, 158, 11, 0.6)' : '#FCD34D',
+                              backgroundColor: '#FFFBEB',
+                              borderColor: '#FCD34D',
                             }}
                           >
                             <div className="flex items-center justify-between mb-2.5">
                               <span
                                 className="rf-week-odd px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider rounded-md border"
                                 style={{
-                                  backgroundColor: isDark ? '#2A200B' : '#FEF3C7',
-                                  borderColor: isDark ? 'rgba(245, 158, 11, 0.5)' : '#FDE68A',
-                                  color: isDark ? '#FDE68A' : '#92400E',
+                                  backgroundColor: '#FEF3C7',
+                                  borderColor: '#FDE68A',
+                                  color: '#92400E',
                                 }}
                               >
                                 WEEK {week.week_number}
@@ -1174,9 +1033,9 @@ export default function RoadmapInfographicModal({
                                 <span
                                   className="rf-completed text-[10px] font-bold px-2 py-0.5 rounded-md border"
                                   style={{
-                                    backgroundColor: isDark ? '#06321F' : '#D1FAE5',
-                                    borderColor: isDark ? 'rgba(16, 185, 129, 0.5)' : '#A7F3D0',
-                                    color: isDark ? '#6EE7B7' : '#059669',
+                                    backgroundColor: '#D1FAE5',
+                                    borderColor: '#A7F3D0',
+                                    color: '#059669',
                                   }}
                                 >
                                   COMPLETED
@@ -1186,7 +1045,7 @@ export default function RoadmapInfographicModal({
                             <h3
                               className="rf-title font-bold text-xs sm:text-sm leading-snug"
                               style={{
-                                color: isDark ? '#FFFFFF' : '#1E293B',
+                                color: '#1E293B',
                               }}
                             >
                               {stripEmojis(week.title)}
@@ -1194,7 +1053,7 @@ export default function RoadmapInfographicModal({
                             <p
                               className="rf-desc text-[11px] mt-1.5 leading-relaxed font-normal"
                               style={{
-                                color: isDark ? '#CBD5E1' : '#475569',
+                                color: '#475569',
                               }}
                             >
                               {stripEmojis(week.desc)}
@@ -1210,17 +1069,17 @@ export default function RoadmapInfographicModal({
                             key={week.week_number}
                             className="rf-card-even relative border-2 border-dashed rounded-2xl p-4 sm:p-5 flex flex-col justify-between transition-all"
                             style={{
-                              backgroundColor: isDark ? '#141923' : '#EFF6FF',
-                              borderColor: isDark ? 'rgba(59, 130, 246, 0.6)' : '#BFDBFE',
+                              backgroundColor: '#EFF6FF',
+                              borderColor: '#BFDBFE',
                             }}
                           >
                             <div className="flex items-center justify-between mb-2.5">
                               <span
                                 className="rf-week-even px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider rounded-md border"
                                 style={{
-                                  backgroundColor: isDark ? '#0E223D' : '#DBEAFE',
-                                  borderColor: isDark ? 'rgba(59, 130, 246, 0.5)' : '#BFDBFE',
-                                  color: isDark ? '#BFDBFE' : '#1E40AF',
+                                  backgroundColor: '#DBEAFE',
+                                  borderColor: '#BFDBFE',
+                                  color: '#1E40AF',
                                 }}
                               >
                                 WEEK {week.week_number}
@@ -1229,9 +1088,9 @@ export default function RoadmapInfographicModal({
                                 <span
                                   className="rf-completed text-[10px] font-bold px-2 py-0.5 rounded-md border"
                                   style={{
-                                    backgroundColor: isDark ? '#06321F' : '#D1FAE5',
-                                    borderColor: isDark ? 'rgba(16, 185, 129, 0.5)' : '#A7F3D0',
-                                    color: isDark ? '#6EE7B7' : '#059669',
+                                    backgroundColor: '#D1FAE5',
+                                    borderColor: '#A7F3D0',
+                                    color: '#059669',
                                   }}
                                 >
                                   COMPLETED
@@ -1241,7 +1100,7 @@ export default function RoadmapInfographicModal({
                             <h3
                               className="rf-title font-bold text-xs sm:text-sm leading-snug"
                               style={{
-                                color: isDark ? '#FFFFFF' : '#1E293B',
+                                color: '#1E293B',
                               }}
                             >
                               {stripEmojis(week.title)}
@@ -1249,7 +1108,7 @@ export default function RoadmapInfographicModal({
                             <p
                               className="rf-desc text-[11px] mt-1.5 leading-relaxed font-normal"
                               style={{
-                                color: isDark ? '#CBD5E1' : '#475569',
+                                color: '#475569',
                               }}
                             >
                               {stripEmojis(week.desc)}
@@ -1265,19 +1124,19 @@ export default function RoadmapInfographicModal({
                         <div
                           className="rf-spine w-[3px] h-5"
                           style={{
-                            backgroundColor: isDark ? 'rgba(56, 189, 248, 0.7)' : '#334155',
+                            backgroundColor: '#334155',
                           }}
                         />
                         <div
                           className="rf-diamond w-3.5 h-3.5 transform rotate-45 my-1"
                           style={{
-                            backgroundColor: isDark ? '#38BDF8' : '#0F172A',
+                            backgroundColor: '#0F172A',
                           }}
                         />
                         <div
                           className="rf-spine w-[3px] h-5"
                           style={{
-                            backgroundColor: isDark ? 'rgba(56, 189, 248, 0.7)' : '#334155',
+                            backgroundColor: '#334155',
                           }}
                         />
                       </div>
@@ -1291,7 +1150,7 @@ export default function RoadmapInfographicModal({
             <div
               className="rf-spine w-[3px] h-6 mt-4"
               style={{
-                backgroundColor: isDark ? 'rgba(56, 189, 248, 0.7)' : '#334155',
+                backgroundColor: '#334155',
               }}
             />
 
@@ -1304,7 +1163,7 @@ export default function RoadmapInfographicModal({
             <div
               className="rf-footer w-full pt-8 mt-8 border-t flex flex-col sm:flex-row items-center justify-between gap-2 text-[10px]"
               style={{
-                borderTopColor: isDark ? '#232B3B' : '#E2E8F0',
+                borderTopColor: '#E2E8F0',
                 color: '#94A3B8',
               }}
             >
@@ -1312,7 +1171,7 @@ export default function RoadmapInfographicModal({
               <span
                 className="rf-footer-brand font-semibold"
                 style={{
-                  color: isDark ? '#CBD5E1' : '#64748B',
+                  color: '#64748B',
                 }}
               >
                 PathFinder AI · Personalized Learning Platform

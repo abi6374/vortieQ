@@ -602,19 +602,6 @@ export default function PersonalizedRoadmap({
               <h2 className="font-['Manrope'] font-bold text-lg text-[#1d1d1f] dark:text-white">
                 Your learning roadmap
               </h2>
-              <button
-                type="button"
-                onClick={() => setShowPosterModal(true)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#cfe4fb] dark:border-[#1E3A5F] bg-[#eaf2fc] dark:bg-[#142339] text-[#0066cc] dark:text-[#38BDF8] text-xs font-bold hover:bg-[#dbeafc] dark:hover:bg-[#1A2E4B] transition-all cursor-pointer shadow-2xs"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                  <polyline points="14 2 14 8 20 8" />
-                  <line x1="16" y1="13" x2="8" y2="13" />
-                  <line x1="16" y1="17" x2="8" y2="17" />
-                </svg>
-                <span>Flowchart Poster & PDF</span>
-              </button>
             </div>
 
             {/* Week Selector Chips */}
