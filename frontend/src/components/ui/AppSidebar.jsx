@@ -415,28 +415,12 @@ export default function AppSidebar() {
       }`}
       aria-label="Primary Navigation"
     >
-      {/* ── Top Header Bar: Toggle Button on Left (Consistent Position) + Brand on Right ── */}
-      <div className={`flex items-center flex-none w-full pb-2 ${isExpanded ? 'justify-start gap-2.5 px-0.5' : 'justify-center'}`}>
+      {/* ── Top Header Bar: Stationary Toggle Button ── */}
+      <div className={`flex items-center flex-none w-full pb-2 ${isExpanded ? 'justify-start px-0.5' : 'justify-center'}`}>
         <ToggleSidebarButton
           isExpanded={isExpanded}
           onClick={() => setCollapsed(isExpanded)}
         />
-
-        {isExpanded && (
-          <motion.div
-            initial={{ opacity: 0, x: -6 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.18, ease: 'easeOut' }}
-            className="flex items-center gap-2 overflow-hidden"
-          >
-            <span className="w-7 h-7 rounded-lg bg-[#0066cc] text-white flex items-center justify-center font-black text-xs shadow-xs flex-none">
-              P
-            </span>
-            <span className="font-extrabold text-sm text-[#1d1d1f] dark:text-white tracking-tight font-['Manrope'] truncate">
-              PathFinder
-            </span>
-          </motion.div>
-        )}
       </div>
 
       {/* ── Expanded Widgets: Active Goal & Daily Streak ── */}
