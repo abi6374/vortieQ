@@ -462,17 +462,17 @@ export default function ResourcesScreen() {
             setSteps(allCourses.map((c, i) => ({
               id: c.id || `course-${i}`,
               status: 'not_started',
-              milestone_label: 'Catalog',
-              explanation: c.description || '',
+              milestone_label: stripEmojis(c.milestone_label || 'Catalog'),
+              explanation: stripEmojis(c.description || ''),
               seq: i + 1,
               weekNumber: 1,
-              title: c.title,
-              description: c.description,
-              provider: c.provider,
+              title: stripEmojis(c.title),
+              description: stripEmojis(c.description),
+              provider: stripEmojis(c.provider),
               difficulty: c.difficulty || 'beginner',
               duration_hrs: c.duration_hrs || 10,
               resource_url: c.resource_url,
-              skill_tags: c.skill_tags || [],
+              skill_tags: (c.skill_tags || []).map(stripEmojis),
             })))
             setPath({ goal_text: 'AIML Engineer & Data Analytics' })
           } else if (!cancelled) {
@@ -489,12 +489,12 @@ export default function ResourcesScreen() {
         setPath(p)
         setSteps(
           (rows || []).map((r) => ({
-            id: r.id, status: r.status, milestone_label: r.milestone_label, explanation: r.explanation, seq: r.sequence_order,
+            id: r.id, status: r.status, milestone_label: stripEmojis(r.milestone_label), explanation: stripEmojis(r.explanation), seq: r.sequence_order,
             weekNumber: r.week_number || 1,
-            title: r.courses?.title || 'Course', description: r.courses?.description || '',
-            provider: r.courses?.provider || '', difficulty: r.courses?.difficulty || 'beginner',
+            title: stripEmojis(r.courses?.title || 'Course'), description: stripEmojis(r.courses?.description || ''),
+            provider: stripEmojis(r.courses?.provider || ''), difficulty: r.courses?.difficulty || 'beginner',
             duration_hrs: r.courses?.duration_hrs || 0, resource_url: r.courses?.resource_url || '',
-            skill_tags: r.courses?.skill_tags || [],
+            skill_tags: (r.courses?.skill_tags || []).map(stripEmojis),
           }))
         )
       } catch {}
@@ -923,7 +923,7 @@ export default function ResourcesScreen() {
                     <div key={s.id} className="rx-saved-item">
                       <span className="s-ic">{I.grad}</span>
                       <div className="s-body">
-                        <div className="s-t">{s.title}</div>
+                        <div className="s-t">{stripEmojis(s.title)}</div>
                         <div className="s-m">{typeOf(s).kind} · {s.duration_hrs}h</div>
                       </div>
                       <span className="s-bm" onClick={() => toggleSave(s.id)}>{I.bookmark(true)}</span>
@@ -941,7 +941,7 @@ export default function ResourcesScreen() {
                     <div key={s.id} className="rx-saved-item">
                       <span className="s-ic ic-check">{I.check}</span>
                       <div className="s-body">
-                        <div className="s-t">{s.title}</div>
+                        <div className="s-t">{stripEmojis(s.title)}</div>
                         <div className="s-m">Completed · {s.duration_hrs}h</div>
                       </div>
                     </div>

@@ -61,6 +61,7 @@ import {
 import { useAuth } from '../../hooks/useAuth'
 import { useRoadmap } from '../../hooks/useRoadmap'
 import { useStreak } from '../../hooks/useStreak'
+import { stripEmojis } from '../../utils/textUtils'
 
 /**
  * SkillInsightsScreen Component for PathFinder
@@ -493,8 +494,8 @@ export default function SkillInsightsScreen() {
                             className="w-full text-left p-2 rounded-xl hover:bg-[#eaf2fc] flex items-center justify-between transition-colors cursor-pointer"
                           >
                             <div className="min-w-0 flex-1 pr-2">
-                              <p className="text-xs font-bold text-[#1d1d1f] truncate">{step.title}</p>
-                              <p className="text-[10px] text-[#7a7a7a]">{step.provider || 'Course'} · ~{step.duration_hrs || 2}h</p>
+                              <p className="text-xs font-bold text-[#1d1d1f] truncate">{stripEmojis(step.title)}</p>
+                              <p className="text-[10px] text-[#7a7a7a]">{stripEmojis(step.provider) || 'Course'} · ~{step.duration_hrs || 2}h</p>
                             </div>
                             <span className="text-[10px] font-bold text-[#0066cc] px-2 py-0.5 rounded bg-[#eaf2fc] flex-none capitalize">
                               {step.status || 'Active'}
@@ -1207,7 +1208,7 @@ export default function SkillInsightsScreen() {
               </div>
 
               <h3 className="font-['Manrope'] font-bold text-xl text-[#1d1d1f] dark:text-white">
-                {selectedSkillModal.title}
+                {stripEmojis(selectedSkillModal.title)}
               </h3>
               <p className="text-xs text-[#333333] dark:text-[#94A3B8] mt-1 mb-4">
                 {selectedSkillModal.desc}

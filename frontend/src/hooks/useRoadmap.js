@@ -1,5 +1,44 @@
 import { useCallback, useEffect, useState } from 'react'
 import api, { genIdempotencyKey } from '../lib/apiClient'
+import { stripEmojis } from '../utils/textUtils'
+
+function cleanRoadmap(raw) {
+  if (!raw) return raw
+  const weeks = (raw.weeks || []).map((w) => ({
+    ...w,
+    title: stripEmojis(w.title),
+    milestone_label: stripEmojis(w.milestone_label),
+    locked_reason: stripEmojis(w.locked_reason),
+    steps: (w.steps || []).map((s) => ({
+      ...s,
+      title: stripEmojis(s.title),
+      explanation: stripEmojis(s.explanation),
+      provider: stripEmojis(s.provider),
+      milestone_label: stripEmojis(s.milestone_label),
+      skill_tags: (s.skill_tags || []).map(stripEmojis),
+    })),
+    web_resources: (w.web_resources || []).map((r) => ({
+      ...r,
+      title: stripEmojis(r.title),
+      snippet: stripEmojis(r.snippet),
+      provider: stripEmojis(r.provider),
+    })),
+  }))
+
+  const path = raw.path
+    ? {
+        ...raw.path,
+        goal_text: stripEmojis(raw.path.goal_text),
+        target_role: stripEmojis(raw.path.target_role),
+      }
+    : raw.path
+
+  return {
+    ...raw,
+    weeks,
+    path,
+  }
+}
 
 /**
  * The single source of truth for roadmap state.
@@ -12,15 +51,6 @@ import api, { genIdempotencyKey } from '../lib/apiClient'
  * response returns, so Progress / Skill insights / the week strip all reflect
  * the change without extra requests.
  */
-// Same dev/e2e-only bypass pattern as AuthContext.getDevBypassUser() -
-// import.meta.env.DEV is a Vite build-time constant (false in a real `vite
-// build`), so this check and MOCK_DEV_ROADMAP below are dead code the
-// bundler strips from what actually ships to Vercel. Previously these two
-// localStorage checks (in `load` below) had NO such gate - a production
-// user who happened to have either flag set (or hit by a stale test
-// artifact) and a slow/failing /api/roadmap call would see a fully
-// fabricated roadmap (fake completed steps, fake percent, fake course
-// titles) presented as their real progress.
 function isDevBypassActive() {
   return (
     import.meta.env.DEV &&
@@ -29,7 +59,7 @@ function isDevBypassActive() {
   )
 }
 
-const MOCK_DEV_ROADMAP = {
+const MOCK_DEV_ROADMAP = cleanRoadmap({
   path: { id: 'dev-path', goal_text: 'AIML Engineer & Data Analytics' },
   percent: 35,
   total_steps: 10,
@@ -71,7 +101,7 @@ const MOCK_DEV_ROADMAP = {
       ]
     }
   ]
-}
+})
 
 export function useRoadmap() {
   const [data, setData] = useState(null)      // {path, weeks, current_week, percent, ...}
@@ -86,11 +116,11 @@ export function useRoadmap() {
     try {
       const res = await api.get('/api/roadmap')
       if (res.data && res.data.weeks && res.data.weeks.length > 0) {
-        setData(res.data)
+        setData(cleanRoadmap(res.data))
       } else if (isDevBypassActive()) {
         setData(MOCK_DEV_ROADMAP)
       } else {
-        setData(res.data)
+        setData(cleanRoadmap(res.data))
       }
     } catch (err) {
       if (isDevBypassActive()) {
@@ -116,7 +146,7 @@ export function useRoadmap() {
         rating: validRating,
         tag: tag || '',
       }, { headers: { 'Idempotency-Key': genIdempotencyKey() } })
-      setData(res.data) // full recomputed roadmap
+      setData(cleanRoadmap(res.data)) // full recomputed roadmap
       return { ok: true }
     } catch (err) {
       if (err?.response?.status === 409) {
@@ -137,7 +167,7 @@ export function useRoadmap() {
           const completedSteps = allSteps.filter((s) => s.completed).length
           const totalSteps = allSteps.length
           const percent = totalSteps ? Math.round((completedSteps / totalSteps) * 100) : 0
-          return { ...prev, weeks: newWeeks, completed_steps: completedSteps, total_steps: totalSteps, percent }
+          return cleanRoadmap({ ...prev, weeks: newWeeks, completed_steps: completedSteps, total_steps: totalSteps, percent })
         })
         return { ok: true }
       }
@@ -155,7 +185,7 @@ export function useRoadmap() {
         preference,
         note,
       }, { headers: { 'Idempotency-Key': genIdempotencyKey() } })
-      setData(res.data) // full recomputed roadmap
+      setData(cleanRoadmap(res.data)) // full recomputed roadmap
       // Real reason for the change (mastery-adjusted, prerequisite gap,
       // etc.) when the preference was too_advanced/too_basic - see
       // roadmap_service.rerecommend_task. Absent for format/style

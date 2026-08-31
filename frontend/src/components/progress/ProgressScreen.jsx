@@ -321,7 +321,7 @@ export default function ProgressScreen() {
         date = `In progress · ${weekRange}`
       }
 
-      return { title: g.title, status, date, progress }
+      return { title: stripEmojis(g.title), status, date, progress }
     })
   }, [roadmap.weeks, roadmap.allSteps])
 
@@ -348,7 +348,7 @@ export default function ProgressScreen() {
       })
       .map((s, idx) => ({
         id: s.step_id || `act-${idx}`,
-        title: s.title,
+        title: stripEmojis(s.title),
         time: relativeDay(s.completed_at) || 'Completed recently',
         progressChange: `+${Math.max(1, perStepPercent)}%`,
         type: 'completed',
@@ -367,9 +367,9 @@ export default function ProgressScreen() {
     .map((s, i) => ({
       id: String(i + 1).padStart(2, '0'),
       stepId: s.step_id,
-      title: s.title,
+      title: stripEmojis(s.title),
       duration: s.duration_hrs ? `${s.duration_hrs}h` : '',
-      desc: s.explanation || s.description || '',
+      desc: stripEmojis(s.explanation || s.description || ''),
       buttonLabel: 'Continue',
       icon: iconFor((s.skill_tags || [])[0] || ''),
     }))
@@ -1145,7 +1145,7 @@ export default function ProgressScreen() {
                           <Check className="w-3.5 h-3.5" />
                         </span>
                         <div className="min-w-0 flex-1">
-                          <h4 className="font-bold text-xs text-[#1d1d1f] dark:text-white truncate">{act.title}</h4>
+                          <h4 className="font-bold text-xs text-[#1d1d1f] dark:text-white truncate">{stripEmojis(act.title)}</h4>
                           <p className="text-[11px] text-[#6e6e73] dark:text-[#94A3B8]">{act.time}</p>
                         </div>
                       </div>
