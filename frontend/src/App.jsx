@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react'
+import React, { Suspense, lazy, Component } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import { ThemeProvider } from './contexts/ThemeContext'
@@ -8,21 +8,90 @@ import AIChat from './components/ui/AIChat'
 import ProtectedRoute from './components/auth/ProtectedRoute'
 import BackToTop from './components/ui/BackToTop'
 
-// Route-level code splitting for lightning-fast initial page loads
-const LandingPage = lazy(() => import('./pages/LandingPage'))
-const AuthScreen = lazy(() => import('./components/auth/AuthScreen'))
-const OnboardingPage = lazy(() => import('./pages/OnboardingPage'))
-const RoadmapPage = lazy(() => import('./pages/RoadmapPage'))
-const DashboardPage = lazy(() => import('./pages/DashboardPage'))
-const ProgressPage = lazy(() => import('./pages/ProgressPage'))
-const SkillInsightsPage = lazy(() => import('./pages/SkillInsightsPage'))
-const ResourcesPage = lazy(() => import('./pages/ResourcesPage'))
-const AccountPage = lazy(() => import('./pages/AccountPage'))
-const SettingsPage = lazy(() => import('./pages/SettingsPage'))
-const CoachPage = lazy(() => import('./pages/CoachPage'))
-const InterviewPage = lazy(() => import('./pages/InterviewPage'))
-const HackathonsPage = lazy(() => import('./pages/HackathonsPage'))
-const InternshipsPage = lazy(() => import('./pages/InternshipsPage'))
+/**
+ * Robust lazy import with automatic single retry / reload.
+ * Handles cases where a new production deployment replaces chunk hashes while a client has an older page loaded.
+ */
+function lazyWithRetry(componentImport) {
+  return lazy(async () => {
+    const pageHasBeenForceRefreshed = JSON.parse(
+      window.sessionStorage.getItem('pf_chunk_retry') || 'false'
+    )
+
+    try {
+      const component = await componentImport()
+      window.sessionStorage.setItem('pf_chunk_retry', 'false')
+      return component
+    } catch (error) {
+      console.warn('Chunk import failed, attempting reload for new version:', error)
+      if (!pageHasBeenForceRefreshed) {
+        window.sessionStorage.setItem('pf_chunk_retry', 'true')
+        window.location.reload()
+        return new Promise(() => {}) // keep in loading state until reload happens
+      }
+      throw error
+    }
+  })
+}
+
+// Route-level code splitting with auto-recovery on new deployment builds
+const LandingPage = lazyWithRetry(() => import('./pages/LandingPage'))
+const AuthScreen = lazyWithRetry(() => import('./components/auth/AuthScreen'))
+const OnboardingPage = lazyWithRetry(() => import('./pages/OnboardingPage'))
+const RoadmapPage = lazyWithRetry(() => import('./pages/RoadmapPage'))
+const DashboardPage = lazyWithRetry(() => import('./pages/DashboardPage'))
+const ProgressPage = lazyWithRetry(() => import('./pages/ProgressPage'))
+const SkillInsightsPage = lazyWithRetry(() => import('./pages/SkillInsightsPage'))
+const ResourcesPage = lazyWithRetry(() => import('./pages/ResourcesPage'))
+const AccountPage = lazyWithRetry(() => import('./pages/AccountPage'))
+const SettingsPage = lazyWithRetry(() => import('./pages/SettingsPage'))
+const CoachPage = lazyWithRetry(() => import('./pages/CoachPage'))
+const InterviewPage = lazyWithRetry(() => import('./pages/InterviewPage'))
+const HackathonsPage = lazyWithRetry(() => import('./pages/HackathonsPage'))
+const InternshipsPage = lazyWithRetry(() => import('./pages/InternshipsPage'))
+
+class ErrorBoundary extends Component {
+  constructor(props) {
+    super(props)
+    this.state = { hasError: false }
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true }
+  }
+
+  componentDidCatch(error, info) {
+    console.error('App ErrorBoundary caught error:', error, info)
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="w-full h-screen flex items-center justify-center bg-[#f5f5f7] dark:bg-[#0B0E14] p-6">
+          <div className="max-w-md w-full bg-white dark:bg-[#18181D] border border-[#e0e0e0] dark:border-[#27272F] rounded-2xl p-7 shadow-xl text-center">
+            <h2 className="text-xl font-bold text-[#1d1d1f] dark:text-[#F8FAFC] mb-2">
+              Update Available
+            </h2>
+            <p className="text-sm text-[#555555] dark:text-[#94A3B8] mb-6 leading-relaxed">
+              A newer version of PathFinder is available. Please refresh to load the latest improvements.
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                window.sessionStorage.removeItem('pf_chunk_retry')
+                window.location.reload()
+              }}
+              className="w-full py-2.5 px-4 rounded-xl bg-[#0066cc] hover:bg-[#004fa3] text-white font-bold text-sm shadow-md transition-all cursor-pointer"
+            >
+              Refresh Application
+            </button>
+          </div>
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
 
 function PageFallback() {
   return (
@@ -37,13 +106,14 @@ function PageFallback() {
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <BrowserRouter>
-          <SidebarProvider>
-            <AIChatProvider>
-              <Suspense fallback={<PageFallback />}>
-                <Routes>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <AuthProvider>
+          <BrowserRouter>
+            <SidebarProvider>
+              <AIChatProvider>
+                <Suspense fallback={<PageFallback />}>
+                  <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/auth" element={<AuthScreen />} />
               <Route path="/login" element={<AuthScreen />} />
@@ -181,5 +251,6 @@ export default function App() {
       </BrowserRouter>
     </AuthProvider>
   </ThemeProvider>
+</ErrorBoundary>
   )
 }
