@@ -301,7 +301,7 @@ export default function AccountPage() {
             Loading account & settings…
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-7 items-start w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-7 w-full">
             {/* Primary Left Column: 8 cols on desktop */}
             <div className="lg:col-span-8 space-y-9">
               
@@ -741,102 +741,104 @@ export default function AccountPage() {
             </div>
 
             {/* Right Rail Context & Quick Insights: 4 cols on desktop */}
-            <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-6">
-              {/* Learner Identity Summary Card */}
-              <div className="pf-glass-card p-6 shadow-2xs">
-                <div className="flex items-center gap-4 mb-4">
-                  <span className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#0071e3] to-[#0066cc] text-white font-extrabold text-lg flex items-center justify-center shadow-sm flex-none">
-                    {initials}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <h3 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white truncate">
-                      {fullName}
-                    </h3>
-                    <p className="text-xs text-[#7a7a7a] dark:text-[#94A3B8] truncate">{email}</p>
-                  </div>
-                </div>
-
-                <div className="pt-4 border-t border-[#f5f5f7] dark:border-[#202026] space-y-3">
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="text-[#7a7a7a] dark:text-[#94A3B8]">Target Role</span>
-                    <span className="font-bold text-[#0066cc] dark:text-[#C9D0D6] bg-[#eaf2fc] dark:bg-[#18181D] border border-transparent dark:border-[rgba(201,208,214,0.2)] px-2.5 py-1 rounded-lg">
-                      {form.target_role || 'Not Set'}
+            <div className="lg:col-span-4 relative">
+              <div className="lg:sticky lg:top-6 space-y-6">
+                {/* Learner Identity Summary Card */}
+                <div className="pf-glass-card p-6 shadow-2xs">
+                  <div className="flex items-center gap-4 mb-4">
+                    <span className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#0071e3] to-[#0066cc] text-white font-extrabold text-lg flex items-center justify-center shadow-sm flex-none">
+                      {initials}
                     </span>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-['Manrope'] font-bold text-base text-[#1d1d1f] dark:text-white truncate">
+                        {fullName}
+                      </h3>
+                      <p className="text-xs text-[#7a7a7a] dark:text-[#94A3B8] truncate">{email}</p>
+                    </div>
                   </div>
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="text-[#7a7a7a] dark:text-[#94A3B8]">Study Commitment</span>
-                    <span className="font-semibold text-[#1d1d1f] dark:text-white">
-                      {form.weekly_hours || s?.weekly_hours || 10} hrs / week
+
+                  <div className="pt-4 border-t border-[#f5f5f7] dark:border-[#202026] space-y-3">
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-[#7a7a7a] dark:text-[#94A3B8]">Target Role</span>
+                      <span className="font-bold text-[#0066cc] dark:text-[#C9D0D6] bg-[#eaf2fc] dark:bg-[#18181D] border border-transparent dark:border-[rgba(201,208,214,0.2)] px-2.5 py-1 rounded-lg">
+                        {form.target_role || 'Not Set'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-[#7a7a7a] dark:text-[#94A3B8]">Study Commitment</span>
+                      <span className="font-semibold text-[#1d1d1f] dark:text-white">
+                        {form.weekly_hours || s?.weekly_hours || 10} hrs / week
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-[#7a7a7a] dark:text-[#94A3B8]">Proficiency Level</span>
+                      <span className="font-semibold capitalize text-[#1d1d1f] dark:text-white">
+                        {form.current_level || 'Beginner'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Quick Section Navigation Jumper */}
+                <div className="pf-glass-card p-5 shadow-2xs space-y-2">
+                  <h4 className="font-['Manrope'] font-bold text-xs uppercase tracking-wider text-[#7a7a7a] dark:text-[#94A3B8]">
+                    Quick Navigation
+                  </h4>
+                  <div className="space-y-1.5 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => scrollToSection('section-account')}
+                      className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-[#eaf2fc] dark:hover:bg-[#18181D] text-xs font-bold text-[#333333] dark:text-[#CBD5E1] hover:text-[#0066cc] dark:hover:text-[#C9D0D6] transition-colors cursor-pointer text-left"
+                    >
+                      <span>1. Account</span>
+                      <span>→</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => scrollToSection('section-settings')}
+                      className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-[#eaf2fc] dark:hover:bg-[#18181D] text-xs font-bold text-[#333333] dark:text-[#CBD5E1] hover:text-[#0066cc] dark:hover:text-[#C9D0D6] transition-colors cursor-pointer text-left"
+                    >
+                      <span>2. Settings</span>
+                      <span>→</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Real-time Dynamic Sync Card */}
+                <div className="bg-gradient-to-br from-[#fafbfc] to-[#eaf2fc] dark:from-[#18181D] dark:to-[#121216] border border-[#cfe4fb] dark:border-[#27272F] rounded-2xl p-5 shadow-2xs">
+                  <div className="flex items-start gap-3">
+                    <span className="w-8 h-8 rounded-xl bg-white dark:bg-[#18181D] text-[#0066cc] dark:text-[#C9D0D6] border border-transparent dark:border-[rgba(201,208,214,0.2)] flex items-center justify-center flex-none shadow-2xs">
+                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 2v4" />
+                        <path d="m4.93 4.93 2.83 2.83" />
+                        <path d="M2 12h4" />
+                        <path d="m4.93 19.07 2.83-2.83" />
+                        <path d="M12 18v4" />
+                        <path d="m16.24 16.24 2.83 2.83" />
+                        <path d="M18 12h4" />
+                        <path d="m16.24 7.76 2.83-2.83" />
+                      </svg>
                     </span>
-                  </div>
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="text-[#7a7a7a] dark:text-[#94A3B8]">Proficiency Level</span>
-                    <span className="font-semibold capitalize text-[#1d1d1f] dark:text-white">
-                      {form.current_level || 'Beginner'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Quick Section Navigation Jumper */}
-              <div className="pf-glass-card p-5 shadow-2xs space-y-2">
-                <h4 className="font-['Manrope'] font-bold text-xs uppercase tracking-wider text-[#7a7a7a] dark:text-[#94A3B8]">
-                  Quick Navigation
-                </h4>
-                <div className="space-y-1.5 pt-1">
-                  <button
-                    type="button"
-                    onClick={() => scrollToSection('section-account')}
-                    className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-[#eaf2fc] dark:hover:bg-[#18181D] text-xs font-bold text-[#333333] dark:text-[#CBD5E1] hover:text-[#0066cc] dark:hover:text-[#C9D0D6] transition-colors cursor-pointer text-left"
-                  >
-                    <span>1. Account</span>
-                    <span>→</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => scrollToSection('section-settings')}
-                    className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-[#eaf2fc] dark:hover:bg-[#18181D] text-xs font-bold text-[#333333] dark:text-[#CBD5E1] hover:text-[#0066cc] dark:hover:text-[#C9D0D6] transition-colors cursor-pointer text-left"
-                  >
-                    <span>2. Settings</span>
-                    <span>→</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Real-time Dynamic Sync Card */}
-              <div className="bg-gradient-to-br from-[#fafbfc] to-[#eaf2fc] dark:from-[#18181D] dark:to-[#121216] border border-[#cfe4fb] dark:border-[#27272F] rounded-2xl p-5 shadow-2xs">
-                <div className="flex items-start gap-3">
-                  <span className="w-8 h-8 rounded-xl bg-white dark:bg-[#18181D] text-[#0066cc] dark:text-[#C9D0D6] border border-transparent dark:border-[rgba(201,208,214,0.2)] flex items-center justify-center flex-none shadow-2xs">
-                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M12 2v4" />
-                      <path d="m4.93 4.93 2.83 2.83" />
-                      <path d="M2 12h4" />
-                      <path d="m4.93 19.07 2.83-2.83" />
-                      <path d="M12 18v4" />
-                      <path d="m16.24 16.24 2.83 2.83" />
-                      <path d="M18 12h4" />
-                      <path d="m16.24 7.76 2.83-2.83" />
-                    </svg>
-                  </span>
-                  <div>
-                    <h4 className="font-['Manrope'] font-bold text-sm text-[#1d1d1f] dark:text-white">
-                      Instant Cloud Sync
-                    </h4>
-                    <p className="text-xs text-[#333333] dark:text-[#94A3B8] mt-1 leading-relaxed">
-                      Your profile updates synchronize seamlessly across your dashboard, skill graph, and AI coach recommendations in real time.
-                    </p>
+                    <div>
+                      <h4 className="font-['Manrope'] font-bold text-sm text-[#1d1d1f] dark:text-white">
+                        Instant Cloud Sync
+                      </h4>
+                      <p className="text-xs text-[#333333] dark:text-[#94A3B8] mt-1 leading-relaxed">
+                        Your profile updates synchronize seamlessly across your dashboard, skill graph, and AI coach recommendations in real time.
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Data & Security Notice */}
-              <div className="pf-glass-card p-5 shadow-2xs">
-                <h4 className="font-['Manrope'] font-bold text-xs uppercase tracking-wider text-[#7a7a7a] dark:text-[#94A3B8] mb-2">
-                  Account Privacy
-                </h4>
-                <p className="text-xs text-[#6e6e73] dark:text-[#94A3B8] leading-relaxed">
-                  Your learning data and preferences are encrypted and private to your account.
-                </p>
+                {/* Data & Security Notice */}
+                <div className="pf-glass-card p-5 shadow-2xs">
+                  <h4 className="font-['Manrope'] font-bold text-xs uppercase tracking-wider text-[#7a7a7a] dark:text-[#94A3B8] mb-2">
+                    Account Privacy
+                  </h4>
+                  <p className="text-xs text-[#6e6e73] dark:text-[#94A3B8] leading-relaxed">
+                    Your learning data and preferences are encrypted and private to your account.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
