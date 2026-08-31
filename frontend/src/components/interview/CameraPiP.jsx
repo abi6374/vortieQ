@@ -89,9 +89,11 @@ export default function CameraPiP({
 
   return (
     <div
-      className={`relative w-48 sm:w-64 aspect-video rounded-2xl overflow-hidden shadow-2xl border-2 border-white/20 dark:border-white/15 bg-slate-900/90 backdrop-blur-xl transition-all duration-300 ${className}`}
+      className={`relative w-40 sm:w-56 md:w-64 aspect-video rounded-2xl overflow-hidden shadow-2xl border-2 border-white/40 dark:border-white/15 bg-slate-900/90 dark:bg-slate-900/90 backdrop-blur-xl transition-all duration-300 ${className}`}
       style={{
-        boxShadow: isCameraOn ? '0 12px 36px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.1)' : '0 10px 25px rgba(0,0,0,0.3)'
+        boxShadow: isCameraOn
+          ? '0 12px 36px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.2)'
+          : '0 8px 24px rgba(0,0,0,0.2)'
       }}
     >
       {/* Live Video Feed */}
@@ -104,10 +106,10 @@ export default function CameraPiP({
           className="w-full h-full object-cover transform -scale-x-100"
         />
       ) : (
-        <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-800 to-slate-950 text-slate-300 p-4 text-center">
-          <div className="relative mb-2">
-            <div className="w-12 h-12 rounded-full bg-slate-700/80 flex items-center justify-center border border-white/10 shadow-inner">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-800 to-slate-950 text-slate-300 p-3 text-center">
+          <div className="relative mb-1.5">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-700/80 flex items-center justify-center border border-white/10 shadow-inner">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
                 <circle cx="12" cy="7" r="4" />
               </svg>
@@ -116,7 +118,7 @@ export default function CameraPiP({
               <span className="absolute -inset-1 rounded-full border border-emerald-400/50 animate-ping pointer-events-none" />
             )}
           </div>
-          <span className="text-xs font-medium text-slate-400">
+          <span className="text-[11px] font-medium text-slate-300">
             {!isCameraOn ? 'Camera Turned Off' : 'Voice-Only Mode'}
           </span>
         </div>
@@ -124,7 +126,7 @@ export default function CameraPiP({
 
       {/* Posture / Framing Warning Badge */}
       {postureNotice && isCameraOn && (
-        <div className="absolute top-8 left-1/2 -translate-x-1/2 z-20 px-2.5 py-0.5 rounded-full bg-amber-500/90 text-slate-950 font-extrabold text-[10px] shadow-md backdrop-blur-md animate-pulse">
+        <div className="absolute top-7 sm:top-8 left-1/2 -translate-x-1/2 z-20 px-2.5 py-0.5 rounded-full bg-amber-500/90 text-slate-950 font-extrabold text-[9px] sm:text-[10px] shadow-md backdrop-blur-md animate-pulse whitespace-nowrap">
           {postureNotice}
         </div>
       )}

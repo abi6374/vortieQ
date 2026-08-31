@@ -207,6 +207,8 @@ export default function CalibrationModal({
     }
   }, [hasCamera, voiceOnlyFallback])
 
+  const isStartingInterviewRef = useRef(false)
+
   useEffect(() => {
     requestMediaAccess()
 
@@ -216,7 +218,9 @@ export default function CalibrationModal({
       if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
         audioContextRef.current.close().catch(() => { })
       }
-      stopAllTracks()
+      if (!isStartingInterviewRef.current) {
+        stopAllTracks()
+      }
     }
   }, [])
 
@@ -227,11 +231,13 @@ export default function CalibrationModal({
   }, [mediaStream, hasCamera, voiceOnlyFallback])
 
   const handleExit = () => {
+    isStartingInterviewRef.current = false
     stopAllTracks()
     onClose()
   }
 
   const handleStartInterview = () => {
+    isStartingInterviewRef.current = true
     onStart({
       trackId: selectedTrack,
       customTopic: customTopic.trim(),

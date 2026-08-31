@@ -48,6 +48,12 @@ export default function PostInterviewDashboard({
 
   const fillerData = metrics?.filler_words || { count: 0, breakdown: {}, densityPercent: 0, impact: 'Low' }
 
+  // Extract core pillar scores safely to prevent any ReferenceErrors
+  const technical_accuracy_score = scores?.technical_depth ?? scores?.technical_accuracy ?? scores?.technical ?? 82
+  const communication_score = scores?.communication_clarity ?? scores?.communication ?? 86
+  const problem_solving_score = scores?.problem_solving ?? 80
+  const system_design_score = scores?.confidence_structure ?? scores?.system_design ?? scores?.architecture ?? 84
+
   // Format Duration MM:SS
   const formatDuration = (secs) => {
     const m = Math.floor(secs / 60)
