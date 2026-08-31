@@ -11,10 +11,10 @@ export default function RoadmapPage() {
     async function fetchPath() {
       if (!pathId) return
       try {
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from('learning_paths')
           .select(`
-            id, goal_text, target_role, status, generated_at,
+            id, goal_text, status, generated_at,
             path_steps (
               id, sequence_order, milestone_label, status, explanation,
               courses ( id, title, provider, difficulty, skill_tags, duration_hrs, resource_url )
@@ -22,7 +22,11 @@ export default function RoadmapPage() {
           `)
           .eq('id', pathId)
           .single()
-        if (data) setPath(data)
+        if (error) {
+          console.warn('Roadmap page fetch error:', error)
+        } else if (data) {
+          setPath(data)
+        }
       } catch (err) {
         console.warn('Roadmap page fetch note:', err)
       }
