@@ -28,7 +28,7 @@ function PageFallback() {
   return (
     <div className="w-full h-screen flex items-center justify-center bg-[var(--bg-main)]">
       <div className="flex flex-col items-center gap-3">
-        <div className="w-9 h-9 border-3 border-[#0066cc]/20 border-t-[#0066cc] dark:border-[#C9D0D6]/20 dark:border-t-[#C9D0D6] rounded-full animate-spin" />
+        <div className="w-10 h-10 border-[3px] border-[#0066cc]/25 border-t-[#0066cc] dark:border-[#38BDF8]/25 dark:border-t-[#38BDF8] rounded-full animate-spin" />
         <span className="text-xs font-bold text-[#7a7a7a] dark:text-[#94A3B8] tracking-wide animate-pulse">Loading PathFinder…</span>
       </div>
     </div>

@@ -752,76 +752,144 @@ export default function RoadmapInfographicModal({
     >
       <style>{`
         /* ROADMAP POSTER LIGHT THEME ISOLATION: Immune to any html.dark !important rules */
-        .rf-poster-light, .rf-poster-light * {
+        .rf-poster-light,
+        .rf-poster-light *,
+        html.dark .rf-poster-light,
+        html.dark .rf-poster-light *,
+        html.dark body .rf-poster-light,
+        html.dark body .rf-poster-light * {
           box-sizing: border-box;
         }
+
+        html.dark .rf-poster-light,
+        html.dark body .rf-poster-light,
         .rf-poster-light {
           background-color: #FFFFFF !important;
           border-color: #E2E8F0 !important;
-          color: #1E293B !important;
+          color: #0F172A !important;
         }
+
+        html.dark .rf-poster-light .rf-title,
+        html.dark .rf-poster-light h1,
+        html.dark .rf-poster-light h2,
+        html.dark .rf-poster-light h3,
+        html.dark body .rf-poster-light .rf-title,
+        html.dark body .rf-poster-light h1,
+        html.dark body .rf-poster-light h2,
+        html.dark body .rf-poster-light h3,
+        .rf-poster-light .rf-title,
         .rf-poster-light h1,
         .rf-poster-light h2,
-        .rf-poster-light h3,
-        .rf-poster-light h4,
-        .rf-poster-light .rf-title {
-          color: #1E293B !important;
+        .rf-poster-light h3 {
+          color: #0F172A !important;
+          font-weight: 800 !important;
         }
-        .rf-poster-light p,
-        .rf-poster-light .rf-desc {
-          color: #475569 !important;
+
+        html.dark .rf-poster-light .rf-desc,
+        html.dark .rf-poster-light p,
+        html.dark body .rf-poster-light .rf-desc,
+        html.dark body .rf-poster-light p,
+        .rf-poster-light .rf-desc,
+        .rf-poster-light p {
+          color: #334155 !important;
+          font-weight: 500 !important;
         }
+
+        html.dark .rf-poster-light .rf-banner,
+        html.dark body .rf-poster-light .rf-banner,
         .rf-poster-light .rf-banner {
           background-color: #E2EBE5 !important;
           border-color: #CBD8CE !important;
         }
+
+        html.dark .rf-poster-light .rf-month,
+        html.dark body .rf-poster-light .rf-month,
         .rf-poster-light .rf-month {
           background-color: #FFFFFF !important;
           border-color: #F59E0B !important;
         }
+
+        html.dark .rf-poster-light .rf-month-label,
+        html.dark body .rf-poster-light .rf-month-label,
         .rf-poster-light .rf-month-label {
-          color: #D97706 !important;
+          color: #B45309 !important;
+          font-weight: 900 !important;
         }
+
+        html.dark .rf-poster-light .rf-month-title,
+        html.dark body .rf-poster-light .rf-month-title,
         .rf-poster-light .rf-month-title {
-          color: #1E293B !important;
+          color: #0F172A !important;
+          font-weight: 800 !important;
         }
+
+        html.dark .rf-poster-light .rf-card-odd,
+        html.dark body .rf-poster-light .rf-card-odd,
         .rf-poster-light .rf-card-odd {
           background-color: #FFFBEB !important;
           border-color: #FCD34D !important;
         }
+
+        html.dark .rf-poster-light .rf-card-even,
+        html.dark body .rf-poster-light .rf-card-even,
         .rf-poster-light .rf-card-even {
           background-color: #EFF6FF !important;
           border-color: #BFDBFE !important;
         }
+
+        html.dark .rf-poster-light .rf-week-odd,
+        html.dark body .rf-poster-light .rf-week-odd,
         .rf-poster-light .rf-week-odd {
           background-color: #FEF3C7 !important;
-          border-color: #FDE68A !important;
+          border-color: #FCD34D !important;
           color: #92400E !important;
+          font-weight: 900 !important;
         }
+
+        html.dark .rf-poster-light .rf-week-even,
+        html.dark body .rf-poster-light .rf-week-even,
         .rf-poster-light .rf-week-even {
           background-color: #DBEAFE !important;
-          border-color: #BFDBFE !important;
+          border-color: #93C5FD !important;
           color: #1E40AF !important;
+          font-weight: 900 !important;
         }
+
+        html.dark .rf-poster-light .rf-completed,
+        html.dark body .rf-poster-light .rf-completed,
         .rf-poster-light .rf-completed {
           background-color: #D1FAE5 !important;
           border-color: #A7F3D0 !important;
-          color: #059669 !important;
+          color: #047857 !important;
+          font-weight: 800 !important;
         }
+
+        html.dark .rf-poster-light .rf-spine,
+        html.dark body .rf-poster-light .rf-spine,
         .rf-poster-light .rf-spine {
           background-color: #334155 !important;
           box-shadow: none !important;
         }
+
+        html.dark .rf-poster-light .rf-diamond,
+        html.dark body .rf-poster-light .rf-diamond,
         .rf-poster-light .rf-diamond {
           background-color: #0F172A !important;
           box-shadow: none !important;
         }
+
+        html.dark .rf-poster-light .rf-footer,
+        html.dark body .rf-poster-light .rf-footer,
         .rf-poster-light .rf-footer {
           border-color: #E2E8F0 !important;
-          color: #94A3B8 !important;
-        }
-        .rf-poster-light .rf-footer-brand {
           color: #64748B !important;
+        }
+
+        html.dark .rf-poster-light .rf-footer-brand,
+        html.dark body .rf-poster-light .rf-footer-brand,
+        .rf-poster-light .rf-footer-brand {
+          color: #334155 !important;
+          font-weight: 600 !important;
         }
       `}</style>
 

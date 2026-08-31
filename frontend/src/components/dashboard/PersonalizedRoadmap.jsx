@@ -455,14 +455,17 @@ export default function PersonalizedRoadmap({
   if (roadmap.loading && !roadmap.weeks.length && !pathData?.path_steps?.length) {
     return (
       <AppShell>
-        <div className="min-h-[60vh] flex flex-col items-center justify-center text-center px-4 py-16 animate-in fade-in duration-300">
-          <div className="w-14 h-14 rounded-2xl bg-[#EAF2FC] dark:bg-[#18181D] border border-[#CFE4FB] dark:border-[#27272F] flex items-center justify-center text-[#0066CC] dark:text-[#C9D0D6] mb-5 shadow-sm">
-            <div className="w-7 h-7 border-3 border-[#0066CC] dark:border-[#C9D0D6] border-t-transparent rounded-full animate-spin" />
+        <div className="min-h-[65vh] flex flex-col items-center justify-center text-center px-4 py-16 animate-in fade-in duration-300">
+          <div className="relative w-16 h-16 rounded-2xl bg-[#EAF2FC] dark:bg-[#141B26] border border-[#CFE4FB] dark:border-[#22334B] flex items-center justify-center mb-6 shadow-lg shadow-blue-500/10 dark:shadow-cyan-500/10">
+            {/* Outer spinning ring */}
+            <div className="w-8 h-8 border-[3px] border-[#0066CC]/25 dark:border-[#38BDF8]/25 border-t-[#0066CC] dark:border-t-[#38BDF8] rounded-full animate-spin" />
+            {/* Center pulsing core */}
+            <div className="absolute w-2.5 h-2.5 bg-[#0066CC] dark:bg-[#38BDF8] rounded-full animate-pulse" />
           </div>
-          <h2 className="font-['Manrope'] font-bold text-xl sm:text-2xl text-[#1D1D1F] dark:text-[#F8FAFC] tracking-tight mb-1.5">
+          <h2 className="font-['Manrope'] font-bold text-xl sm:text-2xl text-[#1D1D1F] dark:text-[#F8FAFC] tracking-tight mb-2">
             Loading your learning path...
           </h2>
-          <p className="text-sm text-[#555555] dark:text-[#94A3B8] max-w-md">
+          <p className="text-sm text-[#555555] dark:text-[#94A3B8] max-w-md leading-relaxed">
             Calibrating your customized roadmap milestones and study schedule.
           </p>
         </div>

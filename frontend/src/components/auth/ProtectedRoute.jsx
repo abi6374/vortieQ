@@ -24,7 +24,7 @@ export default function ProtectedRoute({ children }) {
   if ((loading && !isBypass) || (isOAuthCallback && !isAuth)) {
     return (
       <div className="flex h-screen items-center justify-center bg-[#f5f5f7] dark:bg-[#0B0E14]">
-        <div className="animate-spin rounded-full h-9 w-9 border-3 border-[#0066cc] border-t-transparent"></div>
+        <div className="w-10 h-10 border-[3px] border-[#0066cc]/25 dark:border-[#38BDF8]/25 border-t-[#0066cc] dark:border-t-[#38BDF8] rounded-full animate-spin" />
       </div>
     )
   }
